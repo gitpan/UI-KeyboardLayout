@@ -1,0 +1,318 @@
+﻿[]
+ExtraScanCodesWin=
+COMPANYNAME=Steffen Brüntjen, Ilya Zakharevich
+/LAYOUTNAME=US for Russian phonetic, International, ilyaz v0.0/Russian phonetic (for US) International, ilyaz v0.0
+COPYR_YEARS=2011
+@LOCALE_NAME=en-US,ru-RU
+@LOCALE_ID=0409,0419
+@DLLNAME=la-ru-iz,ru-la-iz
+SORT_ORDER_ID_=0000
+@LANGUAGE_NAME=English (United States),Russian (Russia)
+#
+#
+[DEADKEYS]
+#
+# Can be omitted now
+#
+0020=SPACE
+#
+[visual -> KBD/B/C/D]
+#
+visual_rowcount=3
+@visual_per_row_counts=3,4,4
+visual_prefixes= *
+in_key_separator=/
+prefix_repeat=3
+#					Greek-AltGr and CopyRight-AltGr each has only one element: Ω and ©
+@layer_names=Greek,Math,Greek-AltGr
+@layer_names=Latin,Latin-AltGr,CopyRight,CopyRight-AltGr
+@layer_names=Russian,Russian-AltGr,Russian-II,Russian-II-AltGr
+#
+# Perl 5.8.8 does not recognize ҇ as a combining character...
+#
+#	--	¹₁/--≠	²₂	³₃	⁴₄	⁵₅	⁶₆	⁷₇		⁸₈/--∏	⁹₉	⁰₀	⁻/−		⁼⁺/≈∑
+	--	--/--≠	--	--	--	--	--	--		--/--∏	--	--	⁻/−		⁼⁺/≈∑
+***	`~/ˋ˜	1!/¡¹/¼	2@/ª²/½	3#/º³/¾	4$/€¥/⅓	5%/£¢/⅔	6^/ˆˇ	7&/°¯		8*/„‚	9(/“‘	0)/”’	-_/©№//©	=+/×÷/↔⇔
+	ю//ѫ/ѭ	1!/≈≠	2@/²§	3ъ/--№	4Ъ/--£	5ё/--€	6Ё/-- ҃	7&/ ҆҇/ ҅	8*/∞×	9(/≤←/ҁ	0)/≥→	-_/©–		ч//ҷ/ӵ
+#
+	ω	ψ	ε	ρ/√	τ	υ	ω	η/∞	ο	π/∂	⁽₍	⁾₎	--
+***	q/æ	w/å	e/ë	r/ý/®	t/þ/™	y/ÿ	u/ü/↖⇖	i/ï/↗⇗	o/ö	p/œ/℗	[{/«‹	]}/»›	\|/¬¦
+	я/ѣ/ѧ/ѩ	в/ѵ/ԝ	е/ё/ө/ӫ	р/ ҄®	т/ћ/ҭ/ԏ	ы/і/ү/ұ	у/ў/ӯ/ӱ	и/ѷ/ӣ/ӥ	о/ѡ/ѻ/ѿ	п/ѱ/ԥ/ҧ	ш//ԧ/ѐ	щ//ꚇ/ѝ	э//ѥ/ӧ
+#
+	α/∟	σ/∩	δ/∕	φ	γ	θ	ι/∫	κ	λ	₋		₌₊
+***	a/ä	s/ß§/℠	d/ð	f/è	g/é	h/ù/←⇐	j/ú/↓⇓	k/ĳ/↑⇑	l/ø/→⇒	;:/¨·		'"/´†
+	а/ә/Ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/Ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	;:/¨—/ӹ/ӳ	'"/ ́´/ ́ ̀/ ́ ̀
+#
+	ζ	ξ	χ	β	β	ν/ⁿ	μ//Ω		--/--≤		--/--≥		--
+***	z/à	x/á	c/ç/©	v/ì	b/í	n/ñ/↙⇙	m/Ω±/↘⇘		,</ò		.>/ó		/?/¿…
+	з/є/ѯ/ҙ	ь/ъ/ӛ/ӕ	ц/џ/ҵ	ж/ӂ/җ/ӝ	б/ѓ/ѹ	н/њ/ң/ҥ	м/Ω±/ӎ/ꙟ	,</«„/⁘⁙	.>/»“/·։/჻⁖	/?/ј/;
+#
+	--	--
+***	\|/¶❧	./,
+	\|/ӏӀ	./,
+#
+# Earlier versions had:	б/ѹ (now г overflows down as ...);	7&/ ҅ ҆	/?/§”	2@/²³
+#
+# ԃ 	Ꚉ 	ӗ
+# ԅ 	Ԑ 	ӡ
+# ԇ 	ӄ
+# ҝ 	Ԟ 	Ԛ 	Ԡ
+# ԉ 	Ԕ 	ӊ 	ӈ
+# Ԣ 	ԋ 	ҩ
+# ҏ
+# 
+# Ӿ 	Ԧ 	ӌ
+# ҹ 	ҽ 	ҿ 	ҍ 	ӭ
+# Ԙ 	Ӏ
+#
+#		Stressed: ѐ ѝ
+#
+# Non-obvious: '"/́´/ӹ/ӳ я/ѣ, б/ѓ/ѹ, д/ђ/ӟ  й/ї/ӑ  ь/ъ/ӛ/ӕ   ф/ѳ/ғ/Ӻ   м/Ω±/ӎ/ꙟ   ш//ԧ/ѐ	щ//ꚇ/ѝ   з/є/ѯ/ҙ
+#
+[faces/US]
+@layers=Latin,Latin-AltGr
+LinkFace=CyrillicPhonetic
+#
+MetaData_Index=0
+#    These keys are active when the next character is from layers 0, 1:
+@layerDeadKeys= Latin       ˋ  ˜  ˆ  ˇ  °  ¯  ¨  ´  Ω  ±  ©
+@layerDeadKeys= Latin-AltGr ˋ  ˜  ˆ  ˇ  °  ¯  ¨  ´  Ω  ±  ©
+#
+#						002c = ,
+@char2key_prefer_first=\,|,.,002c
+#
+Diacritic_if_undef=			SpaceSelf2Id
+DeadChar_DefaultTranslation=		♪
+#
+# NBSPC --> open box, narrow and hair spaces to figure and narrow nbr-spaces
+DeadKey_Map00a0=	ByPairs[0020.00a0.00a0.2423.2009.2007.200A.202F]	LinkFace
+#
+DeadKey_Map2009=	Layers(Russian-II+Russian-II-AltGr)
+#
+DeadKey_Map200A_0=	Id(Russian-AltGr)
+DeadKey_Map200A_1=	Id(Russian)
+#
+#DeadKey_Map25CC_0=	Id(Latin-AltGr)
+#DeadKey_Map25CC_1=	Id(Latin)
+#
+#DeadKey_Map25CF_0=	Id(Latin-AltGr)
+#DeadKey_Map25CF_1=	Id(Latin)
+#
+#DeadKey_Map25EF_0=	Id(Latin-AltGr)
+#DeadKey_Map25EF_1=	Id(Latin)
+#
+# Default map:
+#
+DeadKey_Map=		Diacritic	Diacritic2Self
+#
+# diaeresis 00a8: combine with cedilla 327(b8) and ogonek 328, comma below 326 (precombined only on SsTt)
+# ogonek is reachable on AltGr layer...)
+# cedilla: only E H unreachable on front layer  except for Ȩȩ Ee - and Hh would be unreachable with AltGr too because of Ǜ - which is typable as ¨Ù)
+# (and Ȩȩ is not used in "known" languages - http://fr.wikipedia.org/wiki/E_caudata - alternative writing of æ
+#   - moved to Copyright face)
+# ẗ gets in the way of Ț and Ţ!		(Moved to copyright face - on AltGr-t...
+DeadKey_Map00a8=	Diacritic[0327](SelectRX[[hH]](FlipLayers))	Diacritic[0328,0327,0326](SelectRX[[tTþÞ]])	Diacritic[00a8,<any-diaeresized>,0328,0327,0326]	Diacritic2Self
+#
+#  Combine macron=00af and stroke (AOUaou missing stroke...)
+DeadKey_Map00af=	Diacritic[00af,<pseudo-stroke>,<any-bar>,<any-stroke>,<any-dash>,<any-overbar>,<any-topbar>,<any-diagonal>,<any-strikethrough>,<any-line>]	ByPairs[1‐2–3—]	Diacritic2Self
+#DeadKey_Map00af=	Diacritic[00af,<pseudo-stroke>,<any-bar>,<any-stroke>,<any-dash>,<any-overbar>,<any-topbar>,<any-diagonal>,<any-underbar>,<any-line>]	Diacritic2Self
+#
+# ring above 00b0: combine with dotabove 307 dotbelow 323 (only AWYÊ miss dot below) [any-dots does not add anything...]
+DeadKey_Map00b0=	Diacritic[00b0,0307,0323,<any-ring>,<any-dot>,<any-dots>,<any-other-circle>,<any-circled>,<circle>]	Diacritic2Self
+#
+## by <any-dot>
+##-007c   02d2    // | -> ˒       // VERTICAL LINE        -> MODIFIER LETTER CENTRED RIGHT HALF RING
+##+007c   237f    // | -> ⍿       // VERTICAL LINE        -> VERTICAL LINE WITH MIDDLE DOT
+#
+#  Combine breve=02d8/0306 and caron 02c7/030c (we do not description of breve-like diacretics!)
+#   Note that Ü combines with caron (in 2 ways! Ǖ Ṻ) - but we prefer Ü -> Ǔ
+DeadKey_Map02c7=	Diacritic[02c7,030c]	Diacritic2Self
+#
+# combine acute 00b4 and hook and horn 031b	(double acute=030b - protect against '' --> ")
+DeadKey_Map00b4=	Diacritic[030b](DeDiacritic[00b4](SelectRX[\w]))	Diacritic[00b4,<pseudo-hook>,<any-hook>,<any-fishhook>,<pseudo-tail>,<any-tail>,<pseudo-curl>,031b]	Diacritic2Self
+#
+# double grave 30f, grave 60/2cb/300	(ntvz have 3 type of hooks attached; the middle one [palatal] on nz are not reached)
+DeadKey_Map02cb=	Diacritic[030f](DeDiacritic[0300](SelectRX[\w]))	Diacritic[02cb,031b,<pseudo-curl>,<any-tail>,<pseudo-tail>,<any-fishhook>,<reverse-any-other-hook>,<pseudo-hook>]	Diacritic2Self
+#
+#     Adding tails to `' has only one detrimental effect, curl has three more:
+##-007a   0290    // z -> ?       // LATIN SMALL LETTER Z -> LATIN SMALL LETTER Z WITH RETROFLEX HOOK
+##+007a   0240    // z -> ?       // LATIN SMALL LETTER Z -> LATIN SMALL LETTER Z WITH SWASH TAIL
+##
+##-00f8   1d85    // ø -> ᶅ       // LATIN SMALL LETTER O WITH STROKE     -> LATIN SMALL LETTER L WITH PALATAL HOOK
+##+00f8   026d    // ø -> ɭ       // LATIN SMALL LETTER O WITH STROKE     -> LATIN SMALL LETTER L WITH RETROFLEX HOOK
+##
+##-0076   2c71    // v -> ⱱ       // LATIN SMALL LETTER V -> LATIN SMALL LETTER V WITH RIGHT HOOK
+##+0076   2c74    // v -> ⱴ       // LATIN SMALL LETTER V -> LATIN SMALL LETTER V WITH CURL
+##
+##-00f1   0273    // ñ -> ɳ       // LATIN SMALL LETTER N WITH TILDE      -> LATIN SMALL LETTER N WITH RETROFLEX HOOK
+##+00f1   0235    // ñ -> ȵ       // LATIN SMALL LETTER N WITH TILDE      -> LATIN SMALL LETTER N WITH CURL
+#
+# Missing ENG, WITH LONG LEG [nNr] / BARRED, INVERTED, TURNED, REVERSED, OPEN, CLOSED
+#
+# Adding ENG makes:
+##-00d1   019d    // Ñ -> Ɲ       // LATIN CAPITAL LETTER N WITH TILDE    -> LATIN CAPITAL LETTER N WITH LEFT HOOK
+##+00d1   014a    // Ñ -> Ŋ       // LATIN CAPITAL LETTER N WITH TILDE    -> LATIN CAPITAL LETTER ENG
+##-00f1   0272    // ñ -> ɲ       // LATIN SMALL LETTER N WITH TILDE      -> LATIN SMALL LETTER N WITH LEFT HOOK
+##+00f1   014b    // ñ -> ŋ       // LATIN SMALL LETTER N WITH TILDE      -> LATIN SMALL LETTER ENG
+#
+# With these hooks, l-right and z-palatal are made reachable; ln-palatal and nz-retroflex are not
+#						belt is only on l...
+DeadKey_Map02dc=	Diacritic[02dc,<any-tilde>,<pseudo-belt>,<pseudo-right-hook>,<pseudo-palatal-hook>,<any-flourish>,<any-calculated>,<pseudo-smallcaps>]	Diacritic2Self
+#
+# Hat:
+DeadKey_Map02c6=	Diacritic[02c6,<reverse-any-calculated>,<pseudo-smallcaps>]	Diacritic2Self
+#
+# Create DeadKey maps basing on visual descriptions:
+#
+DeadKey_Map00a9_0=	Id(CopyRight)		Diacritic[0327](SelectRX[[eE]])
+DeadKey_Map00a9_1=	Id(CopyRight-AltGr)	Diacritic[00a8](SelectRX[[t]](FlipLayers))
+DeadKey_Map00b1_0=	Id(Math)
+DeadKey_Map00b1_1=				SpaceSelf2Id
+DeadKey_Map03a9_0=	Id(Greek)	Diacritic[<super>](SelectRX[[0-9]])	Diacritic[<sub>](SelectRX[[0-9]](FlipShift))
+DeadKey_Map03a9_1=	Id(Greek-AltGr)
+#
+# From Bépo's tables:
+# ؋฿¢₫€ƒ₲₴﷼₭£₥₦௹₰₢₪৳元₩¥৲
+# ₳₱₡₯₠₣₲₴៛₭₤ℳ₦૱₧₨$₮圓₩円 	¤
+#
+[faces/US/VK]
+#
+@SPACE=,0020,00a0@,2009@,200A@
+#
+# Dotted circle, black circle, white circle
+#@APPS=,-1,25CC@,25CF@,25EF@
+#
+# Non-breakable translations (non-ideal 2007), 202F
+#
+[faces/CyrillicPhonetic]
+#
+@layers=Russian,Russian-AltGr
+BaseLayer=Latin
+LinkFace=US
+#
+MetaData_Index=1
+#
+#    These keys are active when the next character is from layers 0, 1:
+@layerDeadKeys= Russian       Ω  ±  © 00a0	́
+@layerDeadKeys= Russian-AltGr Ω  ±  © 00a0	́
+#
+### @char2key_prefer_first=ъ,Ъ,ё,Ё,\,|		Not very handy...
+# Pressing AltGr-| produces |; with the setting below, pressing SWITCH AltGr-| produces the expected ¦
+# Otherwise: the keys on OEM_102 (the SECOND \|) (which produce \| when both on Cyrillic and Latin) 
+# would be prefered, and SWITCH AltGr-| would be resolved as "map | to Latin", and would produce |.
+#						002c = ,
+@char2key_prefer_first=\,|,.,002c
+@char2key_prefer_last=Ё,Ъ,ё,ъ
+#
+####  Not needed now:
+####
+####DeadKey_Map=la_ru(LinkFace)
+#							6  ->	^
+Diacritic_if_undef=			SpaceSelf2Id
+DeadChar_DefaultTranslation=		♪
+#
+# ⌂
+#
+# DeadKey_Map02c6=	la_ru(LinkFace)	Diacritic2Self[02c6](LinkFace)
+# Adding NBSPC does NBSPC --> open box, narrow and hair spaces --> figure and narrow nbr-spaces
+DeadKey_Map00a0=	ByPairs[0020.00a0.00a0.2423.2009.2007.200A.202F]	LinkFace
+#
+#
+DeadKey_Map00a9_0=	Id(CopyRight)
+DeadKey_Map00a9_1=	Id(CopyRight-AltGr)
+DeadKey_Map00b1_0=	Id(Math)
+# DeadKey_Map03a9_0=	Id(Greek)		Diacritic[<super>](SelectRX[[0-9]](LinkFace))	Diacritic[<sub>](FromTo[OverDigits,Digits](LinkFace))
+DeadKey_Map03a9_0=	Id(Greek)		Diacritic[<super>](SelectRX[[0-9]](LinkFace))	Diacritic[<sub>](SelectRX[[0-9]](FlipShift(Latin)))
+# DeadKey_Map03a9_0=	Id(Greek)		Diacritic[<super>](SelectRX[[0-9]](LinkFace))	Diacritic[<sub>](FromToFlipShift[Latin,Latin](SelectRX[[0-9]](LinkFace)))
+DeadKey_Map03a9_1=	Id(Greek-AltGr)
+DeadKey_Map0301_0=	Id(Russian-II)		FromTo[Digits,Denominators1](LinkFace)	FromTo[Digits,Numerators1](FlipShift(Latin))
+DeadKey_Map0301_1=	Id(Russian-II-AltGr)	FromTo[Digits,Denominators2](Latin)	FromTo[Digits,Numerators2](FromToFlipShift[Latin,Latin](Latin))	ByPairs[$⅘](Latin)
+#
+#
+#DeadKey_Map2009_0=	Id(Russian-II)
+#DeadKey_Map2009_1=	Id(Russian-II-AltGr)
+#
+DeadKey_Map200A=	FlipLayers
+#DeadKey_Map200A_0=	Id(Russian-AltGr)
+#DeadKey_Map200A_1=	Id(Russian)
+#
+#DeadKey_Map25CC_0=	Id(Latin-AltGr)
+#DeadKey_Map25CC_1=	Id(Latin)
+#
+DeadKey_Map2009=	FlipLayersLinkFace
+#
+[faces/CyrillicPhonetic/VK]
+#
+@SPACE=,0020,00a0@,2009@,200A@
+#
+# Dotted circle, black circle, white circle
+#@APPS=,-1,25CC@,25CF,25EF
+#
+####[DEADKEYS/eurkey/1/1]
+#####
+####klc_filename=eurkey-std.klc
+#####
+#####    Now is not needed at all
+#####
+[visual -> DEADKEYS/la_ru]
+#
+# Can be omitted now:
+#
+KEYNAME_DEAD
+
+02c6	"MODIFIER LETTER CIRCUMFLEX ACCENT"
+00b4	"ACUTE ACCENT"
+00b1	"PLUS-MINUS SIGN"
+00a8	"DIAERESIS"
+00a9	"COPYRIGHT SIGN"
+00b0	"DEGREE SIGN"
+02cb	"MODIFIER LETTER GRAVE ACCENT (Mandarin Chinese fourth tone)"
+00af	"MACRON"
+02dc	"SMALL TILDE"
+02c7	"CARON (Mandarin Chinese third tone)"
+03a9	"GREEK CAPITAL LETTER OMEGA"
+
+
+[visual -> KBD/Digits]
+#
+# For fractions, we look for fractions with minimal denominator/numerator which contain the given digit in numerator/denominator.  We take the first one and the second one from the list.
+# Note that ⅗, ⅝, ⅞ do not appear in the lists via denominators; and ⅓, ¼, ⅕, ⅙, ⅛ do not appear in the lists via numerators.
+# All Unicoded fractions appear in these lists.  So each one can be entered via a DeadKeyMap.
+#
+#
+visual_rowcount=9
+@visual_per_row_counts=1,1,2,1,1,1,1,1,1
+visual_prefixes=<* *<> <
+in_key_separator=/
+prefix_repeat=3
+#
+@layer_names=Numerators2,Numerators1,Digits,OverDigits,Denominators1,Denominators2,Super,SuperExtraLetters,Sub,SubExtraLetters
+#
+<<<	½	⅖	⅗	--	⅝	--	--	--	--	--	--	--	--	--	--	--	--	--	--
+***	⅟	⅔	¾	⅘	⅚	--	⅞	--	--	--	--	--	--	--	--	--	--	--	--
+	1/!	2/@	3/#	4/$	5/%	6/^	7/&	8/*	9/(	0/)	--	--	--	--	--	--	--	--	--
+***	⅒	½	⅓	¼	⅕	⅙	--	⅛	--	⅒	--	--	--	--	--	--	--	--	--
+<<<	--	--	⅔	¾	⅖	⅚	--	⅜	--	--	--	--	--	--	--	--	--	--	--
+>>>	¹	²	³	⁴	⁵	⁶	⁷	⁸	⁹	⁰	ⁱ	⁲	⁳	⁺	⁻	⁼	⁽	⁾	ⁿ
+	--	--	--	--	--	--	--	--	--	--	i	--	--	+	-	=	(	)	n
+<<<	₁	₂	₃	₄	₅	₆	₇	₈	₉	₀	₊	₋	₌	₍	₎	₏	--	--	--
+	--	--	--	--	--	--	--	--	--	--	+	-	=	(	)	ə	--	--	--
+#
+#
+# Most of the above are very optional now: Super and Sup are obsoleted by Diacritic[<super>] etc
+# combined with Select[] clauses.  Register mapping is not done yet (2011) but can be easily done.
+#
+[Diacritics]
+# Surrogate + 8bit + Modifiers, Modifiers below, Vertical (or Comma-like or Doubled or Dotlike) Modifiers, Prime-like or Centered modifiers, Combining, Combining below, Vertical combining and dotlike Combining
+/APOSTROPHE=		'´ʼʾˀˊ/ˏˌ/ˈˌ/ʹˑ/ ́ ̉ ̛ ̷ ̸ ́ ̓ ͗/ ̗ ̩/ ̍ ̩ ̓ ̕
+/QUOTATION_MARK=	"¨˝˸ː/˶˵/ˮ/ʺ/ ̈ ̋ ̏ ̈́/ ͈ / ̎ ͈
+/GRAVE_ACCENT=		`ˋʿˁˤ/ˎ/ʻʽ/˴/ ̀ ̀/ ̖/ ̒ ̔
+/CIRCUMFLEX_ACCENT=	^ˆ˄/˰/// ̂ ̑  ͡/ ̭ ̯
+/BREVE=			ˇ˅/ˬ˯/// ̆ ̌ ̐ ͝  / ̮ ̬ ͜
+/DEGREE_SIGN=		°˚/˳/˙/˒˓/ ̊/ ̣ ̥ ̤/ ̇ ͘  ̣ ̤
+/TILDE=			~˜/˷//˞/ ̃ ̴ ͂ ͊ ͋ ͌   ͠/ ̰/ ̾
+/MACRON=		¯ˉ˹˺/ˍ˻˼˽˾/˭/˔˕˖˗/ ̄ ̅ ̵ ̶ ̿ ͞ / ̱ ̲ ̳ ͇ ͟   
+#
+# Possibly missing, from Latin-N encodings: ˛˝ Greek: ͺ΄΅
+#`´¨˜ˆˇ°¯
+#

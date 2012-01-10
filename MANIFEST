@@ -1,0 +1,9 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/UI-KeyboardLayout.t
+lib/UI/KeyboardLayout.pm
+examples/EurKey++.kbdd
+examples/txt2html_bubbles.pl
+META.yml                                 Module meta-data (added by MakeMaker)

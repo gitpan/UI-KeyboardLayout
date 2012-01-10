@@ -1,0 +1,6 @@
+Revision history for Perl extension UI::KeyboardLayout.
+
+0.01  Mon Jan  9 23:45:23 2012
+	- original version; created by h2xs 1.23 with options
+		-AX -b 5.8.0 -n UI::KeyboardLayout
+
