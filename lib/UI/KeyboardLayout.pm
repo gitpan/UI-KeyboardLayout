@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION="0.01";
+$VERSION = $VERSION="0.02";
 use strict;
 use utf8;
 
@@ -12,11 +12,16 @@ use subs qw(chr lc uc);
 #BEGIN { *CORE::GLOGAL::chr = sub ($) { toU CORE::chr shift };
 #        *CORE::GLOGAL::lc  = sub ($)  { CORE::lc  toU shift };
 #}
+my %fix = qw( ӏ Ӏ ɀ Ɀ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
+my %unfix = reverse %fix;
+
 sub chr($)  { local $^W = 0; toU CORE::chr shift }	# Avoid illegal character 0xfffe etc warnings...
-sub lc ($)  { CORE::lc  toU shift }
-sub uc($)  { CORE::uc  toU shift }
+sub lc($)   { my $in = shift; $unfix{$in} || CORE::lc toU $in }
+sub uc($)   { my $in = shift;   $fix{$in} || CORE::uc toU $in }
 
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -42,6 +47,15 @@ UI::KeyboardLayout - Module for designing keyboard layouts
   close $f or die;
   $k->print_decompositions($d);
   $k->print_compositions  ($c);
+
+  UI::KeyboardLayout::->set_NamesList("$ENV{HOME}/Downloads/NamesList-6.1.0d8.txt", 
+  				      "$ENV{HOME}/Downloads/DerivedAge-6.1.0d13.txt));
+  my $l = UI::KeyboardLayout::->new_from_configfile('examples/EurKey++.kbdd');
+  for my $F (qw(US CyrillicPhonetic)) {		
+  	# Open file, select() 
+    print $l->fill_win_template(1,[qw(faces US)]);
+    $l->print_coverage(q(US));
+  }
 
 =head1 AUTHORS
 
@@ -112,7 +126,7 @@ the related question of "the ease of recall"; we care only about which symbols
 relate to which "base keys", and do not care about where the base key sit on
 the physical keyboard.
 
-B<NOTE:> the version 0.00 of this module supports only the standard US layout
+B<NOTE:> the version 0.01 of this module supports only the standard US layout
 of the base keys.
 
 Now consider the question of the character repertoir: a person may need ways
@@ -138,7 +152,7 @@ to them.
 Essentially, this means that as far as it does not impacts other accessibility
 goals, it makes sense to have unified memorizable access to as many
 symbols/characters as possible.  (An example of impacting other aspects:
-MicroSoft's (and IBM's) "US International" keyboards steal characters `~'"^:
+MicroSoft's (and IBM's) "US International" keyboards steal characters C<`~'^">:
 typing them produces "unexpected results" - they are deadkeys.  This
 significantly simplifies entering characters with accents, but makes it
 harder to enter non-accented characters.)
@@ -147,14 +161,17 @@ One of the most known principles of design of human-machine interaction
 is that "simple common tasks should be simple to perform, and complicated
 tasks should be possible to perform".  I strongly disagree with this
 principle - IMO, it lacks a very important component: "a gradual increase
-in complexity".  When a certain action is easy to perform, and another 
-similar action is still "possible to perform", but on a very elevated level 
-of complexity, this leads to a significant psychological barrier sitting
-between these tasks.  Even when switching from the former task to the latter 
-has significant benefits, this barrier leads to self-censorship.  People will 
+in complexity".  When a certain way of doing things is easy to perform, and another 
+similar way is still "possible to perform", but on a very elevated level 
+of complexity, this leads to a significant psychological barrier erected
+between these ways.  Even when switching from the first way to the other one 
+has significant benefits, this barrier leads to self-censorship.  Essentially,
+people will 
 ignore the benefits even if they exceed the penalty of "the elevated level of 
 complexity" mentioned above.  And IMO self-censorship is the worst type of 
-censorship.
+censorship.  (There is a certain similarity between this situation and that
+of "self-fulfilled prophesies".  "People won't want to do this, so I would not
+make it simpler to do" - and now people do not want to do this...)
 
 So I would add another clause to the law above: "and moderately complicated
 tasks should remain moderately hard to perform".  What does it tell us in
@@ -186,21 +203,21 @@ phonetic, or, in presence of conflicts, visual").
 
 As many non-basic letters as possible (of those expected to appear often)
 should be available via shortcuts.  Same should be applicable to starting
-sequences of composition rules (such as "instead of typing StartCompose
-and ' one can type AltGr-').
+sequences of composition rules (such as "instead of typing C<StartCompose>
+and C<'> one can type C<AltGr-'>).
 
 =item Smart access
 
 Certain non-basic characters may be accessible by shortcuts which are not
 based on composition rules.  However, these shortcuts should be deducible
 by using simple mneumonic rules (such as "to get a vowel with `-accent,
-type AltGr-key with key sitting below the vowel key").
+type C<AltGr>-key with the physical keyboard's key sitting below the vowel key").
 
 =item Superdeath:
 
-If anything else fails, the user should be able to enter a character by
+If everything else fails, the user should be able to enter a character by
 its Unicode number (preferably in the most frequently referenced format:
-hexadecimal.
+hexadecimal).
 
 =back
 
@@ -221,7 +238,8 @@ memory.
 The "base keyboards" (those used for continuous typing in a certain language
 or script) should be identical to some "standard" widely used keyboards.
 These keyboards should differ from each other in position of keys used by the
-scripts only.  If a script B has more letters than a script A, then a lot of
+scripts only; the "punctuation keys" should be in the same position.  If a
+script B has more letters than a script A, then a lot of
 "punctuation" on the layout A will be replaced by letters in the layout B.
 This missing punctuation should be made available by pressing a modifier
 (AltGr? compare with MicroSoft's Vietnamese keyboard's top row).
@@ -229,7 +247,7 @@ This missing punctuation should be made available by pressing a modifier
 =item
 
 If more than one base keyboard is used, there must be a quick access:
-if one needs to enter one letter from layout B when in layout A, one
+if one needs to enter one letter from layout B when the active layout is A, one
 should not be forced to switch to B, type the letter, then switch back
 to A.  It must be available on "C<Quick_Access_Key letter>".
 
@@ -298,6 +316,22 @@ B<Example:> The standard Russian phonetic layout has Ё on the C<^>-key; on the
 other hand, Ё is a variant of Е; so it makes sense to have Ё available on
 C<AltGr-Е> as well.  Same for Ъ and Ь.
 
+=item
+
+Dead keys which are "abstract" (as opposed to being related to letters
+engraved on physical keyboard) should better be put on modified state
+of "zombie" keys of the keyboard (C<SPACE>, C<TAB>, C<CAPSLOCK>, C<MENU_ACCESS>).
+
+B<NOTE:> Making C<Shift-Space> a prefix key may lead to usability issues
+for people used to type CAPITALIZED PHRASES by keeping C<Shift> pressed
+all the time.  As a minimum, the symbols accessed via C<Shift-SPACE key>
+should be strikingly different from those produced by C<key> so that
+such problems are noted ASAP.  Example: on the first sight, producing
+C<NO-BREAK SPACE> on C<Shift-Space Shift-Space> or C<Shift-Space Space>
+looks like a good idea.  Do not do this: the visually undistinguishable
+C<NO-BREAK SPACE> would lead to significantly hard-to-debug problems if
+it was unintentional.
+
 =back
 
 
@@ -320,19 +354,19 @@ the words I<letter> and I<character> are used interchangeably.  A I<key>
 means a physical key on a keyboard clicked (possibly together with 
 one of modifiers C<Shift>, C<AltGr> - or, rarely C<Control>.  C<AltGr> 
 is either marked as such, or is just the "right" C<Alt> key; at least
-on Windows it can be replaced by C<Control-Alt>.  A I<dead key> is a key 
+on Windows it can be replaced by C<Control-Alt>.  A I<prefix key> is a key 
 click which does not produce any letter, but modifies what the next
-keypress would do.
+keypress would do (sometimes it is called a I<dead key>).
 
 A plain I<layer> is a part of keyboard layout accessible by using only 
-non-dead keyes (possibly in combination with C<Shift>); likewise, I<additional 
-layers> are parts of layout accessible by combining the non-dead keys 
+non-prefix keys (possibly in combination with C<Shift>); likewise, I<additional 
+layers> are parts of layout accessible by combining the non-prefix keys 
 with C<Shift> (if needed) and with a particular combination of other modifiers 
 (C<AltGr> or C<Control>).  So there may be up to 2 additional layers: the
 C<AltGr>-layer and C<Control>-layer.  
 
 
-On the simplest layouts, such as "US" or "Russian",  there is no dead keys - 
+On the simplest layouts, such as "US" or "Russian",  there is no prefix keys - 
 but this is only feasible for languages which use very few characters with 
 diacritic marks.  However, note that most layouts do not use 
 C<Control>-layer - it is stated that this might be subject to problems with
@@ -340,92 +374,92 @@ system interaction.
 
 The primary I<face> consists of the plain and additional layers of a keyboard;
 it is the part of layout accessible without switching "sticky state" and 
-without using dead keys.  There may be up to 3 layouts (Primary, AltGr, Control)
+without using prefix keys.  There may be up to 3 layouts (Primary, AltGr, Control)
 per face (on Windows).  A I<secondary face> is a face exposed after pressing 
-a dead key.
+a prefix key.
 
-A I<keyboard> is a collection of faces: the primary face, plus one face per
-a defined deadkey.  Finally, a I<keyboard group> is a collection of keyboards
-(switchable by CapsLock and/or keyboard change hotkeys like C<Shift-Alt>)
+A I<personality> is a collection of faces: the primary face, plus one face per
+a defined prefix-key.  Finally, a I<keyboard group> is a collection of personalities
+(switchable by CapsLock and/or personality change hotkeys like C<Shift-Alt>)
 designed to work smoothly together.
 
 B<EXAMPLE:> Start with a I<very> elaborate (and not yet implemented, but 
 feasible with this module) example.  A keyboard group may consist of 
-phonetically matched Latin and Cyrillic keyboards, and visually matched Greek 
-and Math keyboards.  Several deadkeys may be shared by all 4 of these 
-keyboards; in particular, there would be 4 deadkeys allowing access to primary 
-faces of these 4 keyboards from other keyboards of the group.  Also, there 
-may be specialised deadkey tuned for particular need of entering Latin script, 
+phonetically matched Latin and Cyrillic personalities, and visually matched Greek 
+and Math personalities.  Several prefix-keys may be shared by all 4 of these 
+personalities; in particular, there would be 4 prefix-keys allowing access to primary 
+faces of these 4 personalities from other personalities of the group.  Also, there 
+may be specialised prefix-key tuned for particular need of entering Latin script, 
 Cyrillic script, Greek script, and Math.
 
-Suppose that there are 8 specialized Latin deadkeys (for example, name them
+Suppose that there are 8 specialized Latin prefix-keys (for example, name them
    
   grave/tilde/hat/breve/ring_above/macron/acute/diaeresis
 
 although in practice each one of them may do more than the name suggests).  
-Then Latin keyboard will have the following 13 faces:
+Then Latin personality will have the following 13 faces:
 
    Primary/Latin-Primary/Cyrillic-Primary/Greek-Primary/Math-Primary
    grave/tilde/hat/breve/ring_above/macron/acute/diaeresis
 
 B<NOTE:>   Here Latin-Primary is the face one gets when one presses
-the Access-Latin deadkey when in Latin mode; it may be convenient to define 
+the Access-Latin prefix-key when in Latin mode; it may be convenient to define 
 it to be the same as Primary - or maybe not.  For example, if one defines it 
-to be Greek-Primary, then this deadkey has a convenient semantic of flipping
+to be Greek-Primary, then this prefix-key has a convenient semantic of flipping
 between Latin and Greek modes for the next typed character: when in
-Latin, C<Latin-DEADKEY a> would enter α, when in Greek, the same keypresses
-[now meaning "Latin-DEADKEY α"] would enter "a".
+Latin, C<Latin-PREFIX-KEY a> would enter α, when in Greek, the same keypresses
+[now meaning "Latin-PREFIX-KEY α"] would enter "a".
 
 Assume that the layout does not use the C<Control> modifier.  Then each of 
 these faces would consists of two layers: the plain one, and the C<AltGr>- 
 one.  For example, pressing C<AltGr> with a key on Greek face could add
 diaeresis to a vowel, or use a modified ("final" or "symbol") "glyph" for
 a consonant (as in σ/ς θ/ϑ).  Or, on Latin face, C<AltGr-a> may produce æ.  Or, on a
-Cyrillic keyboard, AltGr-я (ya) may produce ѣ (yat').
+Cyrillic personality, AltGr-я (ya) may produce ѣ (yat').
 
-Likewise, the Greek keyboard may define special deadkeys to access polytonic 
+Likewise, the Greek personality may define special prefix-keys to access polytonic 
 greek vowels.  (On the other hand, maybe this is not a very good idea - it may
-be more useful to make polytonic Greek accessible from all keyboards in a
+be more useful to make polytonic Greek accessible from all personalities in a
 keyboard group.  Then one is able to type a polytonic Greek letter without 
-switching to the Greek keyboard.)
+switching to the Greek personality.)
 
 With such a keyboard group, to type one Greek word in a Cyrillic text one 
-would switch to the Greek keyboard, then back to Cyrillic; but when all one 
+would switch to the Greek personality, then back to Cyrillic; but when all one 
 need to type now is only one Greek letter, it may be easier to use the 
-"Greek-DEADKEY letter" combination, and save switching back to the
-Cyrillic keyboard.  (Of course, for this to work the letter should be 
-on the primary face of the Greek keyboard.)
+"Greek-PREFIX-KEY letter" combination, and save switching back to the
+Cyrillic personality.  (Of course, for this to work the letter should be 
+on the primary face of the Greek personality.)
 
    =====================================================
 
 Looks too complicated?  Try to think about it in a different way: there
-are many faces in a group of keyboards; break them into 3 "onion rings":
+are many faces in a keyboard group; break them into 3 "onion rings":
 
 =over 4
 
 =item I<CORE> faces 
 
 one can "switch to a such a face" and type continuously using 
-this face without pressing dead keys.  In other words, these faces 
+this face without pressing prefix keys.  In other words, these faces 
 can be made "active".
      
 When another face is active, the letters in these faces are still 
-accessible by pressing one particular dead key before each of these
-letters.  This dead key does not depend on which core face is 
+accessible by pressing one particular prefix key before each of these
+letters.  This prefix key does not depend on which core face is 
 currently "active".  (This is the same as for univerally accessible faces.)
      
 =item  I<Universally accessible> faces 
 
 one cannot "switch to them", however, letters
-in these faces are accessible by pressing one particular dead key
-before this letter.  This dead key does not depend on which
+in these faces are accessible by pressing one particular prefix key
+before this letter.  This prefix key does not depend on which
 core face is currently "active".
      
 =item I<satellite> faces 
 
 one cannot "switch to them", and letters in these faces
 are accessible from one particular core face only.  One must press a 
-dead key before every letter in such faces.
+prefix key before every letter in such faces.
 
 =back
 
@@ -433,13 +467,13 @@ For example, when entering a mix of Latin/Cyrillic scripts and math,
 it makes sense to make the base-Latin and base-Cyrillic faces into
 the core; it is convenient when (several) Math faces and a Greek face 
 can be made universally accessible.  On the other hand, faces containing
-diacretized Latin letters and diacretized Cyrillic letters should better
-be made satellite; this avoids a proliferation of dead keys which would
+diacritized Latin letters and diacritized Cyrillic letters should better
+be made satellite; this avoids a proliferation of prefix keys which would
 make typing slower.
 
 =head1 Access to diacritic marks
 
-The logic: dead keys are either 8-bit characters with high bit set, or
+The logic: prefix keys are either 8-bit characters with high bit set, or
 if none with the needed glyph, they are "spacing modifier letters" or
 "spacing clones of diacritics".  And if you type I<something> after them,
 you can get other modifier letters and combining characters: here is the
@@ -492,12 +526,20 @@ On diacritics:
 
      Accents in different Languages:
   http://fonty.pl/porady,12,inne_diakrytyki.htm#07
+  
+     Typesetting Old and Modern Church Slavonic
+  http://www.sanu.ac.rs/Cirilica/Prilozi/Skup.pdf
+  http://irmologion.ru/ucsenc/ucslay8.html
+  http://irmologion.ru/csscript/csscript.html
+  http://cslav.org/success.htm
+  http://irmologion.ru/developer/fontdev.html#allocating
 
 On typography marks
 
   http://wiki.neo-layout.org/wiki/Striche
   http://www.matthias-kammerer.de/SonsTypo3.htm
   http://en.wikipedia.org/wiki/Soft_hyphen
+  http://en.wikipedia.org/wiki/Dash
 
 On keyboard layouts:
 
@@ -510,7 +552,8 @@ On keyboard layouts:
   http://eurkey.steffen.bruentjen.eu/layout.html
   http://ru.wikipedia.org/wiki/%D0%A4%D0%B0%D0%B9%D0%BB:Birman%27s_keyboard_layout.svg
   http://bepo.fr/wiki/Accueil
-  http://cgit.freedesktop.org/xkeyboard-config/tree/symbols/ru#n598
+  http://cgit.freedesktop.org/xkeyboard-config/tree/symbols/ru
+  http://cgit.freedesktop.org/xkeyboard-config/tree/symbols/keypad
   http://eklhad.net/linux/app/halfqwerty.xkb			(One-handed layout)
   http://www.doink.ch/an-x11-keyboard-layout-for-scholars-of-old-germanic/   (and references there)
   http://www.neo-layout.org/
@@ -531,6 +574,13 @@ On keyboard layouts:
   http://goron.de/~johns/one-hand/#documentation
       On screen keyboard indicator
   http://www.autohotkey.com/docs/scripts/KeyboardOnScreen.htm
+      Phonetic Hebrew layout(s) (1st has many duplicates, 2nd overweighted)
+  http://bc.tech.coop/Hebrew-ZC.html
+  http://help.keymanweb.com/keyboards/keyboard_galaxiehebrewkm6.php
+      Greek (Galaxy) with a convenient mapping (except for Ψ) and BibleScript
+  http://www.tavultesoft.com/keyboarddownloads/%7B4D179548-1215-4167-8EF7-7F42B9B0C2A6%7D/manual.pdf
+      With 2-letter input of Unicode names:
+  http://www.jlg-utilities.com
 
 By author of MSKLC Michael S. Kaplan (do not forget to follow links)
 
@@ -595,6 +645,9 @@ Low level scancode mapping
   http://netj.org/2004/07/windows_keymap
   the free remapkey.exe utility that's in Microsoft NT / 2000 resource kit.
 
+  perl -wlne "BEGIN{$t = {T => q(), qw( X e0 Y e1 )}} print qq(  $t->{$1}$2\t$3) if /^#define\s+([TXY])([0-9a-f]{2})\s+(?:_EQ|_NE)\((?:(?:\s*\w+\s*,){3})?\s*([^\W_]\w*)\s*(?:(?:,\s*\w+\s*){2})?\)\s*(?:\/\/.*)?$/i" kbd.h >ll2
+    then select stuff up to the first e1 key (but DECIMAL is not there T53 is DELETE??? take from MSKLC help/using/advanced/scancodes)
+
 CapsLock as on typewriter:
 
   http://www.annoyances.org/exec/forum/winxp/1071197341
@@ -612,6 +665,7 @@ Problems on X11:
   http://shtrom.ssji.net/skb/xorg-ligatures.html				(of 2008???)
   http://tldp.org/HOWTO/Danish-HOWTO-2.html					(of 2005???)
   http://www.tux.org/~balsa/linux/deadkeys/index.html				(of 1999???)
+  http://www.x.org/releases/X11R7.6/doc/libX11/Compose/en_US.UTF-8.html
 
   EIGHT_LEVEL FOUR_LEVEL_ALPHABETIC FOUR_LEVEL_SEMIALPHABETIC PC_SYSRQ : see
   http://cafbit.com/resource/mackeyboard/mackeyboard.xkb
@@ -619,6 +673,7 @@ Problems on X11:
   ./xkb in /etc/X11 /usr/local/X11 /usr/share/local/X11 but what dead_diaresis means is defined here:
      Apparently, may be in /usr/X11R6/lib/X11/locale/en_US.UTF-8/Compose /usr/share/X11/locale/en_US.UTF-8/Compose
   http://wiki.maemo.org/Remapping_keyboard
+  http://www.x.org/releases/current/doc/man/man8/mkcomposecache.8.xhtml
   
 B<Note:> have XIM input method in GTK disables Control-Shift-u way of entering HEX unicode.
 
@@ -660,6 +715,40 @@ Is this discussing KBDNLS_TYPE_TOGGLE on VK_KANA???
 
   http://mychro.mydns.jp/~mychro/mt/2010/05/vk-f.html
 
+Windows: fonts substitution/fallback/replacement
+
+  http://msdn.microsoft.com/en-us/goglobal/bb688134
+
+Problems on Windows:
+
+  http://en.wikipedia.org/wiki/Help:Special_characters#Alt_keycodes_for_Windows_computers
+  http://en.wikipedia.org/wiki/Template_talk:Unicode#Plane_One_fonts
+
+    Console font: Lucida Console 14 is viewable, but has practically no Unicode support.
+                  Consolas (good at 16) has much better Unicode support (sometimes better sometimes worse than DejaVue)
+		  Dejavue is good at 14 (equal to a GUI font size 9 on 15" 1300px screen; 16px unifont is native at 12 here)
+  http://cristianadam.blogspot.com/2009/11/windows-console-and-true-type-fonts.html
+  
+    Apparently, Windows picks up the flavor (Bold/Italic/Etc) of DejaVue at random; see
+  http://jpsoft.com/forums/threads/strange-results-with-cp-1252.1129/
+	- he got it in bold.  I'm getting it in italic...  Workaround: uninstall 
+	  all flavors but one, THEN enable it for the console...  Then reinstall
+	  (preferably newer versions).
+
+Display (how WikiPedia does it):
+
+  http://en.wikipedia.org/wiki/Help:Special_characters#Displaying_special_characters
+  http://en.wikipedia.org/wiki/Template:Unicode
+  http://en.wikipedia.org/wiki/Template:Unichar
+  http://en.wikipedia.org/wiki/User:Ruud_Koot/Unicode_typefaces
+    In CSS:  .IPA, .Unicode { font-family: "Arial Unicode MS", "Lucida Sans Unicode"; }
+  http://web.archive.org/web/20060913000000/http://en.wikipedia.org/wiki/Template:Unicode_fonts
+
+Windows shortcuts:
+
+  http://windows.microsoft.com/en-US/windows7/Keyboard-shortcuts
+  http://www.redgage.com/blogs/pankajugale/all-keyboard-shortcuts--very-useful.html
+
 =head1 LIMITATIONS
 
 Currently only output for Windows keyboard layout drivers (via MSKLC) is available.
@@ -687,7 +776,7 @@ Sometimes opposite happens, and C<SIGN> appears out of blue sky; compare:
 C<ENG> I<is> a combination of C<n> with C<HOOK>, but it is not marked as such
 in its name.
 
-Sometimes a name of diacretic (after C<WITH>) acquires an C<ACCENT> at end
+Sometimes a name of diacritic (after C<WITH>) acquires an C<ACCENT> at end
 (see C<U+0476>).
 
 Oftentimes the part to the left of C<WITH> is not resolvable: sometimes it
@@ -850,6 +939,33 @@ The distributed examples may have their own copyrights.
 
 UniPolyK-MultiSymple
 
+Need to bind 000d and 0009 (Enter/Tab; 000a is Control-Enter?) in the keymaps 
+to visual bell as well...  Judging by generated C files, also 0003 and
+001b, 007f are generated by Esc, Cancel, Backspace...
+
+Using C<LinkFace> in diacritic map picks up all these C<\r> etc...
+
+Automatic application of C<FlipLayers> prefix key (with sane action on deadkeys).
+C<LinkFace> should also honor dead keys.  Diacritic maps should be generated
+in two flavors (w.r.t. C<FlipLayers>) and auto-filled with C<FlipLayers> prefix key.
+(???? Conflict with modifier-map access of A-S-Space???)
+
+Multiple linked faces (accessible as described in ChangeLog); designated 
+Primary- and Secondary- switch keys (as Shift-Space and AltGr-Space now).
+
+C<Soft hyphen> as a deadkey may be not a good idea: following it by a special key
+(such as C<Shift-Tab>, or C<Control-Enter>) may insert the deadkey character???
+Hence the character should be highly visible...
+
+Currently linked layers must have exactly the same number of keys in VK-tables.
+
+VK tables for TAB, BACK were BS.  Same (remains) for the rest of unusual keys...  (See TAB-was.)
+But UTOOL cannot handle them anyway...
+
+Define an extra element in VK keys: linkable.  Should be sorted first in the kbd map,
+and there should be the same number in linked lists.  Non-linkable keys should not
+be linked together by deadkey access...
+
 Interaction of FromToFlipShift with SelectRX not intuitive.  This works: Diacritic[<sub>](SelectRX[[0-9]](FlipShift(Latin)))
 
 ByPairs[], in fact, does not allow spaces???
@@ -892,6 +1008,7 @@ We use a smartish algorithm to assign multiple diacritics to the same deadkey.  
 would use information about when a particular precombined form was introduced in Unicode...
 
 Inspector tool for NamesList.txt:
+
  grep " WITH .* " ! | grep -E -v "(ACUTE|GRAVE|ABOVE|BELOW|TILDE|DIAERESIS|DOT|HOOK|LEG|MACRON|BREVE|CARON|STROKE|TAIL|TONOS|BAR|DOTS|ACCENT|HALF RING|VARIA|OXIA|PERISPOMENI|YPOGEGRAMMENI|PROSGEGRAMMENI|OVERLAY|(TIP|BARB|CORNER) ([A-Z]+WARDS|UP|DOWN|RIGHT|LEFT))$" | grep -E -v "((ISOLATED|MEDIAL|FINAL|INITIAL) FORM|SIGN|SYMBOL)$" |less
  grep " WITH "    ! | grep -E -v "(ACUTE|GRAVE|ABOVE|BELOW|TILDE|DIAERESIS|CIRCUMFLEX|CEDILLA|OGONEK|DOT|HOOK|LEG|MACRON|BREVE|CARON|STROKE|TAIL|TONOS|BAR|CURL|BELT|HORN|DOTS|LOOP|ACCENT|RING|TICK|HALF RING|COMMA|FLOURISH|TITLO|UPTURN|DESCENDER|VRACHY|QUILL|BASE|ARC|CHECK|STRIKETHROUGH|NOTCH|CIRCLE|VARIA|OXIA|PSILI|DASIA|DIALYTIKA|PERISPOMENI|YPOGEGRAMMENI|PROSGEGRAMMENI|OVERLAY|(TIP|BARB|CORNER) ([A-Z]+WARDS|UP|DOWN|RIGHT|LEFT))$" | grep -E -v "((ISOLATED|MEDIAL|FINAL|INITIAL) FORM|SIGN|SYMBOL)$" |less
 
@@ -938,7 +1055,145 @@ To allow . or , on VK_DECIMAL: maybe make CapsLock-dependent?
 How to write this diacritic recipe: insert hacheck on AltGr-variant, but only if
 the breve on the base layer variant does not insert hacheck (so inserts breve)???
 
-=head1 GOTCHAS (Windows)
+Sorting diacritics by usefulness: we want to apply one of accents from the
+given list to a given key (with l layers of 2 shift states).  For each accent,
+we have 2l possible variants for composition; assign to 2 variants differing
+by Shift the minimum penalty of the two.  For each layer we get several possible
+combinations of different priority; and for each layer, we have a certain number
+of slots open.  We can redistribute combinations from the primary layer to
+secondary one, but not between secondary layers.
+
+Work with slots one-by-one (so that the assignent is "monotinic" when the number
+of slots increases).  Let m be the number of layers where slots are present.
+Take highest priority combinations; if the number of "extra" combinations
+in the primary layer is at least m, distribute the first m of them to
+secondary layers.  If n<m of them are present, fill k layers which
+have no their own combinations first, then other n-k layers.  More precisely,
+if n<=k, use the first n of "free" layers; if n>k, fill all free layers, then
+the last n-k of non-free layers.
+
+Repeat as needed (on each step, at most one slot in each layer appears).
+
+But we do not need to separate case-differing keys!  How to fix?
+
+All done, but this works only on the current face!  To fix, need to pass
+to the translator all the face-characters present on the given key simultaneously.
+
+===== Accent-key TAB accesses extra bindinges (including NUM->numbered one)
+	(may be problematic with some applications???
+	 -- so duplicate it on + and @ if they is not occupied
+	 -- there is nothing related to AT in Unicode)
+
+Diacritics_0218_0b56_0c34=	May create such a thing...
+ (0b56_0c34 invisible to the user).
+
+  Hmm - how to combine penaltized keys with reversion?  It looks like
+  the higher priority bindings would occupy the hottest slots in both
+  direct and reverse bindings...
+
+  Maybe additional forms Diacrtitics2S_* and Diacrtitics2E_* which fight
+  for symbols of the same penalty from start and from end (with S winning
+  on stuff exactly in the middle...).  (The E-form would also strip the last |-group.)
+
+' Shift-Space (from US face) should access the second level of Russian face.
+To avoid infinite cycles, face-switch keys to non-private faces should be
+marked in each face... 
+
+"Acute makes sharper" is applicable to () too to get <>-parens...
+
+Another ways of combining: "OR EQUAL TO", "OR EQUIVALENT TO", "APL FUNCTIONAL
+SYMBOL QUAD", "APL FUNCTIONAL SYMBOL *** UNDERBAR", "APL FUNCTIONAL SYMBOL *** DIAERESIS".
+
+When recognizing symbols for GREEK, treat LUNATE (as NOP).  Try adding HEBREW LETTER at start as well...
+
+Compare with: 8 basic accents: http://en.wikipedia.org/wiki/African_reference_alphabet (English 78)
+
+When a diacritic on a base letter expands to several variants, use them all 
+(with penalty according to the flags).
+
+Problem: acute on acute makes double acute modifier...
+
+Penalized letter are temporarily completely ignored; need to attach them in the end... 
+ - but not 02dd which should be completely ignore...
+
+Report characters available on diacritic chains, but not accessible via such chains.
+Likewise for characters not accessible at all.  Mark certain chains as "Hacks" so that
+they are not counted in these lists.
+
+Long s and "preceded by" are not handled since the table has its own (useless) compatibility decompositions.
+
+
+=head1 WINDOWS GOTCHAS
+
+First of all, keyboard layouts on Windows are controlled by DLLs; the only function
+of these DLLs is to export a table of "actions" to perform.  This table is passed
+to the kernel, and that's it - whatever is not supported by the format of this table
+cannot be implemented by native layouts.  (The DLL performs no "actions" when
+actual keyboard events arrive.)
+
+Essentially, the logic is like that: there are primary "keypresses", and
+chained "keypresses" ("prefix keys" [= deadkeys] and keys pressed after them).  
+Primary keypresses are distinguished by which physical key on keyboard is 
+pressed, and which of "modifier keys" are also pressed at this moment (as well
+as the state of "latched keys" - usually C<CapsLock> only).  This combination
+determines which Unicode character is generated by the keypress, and whether
+this character starts a "chained sequence".
+
+On the other hand, the behaviour of chained keys is governed I<ONLY> by Unicode
+characters they generate: if there are several physical keypresses generating
+the same Unicode characters, these keypresses are completely interchangeable.
+(The only restriction is that the first keypress should be marked as "prefix
+key"; there may be two keys producing B<'> so that one is producing a "real
+tick", and another is producing a "prefix" B<'>.)
+
+The table allows: map C<ScanCode>s to C<VK_key>s; associate a C<VK_key> to several
+(numbered) choices of characters to output, and mark some of these choices as prefixes
+(deadkeys).  (These "base" choices may contain up to 4 16-bit characters (with 32-bit
+characters mapped to 2 16-bit surrogates); but only those with 1 16-bit character may
+be marked as deadkeys.)  For each prefix character (not a prefix key!) one can
+associate a table mapping input 16-bit "base characters" to output 16-bit characters,
+and mark some of the output choices as prefix characters.
+
+The numbered choices above are determined by the state of "modifier keys" (such as
+C<Shift>, C<Alt>, C<Control>), but not directly.  First of all, C<VK_keys> may be
+associated to a certain combination of 6 "modifier bits" (called "logical" C<Shift>,
+C<Alt>, C<Control>, C<Kana>, C<User1> and C<User2>, but the logical bits are not 
+required to coincide with names of modifier keys).  (Example: bind C<Right Control>
+to activate C<Shift> and C<Kana> bits.)  The 64 possible combinations of modifier bits
+are mapped to the numbered choices above.
+
+Additionally, one can define two "separate 
+numbered choices" in presence of CapsLock (but the only allowed modifier bit is C<Shift>).
+The another way to determine what C<CapsLock> is doing: one can mark that it 
+flips the "logical C<Shift>" bit (separately on no-modifiers state, C<Control-Alt>-only state,
+and C<Kana>-only state [?!] - here "only" allow for the C<Shift> bit to be C<ON>).
+
+C<AltGr> key is considered equivalent to C<Control-Alt> combination (of those
+are present, or always???), and one cannot bind C<Alt> and C<Alt-Shift> combinations.  
+Additionally, binding bare C<Control> modifier on alphabetical keys (and
+C<SPACE>, C<[>, C<]>, C<\>) may confuse some applications.
+
+B<NOTE:> there is some additional stuff allowed to be done (but only in presence
+of Far_East_Support installed???).  FE-keyboards can define some sticky state (so
+may define some other "latching" keys in addition to C<CapsLock>).  However,
+I did not find a clear documentation yet (C<keyboard106> in the DDK toolkit???).
+
+There is a tool to create/compile the required DLL: F<kbdutool.exe> of I<MicroSoft 
+Keyboard Layout Creator> (with a graphic frontend F<MSKLC.exe>).  The tool does 
+not support customization of modifier bits, and has numerous bugs concerning binding keys which
+usually do not generate characters.  The graphic frontend does not support
+chained prefix keys, adds another batch of bugs, and has arbitrarily limitations:
+refuses to work if the compiled version of keyboard is already installed;
+refuses to work if C<SPACE> is redefined in useful ways.
+
+B<WORKFLOW:> uninstall the keyboard, comment the definition of C<SPACE>,
+load in F<MSKLC> and create an install package.  Then uncomment the
+definition of C<SPACE>, and compile 4 architecture versions using F<kbdutool>,
+moving the DLLs into suitable directories of the install package.  Install
+the keyboard.
+
+For development cycle, one does not need to rebuild the install package
+while recompiling.
 
 =over 4
 
@@ -985,6 +1240,12 @@ list.
 It looks like the first 4 get in sync if one deletes all related keyboards,
 then installs the necessary subset.  I do not know how to fix 5 - MSKLC
 continues to show the old name for this project.
+
+Another symptom: Current language indicator (like C<EN>) on the language
+bar disappears.  (Reboot time?)
+
+Possible workaround: manually remove the entry in C<HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Keyboard Layouts>
+(the last 4 digits match the codepage in the F<.klc> file).
    
 =item Too long description (or funny characters in description?)
 
@@ -1163,21 +1424,40 @@ show a dialogue for every shortcut with a hotkey it finds.  (But, as I said,
 it did not fix I<my> problem: C<AltGr-s> works in F<MSKLC> test window,
 and nowhere else I tried...)
 
+=item "There was a problem loading the file" from C<MSKLC>
+
+Make line endings in F<.klc> DOSish.
+
+=item C<AltGr-keys> do not work
+
+Make line endings in F<.klc> DOSish (when given as input to F<kbdutool> -
+it gives no error messages, and deadkeys work [?!]).
+
 =back
 
 =cut
 
 # '
-my $NamesList;
-sub set_NamesList ($$) {
+my ($AgeList, $NamesList);
+sub set_NamesList ($$;$) {
     my $class = shift;
-    $NamesList = shift, return unless ref $class;
-    $class->{NamesList} = shift;
+    if (ref $class) {
+      $class->{NamesList} = shift;
+    } else {
+      $NamesList = shift
+    }
+    $AgeList = shift, return unless ref $class;
+    $class->{AgeList} = shift;
 }
 sub get_NamesList ($) {
     my $self = shift;
     return $NamesList unless ref $self and defined $self->{NamesList};
     $self->{NamesList};
+}
+sub get_AgeList ($) {
+    my $self = shift;
+    return $AgeList unless ref $self and defined $self->{AgeList};
+    $self->{AgeList};
 }
 sub new ($;$) {
     my $class = shift;
@@ -1557,9 +1837,17 @@ sub massage_faces ($) {
       @k = map $self->charhex2key($_), @k;
       die "name of layerDeadKeys' element in face `$f' does not match:\n\tin `$D'\n\t`$name' vs `$self->{faces}{$f}{layers}[$c]'"
         unless $self->{faces}{$f}{layers}[$c] =~ /^\Q$name\E(<.*>)?$/;	# Name might have changed in VK processing
+      1 < length and die "not a character as a deadkey: `$_'" for @k;
       $self->{faces}{$f}{'[dead]'}[$c] = {map +($_,1), @k};
       $self->{faces}{$f}{'[DEAD]'}{$_} = 1 for @k;
       $c++;
+    }
+    for my $D (@{$self->{faces}{$f}{layerDeadKeys2} || []}) {
+      $D =~ s/^\s+//;	$D =~ s/\s+$//;
+      my @k = split //, $self->stringHEX2string($D);
+      2 != @k and die "not two characters as a chained deadkey: `@k'";
+#warn "dead2 for <@k>";
+      $self->{faces}{$f}{'[dead2]'}{$k[0]}{$k[1]}++;
     }
   }
   $self
@@ -1575,7 +1863,108 @@ sub massage_hash_values($) {
 }
 #use Dumpvalue;
 
+sub print_codepoint ($$;$) {
+  my ($self, $k, $prefix) = (shift, shift, shift);
+  my $K = ($k =~ /\p{NonspacingMark}/ ? " $k" : $k);
+  $prefix = '' unless defined $prefix;
+  printf "%s%s\t<%s>\t%s\n", $prefix, $self->key2hex($k), $K, $self->UName($k, 'verbose');  
+}
+
+sub print_coverage_string ($$) {
+  my ($self, $s, %seen) = (shift, shift);
+  $seen{$_}++ for split //, $s;
+
+  my $f = $self->get_NamesList;
+  $self->load_compositions($f) if defined $f;
+    
+  $f = $self->get_AgeList;
+  $self->load_uniage($f) if defined $f and not $self->{Age};
+
+  require Unicode::UCD;
+
+  $self->print_codepoint($_) for sort keys %seen;
+}
+
+sub print_coverage ($$) {
+  my ($self, $F) = (shift, shift);
+  
+  my $f = $self->get_NamesList;
+  $self->load_compositions($f) if defined $f;
+    
+  $f = $self->get_AgeList;
+  $self->load_uniage($f) if defined $f and not $self->{Age};
+
+  my $is32 = $self->{faces}{$F}{'[32-bit]'};
+  my $cnt32 = keys %{$is32 || {}};
+  my $c1 = @{ $self->{faces}{$F}{'[coverage1]'} } - $cnt32;
+  my $more = $cnt32 ? " (and $cnt32 not available on Windows - at end of this section above FFFF)" : '';
+  printf "############# %i = %i + %i%s\n", 
+    @{ $self->{faces}{$F}{'[coverage0]'} } + $c1,
+    scalar @{ $self->{faces}{$F}{'[coverage0]'} },
+    $c1, $more;
+  for my $k (@{ $self->{faces}{$F}{'[coverage0]'} }) {
+    $self->print_codepoint($k);
+  }
+  print "############# Via prefix keys:\n";
+  for my $k (@{ $self->{faces}{$F}{'[coverage1]'} }) {
+    $self->print_codepoint($k);
+  }
+  print "############# In prefix keys, but available only elsewhere:\n";
+  for my $k (sort keys %{ $self->{faces}{$F}{'[in_dia_chains]'} }) {
+    next unless $self->{faces}{$F}{'[coverage_hash]'}{$k} and not $self->{faces}{$F}{'[from_dia_chains]'}{$k};
+    $self->print_codepoint($k, '+ ');		# May be in from_dia_chains, but be obscured later...
+  }
+  print "############# Lost in prefix keys (not counting those explicitly prohibited by \\\\):\n";
+  for my $k (sort keys %{ $self->{faces}{$F}{'[in_dia_chains]'} }) {
+    next if $self->{faces}{$F}{'[coverage_hash]'}{$k};
+    $self->print_codepoint($k, '- ');
+  }
+  print "############# Lost in known classified modifiers/standalone/combining:\n";
+  for my $k (sort keys %{ $self->{'[map2diac]'} }) {
+    next if $self->{faces}{$F}{'[coverage_hash]'}{$k};
+    $self->print_codepoint($k, '?- ');
+  }
+  
+}
+  
+sub coverage_face0 ($$) {
+  my ($self, $F) = (shift, shift);
+  my $LL = $self->{faces}{$F}{layers};
+  return $self->{faces}{$F}{'[coverage0]'} if exists $self->{faces}{$F}{'[coverage0]'};
+  my %seen;
+  for my $l (@$LL) {
+    my $L = $self->{layers}{$l};
+    for my $k (@$L) {
+      $seen{$_}++ for grep defined, @$k;
+    }
+  }
+  $self->{faces}{$F}{'[coverage0]'} = [sort keys %seen]
+}
+
+sub massage_char_substitutions($$) {	# Read $self->{Substitutions}
+  my($self, $data) = (shift, shift);
+  die "Too late to load char substitutions" if $self->{Compositions};
+  for my $K (keys %{ $data->{Substitutions} || {}}) {
+    my $arr = $data->{Substitutions}{$K};
+    for my $S (@$arr) {
+      my $s = $self->manyHEX($S);
+      $s =~ s/\p{Blank}(?=\p{NonspacingMark})//g;
+      die "Expect 2 chars in substitution rule; I see <$s> (from <$S>)" unless 2 == (my @s = split //, $s);
+      $self->{'[Substitutions]'}{"<subst-$K>"}{$s[0]} = [[0, $s[1]]];	# Format as in Compositions
+    }
+  }
+}
+
 sub new_from_configfile ($$) {
+  my ($class, $F) = (shift, shift);
+  open my $f, '< :utf8', $F or die "Can't open `$F' for read: $!";
+  my $s = do {local $/; <$f>};
+  close $f or die "Can't close `$F' for read: $!";
+#warn "Got `$s'";
+  $class->new_from_configfile_string($s);
+}
+
+sub new_from_configfile_string ($$) {
     my ($class, $ss) = (shift, shift);
     die "too many arguments to UI::KeyboardLayout->new_from_configfile" if @_;
     my $data = $class->parse_configfile($ss);
@@ -1584,11 +1973,38 @@ sub new_from_configfile ($$) {
     @{$data->{layers}}{keys %$layers} = values %$layers;
     $data = bless $data, (ref $class or $class);
     $data->massage_hash_values;
-    $data->massage_diacritics;
+    $data->massage_diacritics;			# Read $self->{Diacritics}
+    $data->massage_char_substitutions($data);	# Read $self->{Substitutions}
     $data->massage_faces;
     
     $data->massage_deadkeys_win($data);
     $data->create_composite_layers;		# Needs to be after simple deadkey maps are known
+    
+    for my $F (keys %{ $data->{faces} }) {
+      $data->coverage_face0($F);
+    }
+    for my $F (keys %{ $data->{faces} }) {
+      my(%seen0, %seen1);
+      next if $F =~ /###/;		# Face-on-a-deadkey
+      warn("Face `$F' has no [deadkeyFace]"), next unless $data->{faces}{$F}{'[deadkeyFace]'};
+#      next;
+      for my $deadKEY ( sort keys %{ $data->{faces}{$F}{'[deadkeyFace]'}} ) {
+        unless (%seen0) {
+          $seen0{$_}++ for @{ $data->{faces}{$F}{'[coverage0]'} };
+        }
+        ### XXXXX Directly linked faces may have some chars unreachable via the swith-prefixKey
+        my $deadKey = $data->charhex2key($deadKEY);
+        warn("DeadKey `$deadKey' not reached in face `$F'"), next
+          unless $seen0{$deadKey};
+        my $FFF = $data->{faces}{$F}{'[deadkeyFace]'}{$deadKEY};
+        my $cov2 = $data->{faces}{$FFF}{'[coverage0]'} 
+          or warn("Deadkey `$deadKey' on face `$F' -> unmassaged face"), next;
+        $seen0{$_}++ or $seen1{$_}++ for @$cov2;
+        $data->{faces}{$F}{'[coverage1]'} = [sort keys %seen1];
+        $data->{faces}{$F}{'[coverage_hash]'} = \%seen0;
+      }
+    }
+    $data
 }
 
 sub massage_deadkeys_win ($$) {
@@ -1652,6 +2068,7 @@ my %oem_keys = reverse (qw(
      DECIMAL	.#
 ));			#'# Here # marks keys which need special attention...
 
+	# For type 4 of keyboard (same as types 1,3)
 my %scan_codes = (reverse qw(
   02	1
   03	2
@@ -1704,48 +2121,142 @@ my %scan_codes = (reverse qw(
   56	OEM_102
   53	DECIMAL
 
+  01	ESCAPE
+  0C	OEM_MINUS
+  0D	OEM_PLUS
+  0E	BACK
+  0F	TAB
+  1A	OEM_4
+  1B	OEM_6
+  1C	RETURN
+  1D	LCONTROL
+  27	OEM_1
+  28	OEM_7
+  29	OEM_3
+  2A	LSHIFT
+  2B	OEM_5
+  33	OEM_COMMA
+  34	OEM_PERIOD
+  35	OEM_2
+  36	RSHIFT
+  37	MULTIPLY
+  38	LMENU
+  3A	CAPITAL
+  3B	F1
+  3C	F2
+  3D	F3
+  3E	F4
+  3F	F5
+  40	F6
+  41	F7
+  42	F8
+  43	F9
+  44	F10
+  45	NUMLOCK
+  46	SCROLL
+  47	HOME
+  48	UP
+  49	PRIOR
+  4A	SUBTRACT
+  4B	LEFT
+  4C	CLEAR
+  4D	RIGHT
+  4E	ADD
+  4F	END
+  50	DOWN
+  51	NEXT
+  52	INSERT
+  53	DELETE
+  54	SNAPSHOT
+  56	OEM_102
+  57	F11
+  58	F12
+  59	CLEAR
+  5A	OEM_WSCTRL
+  5B	OEM_FINISH
+  5C	OEM_JUMP
+  5D	EREOF
+  5E	OEM_BACKTAB
+  5F	OEM_AUTO
+  62	ZOOM
+  63	HELP
+  64	F13
+  65	F14
+  66	F15
+  67	F16
+  68	F17
+  69	F18
+  6A	F19
+  6B	F20
+  6C	F21
+  6D	F22
+  6E	F23
+  6F	OEM_PA3
+  71	OEM_RESET
+  73	ABNT_C1
+  76	F24
+  7B	OEM_PA1
+  7C	TAB
+  7E	ABNT_C2
+  7F	OEM_PA2
+  e010	MEDIA_PREV_TRACK
+  e019	MEDIA_NEXT_TRACK
+  e01C	RETURN
+  e01D	RCONTROL
+  e020	VOLUME_MUTE
+  e021	LAUNCH_APP2
+  e022	MEDIA_PLAY_PAUSE
+  e024	MEDIA_STOP
+  e02E	VOLUME_DOWN
+  e030	VOLUME_UP
+  e032	BROWSER_HOME
+  e035	DIVIDE
+  e037	SNAPSHOT
+  e038	RMENU
+  e046	CANCEL
+  e047	HOME
+  e048	UP
+  e049	PRIOR
+  e04B	LEFT
+  e04D	RIGHT
+  e04F	END
+  e050	DOWN
+  e051	NEXT
+  e052	INSERT
+  e053	DELETE
+  e05B	LWIN
+  e05C	RWIN
+  e05D	APPS
+  e05E	POWER
+  e05F	SLEEP
+  e065	BROWSER_SEARCH
+  e066	BROWSER_FAVORITES
+  e067	BROWSER_REFRESH
+  e068	BROWSER_STOP
+  e069	BROWSER_FORWARD
+  e06A	BROWSER_BACK
+  e06B	LAUNCH_APP1
+  e06C	LAUNCH_MAIL
+  e06D	LAUNCH_MEDIA_SELECT
+  e11D	PAUSE
 
-  08	BACK
-  09	TAB
-  0C	CLEAR
-  0D	RETURN
   10	SHIFT
   11	CONTROL
   12	MENU
-  13	PAUSE
-  14	CAPITAL
   15	KANA
   15	HANGUL
   17	JUNJA
   18	FINAL
   19	HANJA
   19	KANJI
-  1B	ESCAPE
   1C	CONVERT
   1D	NONCONVERT
   1E	ACCEPT
   1F	MODECHANGE
-  20	SPACE
-  21	PRIOR
-  22	NEXT
-  23	END
-  24	HOME
-  25	LEFT
-  26	UP
-  27	RIGHT
-  28	DOWN
   29	SELECT
   2A	PRINT
   2B	EXECUTE
-  2C	SNAPSHOT
-  2D	INSERT
-  2E	DELETE
-  2F	HELP
 
-  5B	LWIN
-  5C	RWIN
-  5D	APPS
-  5F	SLEEP
   60	NUMPAD0
   61	NUMPAD1
   62	NUMPAD2
@@ -1756,58 +2267,7 @@ my %scan_codes = (reverse qw(
   67	NUMPAD7
   68	NUMPAD8
   69	NUMPAD9
-  6A	MULTIPLY
-  6B	ADD
   6C	SEPARATOR
-  6D	SUBTRACT
-  6E	DECIMAL
-  6F	DIVIDE
-  70	F1
-  71	F2
-  72	F3
-  73	F4
-  74	F5
-  75	F6
-  76	F7
-  77	F8
-  78	F9
-  79	F10
-  7A	F11
-  7B	F12
-  7C	F13
-  7D	F14
-  7E	F15
-  7F	F16
-  80	F17
-  81	F18
-  82	F19
-  83	F20
-  84	F21
-  85	F22
-  86	F23
-  87	F24
-  90	NUMLOCK
-  91	SCROLL
-  A0	LSHIFT
-  A1	RSHIFT
-  A2	LCONTROL
-  A3	RCONTROL
-  A4	LMENU
-  A5	RMENU
-  A6	BROWSER_BACK
-  A7	BROWSER_FORWARD
-  A8	BROWSER_REFRESH
-  A9	BROWSER_STOP
-  AA	BROWSER_SEARCH
-  AB	BROWSER_FAVORITES
-  AC	BROWSER_HOME
-  AD	VOLUME_MUTE
-  AE	VOLUME_DOWN
-  AF	VOLUME_UP
-  B0	MEDIA_NEXT_TRACK
-  B1	MEDIA_PREV_TRACK
-  B2	MEDIA_STOP
-  B3	MEDIA_PLAY_PAUSE
   B4	MEDIA_LAUNCH_MAIL
   B5	MEDIA_LAUNCH_MEDIA_SELECT
   B6	MEDIA_LAUNCH_APP1
@@ -1818,14 +2278,13 @@ my %scan_codes = (reverse qw(
   F6	ATTN
   F7	CRSEL
   F8	EXSEL
-  F9	EREOF
   FA	PLAY
-  FB	ZOOM
   FC	NONAME
   FD	PA1
   FE	OEM_CLEAR
 
 ));	# http://www.opensource.apple.com/source/WebCore/WebCore-1C25/platform/gdk/KeyboardCodes.h
+	# the part after PAUSE is junk...
 
 # [ ] \ space
 my %oem_control = (qw(
@@ -1843,7 +2302,8 @@ sub massage_VK ($$) {
   my ($self, $f, %seen, %seen_dead) = (shift, shift);
   my $l0 = $self->{faces}{$f}{layers}[0];
   $self->{faces}{$f}{'[non_VK]'} = @{ $self->{layers}{$l0} };
-  my @extra = map [], 0..$#{ $self->{faces}{$f}{layers} };
+  my @extra = map [[],[],[],[],[]], 0..$#{ $self->{faces}{$f}{layers} };
+  $extra[0] = [["\r","\n"],["\b","\x7F"],["\t","\x1b"],["\x1c","\x1d"],["\cC"]];	# Enter, C-Enter, Bsp, C-Bsp, Tab, Esc, Cancel
   for my $k (sort keys %{$self->{faces}{$f}{VK} ||= {}}) {
     my ($v, @C) = $self->{faces}{$f}{VK}{$k};
     $v->[0] = $scan_codes{$k} or die("Can't find the scancode for the VK key `$k'")
@@ -2161,24 +2621,40 @@ sub linked_faces_2_hex_map ($$$) {
 }
 
 my $dead_descr;
-sub print_deadkey_win ($$$) {
-  my ($self, $nameF, $d) = (shift, shift, shift);
+my %control = split / /, "\n \\n \r \\r \t \\t \b \\b \cC \\0x03 \x7f \\x7f \x1b \\x1b \x1c \\x1c \x1d \\x1d";
+sub print_deadkey_win ($$$$) {
+  my ($self, $nameF, $d, $dead2) = (shift, shift, shift, shift);
   my $b = $self->{faces}{$nameF}{'[deadkeyFace]'}{$d};
-  my $map = linked_faces_2_hex_map($self, $nameF, $b);
+#warn "See dead2 in <$nameF> for <$d>" if $dead2;
+  $dead2 = ($dead2 || {})->{$self->charhex2key($d)} || {};
+  my(@sp, %sp) = map {(my $in = $_) =~ s/(?<=.)\@$//s; $in} @{ $self->{faces}{$nameF}{VK}{SPACE} || [] };
+  @sp = map $self->charhex2key($_), @sp;
+  @sp{@sp[1..$#sp]} = (0..$#sp);		# The leading elt is the scancode
+  my $map = $self->linked_faces_2_hex_map($nameF, $b);
 
   my $OUT = "DEADKEY\t$d\n\n";
   # Good order: first alphanum, then punctuation, then space
   my @keys = sort keys %$map;			# Not OK for 6-byte keys
-  @keys = (grep( lc(chr hex $_) ne uc(chr hex $_),		      @keys),
-           grep((lc(chr hex $_) eq uc chr hex $_ and (chr hex $_) !~ /\p{Blank}/), @keys),
-           grep((lc(chr hex $_) eq uc chr hex $_ and (chr hex $_) =~ /\p{Blank}/ and $_ ne '0020'), @keys),
+  @keys = (grep(( lc(chr hex $_) ne uc(chr hex $_) and not $sp{chr hex $_} ),		      @keys),
+           grep(((lc(chr hex $_) eq uc chr hex $_ and (chr hex $_) !~ /\p{Blank}/) and not $sp{chr hex $_}), @keys),
+           grep((((lc(chr hex $_) eq uc chr hex $_ and (chr hex $_) =~ /\p{Blank}/) or $sp{chr hex $_}) and $_ ne '0020'), @keys),
            grep(				                    $_ eq '0020',  @keys));
-  for my $n (@keys) {	# Not OK for 6-byte keys: make SPACE last
+  for my $n (@keys) {	# Not OK for 6-byte keys (impossible on Win): make SPACE last
 #      warn "doing $n\n";
-    my $expl = exists $self->{UNames} ? "\t// " . join "\t-> ", map $self->UName($_), 
-                  chr hex $n, chr hex $map->{$n} : '';
-
-    $OUT .= sprintf "%s\t%s\t// %s -> %s%s\n", $n, $map->{$n}, chr hex $n, chr hex $map->{$n}, $expl;
+    my $to = $map->{$n};
+    $self->{faces}{$nameF}{'[32-bit]'}{chr hex $map->{$n}}++, next if hex $n > 0xFFFF;	# Cannot be put in a map...
+    if (hex $to > 0xFFFF) {		# Value cannot be put in a map...
+      $self->{faces}{$nameF}{'[32-bit]'}{chr hex $map->{$n}}++;
+      next unless defined ($to = $self->{faces}{$nameF}{DeadChar_32bitTranslation});
+      $to =~ s/^\s+//;	$to =~ s/\s+$//;
+      $to = $self->key2hex($to);
+    }
+    my $expl = exists $self->{UNames} ? "\t// " . join "\t-> ",		#  map $self->UName($_), 
+#                  chr hex $n, chr hex $map->{$n} : '';
+		 $self->UName(chr hex $n), $self->UName(chr hex $to, 1) : '';
+    my $DEAD = ($dead2->{chr hex $n} ? '@' : '');
+    my $from = $control{chr hex $n} || chr hex $n;
+    $OUT .= sprintf "%s\t%s%s\t// %s -> %s%s\n", $n, $to, $DEAD, $from, chr hex $to, $expl;
   }
   warn "DEADKEY $d for face `$nameF' empty" unless @keys;
   (!!@keys, $OUT)
@@ -2194,47 +2670,106 @@ sub massage_diacritics ($) {			# "
   }
 }
 
-sub extract_diacritic ($$$$$@) {
-  my ($self, $dia, $idx, $off, $which, $need) = (shift, shift, shift, shift, shift, shift);
-  my @v = map @$_, @_;				# join
-  @v = grep +((ord $_) >= 128 and $_ ne $dia), @v;
-  my $i = $idx + $off + 1;
-  die "diacritic `  $dia  ' has no $which no.$i assigned" 
-    unless $i > $need or defined $v[$idx];
-# warn "Translating for dia=<$dia>: idx=$idx off=$off <$which> -> <$v[$idx]>" if defined $v[$idx];
+sub extract_diacritic ($$$$$$@) {
+  my ($self, $dia, $idx, $which, $need, $skip2) = (shift, shift, shift, shift, shift, shift);
+  my @v  = map @$_, shift;			# first one full
+  push @v, map @$_[($skip2 ? 2 : 0)..$#$_], @_;		# join the rest, omitting the first 2 (assumed: accessible in other ways)
+  push @v, grep defined, map @$_[0..1], @_ if $skip2;
+#  @v = grep +((ord $_) >= 128 and $_ ne $dia), @v;
+  @v = grep +(ord $_) >= 0x80, @v;
+  die "diacritic `  $dia  ' has no $which no.$idx (0-based) assigned" 
+    unless $idx >= $need or defined $v[$idx];
+# warn "Translating for dia=<$dia>: idx=$idx <$which> -> <$v[$idx]> of <@v>" if defined $v[$idx];
   return $v[$idx];
 }
 
-sub diacritic2self ($$$) {
-  my ($self, $dia, $c) = (shift, shift, shift);
+sub diacritic2self ($$$$$$) {
+  my ($self, $dia, $c, $face, $N, $space) = (shift, shift, shift, shift, shift, shift);
 #  warn("Translating for dia=<$dia>: got undef"),
   return $c unless defined $c;
 #warn "  Translating for dia=<$dia>: got <$c>";
-  return $dia if $c eq ' ';
   die "`  $dia  ' not a known diacritic" unless my $name = $self->{'[map2diac]'}{$dia};
   my $v = $self->{'[diacritics]'}{$name} or die "Panic!";
+  my ($first) = grep 0x80 <= ord, @{$v->[0]} or die "diacritic `  $dia  ' does not define any non-7bit modifier";
+  return $first if $c eq ' ';
   if ($c eq $dia) {
 #warn "Translating2combining dia=<$dia>: got <$c>  --> <$v->[4][0]>";
+    # This happens with caron which reaches breve as the first:
+#    warn "The diacritic `  $dia  ' differs from the first non-7bit entry `  $first  ' in its list" unless $dia eq $first;
     die "diacritic `  $dia  ' has no default combining char assigned" unless defined $v->[4][0];
     return $v->[4][0];
-  }						# XXXX Should be face-dependent???
-  if ($c =~ /^\p{Blank}$/) {	# NBSP, Thin space 2007	-> second/third modifier
+  }
+  my $limits = $self->{Diacritics_Limits}{ALL} || [(0) x 7];
+  if ($space->{$c}) {	# SPACE is handled above (we assume it is on index 0...
+    # ~ and ^ have only 3 spacing variants; one of them must be on ' ' - and we omit the first 2 of non-principal block...
+    return $self->extract_diacritic($dia, $space->{$c}, 'spacing variant', $limits->[0], 'skip2', @$v[0..3]);
+  } elsif (0 <= (my $off = index "\r\t\n\x1b\x1d\x1c\b\x7f", $c)) {	# Enter, Tab, C-Enter, C-[, C-], C-\, Bspc, C-Bspc
     # ~ and ^ have only 3 spacing variants; one of them must be on ' '
-    return $self->extract_diacritic($dia, ($c ne "\x{A0}"), +1, 'spacing variant', 3, @$v[0..3]);
+    return $self->extract_diacritic($dia, 4 + $off, 'spacing variant', $limits->[0], 'skip2', @$v[0..3]);
+  } elsif ($c =~ /^\p{Blank}$/) {	# NBSP, Thin space 2007	-> second/third modifier
+    # ~ and ^ have only 3 spacing variants; one of them must be on ' '
+    return $self->extract_diacritic($dia, ($c ne "\x{A0}")+1, 'spacing variant', $limits->[0], 'skip2', @$v[0..3]);
   }
-  if ($c eq "|" or $c eq "\\") {	# Vertical+etc variants
-#warn "Translating2vertical dia=<$dia>: got <$c>  --> <$v->[4][0]>";
-    return $self->extract_diacritic($dia, ($c eq "|"), +0, 'vertical+etc spacing variant', 0, @$v[2..3]);
+  if ($c eq "|" or $c eq "\\") {
+#warn "Translating2vertical dia=<$dia>: got <$c>  --> <$v->[4][0]>";	# Skip2 would hurt, since macron+\ is defined:
+    return $self->extract_diacritic($dia, ($c eq "|"), 'vertical+etc spacing variant', $limits->[2], !'skip2', @$v[2..3]);
   }
-  if ($c eq "/" or $c eq "?") {	# Prime-like+etc variants
-    return $self->extract_diacritic($dia, ($c eq "?"), +0, 'prime-like+etc spacing variant', 0, @$v[3]);
+  if ($c eq "/" or $c eq "?") {
+    return $self->extract_diacritic($dia, ($c eq "?"), 'prime-like+etc spacing variant', $limits->[3], 'skip2', @$v[3]);
   }
-  if ($c eq "_" or $c eq "-") {	# Prime-like+etc variants
-    return $self->extract_diacritic($dia, ($c eq "-"), +0, 'lowered+etc spacing variant', 1, @$v[1..3]);
+  if ($c eq "_" or $c eq "-") {
+    return $self->extract_diacritic($dia, ($c eq "_"), 'lowered+etc spacing variant', $limits->[1], 'skip2', @$v[1..3]);
   }
   return undef;
-} 
+}
 
+# Combining stuff:
+# perl -C31 -MUnicode::UCD=charinfo -le 'sub n($) {(charinfo(ord shift) || {})->{name}} for (0x20..0x10ffff) {next unless (my $c = chr) =~ /\p{NonspacingMark}/; (my $n = n($c)) =~ /^COMBINING\b/ or next; printf qq(%04x\t%s\t%s\n), $_, $c, $n}' >cc
+# perl -C31 -MUnicode::UCD=charinfo -le 'sub n($) {(charinfo(ord shift) || {})->{name}} for (0x20..0x10ffff) {next unless (my $c = chr) =~ /\p{NonspacingMark}/; (my $n = n($c)) =~ /^COMBINING\b/ and next; printf qq(%04x\t%s\t%s\n), $_, $c, $n}' >cc
+
+sub dia2list ($$) {
+  my ($self, $dia, @dia) = (shift, shift);
+#warn "Split dia `$dia'";
+  if ((my ($pre, $mid, $post) = split /(\+|--)/, $dia, 2) > 1) {	# $mid is not counted in that "2"
+    for my $p ($self->dia2list($pre)) {
+      push @dia, map "$p$mid$_", $self->dia2list($post);
+    }
+# warn "Split dia to `@dia'";
+    return @dia;
+  }
+  return $dia if $dia =~ /^\\\\/;		# Penalization lists
+  $dia = $self->charhex2key($dia);
+  unless ($dia =~ /^(\p{NonspacingMark}|<[-\w]+>)$/) {
+    die "`  $dia  ' not a known diacritic" unless my $name = $self->{'[map2diac]'}{$dia};
+    my $v = $self->{'[diacritics]'}{$name} or die "A spacing character <$dia> was requested to be treated as a composition one, but we do not know translation";
+    die "Panic!" unless defined ($dia = $v->[4][0]);
+  }
+  if ($dia =~ /^<(reverse-)?any(1)?-(other-)?\b([-\w]+)\b>$/) {
+    my($rev, $one, $other, $match, $rx) = ($1, $2, $3, $4, "(?<!<)\\b$4\\b");
+    $rx =~ s/-/\\b\\W+\\b/g;
+    my ($A, $B);
+    my @out = keys %{$self->{Compositions}};
+    @out = grep {length > 1 ? /$rx/ : (lc $self->UName($_) || '') =~ /$rx/ } @out;    	
+    # make <a> before <a-b>; penalize those with and/over inside
+    @out = sort {($A=$a) =~ s/>/\cA/g, ($B=$b) =~ s/>/\cA/g; /.\b(and|over)\b./ and s/^/~/ for $A,$B; $A cmp $B or $a cmp $b} @out;
+    @out = grep length($match) != length, @out if $other;
+    @out = grep !/\bAND\s/, @out if $one;
+    @out = reverse @out if $rev;
+    push @dia, @out;
+  } else {		# <pseudo-curl> <super> etc
+#warn "Dia=`$dia'";
+    return $dia;
+  }
+  @dia;
+}
+
+sub flatten_arrays ($$) {
+  my ($self, $a) = (shift, shift);
+  return $a unless ref($a  || '') eq 'ARRAY';
+  map $self->flatten_arrays($_), @$a;
+}
+
+#use Dumpvalue;
 my %translators = ( Id => sub ($) {shift} );
 sub make_translator ($$$$$) {		# translator may take some values from "environment" 
   # (such as which deadkey is processed), so caching is tricky: if does -> $used_deadkey reflects this
@@ -2269,38 +2804,81 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
         $h{defined($kk = $f->[$k][$_]) ? $kk : ''} = $t->[$k][1-$_] for 0,1;
       } else {
         $h{defined($kk = $f->[$k][$_]) ? $kk : ''} = $t->[$k][$_] for 0,1;
-      }
+      }# 
     }
     return sub ($) { my $c = shift; defined $c or return $c; $h{$c} }, '';
   }
-  if ($name =~ /^(De)?Diacritic(2Self)?(?:\[(.+)\])?$/) {
-    die "DeDiacritic2Self does not make sense" if my $undo = $1 and $2;
-    my $Dia = ((defined $3) ? $3 : do {$used_deadkey ="/$deadkey"; $deadkey});	# XXXX `do' is needed, comma does not work
+  if ($name =~ /^(De)?Diacritic(SpaceOK)?(Hack)?(2Self)?(?:\[(.+)\])?$/) {
+    die "DeDiacritic2Self does not make sense" if my $undo = $1 and $4;
+    my ($hack, $spaceOK) = ($3, $2);
+    my $Dia = ((defined $5) ? $5 : do {$used_deadkey ="/$deadkey"; $deadkey});	# XXXX `do' is needed, comma does not work
     $Dia = $self->charhex2key($Dia);
-    return sub ($) { $self->diacritic2self($Dia, shift) }, $used_deadkey if $2;
+    my(@sp, %sp) = map {(my $in = $_) =~ s/(?<=.)\@$//s; $in} @{ $self->{faces}{$face}{VK}{SPACE} || [] };
+    @sp = map $self->charhex2key($_), @sp;
+    @sp{@sp[1..$#sp]} = (0..$#sp);		# The leading elt is the scancode
+#warn "SPACE: <", join('> <', %sp), '>';
+    return sub ($) { $self->diacritic2self($Dia, shift, $face, $N, \%sp) }, $used_deadkey if $4;
 #    die "DeDiacritic[...] is not supported yet" if $undo;
     
     my $f = $self->get_NamesList;
     $self->load_compositions($f) if defined $f;
-    my (@dia,%unAltGr);
-    for my $dia (split /,/, $Dia) {
-      $dia = $self->charhex2key($dia);
-      unless ($dia =~ /^(\p{NonspacingMark}|<[-\w]+>)$/) {
-        die "`  $dia  ' not a known diacritic" unless my $name = $self->{'[map2diac]'}{$dia};
-        my $v = $self->{'[diacritics]'}{$name} or die "A spacing character <$dia> was requested to be treated as a composition one, but we do not know translation";
-        die "Panic!" unless defined ($dia = $v->[4][0]);
+    
+    $f = $self->get_AgeList;
+    $self->load_uniage($f) if defined $f and not $self->{Age};
+    # New processing: - = strip 1 from end; -3/ = strip 1 from the last 3
+    if ($Dia =~ s/^([-+])((\d+)\/)?//) {		# temporary hack before the branch is tested
+#warn "Doing `$Dia' the smart way";
+#print "Doing `$Dia' the smart way\n";
+#warn "Age of <à> is <$self->{Age}{à}>";
+      my($lead, $limit) = ($1, $3);
+      my @groups;
+      for my $group (split /\|/, $Dia, -1) {
+        my @dia;
+        for my $dia (split /,/, $group) {
+          push @dia, $self->dia2list($dia);
+        }
+        push @groups, \@dia;		# Do not omit empty groups
+      }			# Now get all the chars, and precompile results for them
+      my $L = $self->{faces}{$face}{layers};
+      my @L = map $self->{layers}{$_}, @$L;
+      my %Map;
+      for my $i (0..$#{ $L[0] }) {				# key number
+        my @K = map $L[$_][$i], 0..$#L;				# bindings of the key
+        next if not $spaceOK and $K[0][0] eq ' ';
+        my $sorted = $self->sort_compositions(\@groups, \@K);
+        $self->{faces}{$face}{'[in_dia_chains]'}{$_}++
+          for grep defined, ($hack ? () : $self->flatten_arrays($sorted));
+#Dumpvalue->new()->dumpValue(["Key $L[0][$i][0]", $sorted]);
+        if ($lead eq '-') {
+          my (@slots, @LL);
+          for my $l (0..$#L) {
+            push @slots, $self->shift_pop_compositions($sorted, $l, 'from end', $limit, 'ignore1', my $ll = []);
+            push @LL, $ll;
+#print 'ToLayers  <', join('> <', map {defined() ? $_ : 'undef'} @$ll), ">\n";
+          }
+#print 'Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, $slots[0]), ">\n";
+#print 'Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, @slots[1..$#slots]), "> deadKey=$deadkey\n";
+          $self->append_keys($sorted, \@slots, \@LL);
+#Dumpvalue->new()->dumpValue(["Key $L[0][$i][0]", $sorted]);
+        }
+        my @out = map $self->shift_pop_compositions($sorted, $_), 0..$#L;		# Layer number
+        $self->{faces}{$face}{'[from_dia_chains]'}{$_}++
+          for grep defined, ($hack ? () : map $self->flatten_arrays($_), @out);
+        for my $Ln (0..$#L) {
+          for my $shift (0,1) {
+            next unless defined $K[$Ln][$shift] and defined $out[$Ln][$shift];
+            warn("Diacritic binding($Dia) for `$K[$Ln][$shift]' already exists: old `$Map{$K[$Ln][$shift]}' vs `$out[$Ln][$shift]'"), 
+              next if exists $Map{$K[$Ln][$shift]} and $Map{$K[$Ln][$shift]} ne $out[$Ln][$shift];
+            $Map{$K[$Ln][$shift]} = $out[$Ln][$shift];
+          }
+        }
       }
-      if ($dia =~ /^<(reverse-)?any-(other-)?\b([-\w]+)\b>$/) {
-        my($rev, $other, $match, $rx) = ($1, $2, $3, "(?<!<)\\b$3\\b");
-        $rx =~ s/-/\\b\\W+\\b/g;
-        my ($A, $B);
-        my @out = grep /$rx/, sort {($A=$a) =~ s/>/\cA/g, ($B=$b) =~ s/>/\cA/g, $A cmp $B or $a cmp $b} keys %{$self->{Compositions}};	# make <a> before <a-b>
-        @out = grep length($match) != length, @out if $other;
-        @out = reverse @out if $rev;
-        push @dia, @out;
-      } else {
-        push @dia, $dia;
-      }
+#warn "Age of <à> is <$self->{Age}{à}>";
+      return sub ($) { return undef unless defined (my $in=shift); $Map{$in} }, $used_deadkey;
+    }
+    my (@dia, %unAltGr);
+    for my $dia (split /[,|]/, $Dia) {
+      push @dia, $self->dia2list($dia);
     }
     if ($N) {				# XXXX How this interacts with $undo???
       my $L = $self->{faces}{$face}{layers};
@@ -2312,7 +2890,7 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
         }
       }
       for my $c (keys %unAltGr) {
-        warn "AltGr symbol `$c' found on multiple keys: <@{ $unAltGr{$c} }>; ignoring for the purpose of smart diacretic assignment"
+        warn "AltGr symbol `$c' found on multiple keys: <@{ $unAltGr{$c} }>; ignoring for the purpose of smart diacritic assignment"
           if @{ $unAltGr{$c} } > 1;
         delete($unAltGr{$c}), next if @{ $unAltGr{$c} } > 1;
         $unAltGr{$c} = $unAltGr{$c}[0];
@@ -2336,7 +2914,7 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
         (my $Pair = $1) =~ s/\p{Blank}//g;
 #warn "Pair = <$Pair>";
 	# Cannot do it earlier, since HEX can introduce new blanks
-	$Pair =~ s/(?<=[0-9a-f]{4})\.$//;		# Remove . which was on \b before extracting substring
+	$Pair =~ s/(?<=[0-9a-f]{4})\.$//i;		# Remove . which was on \b before extracting substring
         $Pair = $self->stringHEX2string($Pair);
 #warn "  -->  <$Pair>";
         die "Panic! <$Pair>" unless 2 == scalar (my @c = split //, $Pair);
@@ -2398,11 +2976,14 @@ sub make_translated_layer_stack ($@) {		# Stacking
   my ($self, @keys) = (shift);
   warn "Stacking empty list of layers" unless @_;
   my $new_name = "@_";
+# warn "Combining layers <@_>";
   return $new_name if exists $self->{layers}{$new_name};
   my @L = map $self->{layers}{$_}, @_;
   for my $l (@L) {
+# warn "... Another layer...";
     for my $k (0..$#$l) {
       for my $kk (0..$#{$l->[$k]}) {
+# warn "...... On $k/$kk: I see `$l->[$k][$kk]'" if defined $l->[$k][$kk];
         $keys[$k][$kk] = $l->[$k][$kk] if defined $l->[$k][$kk] and not defined $keys[$k][$kk];	# Deep copy
       }
       $keys[$k] ||= [];
@@ -2554,7 +3135,7 @@ sub create_composite_layers ($) {
             unless defined $H->{'[deadkeyLayer]'}{$KK}[$layer]
         }
         # Join the syntetic layers (now well-formed) into a new synthetic face:
-        my $new_facename = "$p[-1]###$KK";
+       my $new_facename = "$p[-1]###$KK";
         $self->{faces}{$new_facename}{layers} = $H->{'[deadkeyLayer]'}{$KK};
         $H->{'[deadkeyFace]'}{$KK} = $new_facename;
 	my $default = $self->get_deep($self, 'faces', $p[-1], 'DeadChar_DefaultTranslation');
@@ -2619,8 +3200,12 @@ sub fill_win_template ($$$) {
   }
   ### Deadkeys???   need_extra_keys_to_access???
   my ($OUT, $OUT_NAMES) = ('', "KEYNAME_DEAD\n\n");
+  
+  my $f = $self->get_AgeList;
+  $self->load_uniage($f) if defined $f and not $self->{Age};
+
   for my $deadKey ( sort keys %{ $F->{'[deadkeyFace]'} } ) {
-    (my $nonempty, my $MAP) = $self->print_deadkey_win($k->[-1], $deadKey);
+    (my $nonempty, my $MAP) = $self->print_deadkey_win($k->[-1], $deadKey, $F->{'[dead2]'});
     $OUT .= "$MAP\n";
     my $N = $self->{DEADKEYS}{$deadKey} || $self->{'[seen_knames]'}{chr hex $deadKey}
 	|| $self->UName($deadKey);		# = $map->[1]{name};
@@ -2666,6 +3251,7 @@ sub decompose_r($$$$) {		# returns [$compat, @expand]
   return $cache->{$i} if $cache->{$i};
   return $cache->{$i} = [0, $i] unless my $in = $t->{$i};
   my $compat = $in->[0];
+#warn "i=<$i>, compat=<$compat>, rest=<$in->[1]>";
   my $expand = $self->decompose_r($t, $in->[1], $cache);
 #warn "Got: $in->[1] -> <@$expand> from $i = <@$in>";
   $expand = [@$expand];		# Deep copy
@@ -2685,15 +3271,21 @@ sub parse_NameList ($$) {
       my ($K, $Name) = ($1, $2);
       $N{$Name} = $K;
       $NM{$self->charhex2key($K)} = $Name;		# Not needed for compositions, but handy for user-visible output
+      # Finish processing of preceding text
       if (defined $kk					# Did not see (official) decomposition
-          and $name =~ /^(.*?)\s+(?:WITH\s+|(?=(?:OVER|ABOVE|BELOW(?=\s+LONG\s+DASH)))\s+\b(?!WITH|AND))(.*?)\s*$/) {
+#         and $name =~ /^(.*?)\s+(?:WITH\s+|(?=(?:OVER|ABOVE|PRECEDED\s+BY|BELOW(?=\s+LONG\s+DASH)))\s+\b(?!WITH|AND))(.*?)\s*$/) {
+          and $name =~ /^(.*?)\s+(?:WITH\s+|(?=(?:OVER|ABOVE|PRECEDED\s+BY|BELOW(?=\s+LONG\s+DASH))\s+\b(?!WITH\b|AND\b)))(.*?)\s*$/) {
         $candidates{$k} = [$1, $2];
       } elsif (defined $kk					# Did not see (official) decomposition
-               and (my $t = $name) =~ s/\b(BARRED|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED)\s+//) {
-        $candidates{$k} = [$t, "calculated-$1"];
+               and $name =~ /^(.*)\s+(?=OR\s)(.*?)\s*$/) {	# Find the latest possible...
+        $candidates{$k} = [$1, $2];
+      } elsif (defined $kk					# Did not see (official) decomposition
+               and (my $t = $name) =~ s/\b(COMBINING(?=\s+CYRILLIC\s+LETTER)|BARRED|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|SCRIPT|LONG|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED|DOTLESS|FINAL)\s+|\s+(BAR|SYMBOL)$//) {
+        $candidates{$k} = [$t, "calculated-$+"];
         $candidates{$k}[1] .= '-epigraphic'   if $t =~ /\bEPIGRAPHIC\b/;	# will be massaged away from $t later
 # warn("smallcapital $name"),
         $candidates{$k}[1] .= '-smallcaps' if $t =~ /\bSMALL\s+CAPITAL\b/;	# will be massaged away from $t later
+# warn "Candidates: <$candidates{$k}[0]>; <$candidates{$k}[1]>";
       } elsif (defined $kk					# Did not see (official) decomposition
                and ($t = $name) =~ s/\b(CIRCLED)\s+//) {
         $candidates{$k} = [$t, "fake-$1"];
@@ -2725,21 +3317,26 @@ sub parse_NameList ($$) {
       $a->[-1] = "<font$type>";
     }}
     push @$a, '<pseudo-upgrade>' unless @$a > 2;
-    $basic{$k} = $a;
-    undef $kk;
+    $basic{$k} = $a;			# <fraction> 1 2044					--\
+    undef $kk unless $a->[-1] eq '<pseudo-upgrade>' or @$a == 3 and (chr hex $a->[-2]) =~ /\W|\p{Lm}/ and $a->[-1] !~ /^</ and (chr hex $a->[-1]) =~ /\w/;				# Disable guesswork processing
     # print "@$a";
   }
   $candidates{'014A'} = ['LATIN CAPITAL LETTER N', 'faked-HOOK'];		# Pretend on ENG...
   $candidates{'014B'} = ['LATIN SMALL LETTER N',   'faked-HOOK'];		# Pretend on ENG...
+  	# XXXX Better have this together with pseudo-upgrade???
+  $candidates{'00b5'} = ['GREEK SMALL LETTER MU',  'faked-calculated-SYMBOL'];	# Pretend on MICRO SIGN...
+#  $candidates{'00b5'} = ['GREEK SMALL LETTER MU',  'calculated-SYMBOL'];	# Pretend on MICRO SIGN...
   for my $c (keys %candidates) {		# Done after all the names are known
     my ($app, $t, $base, $b) = '';
-#warn "candidates: $c <$candidates{$c}[0]>, <@{$candidates{$c}}[1..$#{$candidates{$c}}]>";
+# warn "candidates: $c <$candidates{$c}[0]>, <@{$candidates{$c}}[1..$#{$candidates{$c}}]>";
     # An experiment shows that the FORMS are properly marked as non-canonical decompositions; so they are not needed here
     (my $with = my $raw = $candidates{$c}[1]) =~ s/\s+(SIGN|SYMBOL|(?:FINAL|ISOLATED|INITIAL|MEDIAL)\s+FORM)$//
       and $app = " $1";
     for my $Mod ( (map ['', $_], $app, '', ' SIGN', ' SYMBOL', ' OF', ' AS MEMBER', ' TO'),	# `SUBSET OF', `CONTAINS AS MEMBER', `PARALLEL TO'
 		  (map [$_, ''], 'WHITE ', 'WHITE UP-POINTING ', 'N-ARY '), ['WHITE ', ' SUIT'] ) {
       my ($prepend, $append) = @$Mod;
+      next if $raw =~ /-SYMBOL$/ and 0 <= index($append, "SYMBOL");	# <calculated-SYMBOL>
+#warn "raw=`$raw', prepend=<$prepend>, append=<$append>, base=$candidates{$c}[0]";
       $t++;
       $b = "$prepend$candidates{$c}[0]$append";
       $b =~ s/\bTWO-HEADED\b/TWO HEADED/ unless $N{$b};
@@ -2751,9 +3348,14 @@ sub parse_NameList ($$) {
       $b =~ s/\bCIRCLED\s+MULTIPLICATION\s+SIGN\b/CIRCLED TIMES/ unless $N{$b};
       $b =~ s/^(CAPITAL|SMALL)\b/LATIN $1 LETTER/ unless $N{$b};			# TURNED SMALL F
       $b =~ s/\bEPIGRAPHIC\b/CAPITAL/ unless $N{$b};			# XXXX is it actually capital?
-      $b =~ s/\bLATIN\s+LETTER\s+SMALL\s+CAPITAL\b/LATIN CAPITAL LETTER/ # and warn "smallcapital -> <$b>" 
+      $b =~ s/^LATIN\s+LETTER\s+SMALL\s+CAPITAL\b/LATIN CAPITAL LETTER/ # and warn "smallcapital -> <$b>" 
         if not $N{$b} or $with=~ /smallcaps/;			# XXXX is it actually capital?
+      $b =~ s/^GREEK\s+CAPITAL\b(?!=\s+LETTER)/GREEK CAPITAL LETTER/ unless $N{$b};
+      $b =~ s/^GREEK\b(?!\s+(?:CAPITAL|SMALL)\s+LETTER)/GREEK SMALL LETTER/ unless $N{$b};
+      $b =~ s/^CYRILLIC\b(?!\s+(?:CAPITAL|SMALL)\s+LETTER)(?=\s+LETTER\b)/CYRILLIC SMALL/ unless $N{$b};
+#      $b =~ s/^MICRO$/GREEK SMALL LETTER MU/ unless $N{$b};
 
+#warn "    b =`$b', prepend=<$prepend>, append=<$append>, base=$candidates{$c}[0]";
       if (defined ($base = $N{$b})) {
 #        $with = $raw if $t;
 # warn "<$candidates{$c}[0]> WITH <$candidates{$c}[1]> resolved via SIGN/SYMBOL/.* FORM: strip=<$app> add=<$prepend/$append>" if $append or $app;
@@ -2763,7 +3365,7 @@ sub parse_NameList ($$) {
     ($warnUNRES and warn("Unresolved: <$candidates{$c}[0]> WITH <$candidates{$c}[1]>")), next unless defined $base;
     my @modifiers = split /\s+AND\s+/, $with;
     @modifiers = map { s/\s+/-/g; "<pseudo-\L$_>" } @modifiers;
-#warn " --> <$base> <@modifiers>";
+# warn " --> <$base> <@modifiers>";
     $basic{$c} = [1, $base, @modifiers]
   }
   $self->decompose_r(\%basic, $_, \%cached_full) for keys %basic;	# Now %cached_full is fully expanded - has trivial expansions too
@@ -2829,7 +3431,8 @@ sub print_compositions($$) {
 }
 
 sub load_compositions($$) {
-  my ($self, $comp, %comp) = (shift, shift);
+  my ($self, $comp) = (shift, shift);
+  my %comp = %{ $self->{'[Substitutions]'} || {} };
   return if $self->{Compositions};
   open my $f, '<', $comp or die "Can't open $comp for read";
   ($self->{Decompositions}, $comp, $self->{UNames}) = $self->parse_NameList($f);
@@ -2847,11 +3450,53 @@ sub load_compositions($$) {
   $self
 }
 
-sub UName($$) {
-  my ($self, $c) = (shift, shift);
-  return "<$c>" unless exists $self->{UNames};
+sub load_uniage($$) {
+  my ($self, $fn) = (shift, shift);
+  # get_AgeList
+  open my $f, '<', $fn or die "Can't open `$fn' for read: $!";
+  local $/;
+  my $s = <$f>;
+  close $f or die "Can't close `$fn' for read: $!";
+  $self->{Age} = $self->parse_derivedAge($s);
+  $self
+}
+
+sub load_unidata($$) {
+  my ($self, $comp) = (shift, shift);
+  $self->load_compositions($comp);
+  return $self unless @_;
+  $self->load_uniage(shift);
+}
+
+sub UName($$$) {
+  my ($self, $c, $verbose, $app, $n, $i, $A) = (shift, shift, shift, '');
   $c = $self->charhex2key($c);
+  if (not exists $self->{UNames} or $verbose) {
+    require Unicode::UCD;
+    $i = Unicode::UCD::charinfo(ord $c) || {};
+    $A = $self->{Age}{$c};
+    $n = $self->{UNames}{$c} || ($i->{name}) || "<$c>";
+    if ($verbose and (%$i or $A)) {
+      my $scr = $i->{script};
+      my $bl = $i->{block};
+      $scr = join '; ', grep defined, $scr, $bl, $A;
+      $scr = "Com/MiscSym1.1" if 0x266a == ord $c;	# EIGHT NOTE: we use as "visual bell"
+      $app = " [$scr]" if length $scr;
+    }
+    return "$n$app"
+  }
   $self->{UNames}{$c} || "[$c]"
+}
+
+sub parse_derivedAge ($$) {
+  my ($self, $s, %C) = (shift, shift);
+  for my $l (split /\n/, $s) {
+    next if $l =~ /^\s*(#|$)/;
+    die "Unexpected line in DerivedAge: `$l'" 
+      unless $l =~ /^([0-9a-f]{4,})(?:\.\.([0-9a-f]{4,}))?\s*;\s*(\d\.\d)\b/i;
+    $C{chr $_} = $3 for (hex $1) .. hex($2 || $1);
+  }
+  \%C;
 }
 
 my %compositions;
@@ -2906,191 +3551,386 @@ sub get_compositions ($$$$;$) {
       return ((@seen == 2 and $a1) or $a2)->[0][1];
     }
   }}
-  return undef unless my ($r) = grep defined, map $self->{Compositions}{$_}{$C}, @$m;
+  return undef unless my ($r) = grep defined, map $self->compound_composition($_,$C), @$m;
   warn "Composing <$C> <@$m>: multiple answers: <", (join '> <', map "@$_", @$r), ">" unless @$r == 1 or $C eq ' ';
 # warn("done   <$C> <$m>: <$r->[0][1]>"); # if $m eq 'A';
   $r->[0][1]
 }
 
+sub compound_composition ($$$) {
+  my ($self, $M, $C, @res, %seen) = (shift, shift, shift);
+  return undef unless defined $C;
+#warn "composing `$M' with base <$C>";
+  $C = [[0,$C]];			# Emulate element of return of Compositions
+  for my $m (reverse split /\+|-(?=-)/, $M) {
+    my @res;
+    if ($m =~ s/^-//) {
+      @res = map $self->get_compositions([$m], $_->[1], 'undo'), @$C;
+      @res = map [[0,$_]], grep defined, @res;
+    } else {
+#warn "compose `$m' with bases <", join('> <', map $_->[1], @$C), '>';
+      @res = map $self->{Compositions}{$m}{$_->[1]}, @$C;
+    }
+    @res = map @$_, grep defined, @res;
+    return undef unless @res;
+    $C = \@res;
+  }
+  $C
+}
+
+# Design goals: we assign several diacritics to a prefix key (possibly with 
+# AltGr on the "Base key" and/or other "multiplexers" in between).  We want: 
+#   *) a lc/uc paired result to sit on Shift-paired keypresses; 
+#   *) avoid duplication among multiplexers (a secondary goal); 
+#   *) allow some diacritics in the list to be prefered ("groups" below);
+#   *) when there is a choice, prefer non-bizzare (read: with smaller Unicode 
+#      "Age" version) binding to be non-multiplexed.  
+# We allow something which was not on AltGr to acquire AltGr when it gets a 
+# diacritic.
+
+# It MAY happen that an earlier binding has empty slots, 
+# but a later binding exists (to preserve lc/uc pairing, and shift-state)
+
+### XXXX Unclear: how to catenate something in front of such a map...
+# we do $composition->[0][1], which means we ignore additional compositions!  And we ignore HOW, instead of putting it into penalty
+
+sub sort_compositions ($$$) {
+  my ($self, $m, $C, @res, %seen, %Penalize) = (shift, shift, shift);
+  for my $MM (@$m) {			# |-groups
+    my(%byPenalty, @byLayers);
+    for my $M (@$MM) {			# diacritic in a group; may flatten each layer, but do not flatten separately each shift state: need to pair uc/lc
+      if ((my $P = $M) =~ s/^\\\\//) {
+# warn "Penalize: <$P>";	# Actually, it is not enough to penalize; one should better put it in a different group...
+        $Penalize{$_}++ for split //, $P;		# Temporarily, we ignore them completely
+        next
+      }
+      for my $L (0..$#$C) {		# Layer number; indexes a shift-pair
+#        my @res2 = map {defined($_) ? $self->{Compositions}{$M}{$_} : undef } @{ $C->[$L] };
+        my @res2 = map $self->compound_composition($M,$_), @{ $C->[$L] };
+        @res2    = map {defined() ? $_->[0][1] : undef} @res2;			# XXXX ignore additional keys, ignore "HOW"???
+        @res2    = map {(not defined() or $seen{$_}++) ? undef : $_} @res2;	# remove duplicates
+        next unless my $cnt = grep defined, @res2;
+        my($penalty, $p) = 'zzz';	# above any "5.1", "undef" ("unassigned"???)
+        $penalty gt ($p = $self->{Age}{$_} || 'undef') and $penalty = $p for grep defined, @res2;
+        $penalty = 'Z', next if grep {defined and $Penalize{$_}} @res2;
+        my $have1 = (not (defined $res2[0] and defined $res2[1]) or 0);
+        # Break a non-lc/uc paired translations into separate groups
+        my $double_occupancy = ($cnt == 2 and $res2[0] ne $res2[1] and $res2[0] eq lc $res2[1]);
+        push @{ $byPenalty{"$penalty$have1"}[$double_occupancy][$L] }, \@res2;
+        next;
+      }
+    }		# sorted bindings, per Layer
+    push @res, [ @byPenalty{ sort keys %byPenalty } ];	# each elt is an array ref indexed by layer number; elt of this is [lc uc]
+  }
+  \@res
+}	# index as $res->[group][penalty_N][double_occ][layer][NN][shift]
+
+sub append_keys ($$$$) {	# $k is [[lc,uc], ...]
+  my ($self, $C, $KK, $LL, @KKK, $cnt) = (shift, shift, shift, shift);
+  for my $L (0..$#$KK) {	# $LL contains info about from which layer the given binding was stolen
+    my $k = $KK->[$L];
+    next unless defined $k and (defined $k->[0] or defined $k->[1]);
+    $cnt++;
+    my $paired = (@$k == 2 and defined $k->[0] and defined $k->[1] and $k->[0] ne $k->[1] and $k->[0] eq lc $k->[1]);
+    my @need_special = map { $LL and $L and defined $k->[$_] and defined $LL->[$L][$_] and 0 == $LL->[$L][$_]} 0..$#$k;
+    if (my $special = grep $_, @need_special) {	# count
+       push(@{ $KKK[$paired][0] }, $k), next if $special == grep defined, @$k;
+       $paired = 0;
+       my $to_level0 = [map { $need_special[$_] ? $k->[$_] : undef} 0..$#$k];
+       $k            = [map {!$need_special[$_] ? $k->[$_] : undef} 0..$#$k];
+       push @{ $KKK[$paired][0] }, $to_level0;
+    }
+    push @{ $KKK[$paired][$L] }, $k;	# 0: layer has only one slot
+  }
+#print "cnt=$cnt\n";
+  push @$C, [[@KKK]] if $cnt;	# one group of one level of penalty
+  $C
+}
+
+sub shift_pop_compositions ($$$;$$$$) {
+  my($self, $C, $L, $backwards, $limit, $ignore1, $store_level) = (shift, shift, shift, shift, shift || 1e100, shift, shift);
+  my($do_lc, $do_uc) = (1,1);
+  my($both, $first, $out_lc, $out_uc, @out, @out_levels, $have_out, $groupN) = ($do_lc and $do_uc);
+  for my $group ($backwards ? reverse @$C : @$C) {
+    last if --$limit < 0;
+    $groupN++;
+    for my $penalty_group (@$group) {	# each $penalty_group is indexed by double_occupancy and layer
+      # each layer in sorted; if $both, we prefer to extract a paired translation; so it is enough to check the first elt on each layer
+      my $group_both = $both;
+      if ($both) {
+        $group_both = 0 unless $penalty_group->[1] and @{ $penalty_group->[1][$L] || [] } or @{ $penalty_group->[1][0] || [] };
+      }	# if $group_both == 0, and $both: double-group is empty, so we can look only in single/unrelated one.
+              # if $both = $group_both == 0: may not look in double group, so can look only in single/unrelated one
+              # if $both = $group_both == 1: must look in double-group only.
+      for my $Set (($L ? [0, $penalty_group->[$group_both][0]] : ()), [$L, $penalty_group->[$group_both][$L]]) {
+        my $set = $Set->[1];
+        next unless $set and @$set;		# @$set consists of [unshifted, shifted] pairs
+        if ($group_both) {	# we know we meet a double element at start of the group
+          my $OUT = $backwards ? pop @$set : shift @$set;	# we know we meet a double element at start of the group
+          return [] if $ignore1 and $groupN == 1;
+          @$store_level = ($Set->[0]) x 2 if $store_level;
+          return $OUT;
+        }
+##          or ($both and defined $elt->[0] and defined $elt->[1]);
+        my $spliced = 0;
+        for my $eltA ($backwards ? map($#$set - $_, 0..$#$set) : 0..$#$set) {			
+          my $elt = $eltA - $spliced;
+          my $lc_ok = ($do_lc and defined $set->[$elt][0]);
+          my $uc_ok = ($do_uc and defined $set->[$elt][1]);
+          next if not ($lc_ok or $uc_ok);
+          my $have_both = (defined $set->[$elt][0] and defined $set->[$elt][1]);
+          my $found_both = ($lc_ok and $uc_ok);	# If defined $have_out, cannot have $found_both; moreover $have_out ne $uc_ok
+	  die "Panic!" if defined $have_out and ($found_both or $have_out eq $uc_ok);
+#          next if not $found_both and defined $have_out and $have_out eq $uc_ok;
+          my $can_splice = $have_both ? $both : 1;
+          my $can_return = $both ? $have_both : 1;
+          my $OUT = my $out = $set->[$elt];			# Can't return yet: @out may contain a part of info...
+          unless (($ignore1 and $groupN == 1) or defined $have_out and $have_out eq $uc_ok) {	# In case !$do_return or $have_out
+            $out[$uc_ok] = $out->[$uc_ok];			# In case !$do_return or $have_out
+            $out_levels[$uc_ok] = $Set->[0];
+          }
+#warn 'Doing <', join('> <', map {defined() ? $_ : 'undef'} @{ $set->[$elt] }), "> L=$L; splice=$can_splice; return=$can_return; lc=$lc_ok uc=$uc_ok";
+          if ($can_splice) {		# Now: $both and not $have_both; must edit in place
+            splice @$set, $elt, 1;
+            $spliced++ unless $backwards;
+          } else {			# Must edit in place
+            $OUT = [@$out];					# Deep copy
+            undef $out->[$uc_ok];				# only one matched...
+          }
+          $OUT = [] if $ignore1 and $groupN == 1;
+          if ($can_return) {
+            if ($found_both) {
+              @$store_level = map {$_ and $Set->[0]} @$OUT if $store_level;
+              return $OUT;
+            } else {
+              @$store_level = @out_levels if $store_level;
+              return \@out;
+            }
+#            return($found_both ? $OUT : \@out);
+          }					# Now: had $both and !$had_both; must condinue
+          $have_out = $uc_ok;
+          $both = 0;						# $group_both is already FALSE
+          ($lc_ok ? $do_lc : $do_uc) = 0;
+#warn "lc/uc: $do_lc/$do_uc";
+        }
+      }
+    }
+  }
+  @$store_level = @out_levels if $store_level;
+  return \@out
+}
+
+
+
 1;
 
 __END__
 
-#
-# On principles of intuitive design of Latin keyboard:
-#
-# Some common (meaning: from Latin-1-10 of ISO 8859) Latin alphabet letters 
-# are not composed (at least not by using 8 modifiers).  We mean ÆÐÞÇĲØŒß
-# (and ¡¿ for non-alphatetical symbols). It is crucial that they may be
-# entered by an intuitively clear key of the keyboard.    There is an obvious
-# ASCII letter associated to each of these (e.g., T associated to the thorn
-# Þ), and in the best world just pressing this letter with AltGr- modifier
-# would produce the desired symbol.
-#
-# There is only one conflict only: both Ø,Œ "want" to be entered as AltGr-O;
-# this is the ONLY piece of arbitrariness in the design so far.  After
-# resolving this conflict, AltGr-keys !ASDCTIO? are assigned their meanings,
-# and cannot carry other letters (call them "stuck in stone keys").
-#
-# (Other keys "stuck in stone" are dead key: it is important to have the
-# glyph etched on these keyboard's keys similar to the task they perform.)
-#
-# Then there are several non-alphabetical symbols accessible through ISO 8859
-# encodings.  Assigning them AltGr- access is another task to perform.
-# Some of these symbols come in pairs, such as ≤≥, «», ‹›, “”, ‘’; it makes
-# sense to assign them to paired keyboard's keys: <> or [] or ().
-#
-# However, this task is in conflict of interests with the following task, so
-# let us explain the needs answered by that task first.
-# 
-# One can always enter accented letters using dead keys; but many people desire a
-# quickier way to access them, by just pressing AltGr-key (possibly with
-# shift).  The most primitive keyboard designs (such as IBM International,
-#    http://www.borgendale.com/uls.htm
-# ) omit this step and assign only the NECESSARY letters for AltGr- access.
-# (Others, like MicroSoft International, assign only a very small set.)
 
-# This problem breaks into two tasks, choosing a repertoir of letters which
-# will be typable this way, and map them to the keys of the keyboard.
-# For example, EurKey choses to use ´¨`-accented characters AEUIO (except
-# for Ỳ), plus ÅÑ; MicroSoft International does ÄÅÉÚÍÓÖÁÑß only (and IBM
-# International does
-# none); Bepo does only ÉÈÀÙŸ (but also has the Azeri Ə available - which is
-# not in ISO 8819 - and has Ê on the 105th key "2nd \|"), Mac Extended has
-# only ÝŸ
-#
-#    http://bepo.fr/wiki/Manuel
-#    http://tlt.its.psu.edu/suggestions/international/accents/codemacext.html
-#		or look for "a graphic of the special characters" on
-#    http://homepage.mac.com/thgewecke/mlingos9.html
-#
-#
-# Keyboards on Mac: http://homepage.mac.com/thgewecke/mlingos9.html
-# Tool to produce: http://wordherd.com/keyboards/
-# http://developer.apple.com/library/mac/#technotes/tn2056/_index.html
-#
-# ================= Our solution
-#
-# First, the answer:
-#
-#  Rule 0:  letters which are not accented by `´¨˜ˆˇ°¯ are entered by
-#           AltGr-keys "obviously associated" to them.  Supported: ÆÐÞÇĲØß.
-#  Rule 0a: Same is applicable to Ê and Ñ.
-#  Rule 1:  Vowels AEYUIO accented by `´¨ are assigned "the natural position":
-#           They are in a row of accent (¨ is the top, ´ is the middle, ` is
-#           the bottom row of 3 letter-rows on keyboard - so À is on ZXCV-row),
-#           and are on the same diagonal as the base letter.  For left-hand
-#           vowels (A,E) the diagonal is in the direction of \, for right hand
-#           voweles (Y,U,I,O) - in the direction of /.
-#  Rule 1a: If the "natural position" is occupied, the neighbor key in the
-#           direction of "the other diagonal" is chosen.  (So for A,E it is
-#           the /-diagonal, and for right-hand vowels YUIO it is the \-diag.)
-#  Rule 1b: The neighbor key is down unless the key is on bottom
-#           row - then it is up.
-#                                 Supported by rules "1": all but ÏËỲ.
-#  Rule 2:  Additionally, Å,Œ are available on keys R,P.
-#
-# ================================ Clarification:
-#
-# If you remember only Rule 0, you still can enter all Latin-1 letter using
-# Rule 0; all you need to memorize are dead keys: `';~6^7& for `´¨˜ˆˇ°¯.
-#    (What the rule 0 actually says is: "You do not need to memorize me". ;-)
-#
-# If all you remember are rules 1,1a, you can calculate the position of the
-# AltGr-key for AEYUIO accented by `´¨ up to a choice of 3 keys (the "natural
-# key" and its 2 neighbors) - which are quick to try all if you forgot the
-# precise position.  If you remember rules 1,1ab, then this choice is down to
-# 2 possible candidates.
-#
-# Essentially, all you must remember in details is that the "natural positions"
-# form a V-shape # - \ on left, / on right, and in case of bad luck you
-# should move in the direction of other diagonal one step.  Then a letter is
-# either in its "obvious position", or in one of 3 modifications of the
-# natural position".  Only Å and Œ need a special memorization.
-#
-# ================ Motivations: 
-#
-# It is important to have a logical way to quickly understand whether a letter
-# is quickly accessible from a keyboard, and on which key (or, maybe, to find
-# a small set of keys on which a letter may be present - then, if one forgets,
-# it is possible to quickly un-forget by trying a small number of keys).
-#
-# The idea: we assign alphabetical Latin symbols only to alphabetical keys
-# on the keyboard; this way we can use (pared) symbol keys to enter pared
-# Unicode symbols.  Now consider diagonals on the alphabetic part of the
-# keyboard: \-diagonals (like EDC) and /-diagonals (like UHB).  Each diagonal
-# contains 3 (or less) alphabetic keys; we WANT to assign ¨-accent to the top
-# one, ´-accent to the middle one, and `-accent to the bottom one.
-#
-# On the left-hand part of the keyboard, use \-diagonals, on the right-hand
-# part use /-diagonals; now each diagonal contains EXACTLY 3 alphabetic keys.
-# Moreover, the diagonals which contain vowels AEYUIO do not intersect.
-#
-# If we have not decided to have keys set in stone, this would be all - we
-# would get "completely predictable" access to ´¨`-accented characters AEUIO.
-# For example, Ÿ would be accessible on AltGr-Y, Ý on AltGr-G, Ỳ on AltGr-V.
-# Unfortunately, the diagonals contain keys ASDCIO set in stone.  So we need
-# a way to "move away" from these keys.  The rule is very simple: we move
-# one step away in the direction of "other" diagonal (/-diagonal on the left
-# half, and \-diagonal on the right half) one step down (unless we start
-# on keys A, C where "down" is impossible and we move up to W or F).
-#
-# Examples: Ä is on Q, Á "wants to be" on A (used for Æ), so it is moved to
-# W; Ö wants to be on O (already used for Ø or Œ), and is moved away to L;
-# È wants to be on C (occupied by Ç), but is moved away to F.
-#
-# There is no way to enter Ï using this layout (unless we agree to move it
-# to the "8*" key, which may conflict with convenience of entering typographic
-# quotation marks).  Fortunately, this letter is rare (comparing even to Ë
-# which is quite frequent in Dutch).  So there is no big deal that it is not
-# available for "handy" input - remember that one can always use deadkeys.
-#
-#  http://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_letters_in_other_languages
-#
-# Note that the keys "P" and "R" are not engaged by this layout; since "P"
-# is a neighbor of "O", it is natural to use it to resolve the conflict
-# between Ø or Œ (which both want to be set in stone on "O").  This leaves
-# only the key "R" unengaged; but what we do not cover are two keys Å and Ñ
-# which are relatively frequent in Latin-derived European languages.
+=head1 On principles of intuitive design of Latin keyboard
 
-# Note that Ì is moderately frequent in Italian, but Ñ is much more frequent
-# in Spanish.  Since Ì occupies the key which on many keyboards is taken by
-# Ñ, maybe it makes sense to switch them...  Likewise, Ê is much more frequent
-# than Ë; switch them.
+Some common (meaning: from Latin-1-10 of ISO 8859) Latin alphabet letters 
+are not composed (at least not by using 3 simplest modifiers out of 8 modifiers).
+We mean B<ÆÐÞÇĲØŒß>
+(and B<¡¿> for non-alphatetical symbols). It is crucial that they may be
+entered by an intuitively clear key of the keyboard.    There is an obvious
+ASCII letter associated to each of these (e.g., B<T> associated to the thorn
+B<Þ>), and in the best world just pressing this letter with C<AltGr>-modifier
+would produce the desired symbol.
 
-# ===========  TODO
+  But what to do with ª,º?
 
-# U-caron: ǔ, Ǔ which is used to indicate u in the third tone of Chinese language pinyin.
-# But U-breve is used in Latin encodings.
-# Ǧ/ǧ (G with caron) is used, but only in "exotic" or old languages (has no
-# combined form - while G-breve is in Latin encodings.
-# A-breve Ă: A-caron Ǎ is not in Latin-N; apparently, is used only in pinyin,
-# zarma, Hokkien, vietnamese, IPA, transliteration of Old Latin, Bible and Cyrillic's big yus.
+There is only one conflict: both B<Ø>,B<Œ> "want" to be entered as C<AltGr-O>;
+this is the ONLY piece of arbitrariness in the design so far.  After
+resolving this conflict, C<AltGr>-keys B<!ASDCTIO?> are assigned their meanings,
+and cannot carry other letters (call them "stuck in stone keys").
 
-# In EurKey: only a takes breve, the rest take caron (including G but not U)
+(Other keys "stuck in stone" are dead key: it is important to have the
+glyph etched on these keyboard's keys similar to the task they perform.)
 
-# out of accents ° and dot-accent ˙ in Latin-N: only A and U take °, and they
-# do not take dot-accent.  In EurKey: also small w,y take ring accent; same in
-# Bepo - but they do not take dot accent in Latin-N.
+Then there are several non-alphabetical symbols accessible through ISO 8859
+encodings.  Assigning them C<AltGr>- access is another task to perform.
+Some of these symbols come in pairs, such as ≤≥, «», ‹›, “”, ‘’; it makes
+sense to assign them to paired keyboard's keys: <> or [] or ().
 
-# Double-´ and cornu (both on a,u only) can be taken by ¨ or ˙ on letters with
-# ¨ already present (in Unicode ¨ is not precombined with diaeresis or dots).
-# But one must special-case Ë and Ï and Ø (have Ê and Ĳ instead; Ĳ takes no accents,
-# but Ê takes acute, grave, tilde and dot below...).!  Æ takes acute and macron; Ø takes acute.
+However, this task is in conflict of interests with the following task, so
+let us explain the needs answered by that task first.
 
-# Actually, cornu=horn is only on o,u, so using dot/ring on ö and ü is very viable...
+One can always enter accented letters using dead keys; but many people desire a
+quickier way to access them, by just pressing AltGr-key (possibly with
+shift).  The most primitive keyboard designs (such as IBM International,
 
-# So for using AltGr-letter after deadkeys: diaresis can take dot above, hat and wedge, diaresis.
-# Likewise, ` and ´ are not precombined together (but there is a combined
-# combining mark).  So one can do something else on vowels (ogonek?).
+   http://www.borgendale.com/uls.htm
 
-# Applying ´ to `-accented forms: we do not have `y, so must use "the natural position"
-# which is mixed with Ñ (takes no accents) and Ç (takes acute!!!).
+) omit this step and assign only the NECESSARY letters for AltGr- access.
+(Others, like MicroSoft International, assign only a very small set.)
 
-# s, t do not precombine with `; so can use for the "alternative cedilla".
+This problem breaks into two tasks, choosing a repertoir of letters which
+will be typable this way, and map them to the keys of the keyboard.
+For example, EurKey choses to use ´¨`-accented characters B<AEUIO> (except
+for B<Ỳ>), plus B<ÅÑ>; MicroSoft International does C<ÄÅÉÚÍÓÖÁÑß> only (and IBM
+International does
+none); Bepo does only B<ÉÈÀÙŸ> (but also has the Azeri B<Ə> available - which is
+not in ISO 8819 - and has B<Ê> on the 105th key "C<2nd \|>"), Mac Extended has
+only B<ÝŸ> (?!)
 
-# Only auwy take ring, and they do not take cedilla.  Can merge.
+   http://bepo.fr/wiki/Manuel
+   http://bepo.fr/wiki/Utilisateur:Masaru					# old version of .klc
+   http://www.jlg-utilities.com/download/us_jlg.klc
+   http://tlt.its.psu.edu/suggestions/international/accents/codemacext.html
+		or look for "a graphic of the special characters" on
+   http://homepage.mac.com/thgewecke/mlingos9.html
 
-# Bepo's hook above; ảɓƈɗẻểƒɠɦỉƙɱỏƥʠʂɚƭủʋⱳƴỷȥ ẢƁƇƊẺỂƑƓỈƘⱮỎƤƬỦƲⱲƳỶȤ
-#   perl -wlnae "next unless /HOOK/; push @F, shift @F; print qq(@F)" NamesList.txt | sort | less
-# Of capital letters only T and Y take different kinds of hooks... (And for T both are in Latin-Extended-B...)
+
+Keyboards on Mac: L<http://homepage.mac.com/thgewecke/mlingos9.html>
+Tool to produce: L<http://wordherd.com/keyboards/>
+L<http://developer.apple.com/library/mac/#technotes/tn2056/_index.html>
+
+=head2 Our solution
+
+First, the answer:
+
+=over 10
+
+=item Rule 0:
+
+letters which are not accented by B<`´¨˜ˆˇ°¯> are entered by
+C<AltGr>-keys "obviously associated" to them.  Supported: B<ÆÐÞÇĲØß>.
+ 
+=item Rule 0a: 
+
+Same is applicable to B<Ê> and B<Ñ>.
+
+=item Rule 1:  
+
+Vowels B<AEYUIO> accented by B<`´¨> are assigned the so called I<"natural position">:
+3 Bottom row of keyboard are allocated to accents (B<¨> is the top, B<´> is the middle, B<`> is
+the bottom row of 3 letter-rows on keyboard - so B<À> is on B<ZXCV>-row),
+and are on the same diagonal as the base letter.  For left-hand
+vowels (B<A>,B<E>) the diagonal is in the direction of \, for right hand
+voweles (B<Y>,B<U>,B<I>,B<O>) - in the direction of /.
+
+=item Rule 1a: 
+
+If the "natural position" is occupied, the neighbor key in the
+direction of "the other diagonal" is chosen.  (So for B<A>,B<E> it is
+the /-diagonal, and for right-hand vowels B<YUIO> it is the \-diag.)
+
+=item Rule 1b: 
+
+The neighbor key is down unless the key is on bottom row - then it is up.
+
+Supported by rules "1": all but B<ÏËỲ>.
+
+=item Rule 2:  
+
+Additionally, B<Å>,B<Œ>,B<Ì> are available on keys B<R>,B<P>,B<V>.
+
+=back
+
+=head2 Clarification:
+
+If you remember only Rule 0, you still can enter all Latin-1 letter using
+Rule 0; all you need to memorize are dead keys: B<`';~6^7&> for B<`´¨˜ˆˇ°¯>
+on EurKey keyboard (but better locations I<ARE> possible).
+   
+   (What the rule 0 actually says is: "You do not need to memorize me". ;-)
+
+If all you remember are rules 1,1a, you can calculate the position of the
+AltGr-key for AEYUIO accented by `´¨ up to a choice of 3 keys (the "natural
+key" and its 2 neighbors) - which are quick to try all if you forgot the
+precise position.  If you remember rules 1,1ab, then this choice is down to
+2 possible candidates.
+
+Essentially, all you must remember in details is that the "natural positions"
+form a V-shape # - \ on left, / on right, and in case of bad luck you
+should move in the direction of other diagonal one step.  Then a letter is
+either in its "obvious position", or in one of 3 modifications of the
+natural position".  Only Å and Œ need a special memorization.
+
+=head2 Motivations: 
+
+It is important to have a logical way to quickly understand whether a letter
+is quickly accessible from a keyboard, and on which key (or, maybe, to find
+a small set of keys on which a letter may be present - then, if one forgets,
+it is possible to quickly un-forget by trying a small number of keys).
+
+The idea: we assign alphabetical Latin symbols only to alphabetical keys
+on the keyboard; this way we can use (pared) symbol keys to enter pared
+Unicode symbols.  Now consider diagonals on the alphabetic part of the
+keyboard: \-diagonals (like EDC) and /-diagonals (like UHB).  Each diagonal
+contains 3 (or less) alphabetic keys; we WANT to assign ¨-accent to the top
+one, ´-accent to the middle one, and `-accent to the bottom one.
+
+On the left-hand part of the keyboard, use \-diagonals, on the right-hand
+part use /-diagonals; now each diagonal contains EXACTLY 3 alphabetic keys.
+Moreover, the diagonals which contain vowels AEYUIO do not intersect.
+
+If we have not decided to have keys set in stone, this would be all - we
+would get "completely predictable" access to ´¨`-accented characters AEUIO.
+For example, Ÿ would be accessible on AltGr-Y, Ý on AltGr-G, Ỳ on AltGr-V.
+Unfortunately, the diagonals contain keys ASDCIO set in stone.  So we need
+a way to "move away" from these keys.  The rule is very simple: we move
+one step away in the direction of "other" diagonal (/-diagonal on the left
+half, and \-diagonal on the right half) one step down (unless we start
+on keys A, C where "down" is impossible and we move up to W or F).
+
+Examples: Ä is on Q, Á "wants to be" on A (used for Æ), so it is moved to
+W; Ö wants to be on O (already used for Ø or Œ), and is moved away to L;
+È wants to be on C (occupied by Ç), but is moved away to F.
+
+There is no way to enter Ï using this layout (unless we agree to move it
+to the "8*" key, which may conflict with convenience of entering typographic
+quotation marks).  Fortunately, this letter is rare (comparing even to Ë
+which is quite frequent in Dutch).  So there is no big deal that it is not
+available for "handy" input - remember that one can always use deadkeys.
+
+ http://en.wikipedia.org/wiki/Letter_frequency#Relative_frequencies_of_letters_in_other_languages
+
+Note that the keys "P" and "R" are not engaged by this layout; since "P"
+is a neighbor of "O", it is natural to use it to resolve the conflict
+between Ø or Œ (which both want to be set in stone on "O").  This leaves
+only the key "R" unengaged; but what we do not cover are two keys Å and Ñ
+which are relatively frequent in Latin-derived European languages.
+
+Note that Ì is moderately frequent in Italian, but Ñ is much more frequent
+in Spanish.  Since Ì occupies the key which on many keyboards is taken by
+Ñ, maybe it makes sense to switch them...  Likewise, Ê is much more frequent
+than Ë; switch them.
+
+=head2 (OLD?) TODO
+
+U-caron: ǔ, Ǔ which is used to indicate u in the third tone of Chinese language pinyin.
+But U-breve is used in Latin encodings.
+Ǧ/ǧ (G with caron) is used, but only in "exotic" or old languages (has no
+combined form - while G-breve is in Latin encodings.
+A-breve Ă: A-caron Ǎ is not in Latin-N; apparently, is used only in pinyin,
+zarma, Hokkien, vietnamese, IPA, transliteration of Old Latin, Bible and Cyrillic's big yus.
+
+In EurKey: only a takes breve, the rest take caron (including G but not U)
+
+out of accents ° and dot-accent ˙ in Latin-N: only A and U take °, and they
+do not take dot-accent.  In EurKey: also small w,y take ring accent; same in
+Bepo - but they do not take dot accent in Latin-N.
+
+Double-´ and cornu (both on a,u only) can be taken by ¨ or ˙ on letters with
+¨ already present (in Unicode ¨ is not precombined with diaeresis or dots).
+But one must special-case Ë and Ï and Ø (have Ê and Ĳ instead; Ĳ takes no accents,
+but Ê takes acute, grave, tilde and dot below...).!  Æ takes acute and macron; Ø takes acute.
+
+Actually, cornu=horn is only on o,u, so using dot/ring on ö and ü is very viable...
+
+So for using AltGr-letter after deadkeys: diaresis can take dot above, hat and wedge, diaresis.
+Likewise, ` and ´ are not precombined together (but there is a combined
+combining mark).  So one can do something else on vowels (ogonek?).
+
+Applying ´ to `-accented forms: we do not have `y, so must use "the natural position"
+which is mixed with Ñ (takes no accents) and Ç (takes acute!!!).
+
+s, t do not precombine with `; so can use for the "alternative cedilla".
+
+Only auwy take ring, and they do not take cedilla.  Can merge.
+
+Bepo's hook above; ảɓƈɗẻểƒɠɦỉƙɱỏƥʠʂɚƭủʋⱳƴỷȥ ẢƁƇƊẺỂƑƓỈƘⱮỎƤƬỦƲⱲƳỶȤ
+  perl -wlnae "next unless /HOOK/; push @F, shift @F; print qq(@F)" NamesList.txt | sort | less
+Of capital letters only T and Y take different kinds of hooks... (And for T both are in Latin-Extended-B...)

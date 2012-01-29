@@ -4,3 +4,224 @@ Revision history for Perl extension UI::KeyboardLayout.
 	- original version; created by h2xs 1.23 with options
 		-AX -b 5.8.0 -n UI::KeyboardLayout
 
+0.02
+	Minor additions to "principles" section of the docs.
+	Document how Windows keyboard layout DLL work.
+	PODify section on Latin-characters keyboard.
+	Parse DerivedAge.
+	Verbose mode of UName with script/block/age appended.
+	Print out coverage.
+	When multiple diacritics assigned to the same key, allow 
+	  intelligent priorities by sorting by Unicode-age inside a group.
+	When a sequence of diacritics is assigned to two keys in
+	  opposite directions, allow intelligent sharing.
+	Allow chained (de)diacritics inside Diacritics() rule, 
+	  as in 02dc+031b--0300: remove `, add horn, add ~.
+	Allow a custom translation list, as in <subst-Vietnamese>.
+	Recognize many new heuristics for pseudo-decompositions.
+	Make the access to modifier letters take into account mapping of SPACE,
+	  and use Enter,Tab,C-Enter as well.  Exchange roles of - and _.
+	Repeated deadkeys.
+	Separate visual bell for 32-bit chars in diacritic maps...
+
+	Eurkey++:	[tentative webpage: k.ilyaz.org/v0 ]
+	  To enter ONE character from THE OTHER face, preceed by Shift-SPACE.
+
+	  Latin face: identical to EurKey (but with enhanced diacritic prefixes,
+	    and full [monotonic] Greek).
+
+	  Cyrillic face: *) identical to Russian phonetic (of X11) on the base layer;
+              *)  has all other letters of modern Slavic Cyrillic-based languages, 
+                   XIX century russian, Kazakh letters on the AltGr-layer;
+              *)  has all the other characters of ISO 8859-5, Old Slavonic (except
+                   letters-titlo-form and powers-of-10), and those in 
+                   flavors of ru on X11 (Tatar, Ossetian, Chuvash, 
+                   Udmurt, Komi, Yakut, Kalmyk, Bashkirian, Mari) 
+                   on AltGr-' prefix (the "bizarre variants key").
+              *)  Has all titlo-forms (up to v6.1) accessible via AltGr-^ 
+                   prefix key (for "bizarre ones" use a key with Shift,
+                   for the rest type the lowercase form [after AltGr-^]);
+                   double-AltGr-^ enters the titlo itself.  Powers of 10
+                   are on the AltGr-^ + digit.  (ST as S, DJERV as D, vzmet as -.)
+		Most keys are in the "expected" positions; but note the following:
+
+    '"/́´/ӹ/ӳ	я/ѣ/ѧ/ѩ	б/ѓ/ѹ/ѽ	д/ђ/ӟ/ԁ  й/ї/ҋ/ӑ  ь/ъ/ӛ/ӕ   ф/ѳ/ғ/Ӻ   м/Ω±/ӎ/ꙟ   ш//ԧ/ѐ	щ//ꚇ/ѝ   з/є/ѯ/ҙ  ц/џ/ҵ/ќ
+
+		AltGr-' is the "get bizarre variants" key; so for д/ђ/ӟ/ԁ, ђ is on
+		AltGr-д, ӟ is on AltGr-' д, and ԁ=U+0501 is on AltGr-' AltGr-д.
+		Shift-AltGr-' gives ´.
+		The keys ъЪёЁ are duplicated: they are placed above 3456 (as in
+		the standard phonetic keyboard) AND they are placed as 
+		AltGr-variants of ь and е.  The Latin punctuation keys "hidden"
+		by ючшщэ (and over-digits ъЪёЁ) are accessible on AltGr-keys.
+
+	  Extended prefix keys for Latin diacritics:
+		Each can perform multiple functions; if several functions are
+		applicable to a given key (the normal situation!) the best match
+		is assigned to PREFIX + Key, the second best to PREFIX + AltGr-Key.
+
+		Pressing twice give the corresponding combining character; if
+		followed by Space, Shift-Space, AltGr-Space, Shift-AltGr-Space,
+		produces various related spacing modifier letters; if followed
+		by | or AltGr-|, gives a vertical form etc (see below).
+
+		What is "the best match"?  It is the position in the list below 
+		(left is prefered) combined with bizarreness of the symbol (less
+		bizarre is prefered).  Also, PREFIXed AltGr-Key may just add
+		a second accent to what AltGr-Key generates (if this is "the best
+		choice" as described above - it competes with "the second choice"
+		for the base key); the [Vietnamese ACCENT] actions
+		below operate only for adding SECOND accent on AltGr-keys, and 
+		only on "green ones": AltGr- WZFH,L (see below).
+
+	    Alt-^    breve + caron + other breves + other carons + loop + belt + flourish
+	    		Heuristic: Alt-Shift-6 inverts Alt-6 (which is, basically, hat-accent)
+	    Alt-;    diaeresis + [Vietnamese hook above] + ogonek + cedilla + comma below
+	    		Heuristic: ; is an offspring of double-dot and comma
+	    Alt-&    macron + stroke + various other additions of straight line(s)
+	    		On numbers 0,1,2,3,4: soft-hyphen, hyphen, en-dash, em-dash, horizontal bar
+	    		On numbers 5-9: IPA tone modifiers ˥˦˧˨˩.
+	    Alt-7    
+    ring above + [Vietnamese dot below] + dot above + dot below + various rings/dots + circle about
+
+	  	The other prefix keys work in pairs: the first one operates
+	  	as described above, prefering accents on the left of the list; 
+	  	and the second one prefers accents on the right
+	  	
+	    Alt-' and Alt-`
+	acute + [Vietnamese acute] + hooks + tails + curls + horn + ticks + [Vietnamese grave] + grave
+	    Alt-~ and Alt-6
+	       tilde + [Vietnamese tilde] + belt + descender + mutiliated + smallcaps + hat
+			("Mutiliated" means rotated/reflected/open/closed etc.)
+
+	  Vietnamese input: One must remember positions of quick-access 
+	    AltGr-vowels with ` or ´, of additional "green keys" for ĂÂÊÔƠƯ,
+	    how to enter diacritics `, ´, ˜, ... via AltGr-prefix keys
+	    (`, ´, ˜ are where expected, dot below on AltGr-7 [possibly with
+	    AltGr on the vowel key], ˘ on AltGr-^, ˆ on AltGr-6; hook on 
+	    "English vowels" is on AltGr-´ with AltGr-vowel, and on "green keys"
+	    it is on AltGr-;).  Also: đ/Đ is AltGr-& before d/D.
+
+	    THE RULES:
+
+	    All characters with at most one "accent" (except "horny" ƠƯ) can be 
+	    entered "normally" (following the rules for AltGr-diacritics 
+	    on "English letters", or via quick-access AltGr-vowels with ` or ´).
+	    
+	    For characters with ` or ´ tone mark and another ornament 
+	    (except "horn"), use the AltGr-prefix key for this 
+	    "other ornament" with the quick-access AltGr-vowel for `/´-vowel.
+	    
+	    To put tilde, dot below, or hook as the "second" diacritic, one
+	    should know additional positions on AltGr-layer: ĂÂÊÔƠƯ take 
+	    places of ÅÀÈÒØÙ (which are on AltGr- WZF,LH; call these places 
+	    "green AltGr-keys").  Preceed the green AltGr-key by the 
+	    AltGr-prefix for the diacritic (given above).
+	    
+	    This leaves `, ´ on horns ƠƯ and horns themselves.  For the former,
+	    use AltGr-` and AltGr-´ on O and U with "the opposite ` or ´ accent".
+	    For ƠƯ, use AltGr-` on AltGr-O and AltGr-U (which are ÖÜ).
+	  
+	    =====
+
+	    Desired heuristic for semantic: under the weight of additional 
+	    accent, `-accent on letters collapses to a different accent:
+	      under ´ it collapses to a horn on O and U (Ơ and Ư) so
+	      one gets Ớ and Ứ (likewise for ´-accent under `).
+	      Over ¨-accent ` again collapses to horn (but ¨ evaporates, so
+	      one gets a pure horn).
+	      
+	  Modifier letters: entered via the Latin AltGr-diacritic with a similar
+            shape of "the principal diacritic".  Following by space gives the
+            standalone form of the diacritic; by Shift-Space the modifier 
+            form (if different; otherwise the other most similar modifier form).
+            Two most visually similar "lower modifier" letters are entered by
+            - and _; same for Vertical/Comma-like/Doubled/Dotlike - on \ and |;
+            the Prime-like/Centered are on / and ?.  As the last resort, follow
+            by AltGr-Space, AltGr-Shift-Space, Enter, Tab, Ctrl-Enter, C-[,
+            C-], C-\, Backspace and Control-Backspace to get other visually
+            similar forms (in order).  (The last resort method helps also
+            when, for example, AltGr-& \ enters stroked-\ (which overrides
+            the possible modifier semantic).  All pre-v4.0 modifiers (and all
+            non-letter 4.0-modifiers, and all
+            IPA modifiers) can be entered.  (See tables in .kbdd file.)
+	  
+	  Combining diacritics: only the principal one is currently supported.
+	    Enter by double-AltGr-diacritic.
+	    
+	  Accessibility features: prefix a key by AltGr-Shift-Space to
+	    access the AltGr-meaning of the key (useful if AltGr-key is stolen 
+	    by the system).  Works after linked-faces-prefixes too (but 
+	    currently not before or after Latin diacritic-prefix). Example: 
+	    AltGr-Shift-Space + | acts as AltGr-|.  Repeat twice/3-times/4-times 
+	    to access the AltGr-inverted linked face (and other flavors of
+	    the linked face).
+
+	    Similarly, from Cyrillic personality, the linked faces are Latin,
+	    AltGr-inverted Latin, bizarre Cyrillic, and titlo-Cyrillic.  So
+	    Shift-Space accesses Latin, AltGr-Space accesses AltGr-inverted Latin,
+	    double AltGr-Space accesses bizarre Cyrillic.  And repetition
+	    of AltGr-Shift-Space access AltGr-inverted versions of Cyrillic,
+	    bizarre Cyrillic, titlo-Cyrillic, and Latin.
+
+	  Linked faces for Latin: Cyrillic, bizarre-Cyrillic, and
+	    titlo-Cyrillic.  The principal one is accessed by Shift-Space,
+	    the second by AltGr-Space, the third one by double-AltGr-Space.
+	    Alternatively, one access the second/third one by using Cyrillic
+	    prefix keys AltGr-' and AltGr-^ after Shift-Space prefix.
+            
+          Shift-Space followed by various Modifiers-Space enters "visible
+            representations" of space: ␢, ␣ and . on Space, Shift-Space, and
+            AltGr-Space.  Follow AltGr-Space by Space or Shift-Space to get 
+            wide non-breakable space (space-wide and digit-wide); follow
+            Shift-AltGr-Space by Shift-Space to get narrow non-breakable space. 
+            The third linked face maps all spaces to narrow breakable space.
+            
+          Vulgar fraction access: on bizarre-Cyrillic face, either enter a
+            digit in denominator, or a digit in numerator with Shift-modifier.
+            To increase numerator/denominator, add AltGr-modifier.  (All
+            fractions of v6.1 are accessible.)  (From Latin: on AltGr-Space;
+            from Cyrillic: on AltGr-'.)
+            
+          Visual bell: non-existent prefix-key combinations generate the visual
+            bell bell ♪.  Combination which make sense but can't be entered
+            on the give OS generate ♫ (currently 32-bit codepoints on Windows).
+          
+==========================================
+	  Add ќ on Russian-II-AltGr on c[ц] (this completes ISO 8819-5.)
+	  Add characters missing from ru X11 old slavic keyboard (except
+	  powers-of-10 and combining letters).
+	  
+	  Add ―, soft hyphen, no-break hyphen and figure dash to Overbar map (on 4, ¦, ! and 0). 
+	  Add ¤, kra ĸ and cedilla to CopyRight layer on $, q and comma.  
+	    (This completes ISO 8859-N maps - except for Hebrew/Arabic/Thai letters.)  
+	    (But not WGL4; or Adobe GL - about 760 missing [!!!] outside of combined characters, and
+	      "ARABIC|HALFWIDTH|FULLWIDTH|HEBREW|<control>|ARMENIAN|DEVANAGARI|BENGALI|GURMUKHI|GUJARATI|THAI|CJK.Symbols|CJK.Letters|CJK.Compatibility|Private.Use.Area|HIRAGANA|KATAKANA|BOPOMOFO|HANGUL|Small.Form"
+	    .)
+	    
+	  Add ẗ to CopyRight layer as AltGr-t, and Ȩȩ cedilla as eE.
+	  How to do ḩ, ḥ, ɬ, ŀ, ẇ, ẉ, Ẏ, ẓ, Ǜ, ǚ, Ǘ (1.1 penalized by Vietnamese)
+	  and newer Ȧ, Ⱥ???
+
+	  ḩ - romanization of Arabic
+	  ḥ - in dialects of Asturian
+	  ɬ - IPA
+	  ŀ - not recommended usage of l·l in Catalan
+	  ẇ ẉ - unknown
+	  Ẏ - Avestan, and ISO transliteration of Izhitsa Ѵ
+	  ẓ - transcription of Afro-Asiatic
+	  Ǜ, ǚ, Ǘ - unknown (transliteration of chinese?)
+	  Ȧ - Livonian, and ISO transliteration of Yus Ѫ
+	  Ⱥ - Saanich and precursor to Å in Norsk.
+	  
+	  Fix shortcoming of the Greek section: dialytika-versions of ι and υ
+	    on ,., drahma ₯ and question mark ; on /?, micro sign on AltGr-M, 
+	    and tonos, ypogegrammeni on `_.  
+	    Add tonos-versions of vowels, symbol variants, and final sigma 
+	    on AltGr-letters.
+	    	(?!!! But not tonos-dialytika with Diacritics[+...]???? - it may work only on the given face, not elsewhere...)
+
+	  Diacritic tables: all the non-char modifiers up to v4.0 are accessible, so are IPA letter-modifiers.
+
+	Vulgar fractions: 1/7 1/9 and 0/3 were missing.
+	Scancodes for unusual keys were completely wrong (now taken from keyboard type 4 of kbd.h).
