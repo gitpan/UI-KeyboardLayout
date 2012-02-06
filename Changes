@@ -92,13 +92,15 @@ Revision history for Perl extension UI::KeyboardLayout.
 	acute + [Vietnamese acute] + hooks + tails + curls + horn + ticks + [Vietnamese grave] + grave
 	    Alt-~ and Alt-6
 	       tilde + [Vietnamese tilde] + belt + descender + mutiliated + smallcaps + hat
-			("Mutiliated" means rotated/reflected/open/closed etc.)
+			("Mutiliated" means rotated/reflected/open/closed etc.
+			 Case is preserved, so characters without uppercase equivalents
+			 are on lower register keys, and smallcaps are on Shift-register.)
 
 	  Vietnamese input: One must remember positions of quick-access 
 	    AltGr-vowels with ` or ´, of additional "green keys" for ĂÂÊÔƠƯ,
 	    how to enter diacritics `, ´, ˜, ... via AltGr-prefix keys
 	    (`, ´, ˜ are where expected, dot below on AltGr-7 [possibly with
-	    AltGr on the vowel key], ˘ on AltGr-^, ˆ on AltGr-6; hook on 
+	    AltGr on the vowel key], ˘ on AltGr-^, ˆ on AltGr-6; hook above on 
 	    "English vowels" is on AltGr-´ with AltGr-vowel, and on "green keys"
 	    it is on AltGr-;).  Also: đ/Đ is AltGr-& before d/D.
 
@@ -167,14 +169,14 @@ Revision history for Perl extension UI::KeyboardLayout.
 	  Linked faces for Latin: Cyrillic, bizarre-Cyrillic, and
 	    titlo-Cyrillic.  The principal one is accessed by Shift-Space,
 	    the second by AltGr-Space, the third one by double-AltGr-Space.
-	    Alternatively, one access the second/third one by using Cyrillic
+	    Alternatively, one can access the second/third one by using Cyrillic
 	    prefix keys AltGr-' and AltGr-^ after Shift-Space prefix.
             
           Shift-Space followed by various Modifiers-Space enters "visible
             representations" of space: ␢, ␣ and . on Space, Shift-Space, and
             AltGr-Space.  Follow AltGr-Space by Space or Shift-Space to get 
-            wide non-breakable space (space-wide and digit-wide); follow
-            Shift-AltGr-Space by Shift-Space to get narrow non-breakable space. 
+            wide no-break space (space-wide and digit-wide); follow
+            Shift-AltGr-Space by Shift-Space to get narrow no-break space. 
             The third linked face maps all spaces to narrow breakable space.
             
           Vulgar fraction access: on bizarre-Cyrillic face, either enter a
@@ -215,13 +217,41 @@ Revision history for Perl extension UI::KeyboardLayout.
 	  Ⱥ - Saanich and precursor to Å in Norsk.
 	  
 	  Fix shortcoming of the Greek section: dialytika-versions of ι and υ
-	    on ,., drahma ₯ and question mark ; on /?, micro sign on AltGr-M, 
+	    on ,. , drahma ₯ and question mark ; on /?, micro sign on AltGr-M, 
 	    and tonos, ypogegrammeni on `_.  
 	    Add tonos-versions of vowels, symbol variants, and final sigma 
 	    on AltGr-letters.
-	    	(?!!! But not tonos-dialytika with Diacritics[+...]???? - it may work only on the given face, not elsewhere...)
+	    	(?!!! But no tonos-dialytika with Diacritics[+...]???? - it may work only on the given face, not elsewhere...)
 
-	  Diacritic tables: all the non-char modifiers up to v4.0 are accessible, so are IPA letter-modifiers.
+	  Diacritic tables: all the non-char modifiers up to v4.0 are accessible, so are all IPA letter-modifiers.
 
 	Vulgar fractions: 1/7 1/9 and 0/3 were missing.
 	Scancodes for unusual keys were completely wrong (now taken from keyboard type 4 of kbd.h).
+
+0.03	Remove accumulated crud from EurKey++.kbdd.
+	Remove manyHEX() wrongly used.
+	Make Substitutions case-aware: only one case should be used.
+	New face configuration AltGrCharSubstitutions.
+	Better sorting of variants of diacritics: take into account the block (the later in the list, the more bizarre).
+	Auto-generate linked-in AltGr-inverted maps; handles prefix keys; we did cycle elimination (but not now,
+	  when we do not expect this to coexist with manual AltGr-inversion - cycle elimination is too much
+	  work in presence of InvMap).
+	Support for repeated altgr_flip_key --> inversion of other linked faces.
+	Generation of modifier keys - skip the AltGr-inversion key.
+	When emitting coverage, do not count deadkeys "by themselves".  (Not implemented for repeated dead keys.)
+	Include the files with repertoirs of certain "access Unicode chars" tools/standards; in examples/charlists.
+	Extra sorting order for results of <any-FOO> - take into account the number of words.
+	+ARRAY_NAME=val was not allowed in a visual section.
+	Overrides are possible for AltGr-inverted prefix keymaps (including chained deadkeys when inverted key is not auto).
+	Start documenting format of .kbdd file; all but the (most important) personality-sections are documented.
+
+	EurKey++:
+	  Enable pinyin input of tonal variants of ü by accents on a green key AltGr-k (normally enters ĳ).
+	  New sorting required some massage of binding for ` and ´ to preserve the Vietnamese semantic.
+	  New sorting: we lost N with long leg, and exchanged I-dot-below with I-dot-above.
+	    (Now, of Vietnamese, only o gets dot below without AltGr.)
+	  Shift-AltGr-SPACE after a prefix diacritics key does not generate a 4th modifier letter.
+	  Shift-AltGr-SPACE after a prefix diacritics key gives AltGr-inverted map.	
+	  Allow ring/dot prefix to remove dots from i and j; remove ı from "mutiliated" lists, so that ᴉ is available.
+	  AltGr-inverted maps are aware of diacritics (so can be used before and/or after diacritics).
+	  Massive simplification of .kbdd file - remove manual AltGr-inversion crud.
