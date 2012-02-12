@@ -45,7 +45,7 @@ prefix_repeat=3
 #
 	α/∟	σ/∩	δ/∕	φ	γ	θ	ι/∫	κ	λ	₋		₌₊
 ***	a/ä	s/ß§/℠	d/ð	f/è	g/é	h/ù/←⇐	j/ú/↓⇓	k/ĳ/↑⇑	l/ø/→⇒	;:/¨·		'"/´†
-	а/ә/ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	;:/¨—/ӹ/ӳ	'"/ ́´/ ́ ̀/ ́ ̀
+	а/ә/ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	;:/¨—/ӹ/ӳ	'"/ ́´/ ̀ ̀/ ́ ́
 #
 	ζ	ξ	χ	β	β	ν/ⁿ	μ//Ω		--/--≤		--/--≥		--
 ***	z/à	x/á	c/ç/©	v/ì	b/í	n/ñ/↙⇙	m/Ω±/↘⇘		,</ò		.>/ó		/?/¿…
@@ -84,11 +84,11 @@ prefix_repeat=3
 LinkFace=CyrillicPhonetic
 #
 MetaData_Index=0
-#    These keys are active when the next character is from layers 0, 1:
-@layerDeadKeys= Latin       ˋ  ˜  ˆ  ˇ  °  ¯  ¨  ´  Ω  ±  ©
-@layerDeadKeys= Latin-AltGr ˋ  ˜  ˆ  ˇ  °  ¯  ¨  ´  Ω  ±  ©
+faceDeadKeys= 	´  ˋ  ˜  ˆ  ˇ  °  ¯  ¨  Ω  ±  ©
+ExportDeadKeys=	´  ˋ  ˜  ˆ  ˇ  °  ¯  ¨
 #
-@layerDeadKeys2= 03a6.03a6, 0192.02c7,	0192.00b4
+@faceDeadKeys2= 03a6.03a6
+#			, 0192.02c7,	0192.00b4
 #		=> 0483	=> 0483		=> 03a6
 #
 #						002c = ,
@@ -100,6 +100,7 @@ MetaData_Index=0
 # Tibetan range: take only tibetan diacritics, so our code adding diacritics won't be confused by prefices... ???
 Auto_Diacritic_Start=0f00
 Flip_AltGr_Key=00a0
+@Import_Prefix_Keys=	0301:CyrillicPhonetic,03a6,	0483:CyrillicPhonetic,0483
 #
 DeadKey_InvMap0000=	ByPairs[0192.202f]
 #                   Chaining makes sense if Flip_AltGr_Key is on AltGr key (repeating will reach inverted faces of:)
@@ -111,17 +112,13 @@ DeadChar_32bitTranslation=		♫
 #
 # 017F,0192,03a6 - good candidates to never be generated on the base face.  But 017F takes accents (use it for dead2 only)
 # 00b6=pilcrow 007c=| 002f=/ 00a0=NBSPC --> open box, narrow and hair spaces to figure and narrow nbr-spaces (was: 03a6.2007 00a0.202F)
-DeadKey_Map0192=	ByPairs[0020.2422.0192.2423.03a6.2420.02c7.0483.00b4.03a6]	Layers(Russian+Russian-AltGr)
+DeadKey_Map0192=	ByPairs[0020.2422.0192.2423.03a6.2420]	LinkFace
+# Layers(Russian+Russian-AltGr)
 #							was: 0020.2009
-DeadKey_Map03a6=	ByPairs[0020.00a0.0192.2007.03a6.0483]	Layers(Russian-II+Russian-II-AltGr)	FromTo[Digits,Denominators1](Face(US))	FromTo[Digits,Numerators1](FlipShift(Face(US)))	FromTo[Digits,Denominators2](FlipLayers(US))	FromTo[Digits,Numerators2](FlipShift(FlipLayers(US)))
+DeadKey_AddMap03a6=	ByPairs[0020.00a0.0192.2007.03a6.0483]
+#DeadKey_Map03a6=	ByPairs[0020.00a0.0192.2007.03a6.0483]	Layers(Russian-II+Russian-II-AltGr)	FromTo[Digits,Denominators1](Face(US))	FromTo[Digits,Numerators1](FlipShift(Face(US)))	FromTo[Digits,Denominators2](FlipLayers(US))	FromTo[Digits,Numerators2](FlipShift(FlipLayers(US)))
 # A66F is COMBINING VZMET
-DeadKey_Map0483=	ByPairs[0020.2009.0192.2009.03a6.2009]	Diacritic[<pseudo-calculated-combining>](Face(CyrillicPhonetic))	Diacritic[<pseudo-calculated-combining>](FlipShift(Layers(Russian-II+Russian-II-AltGr)))	FromTo[Digits,CyrPowersOfTen](Face(US))	ByPairs[-A66F.S.2df5.D.2df8](Face(US))
-#DeadKey_Map0484=	ByPairs[0020.2009.0192.2009.03a6.2009]	Diacritic[<pseudo-calculated-combining>](FlipLayers(CyrillicPhonetic))	Diacritic[<pseudo-calculated-combining>](FlipShift(Layers(Russian-II-AltGr+Russian-II)))	FromTo[Digits,CyrPowersOfTen](FlipLayers(US))	ByPairs[-A66F.S.2df5.D.2df8](FlipLayers(US))
-#
-#	Repeat 00a0 twice: inverted LinkFace, 3 times: inverted Cyrillic-II
-#DeadKey_Map017f=	ByPairs[0020.2420.017f♪00a0.0194'03a6^0483]	Layers(Russian-AltGr+Russian)
-#DeadKey_Map0194=	ByPairs[0020.0483.0194♪00a0.0484]	Layers(Russian-II-AltGr+Russian-II)
-#'
+#DeadKey_Map0483=	ByPairs[0020.2009.0192.2009.03a6.2009]	Diacritic[<pseudo-calculated-combining>](Face(CyrillicPhonetic))	Diacritic[<pseudo-calculated-combining>](FlipShift(Layers(Russian-II+Russian-II-AltGr)))	FromTo[Digits,CyrPowersOfTen](Face(US))	ByPairs[-A66F.S.2df5.D.2df8](Face(US))
 #				Default map (not used now???):
 DeadKey_Map=		Diacritic	Diacritic2Self
 #
@@ -136,26 +133,26 @@ DeadKey_Map00a8=	Diacritic[+\\ẗ,\\Ǜ[h],00a8|0309+<subst-Vietnamese>|<any-diae
 #     <any-comma> picks up digits with comma which are above 0xffff - better make it last
 #
 #  Combine macron=00af and stroke (AOUaou missing stroke...)  00ad=SOFT HYPHEN; <any-stroke> should pick up 0338; 20D2 (|) and 20E5 \ do not appear in decompositions...
-DeadKey_Map00af=	Diacritic[+00af|<pseudo-stroke>,<any-bar>,<any-stroke>,<any-dash>,<any-overbar>,<any-topbar>,<any-diagonal>,<any-strikethrough>,<any-over-equal>,<any-equal>,<any-line>,<any-quill>,<any-base>]	ByPairs[1‐2–3—]	ByPairs[4―0‒¦00ad!‑]	ShiftFromTo[5,˥](SelectRX[[5-9]])	Diacritic2Self
+DeadKey_Map00af=	ByPairs[4―0‒”ə¦00ad!‑†‡]	Diacritic[+00af|<pseudo-stroke>,<any-bar>,<any-stroke>,<any-dash>,<any-overbar>,<any-topbar>,<any-diagonal>,<any-strikethrough>,<any-over-equal>,<any-solidus>,<any-equal>,<any-line>,<any-quill>,<any-base>,<any-phonetized>|<any-stroke>+<any-calculated>,<any-right-hook>]	ByPairs[1‐2–3—]	ShiftFromTo[5,˥](SelectRX[[5-9]])	Diacritic2Self
 #
 # ring above 00b0: combine with dotabove 307 dotbelow 323 
 # (only WÊ miss dot below, AUY miss dot above: Ȧ is Livonian and phonetic; U is not precomposed; Ẉ - WHERE???) 
 # Ẏ (useful WHERE???) obscures Vietnamese Ỵ, [any-dots does not add anything...]
-DeadKey_Map00b0=	Diacritic[+\\Ẏ,00b0||0323+<subst-Vietnamese>|0307,0323|<any-ring>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,<any-circled>,<circle>]	Diacritic2Self
+DeadKey_Map00b0=	Diacritic[+\\Ẏ,00b0||0323+<subst-Vietnamese>|0307,0323|<any-ring>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,<any-circled>,<circle>] ByPairs[%‰]	Diacritic2Self
 #
 #  Combine breve=02d8/0306 and caron 02c7/030c (we do not description of breve-like diacretics!)
 #   Note that Ü combines with caron (in 2 ways! Ǖ Ṻ) - but we prefer Ü -> Ǔ;	arc/check not visible
 DeadKey_Map02c7=	Diacritic[+02c7|030c|<any-breve>,<any-arc>,<any-caron>,<any-loop>,<any-check>,<any-belt>,<any-flourish>]	Diacritic2Self
 #
 # combine acute 00b4 and hooks/tails/curls and horn 031b	(double acute=030b/2dd - protect against '' --> "; Ǘ is accessible otherwise, hides Ủ)
-DeadKey_Map00b4=	Diacritic[+\\˝,\\Ǘ[u],00b4|030b--00b4,00b4+031b--0300|<pseudo-hook>,<any-hook>,<any-fishhook>,<pseudo-tail>,<any-leg>,<any-tail>,<pseudo-curl>,<any-apostrophe>,<any-tick>|031b]	Diacritic2Self
+DeadKey_Map00b4=	Diacritic[+\\˝,\\Ǘ[u],00b4|030b--00b4,00b4+031b--0300|<pseudo-hook>,<any-hook>+<any-calculated>,<any-fishhook>+<any-calculated>,<any-hook>,<any-fishhook>,<pseudo-tail>,<any-leg>,<any-tail>,<pseudo-curl>,<any-apostrophe>,<any-tick>|031b]	Diacritic2Self
 #
 # Do not need 00b4+<subst-Vietnamese> ???
 #
 # double grave 30f, grave 60/2cb/300; append reversed list for acute (horn=031b)	
 # (tnvz have 3 type of hooks attached; the middle one [palatal] on nz are not reached ƫᶇᶌᶎ)
 # Ǜ would get in the way of Vietnamese Ư (it could be available elsewhere, but there it is also penalized...)
-DeadKey_Map02cb=	Diacritic[-2/\\Ǜ[u],02cb|030f--0300,02cb+031b--0301,031b--00a8|031b,<any-tick>,<any-apostrophe>,<pseudo-curl>,<any-tail>,<any-leg>,<pseudo-tail>,<any-fishhook>,<reverse-any-other-hook>,<pseudo-hook>|00b4,030b--00b4]	Diacritic2Self
+DeadKey_Map02cb=	Diacritic[-2/\\Ǜ[u],02cb|030f--0300,02cb+031b--0301,031b--00a8|031b,<reverse-any-tick>,<reverse-any-apostrophe>,<pseudo-curl>,<reverse-any-tail>,<reverse-any-leg>,<pseudo-tail>,<reverse-any-fishhook>,<reverse-any-other-hook>,<reverse-any-fishhook>+<reverse-any-calculated>,<reverse-any-hook>+<reverse-any-calculated>,<pseudo-hook>|00b4,030b--00b4]	Diacritic2Self
 #
 #	(For the purpose of double accents, grave 0300 is considered equivalent to horn 031b or hat 02c6, ring 00b0 to breve 02d8/0306, with-stroke to horn)
 DeadKey_Map02dc=	Diacritic[-2/\\ı,02dc|02dc+<subst-Vietnamese>,<any-tilde>,<any-equivalent>|<any-descender>,<any-upturn>,<any-calculated>,<pseudo-smallcaps>|02c6]	Diacritic2Self
@@ -165,11 +162,11 @@ DeadKey_Map02c6=	Diacritic[+\\ı,02c6|<pseudo-smallcaps>,<reverse-any-calculated
 #
 # Create DeadKey maps basing on visual descriptions:
 #
-DeadKey_Map00a9_0=	Id(CopyRight)		Diacritic[0327](SelectRX[[eE]](Latin))	ByPairs[$¤,¸qĸ](Latin)
-DeadKey_Map00a9_1=	Id(CopyRight-AltGr)	Diacritic[00a8](SelectRX[[t]](Latin))
-DeadKey_Map00b1_0=	Id(Math)
+DeadKey_Map00a9_0=	Id(CopyRight)		Diacritic[0327](SelectRX[[eE]](Latin))	ByPairs[$¤,¸qĸËƏëə"〃](Latin)
+DeadKey_Map00a9_1=	Id(CopyRight-AltGr)	Diacritic[00a8](SelectRX[[t]](Latin))	ByPairs[EƏeə](Latin)
+DeadKey_Map00b1_0=	Id(Math)		ByPairs['′"″]
 DeadKey_Map00b1_1=				SpaceSelf2Id
-# 0301 over Greek letters=tonos;   0308=dialytika
+# 0301 over Greek letters=tonos;   0308=dialytika	'
 DeadKey_Map03a9_0=	Id(Greek)	Diacritic[<super>](SelectRX[[0-9]])	Diacritic[<sub>](SelectRX[[0-9]](FlipShift))	Diacritic[0308](ByPairs[.υ,ι<Ι>Υ](Latin))	ByPairs[/₯?;`΄_ͺ](Latin)
 DeadKey_Map03a9_1=	Id(Greek-AltGr)		Diacritic[0308+0301](ByPairs[.υ,ι<Ι>Υ](Latin))	Diacritic[0301,<any-calculated-symbol>,<any-calculated-final>,<any-lunate-symbol>](Greek)	ByPairs[Mµ](Latin)
 #
@@ -195,11 +192,10 @@ LinkFace=US
 #
 MetaData_Index=1
 #
-#    These keys are active when the next character is from layers 0, 1:
-@layerDeadKeys= Russian       Ω  ±  © 0192	́	҃
-@layerDeadKeys= Russian-AltGr Ω  ±  © 0192	́	҃
+faceDeadKeys= 	́	҃	Ω  ±  ©
+ExportDeadKeys=	́	҃
 #
-@layerDeadKeys2= 03a6.03a6,	00a0.Ё
+@faceDeadKeys2= 03a6.03a6,	00a0.Ё
 #		=> 0483	     	=> 0483
 #
 # Pressing AltGr-| produces |; with the setting below, pressing SWITCH AltGr-| produces the expected ¦
@@ -223,13 +219,13 @@ Diacritic_if_undef=			SpaceSelf2Id
 DeadChar_DefaultTranslation=		♪
 DeadChar_32bitTranslation=		♫
 #
-DeadKey_Map0192=	ByPairs[0020.2422.0192.2423.03a6.2420]	Layers(Latin+Latin-AltGr)
+DeadKey_Map0192=	ByPairs[0020.2422.0192.2423.03a6.2420]	LinkFace
 DeadKey_InvMap0192=	ByPairs[0020.00a0.0192.2007.03a6.0483]
 #
-DeadKey_Map00a9_0=	Id(CopyRight)		Diacritic[0327](SelectRX[[eE]](Latin))	ByPairs[$¤,¸qĸ](Latin)
-DeadKey_Map00a9_1=	Id(CopyRight-AltGr)	Diacritic[00a8](SelectRX[[t]](Latin))
+DeadKey_Map00a9_0=	Id(CopyRight)		Diacritic[0327](SelectRX[[eE]](Latin))	ByPairs[$¤,¸qĸËƏëə"〃](Latin)
+DeadKey_Map00a9_1=	Id(CopyRight-AltGr)	Diacritic[00a8](SelectRX[[t]](Latin))	ByPairs[EƏeə](Latin)
 #
-DeadKey_Map00b1_0=	Id(Math)
+DeadKey_Map00b1_0=	Id(Math)		ByPairs['′"″]
 DeadKey_Map00b1_1=				SpaceSelf2Id
 DeadKey_Map03a9_0=	Id(Greek)	Diacritic[<super>](SelectRX[[0-9]])	Diacritic[<sub>](SelectRX[[0-9]](FlipShift))	Diacritic[0308](ByPairs[.υ,ι<Ι>Υ](Latin))	ByPairs[/₯?;`΄_ͺ](Latin)
 DeadKey_Map03a9_1=	Id(Greek-AltGr)		Diacritic[0308+0301](ByPairs[.υ,ι<Ι>Υ](Latin))	Diacritic[0301,<any-calculated-symbol>,<any-calculated-final>](Greek)	ByPairs[Mµ](Latin)
@@ -240,16 +236,6 @@ DeadKey_Map0301_1=	Id(Russian-II-AltGr)	FromTo[Digits,Denominators2](Latin)	From
 #				0483 is ҃ titlo, A66F is combining vzmet, 2df5 is combining ST, 2df8 is combining DJERV (which we do not have non-combining???)
 DeadKey_Map0483=	ByPairs[0020.2009.0192.2009.03a6.2009]	Diacritic[<pseudo-calculated-combining>](Face(CyrillicPhonetic))	Diacritic[<pseudo-calculated-combining>](FlipShift(Layers(Russian-II+Russian-II-AltGr)))	FromTo[Digits,CyrPowersOfTen](Face(US))	ByPairs[-A66F.S.2df5.D.2df8](Face(US))
 DeadKey_InvMap0483=	ByPairs[0192.2009]
-#DeadKey_Map0484=	ByPairs[0020.2009.0192.2009.03a6.2009.00a0.017f]	Diacritic[<pseudo-calculated-combining>](FlipLayers(CyrillicPhonetic))	Diacritic[<pseudo-calculated-combining>](FlipShift(Layers(Russian-II-AltGr+Russian-II)))	FromTo[Digits,CyrPowersOfTen](FlipLayers(US))	ByPairs[-A66F.S.2df5.D.2df8](FlipLayers(US))
-#
-#	Repeat 00a0 twice: inverted LinkFace, 3 times: inverted Cyrillic-II
-#DeadKey_Map017f=	ByPairs[0020.2420.017f♪]	Layers(Latin-AltGr+Latin)
-#DeadKey_Map0194=	ByPairs[0020.0483.0194♪00a0.0484]	Layers(Russian-II-AltGr+Russian-II)
-#
-# On SPACE, pretend that the deadkey assignment is as revealed by following by SPACE	(Ё would be mapped to Е if we do not specify it explicitly:)
-# DeadKey_Map00a0=	ByPairs[0020.03a6.0192.202f.00a0.0194.Ё.0483]	FlipLayers
-#
-#DeadKey_Map03a6=	ByPairs[0020.00a0.0192.2007.03a6.0483]	FlipLayers(US)
 #
 [faces/CyrillicPhonetic/VK]
 #

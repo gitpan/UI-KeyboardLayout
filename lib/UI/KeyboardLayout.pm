@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION="0.03";
+$VERSION = $VERSION="0.04";
 use strict;
 use utf8;
 
@@ -684,6 +684,7 @@ On typography marks
   http://www.matthias-kammerer.de/SonsTypo3.htm
   http://en.wikipedia.org/wiki/Soft_hyphen
   http://en.wikipedia.org/wiki/Dash
+  http://en.wikipedia.org/wiki/Ditto_mark
 
 On keyboard layouts:
 
@@ -915,7 +916,21 @@ are swapped: Z is etched between T and U, and Y is to the left of X, or French
 which swaps A and Q, or French or Russian physical keyboards which have more
 alphabetical keys than 26).
 
-Currently no LIGATURES or chained deadkeys are supported.
+Currently no C<LIGATURES> are supported.
+
+While the architecture of assembling a keyboard of small easy-to-describe
+pieces is (IMO) elegant and very powerful, and is proven to be useful, it 
+still looks like a collection of independent hacks.  Many of these hacks
+look quite similar; it would be great to find a way to unify them, so 
+reduce the repertoir of operations for assembly.
+
+The current documentation is a hodge-podge of semi-coherent rambling.
+
+The implementation of the module is crumbling under its weight.  Its 
+evolution was by bloating (even when some design features were simplified).
+Since initially I had very little clue to which level of abstraction and 
+flexibility the keyboard description would evolve, bloating accumulated 
+to incredible amounts.
 
 =head1 UNICODE TABLE GOTCHAS
 
@@ -1594,7 +1609,7 @@ it gives no error messages, and deadkeys work [?!]).
 =cut
 
 # '
-my ($AgeList, $NamesList);
+my ($AgeList, $NamesList, $DEBUG);
 sub set_NamesList ($$;$) {
     my $class = shift;
     if (ref $class) {
@@ -1826,6 +1841,7 @@ sub pre_link_layers ($$$;$$) {	# Un-obscure non-alphanum bindings from the first
     next if $skipfix;
     die "Layer `$L' of face `$HH' is being relinked via `$HH' -> `$hh'???"
       if $self->{layers}{'[ini_copy]'}{$L};
+#warn "ini_copy: `$L'";
     $self->{layers}{'[ini_copy]'}{$L} = $self->deep_copy($self->{layers}{$L});
   }
   for my $K (0..$#{$self->{layers}{$hn->[0]}}) {
@@ -1901,7 +1917,8 @@ sub face_make_backlinks($$$$;$$) {		# It is crucial to proceed layers in
       die "Layer `$L' has lastchar $#$a, expected $last" unless $#$a == $last;
 ##########
       for my $shift (0..$#{$a->[$k]}) {
-        next unless defined (my $c = $a->[$k][$shift]); 
+        next unless defined (my $c = $a->[$k][$shift]);
+        $c = $c->[0] if 'ARRAY' eq ref $c;			# Treat prefix keys as usual chars
         if ($prefer_first->{$c}) {
 #warn "Layer `$L' char `$c': prefer first";
           push    @{ $seen->{$c} }, [$Lc, $k, $shift];
@@ -1922,14 +1939,17 @@ sub flip_layer_N ($$$) {		# Increases layer number if number of layers is >2 (go
   $N + 1
 }
 
-sub faces_link_via_backlinks($$$;$) {		# It is crucial to proceed layers in 
+sub faces_link_via_backlinks($$$;$$) {		# It is crucial to proceed layers in 
 #  parallel: otherwise the semantic of char2key_prefer_first suffers
-  my ($self, $F1, $F2, $default) = (shift, shift, shift, shift);
+  my ($self, $F1, $F2, $default, $no_inic) = (shift, shift, shift, shift, shift);
   return if $self->{faces}{$F1}{"AltGr_SPACE_map"}{$F2};		# Reuse old copy
 #warn "Making links for `$F1' -> `$F2'";
   my $seen = $self->{face_back}{$F1} or die "Panic!";	# maps char to array of possitions it appears in, each [layer, key, shift]
   my $LL = $self->{faces}{$F2}{layers};
-  my @LL = map $self->{layers}{'[ini_copy]'}{$_} || $self->{layers}{$_}, @$LL;
+#!$no_inic and $self->{layers}{'[ini_copy1]'}{$_} and warn "ini_copy1 of `$_' exists" for @$LL;
+#!$no_inic and $self->{layers}{'[ini_copy]'}{$_}  and warn  "ini_copy of `$_' exists" for @$LL;
+  my @LL = map $self->{layers}{'[ini_copy1]'}{$_} || $self->{layers}{'[ini_copy]'}{$_} || $self->{layers}{$_}, @$LL;
+  @LL = map $self->{layers}{$_}, @$LL if $no_inic;
   my($maxL, %r, %altR) = $#LL;
   # XXXX Must use $self->{layers}{'[ini_copy]'}{$L} for the target
   for my $c (sort keys %$seen) {
@@ -1942,8 +1962,8 @@ sub faces_link_via_backlinks($$$;$) {		# It is crucial to proceed layers in
 				    $LL[$_->[0]][$_->[1]][$_->[2]]
 				  } @$arr), $default or next;
     my ($To) = grep defined, (map { $LL[$self->flip_layer_N($_->[0], $maxL)][$_->[1]][$_->[2]] } @$arr), $default or next;
-    $r{$c}    = $to;
-    $altR{$c} = $To;
+    $r{$c}    = $to;					# Keep prefix keys as array refs
+    $altR{$c} = $To;					# Ditto
   }
   $self->{faces}{$F1}{"AltGr_SPACE_map"}{$F2} = \%r;
   $self->{faces}{$F1}{"AltGr_SPACE_map_INV"}{$F2} = \%altR;
@@ -1976,6 +1996,7 @@ sub massage_faces ($) {
     $self->{faces}{$f}{'[char2key_prefer_last]'}{$_}++ 		# Make a hash
       for @{ $self->{faces}{$f}{char2key_prefer_last} || [] } ;
     (my ($seen, $seen_dead), $self->{faces}{$f}{'[dead_in_VK]'}) = $self->massage_VK($f);
+    $self->{faces}{$f}{'[dead_in_VK_array]'} = $seen_dead;
     $self->{faces}{$f}{'[coverage_hex]'}{$self->key2hex($_)}++ for @$seen;
     for my $S (@{ $self->{faces}{$f}{AltGrCharSubstitutions} || []}) {
       my $s = $self->stringHEX2string($S);
@@ -1987,7 +2008,9 @@ sub massage_faces ($) {
       $self->{faces}{$f}{'[AltSubstitutions]'}{uc $s[0]} = uc $s[1]
         if uc $s[0] ne $s[0] and uc $s[1] ne $s[1];
     }
-
+    s/^\s+//, s/\s+$//, $_ = $self->stringHEX2string($_) for @{ $self->{faces}{$f}{Import_Prefix_Keys} || []};
+    my %h = @{ $self->{faces}{$f}{Import_Prefix_Keys} || []};
+    $self->{faces}{$f}{'[imported2key]'} = \%h if %h;
   }
   for my $f (keys %{$self->{faces}}) {	# Needed for face_make_backlinks: must know which keys in faces will be finally present
     my $o = $self->{faces}{$f}{LinkFace};
@@ -2003,10 +2026,12 @@ sub massage_faces ($) {
     $self->faces_link_via_backlinks($o, $f);
   }
   for my $f (keys %{$self->{faces}}) {
+    my ($DDD, $export)	= map $self->{faces}{$f}{"[$_]"} ||= {}, qw(DEAD export);
+    my ($ddd)		= map $self->{faces}{$f}{"[$_]"} ||= [], qw(dead);
     $self->coverage_hex($f);
     my $S = $self->{faces}{$f}{layers};
-    my $c = 0;
-    for my $D (@{$self->{faces}{$f}{layerDeadKeys} || []}) {
+    my ($c,%s,@d) = 0;
+    for my $D (@{$self->{faces}{$f}{layerDeadKeys} || []}) {		# deprecated...
       $c++, next unless length $D;	# or $D ~= /^\s*--+$/ ;	# XXX How to put empty elements in an array???
       $D =~ s/^\s+//;
       (my $name, my @k) = split /\s+/, $D;
@@ -2014,11 +2039,43 @@ sub massage_faces ($) {
       die "name of layerDeadKeys' element in face `$f' does not match:\n\tin `$D'\n\t`$name' vs `$self->{faces}{$f}{layers}[$c]'"
         unless $self->{faces}{$f}{layers}[$c] =~ /^\Q$name\E(<.*>)?$/;	# Name might have changed in VK processing
       1 < length and die "not a character as a deadkey: `$_'" for @k;
-      $self->{faces}{$f}{'[dead]'}[$c] = {map +($_,1), @k};
-      $self->{faces}{$f}{'[DEAD]'}{$_} = 1 for @k;
+      $ddd->[$c] = {map +($_,1), @k};
+      ($s{$_}++ or push @d, $_), $DDD->{$_} = 1 for @k;
       $c++;
     }
-    for my $D (@{$self->{faces}{$f}{layerDeadKeys2} || []}) {
+    for my $k (split /\p{Blank}+/, (defined $self->{faces}{$f}{faceDeadKeys} ? $self->{faces}{$f}{faceDeadKeys} : '')) {
+      next unless length $k;
+      $k = $self->charhex2key($k);
+      1 < length $k and die "not a character as a deadkey: `$k'";
+      $ddd->[$_]{$k} = 1 for 0..$#{ $self->{faces}{$f}{layers} };	# still used...
+      $DDD->{$k} = 1;
+      $s{$k}++ or push @d, $k;
+    }
+    for my $k (split /\p{Blank}+/, (defined $self->{faces}{$f}{ExportDeadKeys} ? $self->{faces}{$f}{ExportDeadKeys} : '')) {
+      next unless length $k;
+      $k = $self->charhex2key($k);
+      1 < length $k and die "not a character as an exported deadkey: `$k'";
+      $export->{$k} = 1;
+    }
+    if (my $LL = $self->{faces}{$f}{'[ini_layers]'}) {
+      my @out;
+      for my $L ( @$LL ) {
+        push @out, "$L++prefix+";
+        my $l = $self->{layers}{$out[-1]} = $self->deep_copy($self->{layers}{$L});
+        for my $n (0 .. $#$l) {
+          my $K = $l->[$n];
+          for my $k (@$K) {
+#warn "face `$f' layer `$L' ini_layers_prefix: key `$k' marked as a deadkey" if defined $k and $DDD->{$k};
+            $k = [$k, $f, ($export->{$k} ? () : 1)] if defined $k and $DDD->{$k};
+          }
+        }
+      }
+      $self->{faces}{$f}{'[ini_layers_prefix]'} = \@out;
+    } else {
+      warn "Face `$f' has no ini_layers";
+    }
+    $self->{faces}{$f}{'[dead_array]'} = \@d;
+    for my $D (@{$self->{faces}{$f}{faceDeadKeys2} || $self->{faces}{$f}{layerDeadKeys2} || []}) {	# layerDeadKeys2 obsolete
       $D =~ s/^\s+//;	$D =~ s/\s+$//;
       my @k = split //, $self->stringHEX2string($D);
       2 != @k and die "not two characters as a chained deadkey: `@k'";
@@ -2100,24 +2157,108 @@ sub print_coverage ($$) {
     next if $self->{faces}{$F}{'[coverage_hash]'}{$k};
     $self->print_codepoint($k, '?- ');
   }
-  
+  print "############# Per key list:\n";
+  my($LL, $INV, %s, @d) = ($self->{faces}{$F}{layers}, $self->{faces}{$F}{Flip_AltGr_Key});
+  $s{$self->charhex2key($INV)}++ if defined $INV;	# Skip in reports
+  my @LL = map $self->{layers}{$_}, @$LL;
+  $s{$_}++ or push @d, $_ for map @{ $self->{faces}{$F}{"[$_]"} || [] }, qw(dead_array dead_in_VK_array);
+#warn 'prefix keys to report: <', join('> <', @d), '>';
+  my @Dface = map $self->{faces}{$F}{'[deadkeyFace]'}{$self->key2hex($_)}, @d;
+#warn 'prefix key faces to report: <', join('> <', @Dface), '>';
+  my @maps = (undef, map $_ && $self->linked_faces_2_hex_map($F, $_), @Dface);	# element of Dface may be false if this is non-autonamed AltGr-inverted face
+  for my $n ( 0 .. $#{ $LL[0] } ) {
+    my $out = '';
+    for my $dn (0..@d) {		# 0 is no-dead
+      next if $dn and not $maps[$dn];
+      $out .= "\t" if length $out;
+      my $o = '';
+      for my $L (0..$#$LL) {
+        for my $shift (0..1) {
+          my $pre = '';
+          my $c = $LL[$L][$n][$shift];
+          $o .= ' ', next unless defined $c;
+          $pre = "\x{2620}", $c = $c->[0] if 'ARRAY' eq ref $c;
+          if ($dn) {
+            $c = $maps[$dn]{$self->key2hex($c)};
+            $c = ' ' unless defined $c;
+            $pre = "\x{2620}", $c = $c->[0] if 'ARRAY' eq ref $c;
+            $c = $self->charhex2key($c);
+          } else {
+            $pre = "\x{2620}" if $self->{faces}{$F}{'[coverage0_prefix]'}{$c};
+          }
+          $c =~ s/(?=\p{NonspacingMark})/\x{25cc}/g;	# dotted circle ◌ 25CC
+          $c = "$pre$c";
+          $o .= $self->control2prt($c);
+        }
+      }
+      $out .= $o;
+    }
+    print "$out\n";
+  }
 }
   
 sub coverage_face0 ($$) {
   my ($self, $F) = (shift, shift);
   my $LL = $self->{faces}{$F}{layers};
   return $self->{faces}{$F}{'[coverage0]'} if exists $self->{faces}{$F}{'[coverage0]'};
-  my (%seen, %seen_prefix);
+  my (%seen, %seen_prefix, %imported);
   my $d = { %{ $self->{faces}{$F}{'[DEAD]'} || {} }, %{ $self->{faces}{$F}{'[dead_in_VK]'} || {} } };
   for my $l (@$LL) {
     my $L = $self->{layers}{$l};
     for my $k (@$L) {
-      $seen{$_}++        for grep {defined and !$d->{$_}} @$k;
-      $seen_prefix{$_}++ for grep {defined and  $d->{$_}} @$k;
+      $seen{$_}++        		   for grep {defined and !ref and !$d->{$_}} @$k;
+      $seen_prefix{ref() ? $_->[0] : $_}++ for grep {defined and (ref or $d->{$_})} @$k;
+      $imported{"$_->[0]:$_->[1]"}++	   for grep {defined and ref and !$_->[2]} @$k;
     }
   }
   $self->{faces}{$F}{'[coverage0_prefix]'} = \%seen_prefix;
-  $self->{faces}{$F}{'[coverage0]'} = [sort keys %seen]
+  $self->{faces}{$F}{'[coverage0]'} = [sort keys %seen];
+  $self->{faces}{$F}{'[imported]'} = [sort keys %imported];
+}
+
+sub massage_imported ($$) {
+  my ($self, $f, $K) = (shift, shift);
+  return unless my ($F, $KKK) = $f =~ /^(.*)###([a-f0-9]{4,})$/is;
+  my $H = $self->{faces}{$F};
+  for my $i ( @{ $self->{faces}{$f}{'[imported]'} || [] } ) {
+    my($k,$face) = $i =~ /^(.):(.*)/s or die "Unrecognized imported: `$i'";
+    if (exists $H->{'[imported2key]'}{$i} or exists $H->{'[imported2key_auto]'}{$i}) {
+      $K = exists $H->{'[imported2key]'}{$i} ? $H->{'[imported2key]'}{$i} : $H->{'[imported2key_auto]'}{$i};
+    } elsif ($H->{'[coverage0_prefix]'}{$k} or $H->{'[auto_dead]'}{$k}) {
+      # Assign a fake prefix key to imported map
+      warn("Imported prefix keys exist, but Auto_Diacritic_Start is not defined in face `$F'"), return 
+        unless defined $H->{'[first_auto_dead]'};
+      $K = $H->{'[imported2key_auto]'}{$i} = $self->next_auto_dead($H);
+    } else {		# preserve the prefix key
+      $K = $H->{'[imported2key_auto]'}{$i} = $k;
+      $H->{'[auto_dead]'}{$k}++;
+    }
+    my $LL = $self->{faces}{$face}{'[deadkeyLayer]'}{$self->key2hex($k)}
+      or die "Cannot import a deadkey `$k' from `$face'";
+    $LL = [@$LL];		# So may override
+    my $KK = $self->key2hex($K);
+    if (my $over = $H->{'[AdddeadkeyLayer]'}{$KK}) {
+#warn "face `$F': additional bindings for deadkey $KK exist.\n";
+      $LL->[$_] = $self->make_translated_layer_stack($over->[$_], $LL->[$_]) for 0..$#$LL;
+    }
+    $H->{'[deadkeyLayer]'}{$KK} = $LL;
+    my $new_facename = "$F#\@#\@#\@$i";
+    $self->{faces}{$new_facename}{layers} = $LL;
+    $H->{'[deadkeyFace]'}{$KK} = $new_facename;
+    $self->link_layers($F, $new_facename, 'skipfix', 'no-slot-warn', $self->default_char($F));
+
+    $self->coverage_face0($new_facename);
+  }
+}
+
+sub create_imported_face ($$$$$) {	# pay attention to overrides
+  my ($self, $LL, $newname, $prefix, $face, @LL, @K) = (shift, shift, shift, shift, shift);
+  for my $n (0..$#$LL) {					# Layer number
+    my($L, @k) = $LL->[$n];
+    $L = $self->make_translated_layer_stack($prefix->[$n], $L);
+    push @LL, $L;
+  }
+  $self->{faces}{$newname}{layers} = \@LL;
 }
 
 sub massage_char_substitutions($$) {	# Read $self->{Substitutions}
@@ -2162,17 +2303,22 @@ sub new_from_configfile_string ($$) {
     
     $data->massage_deadkeys_win($data);
     $data->create_composite_layers;		# Needs to be after simple deadkey maps are known
-    
+
     for my $F (keys %{ $data->{faces} }) {
-      $data->coverage_face0($F);		# creates coverage0 array (excludes diacritics)
+      $data->coverage_face0($F);		# creates coverage0,imported array (c0 excludes diacritics), coverage0_prefix hash
     }
     for my $F (keys %{ $data->{faces} }) {
-      next if $F =~ /##(Inv)?#/;		# Face-on-a-deadkey
+      $data->massage_imported($F);		# creates coverage0,imported array (c0 excludes diacritics), coverage0_prefix hash
+    }
+    $data->create_inverted_faces;
+
+    for my $F (keys %{ $data->{faces} }) {
+      next if $F =~ /#\@?#\@?(Inv)?#\@?/;		# Face-on-a-deadkey
       my($seen_prefix, %seen0, %seen1) = $data->{faces}{$F}{'[coverage0_prefix]'};
       warn("Face `$F' has no [deadkeyFace]"), next unless $data->{faces}{$F}{'[deadkeyFace]'};
 #      next;
       for my $deadKEY ( sort keys %{ $data->{faces}{$F}{'[deadkeyFace]'}} ) {
-        unless (%seen0) {
+        unless (%seen0) {				# Do not calculate if $F has no deadkeys...
           $seen0{$_}++ for @{ $data->{faces}{$F}{'[coverage0]'} };
         }
         ### XXXXX Directly linked faces may have some chars unreachable via the switch-prefixKey
@@ -2183,10 +2329,10 @@ sub new_from_configfile_string ($$) {
         my $FFF = $data->{faces}{$F}{'[deadkeyFace]'}{$deadKEY};
         my $cov2 = $data->{faces}{$FFF}{'[coverage0]'} 
           or warn("Deadkey `$deadKey' on face `$F' -> unmassaged face"), next;
-        $seen0{$_}++ or $seen1{$_}++ for @$cov2;
-        $data->{faces}{$F}{'[coverage1]'} = [sort keys %seen1];
-        $data->{faces}{$F}{'[coverage_hash]'} = \%seen0;
+        ref or $seen0{$_}++ or $seen1{$_}++ for @$cov2;		# Skip inherited deadkeys
       }
+      $data->{faces}{$F}{'[coverage1]'} = [sort keys %seen1];
+      $data->{faces}{$F}{'[coverage_hash]'} = \%seen0;
     }
     $data
 }
@@ -2483,7 +2629,7 @@ $do_control{' '} = '0020';
 delete $do_control{0};
 
 sub massage_VK ($$) {
-  my ($self, $f, %seen, %seen_dead) = (shift, shift);
+  my ($self, $f, %seen, %seen_dead, @dead) = (shift, shift);
   my $l0 = $self->{faces}{$f}{layers}[0];
   $self->{faces}{$f}{'[non_VK]'} = @{ $self->{layers}{$l0} };
   my @extra = map [[],[],[],[],[]], 0..$#{ $self->{faces}{$f}{layers} };
@@ -2497,7 +2643,7 @@ sub massage_VK ($$) {
     for my $k (@$v[1..$#$v]) {
       ($k, my $dead) = ($k =~ /^(.+?)(\@?)$/) or die "Empty key in VK list";
       $seen{$k eq '-1' ? '' : ($k = $self->charhex2key($k))}++;
-      $seen_dead{$k}++ if $dead and $k ne '-1';
+      $seen_dead{$k}++ or push @dead, $k if $dead and $k ne '-1';
       my $kk = ($k eq '-1' ? undef : $k);
       push @{ $extra[int($c/2)] }, [] unless $c % 2;
       push @{ $extra[int($c/2)][-1] }, $kk;		# $extra[$N] is [[$k0, $k1] ...]
@@ -2508,19 +2654,26 @@ sub massage_VK ($$) {
 # warn 'Key: <', join('> <', @C), '>';
     @$v = ($v->[0], @C);
   }
+  $self->{faces}{$f}{'[ini_layers]'} = [ @{ $self->{faces}{$f}{layers} } ];	# Deep copy
   if (@extra) {
     my @Ln;
     for my $l (0 .. $#{ $self->{faces}{$f}{layers} } ) {
-      my $Ln = $self->{faces}{$f}{layers}[$l];
+      my $oLn = my $Ln = $self->{faces}{$f}{layers}[$l];
       my $L = $self->{layers}{$Ln};
       my @L = map [$_->[0], $_->[1]], @$L;		# Each element is []; deep copy
       push @L, @{ $extra[$l] };
       push @Ln, ($Ln .= "<$f>");
       $self->{layers}{$Ln} = \@L;
+      # At this moment ini_copy should not exist yet
+warn "ini_copy of `$oLn' exists; --> `$Ln'" if $self->{layers}{'[ini_copy]'}{$oLn};
+#      $self->{layers}{'[ini_copy]'}{$Ln} = $self->{layers}{'[ini_copy]'}{$oLn} if $self->{layers}{'[ini_copy]'}{$oLn};
+#???    Why does not this works???
+#warn "ini_copy1: `$Ln' --> `$oLn'";
+       $self->{layers}{'[ini_copy1]'}{$Ln} = $self->deep_copy($self->{layers}{$oLn});
     }
     $self->{faces}{$f}{layers} = \@Ln;
   }
-  ([keys %seen], [keys %seen_dead], \%seen_dead)
+  ([keys %seen], \@dead, \%seen_dead)
 }
 
 sub format_key ($$$$) {
@@ -2790,6 +2943,15 @@ sub filter_hex_map ($$$$$$) {				# XXXX Not used???
   return { map +($self->key2hex($_), $self->key2hex($Map->{$remap->{$_}[0]})), @k }
 }
 
+sub KEY2hex ($$) {
+  my ($self, $k) = (shift, shift);
+  return $self->key2hex($k) unless 'ARRAY' eq ref $k;
+#warn "see a deadkey `@$k'";
+  $k = [@$k];				# deeper copy
+  $k->[0] = $self->key2hex($k->[0]);
+  $k;
+}
+
 sub linked_faces_2_hex_map ($$$$) {
   my ($self, $name, $b, $inv) = (shift, shift, shift, shift);
   my $L = $self->{faces}{$name};
@@ -2801,20 +2963,27 @@ sub linked_faces_2_hex_map ($$$$) {
   $remap ||= {map +(chr hex $_, chr hex $remap->{$_}), keys %$cover};		# This one in terms of chars, not hex
   my @k = keys %$remap;
 # warn "Map `$name' -> '$b': <", join('> <', map +($self->key2hex($_), $self->key2hex($remap->{$_})), @k), '>';
-  return { map +($self->key2hex($_), $self->key2hex($remap->{$_})), @k }
+  return { map +($self->key2hex($_), $self->KEY2hex($remap->{$_})), @k }
 }
 
 my $dead_descr;
-my %control = split / /, "\n \\n \r \\r \t \\t \b \\b \cC \\0x03 \x7f \\x7f \x1b \\x1b \x1c \\x1c \x1d \\x1d";
+#my %control = split / /, "\n \\n \r \\r \t \\t \b \\b \cC \\x03 \x7f \\x7f \x1b \\x1b \x1c \\x1c \x1d \\x1d";
+my %control = split / /, "\n \\n \r \\r \t \\t \b \\b";
+sub control2prt ($$) {
+  my($self, $c) = (shift, shift);
+  return $c unless ord $c < 0x20 or ord $c == 0x7f;
+  $control{$c} or sprintf '\\x%02x', ord $c;
+}
 sub print_deadkey_win ($$$$$$) {
   my ($self, $nameF, $d, $dead2, $flip_AltGr_hex, $altGr_key_hex) = (shift, shift, shift, shift, shift, shift);
 #warn "emit `$nameF' d=`$d'";
-  my $b = $self->{faces}{$nameF}{'[deadkeyFace]'}{$d};
-  my $b1 = $altGr_key_hex && $self->{faces}{$nameF}{'[deadkeyFaceInvFace]'}{$self->charhex2key($altGr_key_hex)};
+  my $H = $self->{faces}{$nameF};
+  my $b = $H->{'[deadkeyFace]'}{$d};
+  my $b1 = $altGr_key_hex && $H->{'[deadkeyFaceInvFace]'}{$self->charhex2key($altGr_key_hex)};
 #warn "See dead2 in <$nameF> for <$d>" if $dead2;
   my $Dead2 = $dead2;
   $dead2 = ($dead2 || {})->{$self->charhex2key($d)} || {};
-  my(@sp, %sp) = map {(my $in = $_) =~ s/(?<=.)\@$//s; $in} @{ $self->{faces}{$nameF}{VK}{SPACE} || [] };
+  my(@sp, %sp) = map {(my $in = $_) =~ s/(?<=.)\@$//s; $in} @{ $H->{VK}{SPACE} || [] };
   @sp = map $self->charhex2key($_), @sp;
   @sp{@sp[1..$#sp]} = (0..$#sp);		# The leading elt is the scancode
   my @maps = map $self->linked_faces_2_hex_map($nameF, $_), $b, ($b1 ? $b1 : ());	# Invert AltGr???
@@ -2825,21 +2994,21 @@ sub print_deadkey_win ($$$$$$) {
   # 2) process one map with AltGr-inversion (in 1-2 the inversion may have a customization put over it).
   # The problem is to recognize when deadkeys in the inversion come from non-inverted one, or from customization
   # And, in case (1), we must consider flip_AltGr specially...
-  my($is_invAltGr, $AMap, $default) = ($D eq ($flip_AltGr_hex || 'n/a') and $self->{faces}{$nameF}{'[dead2_AltGr_chain]'}{''});
+  my($is_invAltGr, $AMap, $default) = ($D eq ($flip_AltGr_hex || 'n/a') and $H->{'[dead2_AltGr_chain]'}{''});
   if ($#maps or $is_invAltGr) {
-    $self->faces_link_via_backlinks($nameF, $nameF);		# Create AltGr-invert self-mapping
+    $self->faces_link_via_backlinks($nameF, $nameF, undef, 'no_ini');		# Create AltGr-invert self-mapping
     $AMap = $self->linked_faces_2_hex_map($nameF, $nameF, 1);
     $default = $self->default_char($nameF);
     $default = $self->key2hex($default) if defined $default;
 #warn "default=$default deadkey=$D flip=$flip_AltGr_hex" if defined $default;;
   }
   my($ini_dead2, $map_AltGr_over, $over_dead2) = ($dead2, {}, {});
-  if (my $override_InvAltGr = $self->{faces}{$nameF}{"[InvAltGrFace]"}{$is_invAltGr ? '' : $d}) {
+  if (my $override_InvAltGr = $H->{"[InvAltGrFace]"}{$is_invAltGr ? '' : $d}) {
     $map_AltGr_over = $self->linked_faces_2_hex_map($nameF, $override_InvAltGr);
     my $inverted_key = $is_invAltGr ? $flip_AltGr_hex : $altGr_key_hex;
     $over_dead2 = $Dead2->{$self->charhex2key($inverted_key)} || {} if defined $inverted_key;	# ?????
   }
-  $dead2 = { %{ $self->{faces}{$nameF}{'[DEAD]'} }, %{ $self->{faces}{$nameF}{'[dead_in_VK]'} } } if $is_invAltGr;
+  $dead2 = { %{ $H->{'[DEAD]'} }, %{ $H->{'[dead_in_VK]'} } } if $is_invAltGr;
   
 # warn "output map for `$D' invert=", !!$is_invAltGr, ' <',join('> <', sort keys %$dead2),'>';
   for my $invertAlt0 (0..$#maps) {
@@ -2855,11 +3024,22 @@ sub print_deadkey_win ($$$$$$) {
              grep(				                    $_ eq '0020',  @keys));
     for my $n (@keys) {	# Not OK for 6-byte keys (impossible on Win): make SPACE last
 #      warn "doing $n\n";
-      my $to = $map->{$n};
-      $self->{faces}{$nameF}{'[32-bit]'}{chr hex $map->{$n}}++, next if hex $n > 0xFFFF;	# Cannot be put in a map...
+      my ($to, $int_dead) = $map->{$n};
+      if ('ARRAY' eq ref $to) {
+        $int_dead = !$to->[2]; 
+        my $i = $self->charhex2key($to->[0]) . ":$to->[1]";
+        if (defined (my $j = exists $H->{'[imported2key_auto]'}{$i} ? $H->{'[imported2key_auto]'}{$i} : $H->{'[imported2key]'}{$i})) {
+          $to = $self->key2hex($j);
+        } else {
+          warn "Can't resolve `$to->[0]:$to->[1]' to an imported dead key" if $int_dead;
+          $to = $to->[0];
+        }
+        
+      }
+      $H->{'[32-bit]'}{chr hex $map->{$n}}++, next if hex $n > 0xFFFF;	# Cannot be put in a map...
       if (hex $to > 0xFFFF) {		# Value cannot be put in a map...
-        $self->{faces}{$nameF}{'[32-bit]'}{chr hex $map->{$n}}++;
-        next unless defined ($to = $self->{faces}{$nameF}{DeadChar_32bitTranslation});
+        $H->{'[32-bit]'}{chr hex $map->{$n}}++;
+        next unless defined ($to = $H->{DeadChar_32bitTranslation});
         $to =~ s/^\s+//;	$to =~ s/\s+$//;
         $to = $self->key2hex($to);
       }
@@ -2869,26 +3049,21 @@ sub print_deadkey_win ($$$$$$) {
         			 : (($invertAlt ? $AMap->{$n} : $n), $dead2));
 #warn "$D --> $d, `$n', `$alt_n', `$AMap->{$n}'; `$map_AltGr_over->{$n}' i=$invertAlt i0=$invertAlt0 d=$use_dead2->{chr hex $alt_n}";
       my $DEAD = ((defined $alt_n and $use_dead2->{chr hex $alt_n}	# Or are we doing a chain of flip_AltGr :
-      		   or $invertAlt and $n eq ($flip_AltGr_hex || 'n/a') and $self->{faces}{$nameF}{'[dead2_AltGr_chain]'}{$invertAlt0 ? $D : ''})
+      		   or $invertAlt and $n eq ($flip_AltGr_hex || 'n/a') and $H->{'[dead2_AltGr_chain]'}{$invertAlt0 ? $D : ''})
       		  ? '@' : '');
-#warn "AltGr flip: $nameF:$D: $n --> $self->{faces}{$nameF}{'[dead2_AltGr_chain]'}{$D}" if $n eq ($flip_AltGr_hex || 'n/a');
-      my $from = $control{chr hex $n} || chr hex $n;
+#warn "AltGr flip: $nameF:$D: $n --> $H->{'[dead2_AltGr_chain]'}{$D}" if $n eq ($flip_AltGr_hex || 'n/a');
+      my $from = $self->control2prt(chr hex $n);
       ($DEAD, $to) = ('@', $DD[1])	# Join b1 to b on $flip_AltGr_hex
         if @maps == 2 and defined $default and !$invertAlt and !$DEAD and defined $flip_AltGr_hex 
            and (hex $n) == hex $flip_AltGr_hex and (hex $to) == hex $default;	# Do not overwrite existing binding...  Warn???
-      # Nowadays we do not define $flip_AltGr_hex in the principal maps, so this is not that needed???
-      if (0 and (
-          defined $default and $invertAlt and defined $alt_n and (hex $alt_n) == hex $flip_AltGr_hex
-          or exists $map_AltGr_over->{$n})) {
-        # It may have been overwritten by an explicit assignment to InvMap... ???
-        # If this face is reached, then $flip_AltGr_hex in the principal layer is probably a prefix key; do not trust $DEAD;
-        # one can always overwrite this by explicit assignments:
-        $DEAD = $ini_dead2->{chr hex $n} ? '@' : '';
-      }
+      $to = $default if defined $default and (0x7f == hex $to or 0x20 > hex $to) and (0x7f == hex $n or 0x20 > hex $n);
       my $expl = exists $self->{UNames} ? "\t// " . join "\t-> ",		#  map $self->UName($_), 
   #                  chr hex $n, chr hex $map->{$n} : '';
                    $self->UName(chr hex $n), $self->UName(chr hex $to, 1) : '';
-      $OUT .= sprintf "%s\t%s%s\t// %s -> %s%s\n", $n, $to, $DEAD, $from, chr hex $to, $expl;
+      my $to1 = $self->control2prt(chr hex $to);
+      warn "Both int_dead and DEAD properties hold for `$from' --> '$to1' via deadkey $d face=$nameF" if $DEAD and $int_dead;
+      $DEAD = '@' if $int_dead;
+      $OUT .= sprintf "%s\t%s%s\t// %s -> %s%s\n", $n, $to, $DEAD, $from, $to1, $expl;
     }
     $OUT .= "\n";
     $keys ||= @keys;
@@ -2924,6 +3099,7 @@ sub diacritic2self ($$$$$$) {
   my ($self, $dia, $c, $face, $N, $space) = (shift, shift, shift, shift, shift, shift);
 #  warn("Translating for dia=<$dia>: got undef"),
   return $c unless defined $c;
+  $c = $c->[0] if 'ARRAY' eq ref $c;			# Prefix keys behave as usual keys
 #warn "  Translating for dia=<$dia>: got <$c>";
   die "`  $dia  ' not a known diacritic" unless my $name = $self->{'[map2diac]'}{$dia};
   my $v = $self->{'[diacritics]'}{$name} or die "Panic!";
@@ -3019,17 +3195,18 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
   if ($name =~ /^Space(Self)?2Id(?:\[(.+)\])?$/) {
     my $dia = $self->charhex2key((defined $2) ? $2 : do {$used_deadkey ="/$deadkey"; $deadkey});	# XXXX `do' is needed, comma does not work
     my $self_OK = $1 ? $dia : 'n/a';
-    return sub ($) { my $c = (shift() || '[none]'); ($c eq ' ' or $c eq $self_OK) ? $dia : undef }, $used_deadkey;
+    return sub ($) { my $c = (shift() || '[none]'); $c = $c->[0] if 'ARRAY' eq ref $c;	# Prefix key as usual letter
+    		    ($c eq ' ' or $c eq $self_OK) ? $dia : undef }, $used_deadkey;
   }
   if ($name =~ /^ShiftFromTo\[(.+)\]$/) {
     my ($f,$t) = split /,/, "$1";
     $_ = hex $self->key2hex($_) for $f, $t;
-    $t -= $f;
-    return sub ($) { my $c=shift; return $c unless defined $c; chr($t + ord $c) }, '';
+    $t -= $f;					# Treat prefix keys as usual keys:
+    return sub ($) { my $c=shift; return $c unless defined $c; $c = $c->[0] if 'ARRAY' eq ref $c; chr($t + ord $c) }, '';
   }
   if ($name =~ /^SelectRX\[(.+)\]$/) {
-    my ($rx) = qr/$1/;
-    return sub ($) { my $c=shift; defined $c or return $c; return undef unless $c =~ $rx; $c }, '';
+    my ($rx) = qr/$1/;				# Treat prefix keys as usual keys:
+    return sub ($) { my $c=shift; defined $c or return $c; $c = $c->[0] if 'ARRAY' eq ref $c; return undef unless $c =~ $rx; $c }, '';
   }
   if ($name =~ /^FromTo(FlipShift)?\[(.+)\]$/) {
     my $flip = $1;
@@ -3044,8 +3221,8 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
       } else {
         $h{defined($kk = $f->[$k][$_]) ? $kk : ''} = $t->[$k][$_] for 0,1;
       }# 
-    }
-    return sub ($) { my $c = shift; defined $c or return $c; $h{$c} }, '';
+    }						# Treat prefix keys as usual keys:
+    return sub ($) { my $c = shift; defined $c or return $c; $c = $c->[0] if 'ARRAY' eq ref $c; $h{$c} }, '';
   }
   if ($name =~ /^(De)?Diacritic(SpaceOK)?(Hack)?(2Self)?(?:\[(.+)\])?$/) {
     die "DeDiacritic2Self does not make sense" if my $undo = $1 and $4;
@@ -3118,7 +3295,7 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
         }
       }
 #warn "Age of <à> is <$self->{Age}{à}>";
-      return sub ($) { return undef unless defined (my $in=shift); $Map{$in} }, $used_deadkey;
+      return sub ($) { return undef unless defined (my $c=shift); $c = $c->[0] if 'ARRAY' eq ref $c; $Map{$c} }, $used_deadkey;
     }
     my (@dia, %unAltGr);
     for my $dia (split /[,|]/, $Dia) {
@@ -3167,8 +3344,8 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
         $Map{$c[0]} = $c[1];
       }
     }
-    die "Empty ByPairs map <$in>" unless %Map;
-    return sub ($) { my $c = shift; defined $c or return $c; $Map{$c} }, '';
+    die "Empty ByPairs map <$in>" unless %Map;			# Treat prefix keys as usual keys:
+    return sub ($) { my $c = shift; defined $c or return $c; $c = $c->[0] if 'ARRAY' eq ref $c; $Map{$c} }, '';
   }
   my $map = $self->get_deep($self, 'DEADKEYS', split m(/), $name);
   die "Can't resolve character map `$name'" unless defined $map;
@@ -3185,9 +3362,8 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
   die "Can't resolve character map `$name' `map': <", (join '> <', %$map), ">" unless defined $map->{map};
   $map = $map->{map};
   my $Map = { map +(chr hex $_, chr hex($map->{$_})), keys %$map };	# hex form is not unique
-  ( sub ($) {
-      my $in = shift;
-      (defined $in) ? $Map->{$in} : undef 
+  ( sub ($) {					# Treat prefix keys as usual keys:
+      my $c = shift; defined $c or return $c; $c = $c->[0] if 'ARRAY' eq ref $c; $Map->{$c} 
     }, $used_deadkey )
 }
 
@@ -3259,22 +3435,31 @@ sub join_min_paren_matched ($$@) {
   @out
 }
 
+sub export_layers ($$) {
+  my ($self, $face) = (shift, shift);
+  $self->{faces}{$face}{'[ini_layers_prefix]'} || $self->{faces}{$face}{'[ini_layers]'} || $self->{faces}{$face}{layers}
+}
+
 sub pseudo_layer ($$$$) {
   my ($self, $recipe, $face, $N) = (shift, shift, shift, shift);
   if ($recipe eq 'LinkFace') {
     my $L = $self->{faces}{$face}{LinkFace} or die "Face `$face' has no LinkFace";
-    return $self->{faces}{$L}{layers}[$N];
+    return ($self->export_layers($L))->[$N];
   }
+  return ($self->export_layers($face))->[$N] if $recipe eq 'Self';
+  return ($1,$2)[$N]			     if $recipe =~ /^Layers\((.*)\+(.*)\)$/;
+  my $N1 = $self->flip_layer_N($N, $#{ $self->{faces}{$face}{layers} });
   if ($recipe eq 'FlipLayersLinkFace') {
     my $L = $self->{faces}{$face}{LinkFace} or die "Face `$face' has no LinkFace";
-    return $self->{faces}{$L}{layers}[1-$N];
+    return ($self->export_layers($L))->[$N1];
   }
-  return $self->{faces}{$face}{layers}[1-$N] if $recipe eq 'FlipLayers';
-  return $self->{faces}{$face}{layers}[$N]   if $recipe eq 'Self';
-  return $self->{faces}{$2}{layers}[$1 ? $N : 1-$N] if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/;
-  return ($1,$2)[$N]			     if $recipe =~ /^Layers\((.*)\+(.*)\)$/;
+  return ($self->export_layers($face))->[$N1] if $recipe eq 'FlipLayers';
+  return ($self->export_layers("$2"))->[$1 ? $N : $N1]
+    if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/;
   die "Unrecognized Face recipe `$recipe'"
 }
+
+#  my @LL = map $self->{layers}{'[ini_copy1]'}{$_} || $self->{layers}{'[ini_copy]'}{$_} || $self->{layers}{$_}, @$LL;
 
 # A stand-alone word is either LinkFace, or is interpreted as a name of 
 # translation function applied to the current face.
@@ -3283,6 +3468,7 @@ sub pseudo_layer ($$$$) {
 #   layer - unless one restricts the recipe to a particular layer 0/1 of the 
 #   face).  
 # In particular: to specify a layer, use Id(LayerName).
+#use Dumpvalue;
 sub make_translated_layer ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipShift, stacking and maps
   my ($self, $recipe, $face, $N, $deadkey, $append, $ARG) = (shift, shift, shift, shift, shift, '');
 # XXX We can't cache created layer by name, since it depends on $recipe and $N too???
@@ -3295,6 +3481,8 @@ sub make_translated_layer ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipShi
   if (@parts > 1) {
 #warn "parts of the translation spec: <", join('> <', @parts), '>';
     my @layers = map $self->make_translated_layer($_, $face, $N, $deadkey), @parts;
+#print "Stacking for `$recipe'\n" if $DEBUG;
+#Dumpvalue->new()->dumpValue(\@layers) if $DEBUG;
     return $self->make_translated_layer_stack(@layers);
   }
   if ( $recipe =~ /\)$/ ) {
@@ -3340,9 +3528,38 @@ sub default_char ($$) {
   $default;
 }
 
+sub create_inverted_face ($$$$$) {
+  my ($self, $F, $KK, $chain, $flip_AltGr) = (shift, shift, shift, shift, shift);
+  my $H = $self->{faces}{$F};
+  my $auto_chr = $H->{'[deadkeyInvFace]'}{$KK};
+  my $new_facename = $H->{'[deadkeyFaceInvFace]'}{$auto_chr};
+  my $LL = $H->{'[deadkeyLayer]'}{$KK};
+  $LL = $H->{layers} if $KK eq '';
+  $self->create_inverted_AltGr_face($LL, $new_facename, $H->{"[InvdeadkeyLayer]"}{$KK}, $chain->{$KK and $self->charhex2key($KK)}, $flip_AltGr, $F);
+
+# warn "Joining <$F>, <$new_facename>";
+  $self->link_layers($F, $new_facename, 'skipfix', 'no-slot-warn', $self->default_char($F));
+  if ($KK eq '' and defined $flip_AltGr) {
+    $H->{'[deadkeyFace]'}{$self->key2hex($flip_AltGr)} = $H->{'[deadkeyFaceInvFace]'}{$auto_chr};
+  }
+  if ($H->{"[InvdeadkeyLayer]"}{$KK}) {		# There are overrides for the inverted face.  Make a map for them...
+#warn "Overriding face for inverted `$KK' in face $F; new_facename=$new_facename";
+    $H->{'[InvAltGrFace]'}{$KK} = "$new_facename\@override";
+    $self->{faces}{"$new_facename\@override"}{layers} = $H->{"[InvdeadkeyLayer]"}{$KK};
+    $self->link_layers($F, "$new_facename\@override", 'skipfix', 'no-slot-warn', $self->default_char($F));
+  }
+  $new_facename;
+}
+
+sub next_auto_dead ($$) {
+  my ($self, $H, $o) = (shift, shift);
+  1 while $H->{'[auto_dead]'}{ $o = $H->{'[first_auto_dead]'}++ }++;
+  chr $o;
+}
+
 #use Dumpvalue;
 sub create_composite_layers ($) {
-  my ($self, %h) = (shift);
+  my ($self, %h, $expl) = (shift);
 #Dumpvalue->new()->dumpValue($self);
   my $filter = qr(^faces(?:/(.*))?/DeadKey_Map([0-9a-f]{4+})?(_\d)?$)i;
   my @F = grep m(^faces(/.*)?$), @{$self->{'[keys]'}};
@@ -3351,15 +3568,11 @@ sub create_composite_layers ($) {
     my $H = $self->get_deep($self, split m(/), $FF);
     $self->{faces}{$F} = $H if $F =~ m(/) and exists $H->{layers};			# Make a direct-access copy
 
-    my $expl = $self->get_deep($self, (split m(/), $FF), 'Explicit_AltGr_Invert') || [];
-    $expl = [], warn "Odd number of elements of Explicit_AltGr_Invert in face $F, ignore" if @$expl % 2;
-    $expl = {map $self->charhex2key($_), @$expl};
-
     # warn "compositing: faces `$F'; -> <", (join '> <', %$H), ">";
     my (%seen, @H, @H1);
     for my $k ( keys %$H ) {
 # warn "\t`$k' -> `$H->{$k}'";
-      next unless $k =~ m(^DeadKey_(Inv)?Map([0-9a-f]{4,})?(?:_(\d+))?$)i;
+      next unless $k =~ m(^DeadKey_(Inv|Add)?Map([0-9a-f]{4,})?(?:_(\d+))?$)i;
 #warn "\t`$k' -> `$H->{$k}'";
       my($inv, $key, $layers) = ($1 || '', $2, $3);
       my $ref = ((defined $key) ? \@H : \@H1);	# Put undefined at the end
@@ -3373,12 +3586,15 @@ sub create_composite_layers ($) {
       for my $layer (@$layers) {	# Create a layer according to the spec
 #warn "DeadKey Layer for face=$face; layer=$layer, k=$k:\n\t$H->{$k}, key=`", ($key||''),"'\n\t\t";
         my @keys = ((defined $key) ? $key : (grep {not $seen{$_}} map $self->key2hex($_), keys %{ $H->{'[dead]'}[$layer] }));
-        @keys = '' if $inv and "@keys" eq "0000";
+        @keys = '' if $inv and "$inv @keys" eq "Inv 0000";
         for my $KK (@keys) {
 #warn "Doing key `$KK' inv=$inv with `$H->{$k}'";
           (my $recipe = $H->{$k}) =~ s/^\s+//;
           my $massage = !($recipe =~ s/\s+NoDefaultTranslation$//);
+#$DEBUG = $key eq '0192';
           my $new = $self->make_translated_layer($recipe, $face, $layer, $KK);
+#print "Doing key `$KK' face=$face  layer=`$layer' recipe=`$recipe'\n" if $DEBUG;
+#Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $DEBUG;
 	  $new = $self->massage_translated_layer($new,    $face, $layer, $KK) if $massage and not $inv;
           $H->{"[${inv}deadkeyLayer]"}{$KK}[$layer] = $new;
 #warn "Face `$face', layer=$layer key=$KK\t=> `$new'" if $H->{layers}[$layer] =~ /00a9/i;
@@ -3403,13 +3619,29 @@ sub create_composite_layers ($) {
       $H->{'[deadkeyFace]'}{$KK} = $new_facename;
 #warn "Joining <$F>, <$new_facename>";
       $self->link_layers($F, $new_facename, 'skipfix', 'no-slot-warn', $self->default_char($F));
+    }
+  }
+  $self
+}
 
-      # Create AltGr-inverted face if there is at least one key in the AltGr face:
+sub create_inverted_faces ($) {
+  my ($self) = (shift);
+#Dumpvalue->new()->dumpValue($self);
+  for my $F (keys %{$self->{faces} }) {
+    my $H = $self->{faces}{$F};
+    next unless $H->{'[deadkeyLayer]'};		# Are we in a no-nonsense Face-hash with defined deadkeys?
+    my $expl = $self->get_deep($self, 'faces', (split m(/), $F), 'Explicit_AltGr_Invert') || [];
+    $expl = [], warn "Odd number of elements of Explicit_AltGr_Invert in face $F, ignore" if @$expl % 2;
+    $expl = {map $self->charhex2key($_), @$expl};
+
+#warn "Face: <", join( '> <', %$H), ">";
+    my $layerL = @{ $self->{layers}{ $H->{layers}[0] } };	# number of keys in the face (in the principal layer)
+    for my $KK (sort keys %{$H->{'[deadkeyLayer]'}}) {  # Create AltGr-inverted face if there is at least one key in the AltGr face:
       my $LL = $H->{'[deadkeyLayer]'}{$KK};
       next unless defined $H->{'[first_auto_dead]'} and grep defined, map $self->flatten_arrays($_), map $self->{layers}{$_}, @$LL[1..$#$LL];
-      $H->{'[deadkeyInvFace]'}{''} = chr($H->{'[first_auto_dead]'}++) unless exists $H->{'[deadkeyInvFace]'}{''};	# Make principal invertred face
+      $H->{'[deadkeyInvFace]'}{''} = $self->next_auto_dead($H) unless exists $H->{'[deadkeyInvFace]'}{''};	# Make principal invertred face
       my $auto_chr = $H->{'[deadkeyInvFace]'}{$KK} = 
-        ((exists $expl->{$self->charhex2key($KK)}) ? $expl->{$self->charhex2key($KK)} : chr($H->{'[first_auto_dead]'}++));
+        ((exists $expl->{$self->charhex2key($KK)}) ? $expl->{$self->charhex2key($KK)} : $self->next_auto_dead($H));
       $H->{'[deadkeyFaceInvFace]'}{$auto_chr} = "$F##Inv#$KK";
     }
     next unless defined (my $flip_AltGr =  $H->{Flip_AltGr_Key});
@@ -3427,23 +3659,8 @@ sub create_composite_layers ($) {
       $prev = $K;
     }
     for my $KK (keys %{$H->{'[deadkeyInvFace]'}}) {	# Now know which deadkeys take inversion, and via what prefix
-      my $auto_chr = $H->{'[deadkeyInvFace]'}{$KK};
-      my $new_facename = $H->{'[deadkeyFaceInvFace]'}{$auto_chr};
-      my $LL = $H->{'[deadkeyLayer]'}{$KK};
-      $LL = $H->{layers} if $KK eq '';
-      $self->create_inverted_AltGr_face($LL, $new_facename, $H->{"[InvdeadkeyLayer]"}{$KK}, $chain{$KK and $self->charhex2key($KK)}, $flip_AltGr, $F);
-
-# warn "Joining <$F>, <$new_facename>";
-      $self->link_layers($F, $new_facename, 'skipfix', 'no-slot-warn', $self->default_char($F));
-      if ($KK eq '' and defined $flip_AltGr) {
-        $H->{'[deadkeyFace]'}{$self->key2hex($flip_AltGr)} = $H->{'[deadkeyFaceInvFace]'}{$auto_chr};
-      }
-      if ($H->{"[InvdeadkeyLayer]"}{$KK}) {
-warn "Overriding face for inverted `$KK' in face $F; new_facename=$new_facename";
-        $H->{'[InvAltGrFace]'}{$KK} = "$new_facename\@override";
-        $self->{faces}{"$new_facename\@override"}{layers} = $H->{"[InvdeadkeyLayer]"}{$KK};
-        $self->link_layers($F, "$new_facename\@override", 'skipfix', 'no-slot-warn', $self->default_char($F));
-      }
+      my $new = $self->create_inverted_face($F, $KK, \%chain, $flip_AltGr);
+      $self->coverage_face0($new);
     }
     # We do not link the AltGr-inverted faces to the "parent" faces here.  Currently, it should be done when
     # outputting a kbd description...
@@ -3452,8 +3669,8 @@ warn "Overriding face for inverted `$KK' in face $F; new_facename=$new_facename"
 }
 
 #use Dumpvalue;
-sub create_inverted_AltGr_face ($$$$$$$) {
-  my ($self, $LL, $name, $prefix, $nextL, $chainKey, $face, @LL, @K) = (shift, shift, shift, shift, shift, shift, shift);
+sub create_inverted_AltGr_face ($$$$$$$) {	# flip layers paying attention to linked AltGr-inverted faces, and overrides
+  my ($self, $LL, $newname, $prefix, $nextL, $chainKey, $face, @LL, @K) = (shift, shift, shift, shift, shift, shift, shift);
   if (defined $nextL) {			# Borrow from make_translated_layer_tr()
     my %Map = ($chainKey, $nextL);
     my $Tr = sub ($) { my $c = shift; defined $c or return $c; my $o = $Map{$c} ;
@@ -3463,10 +3680,10 @@ sub create_inverted_AltGr_face ($$$$$$$) {
     $Tr = $self->depth1_A_translator($Tr);
     my $LLL = $self->{faces}{$face}{layers};
     for my $n (0..$#$LL) {					# Layer number
-      my $new_name = "$face##ChainAltGr#$n.." . $self->key2hex($nextL);
-#warn "AltGr-chaining: name=$new_name; `$chainKey' => `$nextL'";
-      $self->{layers}{$new_name} ||= [ map $Tr->($_), @{ $self->{layers}{ $LLL->[$n] } }];
-      push @K, $new_name;
+      my $new_Name = "$face##ChainAltGr#$n.." . $self->key2hex($nextL);
+#warn "AltGr-chaining: name=$new_Name; `$chainKey' => `$nextL'";
+      $self->{layers}{$new_Name} ||= [ map $Tr->($_), @{ $self->{layers}{ $LLL->[$n] } }];
+      push @K, $new_Name;
     }
   }
   for my $n (0..$#$LL) {					# Layer number
@@ -3480,7 +3697,7 @@ sub create_inverted_AltGr_face ($$$$$$$) {
     }
     push @LL, $L;
   }
-  $self->{faces}{$name}{layers} = \@LL;
+  $self->{faces}{$newname}{layers} = \@LL;
 }
 
 # use Dumpvalue;
@@ -3635,6 +3852,13 @@ sub parse_NameList ($$) {
       } elsif (defined $kk					# Did not see (official) decomposition
                and ($t = $name) =~ s/\b(LETTER\s+SMALL\s+CAPITAL)/CAPITAL LETTER/) {
         $candidates{$k} = [$t, "smallcaps"];
+      } elsif (defined $kk					# Did not see (official) decomposition
+               and (($t = $name) =~ s/\b(LETTER\s+)E([SZN])[HG]$/$1$2/			# esh/eng/ezh
+               		# next two not triggered since this is actually decomposed:
+                    or ($t = $name) =~ s/(?<=\bLETTER\sV\s)WITH\s+RIGHT\s+HOOK$// 
+                    or ($t = $name) =~ s/\bDOTLESS\s+J\s+WITH\s+STROKE$/J/ 
+               	    or $name eq 'LATIN SMALL LETTER SCHWA' and $t = 'DIGIT ZERO')) {
+        $candidates{$k} = [$t, "phonetized"];
       }
       ($k, $name) = ($K, $Name); 
       $kk = $k;
@@ -3668,8 +3892,8 @@ sub parse_NameList ($$) {
     undef $kk unless $a->[-1] eq '<pseudo-upgrade>' or @$a == 3 and (chr hex $a->[-2]) =~ /\W|\p{Lm}/ and $a->[-1] !~ /^</ and (chr hex $a->[-1]) =~ /\w/;				# Disable guesswork processing
     # print "@$a";
   }
-  $candidates{'014A'} = ['LATIN CAPITAL LETTER N', 'faked-HOOK'];		# Pretend on ENG...
-  $candidates{'014B'} = ['LATIN SMALL LETTER N',   'faked-HOOK'];		# Pretend on ENG...
+#  $candidates{'014A'} = ['LATIN CAPITAL LETTER N', 'faked-HOOK'];		# Pretend on ENG...
+#  $candidates{'014B'} = ['LATIN SMALL LETTER N',   'faked-HOOK'];		# Pretend on ENG...
   	# XXXX Better have this together with pseudo-upgrade???
   $candidates{'00b5'} = ['GREEK SMALL LETTER MU',  'faked-calculated-SYMBOL'];	# Pretend on MICRO SIGN...
 #  $candidates{'00b5'} = ['GREEK SMALL LETTER MU',  'calculated-SYMBOL'];	# Pretend on MICRO SIGN...
@@ -3854,6 +4078,7 @@ sub get_compositions ($$$$;$) {
 # warn("doing  <$C> <$m>: ", $self->key2hex($m), ", ", $self->key2hex($C)); # if $m eq 'A';
 # Dumpvalue->new()->dumpValue($self->{Compositions}) unless $first_time_dump++;
   return undef unless defined $C;
+  $C = $C->[0] if 'ARRAY' eq ref $C;			# Treat prefix keys as usual keys
   if ($undo) {
     return undef unless my $dec = $self->{Decompositions}{$C};
     # order in @$m matters; so does one in Decompositions - but less so

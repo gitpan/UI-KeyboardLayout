@@ -173,7 +173,7 @@ Revision history for Perl extension UI::KeyboardLayout.
 	    prefix keys AltGr-' and AltGr-^ after Shift-Space prefix.
             
           Shift-Space followed by various Modifiers-Space enters "visible
-            representations" of space: ␢, ␣ and . on Space, Shift-Space, and
+            representations" of space: ␢, ␣ and ␠ on Space, Shift-Space, and
             AltGr-Space.  Follow AltGr-Space by Space or Shift-Space to get 
             wide no-break space (space-wide and digit-wide); follow
             Shift-AltGr-Space by Shift-Space to get narrow no-break space. 
@@ -255,3 +255,30 @@ Revision history for Perl extension UI::KeyboardLayout.
 	  Allow ring/dot prefix to remove dots from i and j; remove ı from "mutiliated" lists, so that ᴉ is available.
 	  AltGr-inverted maps are aware of diacritics (so can be used before and/or after diacritics).
 	  Massive simplification of .kbdd file - remove manual AltGr-inversion crud.
+
+0.04	Block output of control chars in prefix keymaps; fix output of \x03.
+	Make all Face-related base-operators in the satellite face processor return the initial layers
+	  (and not massaged layers).  Makes LinkFace useful again in DeadKey descriptor.
+	Rename layerDeadKeys2 to faceDeadKeys2.
+	Replace layerDeadKeys by faceDeadKeys.
+	Start of redoing the internal representation of a face: layers may contain [$deadkey, $face, $noexport] instead of $deadkey.
+	  (do not redo prelink_layers, since it operates on non-instrumented layers).  Deadkeys inherited
+	  from LinkFace are recognized now.  One would need coverage2 section soon...
+	Add a compact summary of characters available on principal prefix keys (of repeated deadkeys, only inherited are marked).
+	Recognized ESH EZH ENG and SCHWA as phonetized variants of s z n 0 (no majuscule SCHWA, as in Azeri).
+	Add curses to LIMITATIONS section docs.
+	Table of chars of bépo was missing many base characters.
+
+	EurKey++:
+	  Clean up .kbdd file a bit.
+	  Add phonetized variants on macron prefix key (add ESH EZH and SCHWA, but removes ‒ so add schwa manually on AltGr).
+	    (To support this, add rules introducing ɟ and v with right hook).
+	  Add hookish+mutiliated rules to the `―´ pair.  (Adds only ʮ - not enough to add ʄ - is it 3 modifiers???)
+	  Now eng's are on macron+etc+phonetized (and n with long right leg appear on `).
+	  Add solidus (overlays) to macron.
+	  Exchange diacritic signs for combining ´ ` in Cyrillic (on double AltGr-' and on AltGr-' with '; 
+	    now Vietnamese versions (which got into Wikipedia ?!) are
+	    on Shift-ed keys, and "normal" acute and grave are on unshifted.
+	  Add Azeri Əə to Ë=AltGr-e, and ditto mark 〃 to " on Copyright face (AltGr-minus).
+	  Add promille ‰ on % on ring/dots face, primes ′,″ on '," on Math (AltGr-M) and ‡ on †=AltGr-" on macron/bar face.
+	  Latin's diacritics prefix keys are available from Cyrillic after Shift-Space. 
