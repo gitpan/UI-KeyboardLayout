@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION="0.04";
+$VERSION = $VERSION="0.05";
 use strict;
 use utf8;
 
@@ -18,6 +18,10 @@ my %unfix = reverse %fix;
 sub chr($)  { local $^W = 0; toU CORE::chr shift }	# Avoid illegal character 0xfffe etc warnings...
 sub lc($)   { my $in = shift; $unfix{$in} || CORE::lc toU $in }
 sub uc($)   { my $in = shift;   $fix{$in} || CORE::uc toU $in }
+
+# We use this for printing, not for reading (so we can use //o AFTER the UCD is read)
+my $rxCombining = qr/\p{NonspacingMark}/;	# The initial version matches what Perl knows
+
 
 =pod
 
@@ -43,7 +47,7 @@ UI::KeyboardLayout - Module for designing keyboard layouts
   
   open my $f, '<', "$ENV{HOME}/Downloads/NamesList-6.1.0d8.txt" or die;
   my $k = UI::KeyboardLayout::->new();
-  my ($d,$c,$names,$blocks) = $k->parse_NameList($f);
+  my ($d,$c,$names,$blocks,$extraComb) = $k->parse_NameList($f);
   close $f or die;
   $k->print_decompositions($d);
   $k->print_compositions  ($c);
@@ -1092,6 +1096,36 @@ C<HEART> means C<WHITE HEART SUIT>.  C<TRIPLE HORIZONTAL BAR> looks genuinely mi
 
 C<SEMIDIRECT PRODUCT> means one of two, left or right???
 
+This better be convertible by rounding/sharpening, but see
+C<BUT NOT/WITH NOT/OR NOT/AND SINGLE LINE NOT/ABOVE SINGLE LINE NOT/ABOVE NOT>
+
+  2268    LESS-THAN BUT NOT EQUAL TO;             1.1
+  2269    GREATER-THAN BUT NOT EQUAL TO;          1.1
+  228A    SUBSET OF WITH NOT EQUAL TO;            1.1
+  228B    SUPERSET OF WITH NOT EQUAL TO;          1.1
+  @               Relations
+  22E4    SQUARE IMAGE OF OR NOT EQUAL TO;                1.1
+  22E5    SQUARE ORIGINAL OF OR NOT EQUAL TO;             1.1
+  @@      2A00    Supplemental Mathematical Operators     2AFF
+  @               Relational operators
+  2A87    LESS-THAN AND SINGLE-LINE NOT EQUAL TO;         3.2
+          x (less-than but not equal to - 2268)
+  2A88    GREATER-THAN AND SINGLE-LINE NOT EQUAL TO;              3.2
+          x (greater-than but not equal to - 2269)
+  2AB1    PRECEDES ABOVE SINGLE-LINE NOT EQUAL TO;                3.2
+  2AB2    SUCCEEDS ABOVE SINGLE-LINE NOT EQUAL TO;                3.2
+  2AB5    PRECEDES ABOVE NOT EQUAL TO;            3.2
+  2AB6    SUCCEEDS ABOVE NOT EQUAL TO;            3.2
+  @               Subset and superset relations
+  2ACB    SUBSET OF ABOVE NOT EQUAL TO;           3.2
+  2ACC    SUPERSET OF ABOVE NOT EQUAL TO;         3.2
+
+Looking into v6.1 reference PDFs, 2268,2269,2ab5,2ab6,2acb,2acc have two horizontal bars, 
+228A,228B,22e4,22e5,2a87,2a88,2ab1,2ab2 have one horizontal bar,  Hence C<BUT NOT EQUAL TO> and C<ABOVE NOT EQUAL TO>
+are equivalent; so are C<WITH NOT EQUAL TO>, C<OR NOT EQUAL TO>, C<AND SINGLE-LINE NOT EQUAL TO>
+and C<ABOVE SINGLE-LINE NOT EQUAL TO>.  (Square variants come only with one horizontal line?)
+
+
 Set C<$ENV{UI_KEYBOARDLAYOUT_UNRESOLVED}> to enable warnings.  Then do
 
   perl -wlane "next unless /^Unresolved: <(.*?)>/; $s{$1}++; END{print qq($s{$_}\t$_) for keys %s}" oxx | sort -n > oxx-sorted-kw
@@ -1292,6 +1326,61 @@ Likewise for characters not accessible at all.  Mark certain chains as "Hacks" s
 they are not counted in these lists.
 
 Long s and "preceded by" are not handled since the table has its own (useless) compatibility decompositions.
+
+╒╤╕
+╞╪╡
+╘╧╛
+╓╥╖
+╟╫╢
+╙╨╜
+╔╦╗
+╠╬╣
+╚╩╝
+┌┬┐
+├┼┤
+└┴┘
+┎┰┒
+┠╂┨
+┖┸┚
+┍┯┑
+┝┿┥
+┕┷┙
+┏┳┓
+┣╋┫
+┗┻┛
+    On top of the light grid:
+┲┱
+╊╉
+┺┹
+┢╈┪
+┡╇┩
+╆╅
+╄╇
+╼━╾╺╸╶─╴╌┄┈ ╍┅┉
+╻
+┃
+╹
+╷
+│
+╵
+ 
+╽
+╿
+╎┆┊╏┇┋
+
+╲ ╱
+ ╳
+╭╮
+╰╯
+◤▲◥
+◀■▶
+◣▼◢
+◜△◝
+◁□▷
+◟▽◞
+◕◓◔
+◐○◑
+ ◒
 
 
 =head1 WINDOWS GOTCHAS
@@ -1690,7 +1779,7 @@ sub parse_configfile ($$) {		# Trailing whitespace is ignored, whitespace about 
 sub process_key_chunk ($$$$$) {
   my $self = shift;
   my $skip_first = shift;
-  (my $k = shift) =~ s/ (?=\p{NonspacingMark})//g;	# Allow combining marks to be on top of SPACE
+  (my $k = shift) =~ s/\p{Blank}(?=\p{NonspacingMark})//g;	# Allow combining marks to be on top of SPACE
   my @k = split //, $k;
   undef $k[0] if ($k[0] || '') eq "\0" and $skip_first;
   push @k, uc $k[0] if @k == 1 and defined $k[0] and $k[0] ne uc $k[0];
@@ -2002,10 +2091,10 @@ sub massage_faces ($) {
       my $s = $self->stringHEX2string($S);
       $s =~ s/\p{Blank}(?=\p{NonspacingMark})//g;
       die "Expect 2 chars in AltGr-char substitution rule; I see <$s> (from <$S>)" unless 2 == (my @s = split //, $s);
-      $self->{faces}{$f}{'[AltSubstitutions]'}{$s[0]} = $s[1];
-      $self->{faces}{$f}{'[AltSubstitutions]'}{lc $s[0]} = lc $s[1]
+      push @{ $self->{faces}{$f}{'[AltSubstitutions]'}{$s[0]} }, $s[1];
+      push @{ $self->{faces}{$f}{'[AltSubstitutions]'}{lc $s[0]} }, lc $s[1]
         if lc $s[0] ne $s[0] and lc $s[1] ne $s[1];
-      $self->{faces}{$f}{'[AltSubstitutions]'}{uc $s[0]} = uc $s[1]
+      push @{ $self->{faces}{$f}{'[AltSubstitutions]'}{uc $s[0]} }, uc $s[1]
         if uc $s[0] ne $s[0] and uc $s[1] ne $s[1];
     }
     s/^\s+//, s/\s+$//, $_ = $self->stringHEX2string($_) for @{ $self->{faces}{$f}{Import_Prefix_Keys} || []};
@@ -2098,7 +2187,7 @@ sub massage_hash_values($) {
 
 sub print_codepoint ($$;$) {
   my ($self, $k, $prefix) = (shift, shift, shift);
-  my $K = ($k =~ /\p{NonspacingMark}/ ? " $k" : $k);
+  my $K = ($k =~ /$rxCombining/ ? " $k" : $k);
   $prefix = '' unless defined $prefix;
   printf "%s%s\t<%s>\t%s\n", $prefix, $self->key2hex($k), $K, $self->UName($k, 'verbose');  
 }
@@ -2131,14 +2220,14 @@ sub print_coverage ($$) {
   my $cnt32 = keys %{$is32 || {}};
   my $c1 = @{ $self->{faces}{$F}{'[coverage1]'} } - $cnt32;
   my $more = $cnt32 ? " (and $cnt32 not available on Windows - at end of this section above FFFF)" : '';
-  printf "############# %i = %i + %i%s\n", 
+  printf "############# %i = %i + %i%s [direct + single prefix keys]\n", 
     @{ $self->{faces}{$F}{'[coverage0]'} } + $c1,
     scalar @{ $self->{faces}{$F}{'[coverage0]'} },
     $c1, $more;
   for my $k (@{ $self->{faces}{$F}{'[coverage0]'} }) {
     $self->print_codepoint($k);
   }
-  print "############# Via prefix keys:\n";
+  print "############# Via (single) prefix keys:\n";
   for my $k (@{ $self->{faces}{$F}{'[coverage1]'} }) {
     $self->print_codepoint($k);
   }
@@ -2186,7 +2275,7 @@ sub print_coverage ($$) {
           } else {
             $pre = "\x{2620}" if $self->{faces}{$F}{'[coverage0_prefix]'}{$c};
           }
-          $c =~ s/(?=\p{NonspacingMark})/\x{25cc}/g;	# dotted circle ◌ 25CC
+          $c =~ s/(?=$rxCombining)/\x{25cc}/go;	# dotted circle ◌ 25CC
           $c = "$pre$c";
           $o .= $self->control2prt($c);
         }
@@ -2239,7 +2328,7 @@ sub massage_imported ($$) {
     my $KK = $self->key2hex($K);
     if (my $over = $H->{'[AdddeadkeyLayer]'}{$KK}) {
 #warn "face `$F': additional bindings for deadkey $KK exist.\n";
-      $LL->[$_] = $self->make_translated_layer_stack($over->[$_], $LL->[$_]) for 0..$#$LL;
+      $LL = [$self->make_translated_layers_stack($over, $LL)];
     }
     $H->{'[deadkeyLayer]'}{$KK} = $LL;
     my $new_facename = "$F#\@#\@#\@$i";
@@ -2249,16 +2338,6 @@ sub massage_imported ($$) {
 
     $self->coverage_face0($new_facename);
   }
-}
-
-sub create_imported_face ($$$$$) {	# pay attention to overrides
-  my ($self, $LL, $newname, $prefix, $face, @LL, @K) = (shift, shift, shift, shift, shift);
-  for my $n (0..$#$LL) {					# Layer number
-    my($L, @k) = $LL->[$n];
-    $L = $self->make_translated_layer_stack($prefix->[$n], $L);
-    push @LL, $L;
-  }
-  $self->{faces}{$newname}{layers} = \@LL;
 }
 
 sub massage_char_substitutions($$) {	# Read $self->{Substitutions}
@@ -3083,10 +3162,11 @@ sub massage_diacritics ($) {			# "
 }
 
 sub extract_diacritic ($$$$$$@) {
-  my ($self, $dia, $idx, $which, $need, $skip2) = (shift, shift, shift, shift, shift, shift);
-  my @v  = map @$_, shift;			# first one full
+  my ($self, $dia, $idx, $which, $need, $skip2, @elt0) = (shift, shift, shift, shift, shift, shift);
+  my @v  = map @$_, my $elt0 = shift;			# first one full
   push @v, map @$_[($skip2 ? 2 : 0)..$#$_], @_;		# join the rest, omitting the first 2 (assumed: accessible in other ways)
-  push @v, grep defined, map @$_[0..1], @_ if $skip2;
+  @elt0 = $elt0 if $skip2 and $skip2 eq 'skip2-include0';
+  push @v, grep defined, map @$_[0..1], @elt0, @_ if $skip2;
 #  @v = grep +((ord $_) >= 128 and $_ ne $dia), @v;
   @v = grep +(ord $_) >= 0x80, @v;
   die "diacritic `  $dia  ' has no $which no.$idx (0-based) assigned" 
@@ -3095,8 +3175,8 @@ sub extract_diacritic ($$$$$$@) {
   return $v[$idx];
 }
 
-sub diacritic2self ($$$$$$) {
-  my ($self, $dia, $c, $face, $N, $space) = (shift, shift, shift, shift, shift, shift);
+sub diacritic2self ($$$$$$$$) {
+  my ($self, $dia, $c, $face, $N, $space, $c_base, $c_noalt) = (shift, shift, shift, shift, shift, shift, shift, shift);
 #  warn("Translating for dia=<$dia>: got undef"),
   return $c unless defined $c;
   $c = $c->[0] if 'ARRAY' eq ref $c;			# Prefix keys behave as usual keys
@@ -3128,13 +3208,42 @@ sub diacritic2self ($$$$$$) {
 #warn "Translating2vertical dia=<$dia>: got <$c>  --> <$v->[4][0]>";	# Skip2 would hurt, since macron+\ is defined:
     return $self->extract_diacritic($dia, ($c eq "|"), 'vertical+etc spacing variant', $limits->[2], !'skip2', @$v[2..3]);
   }
+  if ($N == 1 and $c_noalt and ($c_noalt eq "|" or $c_noalt eq "\\")) {
+#warn "Translating2vertical dia=<$dia>: got <$c>  --> <$v->[4][0]>";	# Skip2 would hurt, since macron+\ is defined:
+    return $self->extract_diacritic($dia, ($c_noalt eq "|"), 'vertical+dotlike combining', $limits->[6], 'skip2', @$v[6,7,4,5]);
+  }
   if ($c eq "/" or $c eq "?") {
     return $self->extract_diacritic($dia, ($c eq "?"), 'prime-like+etc spacing variant', $limits->[3], 'skip2', @$v[3]);
+  }
+  if ($N == 1 and $c_noalt and ($c_noalt eq "/" or $c_noalt eq "?")) {
+    return $self->extract_diacritic($dia, 1 + ($c_noalt eq "?"), 'combining', $limits->[4], 'skip2', @$v[4..7]);	# 1 for double-prefix
   }
   if ($c eq "_" or $c eq "-") {
     return $self->extract_diacritic($dia, ($c eq "_"), 'lowered+etc spacing variant', $limits->[1], 'skip2', @$v[1..3]);
   }
+  if ($N == 1 and $c_noalt and ($c_noalt eq "_" or $c_noalt eq "-")) {
+    return $self->extract_diacritic($dia, ($c_noalt eq "_"), 'lowered combining', $limits->[5], 'skip2', @$v[5..7,4]);
+  }
+  if ($N == 1 and $c_noalt and ($c_noalt eq ";" or $c_noalt eq ":")) {
+    return $self->extract_diacritic($dia, ($c_noalt eq ":"), 'combining for symbols', $limits->[7], 'skip2', @$v[7,4..6]);
+  }
+  if ($N == 1 and defined $c_base and 0 <= (my $ind = index "`1234567890=[],.'", $c_base)) {
+    return $self->extract_diacritic($dia, 2 + $ind, 'combining', $limits->[4], 'skip2-include0', @$v[4..7]);	# -1 for `, 1+2 for double-prefix and AltGr-/?
+  }
+  if ($N == 0 and 0 <= (my $ind = index "[{]}'\"", $c)) {
+    return $self->extract_diacritic($dia, 2 + $ind, 'combining for symbols', $limits->[7], 'skip2-include0', @$v[7,4..6]);
+  }
   return undef;
+}
+
+sub diacritic2self_2 ($$$$$$) {		# Takes a key: array of arrays [lc,uc]
+  my ($self, $dia, $c, $face, $space, @out) = (shift, shift, shift, shift, shift);
+  my $c0 = $c->[0][0];			# Base character
+  for my $N (0..$#$c) {
+    my $c1 = $c->[$N];
+    push @out, [map $self->diacritic2self($dia, $c1->[$_], $face, $N, $space, $c0, $c->[0][$_]), 0..$#$c1];
+  }
+  @out
 }
 
 # Combining stuff:
@@ -3211,7 +3320,7 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
   if ($name =~ /^FromTo(FlipShift)?\[(.+)\]$/) {
     my $flip = $1;
     my ($f,$t) = split /,/, "$2", 2;
-    exists $self->{layers}{$_} or $_= $self->make_translated_layer($_, $face, $N, $deadkey) 
+    exists $self->{layers}{$_} or $_= ($self->make_translated_layers($_, $face, [$N], $deadkey))->[0]
       for $f, $t;
     $_ = $self->{layers}{$_} for $f, $t;
     my (%h, $kk);
@@ -3236,7 +3345,8 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
     @sp = grep $flip_AltGr ne $_, @sp if defined $flip_AltGr;			# It has a different function...
     @sp{@sp[1..$#sp]} = (0..$#sp);		# The leading elt is the scancode
 #warn "SPACE: <", join('> <', %sp), '>';
-    return sub ($) { $self->diacritic2self($Dia, shift, $face, $N, \%sp) }, $used_deadkey if $4;
+#    return sub ($) { $self->diacritic2self($Dia, shift, $face, $N, \%sp) }, $used_deadkey if $4;
+    return sub ($) { $self->diacritic2self_2($Dia, shift, $face, \%sp) }, $used_deadkey, 1 if $4;
 #    die "DeDiacritic[...] is not supported yet" if $undo;
     
     my $f = $self->get_NamesList;
@@ -3375,42 +3485,68 @@ sub depth1_A_translator($$) {		# takes a ref to an array of chars
   }
 }
 
-sub make_translated_layer_tr ($$$$$$$) {		# Apply translation map
-  my ($self, $layer, $tr, $append, $deadkey, $face, $N) = (shift, shift, shift, shift, shift, shift, shift);
-  if ($tr =~ /^FlipShift$/) {
-    die "FlipShift() called on a layer with comma in a name" if $layer =~ /,/;
-    $tr = "FromToFlipShift[$layer,$layer]";
+sub depth2_translator($$) {		# takes a ref to an array of arrays of chars
+  my ($self, $tr) = (shift, shift);
+  return sub ($) {
+    my ($in, @out) = shift;
+    for my $i (0..$#$in) {
+      my $Tr = $tr->[$i];
+      push @out, [map $Tr->($_), @{$in->[$i]}]
+    }
+    @out
   }
-  my ($Tr, $used) = $self->make_translator($tr, $deadkey, $face, $N);
-#warn "  tr=<$tr>, key=<$deadkey>, used=<$used>";
-  $Tr = $self->depth1_A_translator($Tr);
-  my $new_name = "$tr$used($layer)$append";
-  return $new_name if exists $self->{layers}{$new_name};
-# warn "Translating via `$tr' from layer [$layer]: <", join('> <', map "@$_", @{$self->{layers}{$layer}}), '>';
-  $self->{layers}{$new_name} = [ map $Tr->($_), @{$self->{layers}{$layer}}];
-# warn "   --->: <", join('> <', map "@$_", @{$self->{layers}{$new_name}}), '>';
-  $new_name
 }
 
-sub make_translated_layer_stack ($@) {		# Stacking
-  my ($self, @keys) = (shift);
-  warn "Stacking empty list of layers" unless @_;
-  my $new_name = "@_";
-# warn "Combining layers <@_>";
-  return $new_name if exists $self->{layers}{$new_name};
-  my @L = map $self->{layers}{$_}, @_;
-  for my $l (@L) {
-# warn "... Another layer...";
-    for my $k (0..$#$l) {
-      for my $kk (0..$#{$l->[$k]}) {
-# warn "...... On $k/$kk: I see `$l->[$k][$kk]'" if defined $l->[$k][$kk];
-        $keys[$k][$kk] = $l->[$k][$kk] if defined $l->[$k][$kk] and not defined $keys[$k][$kk];	# Deep copy
-      }
-      $keys[$k] ||= [];
+sub make_translated_layers_tr ($$$$$$$) {		# Apply translation map
+  my ($self, $layers, $tr, $append, $deadkey, $face, $NN) = (shift, shift, shift, shift, shift, shift, shift);
+  if ($tr =~ /^FlipShift$/) {
+    if (@$layers > 1) {
+      return map $self->make_translated_layers_tr([$layers->[$_]], $tr, $append, $deadkey, $face, [$NN->[$_]]), 0..$#$layers;
     }
+    die "FlipShift() called on a layer `$layers->[0]' with comma in a name" if $layers->[0] =~ /,/;
+    $tr = "FromToFlipShift[$layers->[0],$layers->[0]]";
   }
-  $self->{layers}{$new_name} = \@keys;
-  $new_name
+  my ($Tr, $used, $for_layers) = $self->make_translator($tr, $deadkey, $face, $NN->[0]);
+  unless ($for_layers) {
+    my @Tr = map [$self->make_translator($tr, $deadkey, $face, $_)], @$NN;
+    $Tr = $self->depth2_translator([map $_->[0], @Tr]);
+  }
+#warn "  tr=<$tr>, key=<$deadkey>, used=<$used>";
+  my @new_names = map "$tr$used($layers->[$_])$append" . ($append and $NN->[$_]), 0..$#$NN;
+  return @new_names unless grep {not exists $self->{layers}{$_}} @new_names;
+# warn "Translating via `$tr' from layer [$layer]: <", join('> <', map "@$_", @{$self->{layers}{$layer}}), '>';
+  my (@L, @LL) = map $self->{layers}{$_}, @$layers;
+  for my $n (0..$#{$L[0]}) {
+    my @C = $Tr->( [ map $L[$_][$n], 0..$#L ] );
+    push @{$LL[$_]}, $C[$_] for 0..$#L;
+  }
+  $self->{layers}{$new_names[$_]} = $LL[$_] for 0..$#L;
+  @new_names
+}
+
+sub make_translated_layers_stack ($@) {		# Stacking
+  my ($self, @out) = (shift);
+  my $c = @{$_[0]};
+  @$_ == $c or die "Stacking: number of layers ", scalar(@$_), " != number of layers $c of the first elt"
+    for @_;
+  for my $l (0..$c-1) {
+    my @layers = map $_->[$l], @_;
+    push @out, "@layers";
+    next if exists $self->{layers}{"@layers"};
+    my (@L, @keys) = map $self->{layers}{$_}, @layers;
+    for my $l (@L) {
+  # warn "... Another layer...";
+      for my $k (0..$#$l) {
+        for my $kk (0..$#{$l->[$k]}) {
+  # warn "...... On $k/$kk: I see `$l->[$k][$kk]'" if defined $l->[$k][$kk];
+          $keys[$k][$kk] = $l->[$k][$kk] if defined $l->[$k][$kk] and not defined $keys[$k][$kk];	# Deep copy
+        }
+        $keys[$k] ||= [];
+      }
+    }
+    $self->{layers}{"@layers"} = \@keys;
+  }
+  @out;
 }
 
 sub paren_match_q ($$) {
@@ -3423,14 +3559,14 @@ sub brackets_match_q ($$) {
   ($s =~ tr/[/[/) == ($s =~ tr/]/]/)
 }
 
-sub join_min_paren_matched ($$@) {
+sub join_min_paren_brackets_matched ($$@) {
   my ($self, $join, @out) = (shift, shift, shift);
+#warn 'joining <', join('> <', @out, @_),'>';
   while (@_) {
-    while (@_ > 1 and not $self->paren_match_q($_[0])) {
-      my $v = shift;
-      $_[0] = "$v$join$_[0]"
+    while (@_ and not ($self->paren_match_q($out[-1]) and $self->brackets_match_q($out[-1]))) {
+      $out[-1] .= $join . shift;
     }
-    push @out, shift
+    push @out, shift if @_;
   }
   @out
 }
@@ -3469,21 +3605,23 @@ sub pseudo_layer ($$$$) {
 #   face).  
 # In particular: to specify a layer, use Id(LayerName).
 #use Dumpvalue;
-sub make_translated_layer ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipShift, stacking and maps
-  my ($self, $recipe, $face, $N, $deadkey, $append, $ARG) = (shift, shift, shift, shift, shift, '');
+sub make_translated_layers ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipShift, stacking and maps
+  my ($self, $recipe, $face, $NN, $deadkey, $append, $ARG) = (shift, shift, shift, shift, shift, '');
 # XXX We can't cache created layer by name, since it depends on $recipe and $N too???
 #  return $recipe if exists $self->{layers}{$recipe};
-  return $self->pseudo_layer($recipe, $face, $N) 
+#  my $FACE = $recipe . join '===', '', @$NN, '';
+#  return $self->{faces}{$FACE}{layers} if exists $self->{faces}{$FACE}{layers};
+  return [map $self->pseudo_layer($recipe, $face, $_), @$NN]
     if $recipe =~ /^((FlipLayers)?LinkFace|FlipLayers|Self|(Face|FlipLayers|Layers)\([^()]+\))$/;
   $recipe =~ s/^(FlipShift)$/$1(Self)/;
-  my @parts = grep /\S/, $self->join_min_paren_matched('', split /(\s+)/, $recipe)
+  my @parts = grep /\S/, $self->join_min_paren_brackets_matched('', split /(\s+)/, $recipe)
     or die "Whitespace face recipe `$recipe'?!";
   if (@parts > 1) {
 #warn "parts of the translation spec: <", join('> <', @parts), '>';
-    my @layers = map $self->make_translated_layer($_, $face, $N, $deadkey), @parts;
+    my @layers = map $self->make_translated_layers($_, $face, $NN, $deadkey), @parts;
 #print "Stacking for `$recipe'\n" if $DEBUG;
 #Dumpvalue->new()->dumpValue(\@layers) if $DEBUG;
-    return $self->make_translated_layer_stack(@layers);
+    return [$self->make_translated_layers_stack(@layers)];
   }
   if ( $recipe =~ /\)$/ ) {
     if ( $recipe =~ /^[^(]*\[/ ) {		# Tricky: allow () inside Func[](args)
@@ -3502,23 +3640,26 @@ sub make_translated_layer ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipShi
   }
 #warn "Translation sub-spec: recipe = <$recipe>, ARG=<$ARG>";
   if (length $ARG) {
-    $ARG = $self->make_translated_layer($ARG, $face, $N, $deadkey) 
-      unless exists $self->{layers}{$ARG};
+    if (exists $self->{layers}{$ARG}) {
+      $ARG = [($ARG) x @$NN];
+    } else {
+      $ARG = $self->make_translated_layers($ARG, $face, $NN, $deadkey)
+    }
   } else {
-    $ARG = $self->{faces}{$face}{layers}[$N];
-    $append = "#$face#$N";
+    $ARG = [map $self->{faces}{$face}{layers}[$_], @$NN];
+    $append = "#$face#";
   }
-  $self->make_translated_layer_tr($ARG, $recipe, $append, $deadkey, $face, $N);	# Either we saw (), or $recipe is not a face recipe!
+  [$self->make_translated_layers_tr($ARG, $recipe, $append, $deadkey, $face, $NN)];	# Either we saw (), or $recipe is not a face recipe!
 }
 
-sub massage_translated_layer ($$$$;$) {
-  my ($self, $in, $face, $N, $deadkey) = (shift, shift, shift, shift, shift, '');
+sub massage_translated_layers ($$$$;$) {
+  my ($self, $in, $face, $NN, $deadkey) = (shift, shift, shift, shift, shift, '');
 #warn "Massaging `$deadkey' for `$face':$N";
   return $in unless my $r = $self->get_deep($self, 'faces', (my @p = split m(/), $face), 'Diacritic_if_undef');
   $r =~ s/^\s+//;
 #warn "	-> end recipe `$r'";
-  my $post = $self->make_translated_layer($r, $face, $N, $deadkey);
-  return $self->make_translated_layer_stack($in, $post);
+  my $post = $self->make_translated_layers($r, $face, $NN, $deadkey);
+  return [$self->make_translated_layers_stack($in, $post)];
 }
 
 sub default_char ($$) {
@@ -3583,20 +3724,21 @@ sub create_composite_layers ($) {
     for my $k1 ( @H, @H1 ) {		# [ ConfigHash key, hex deadkey, layer number ]
       my($k, $key, $layers, $inv, $face) = (@$k1, $F);
       $layers = ((defined $layers) ? [$layers] : [ 0 .. $#{$self->{faces}{$face}{layers}} ]);
-      for my $layer (@$layers) {	# Create a layer according to the spec
+      my @keys = ((defined $key) ? $key : (grep {not $seen{$_}} map $self->key2hex($_), keys %{ $H->{'[DEAD]'} }));
+      @keys = '' if $inv and "$inv @keys" eq "Inv 0000";
+      (my $recipe = $H->{$k}) =~ s/^\s+//;
+      my $massage = !($recipe =~ s/\s+NoDefaultTranslation$//);
+      for my $KK (@keys) {
+#warn "Doing key `$KK' inv=`$inv' face=`$face', recipe=`$recipe'";
+        my $new = $self->make_translated_layers($recipe, $face, $layers, $KK);
+	$new = $self->massage_translated_layers($new,    $face, $layers, $KK) if $massage and not $inv;
+        for my $NN (0..$#$layers) {	# Create a layer according to the spec
 #warn "DeadKey Layer for face=$face; layer=$layer, k=$k:\n\t$H->{$k}, key=`", ($key||''),"'\n\t\t";
-        my @keys = ((defined $key) ? $key : (grep {not $seen{$_}} map $self->key2hex($_), keys %{ $H->{'[dead]'}[$layer] }));
-        @keys = '' if $inv and "$inv @keys" eq "Inv 0000";
-        for my $KK (@keys) {
-#warn "Doing key `$KK' inv=$inv with `$H->{$k}'";
-          (my $recipe = $H->{$k}) =~ s/^\s+//;
-          my $massage = !($recipe =~ s/\s+NoDefaultTranslation$//);
 #$DEBUG = $key eq '0192';
-          my $new = $self->make_translated_layer($recipe, $face, $layer, $KK);
 #print "Doing key `$KK' face=$face  layer=`$layer' recipe=`$recipe'\n" if $DEBUG;
 #Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $DEBUG;
-	  $new = $self->massage_translated_layer($new,    $face, $layer, $KK) if $massage and not $inv;
-          $H->{"[${inv}deadkeyLayer]"}{$KK}[$layer] = $new;
+#warn "new=<<<", join('>>> <<<', @$new),'>>>';
+          $H->{"[${inv}deadkeyLayer]"}{$KK}[$layers->[$NN]] = $new->[$NN];
 #warn "Face `$face', layer=$layer key=$KK\t=> `$new'" if $H->{layers}[$layer] =~ /00a9/i;
 #Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $self->charhex2key($key) eq chr 0x00a9;
         }
@@ -3670,7 +3812,7 @@ sub create_inverted_faces ($) {
 
 #use Dumpvalue;
 sub create_inverted_AltGr_face ($$$$$$$) {	# flip layers paying attention to linked AltGr-inverted faces, and overrides
-  my ($self, $LL, $newname, $prefix, $nextL, $chainKey, $face, @LL, @K) = (shift, shift, shift, shift, shift, shift, shift);
+  my ($self, $LL, $newname, $prefix, $nextL, $chainKey, $face, @K) = (shift, shift, shift, shift, shift, shift, shift);
   if (defined $nextL) {			# Borrow from make_translated_layer_tr()
     my %Map = ($chainKey, $nextL);
     my $Tr = sub ($) { my $c = shift; defined $c or return $c; my $o = $Map{$c} ;
@@ -3686,18 +3828,11 @@ sub create_inverted_AltGr_face ($$$$$$$) {	# flip layers paying attention to lin
       push @K, $new_Name;
     }
   }
-  for my $n (0..$#$LL) {					# Layer number
-    my $n1 = $self->flip_layer_N($n, $#$LL);
-    my($L, @k) = $LL->[$n1];
-    @k = $K[$n] if @K;
-    if ($prefix) {
-      $L = $self->make_translated_layer_stack($prefix->[$n], @k, $L);
-    } elsif (@k) {
-      $L = $self->make_translated_layer_stack(@k, $L);
-    }
-    push @LL, $L;
-  }
-  $self->{faces}{$newname}{layers} = \@LL;
+  my @prefix = $prefix ? $prefix : ();
+  my @n1 = map $self->flip_layer_N($_, $#$LL), 0..$#$LL;
+  my @invLL = @$LL[@n1];
+  push @prefix, \@K if @K;
+  $self->{faces}{$newname}{layers} = [$self->make_translated_layers_stack(@prefix, \@invLL)];
 }
 
 # use Dumpvalue;
@@ -3803,64 +3938,105 @@ my %known_dups = map +($_,1), qw(0384 1D43 1D52 1D9F 1E7A 1E7B 1FBF 2007
   FD92 FDB5 FE34);		# As of Unicode 6.1-beta
 
 sub decompose_r($$$$);		# recursive
-sub decompose_r($$$$) {		# returns [$compat, @expand]
-  my ($self, $t, $i, $cache) = (shift, shift, shift, shift);
+sub decompose_r($$$$) {		# returns array ref, elts are [$compat, @expand]
+  my ($self, $t, $i, $cache, @expand) = (shift, shift, shift, shift);
   return $cache->{$i} if $cache->{$i};
-  return $cache->{$i} = [0, $i] unless my $in = $t->{$i};
-  my $compat = $in->[0];
+  return $cache->{$i} = [[0, $i]] unless my $In = $t->{$i};
+  for my $in (@$In) {
+    my $compat = $in->[0];
 #warn "i=<$i>, compat=<$compat>, rest=<$in->[1]>";
-  my $expand = $self->decompose_r($t, $in->[1], $cache);
+    my $expand_in = $self->decompose_r($t, $in->[1], $cache);
+    $expand_in = $self->deep_copy($expand_in);
 #warn "Got: $in->[1] -> <@$expand> from $i = <@$in>";
-  $expand = [@$expand];		# Deep copy
-warn "Expansion funny: <@$expand>" if @$expand < 2 or $expand->[0] !~ /^[01]$/;
-  $compat = ( shift(@$expand) || $compat);		# do not short-circuit
-warn "!Malformed: $i -> $compat <@$expand>" if $expand->[0] =~ /^[01]$/;
-  return $cache->{$i} = [ $compat, @$expand, @$in[2..$#$in] ];
+    for my $expand (@$expand_in) {
+      warn "Expansion funny: <@$expand>" if @$expand < 2 or $expand->[0] !~ /^[01]$/;
+      $compat = ( shift(@$expand) | $compat);
+      warn "!Malformed: $i -> $compat <@$expand>" if $expand->[0] =~ /^[01]$/;
+      push @expand, [ $compat, @$expand, @$in[2..$#$in] ];
+    }
+  }
+  return $cache->{$i} = \@expand;
 }
+
 sub toHEX ($) { my $i = shift; $i =~ /^\w/ and hex $i}
+
+my %operators = (DOT => ['MIDDLE DOT', 'FULL STOP'], RING => ['DEGREE SIGN'], DIAMOND => ['WHITE DIAMOND'],
+		 'DOUBLE SOLIDUS' => ['PARALLEL TO'], MINUS => ['HYPHEN-MINUS']);
+
+#			THIS IS NOT A MULTIMAP!
+my %uni_manual = (phonetized => {qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ŋ  V ɤ  ! ǃ  ? ʔ  ¿ ʕ )},
+		  addline    => {qw( 0 ∅  ( ∈  ) ∋  = ≡  ≡ ≣  † ‡  + ∦  / ∠  | ∟  . ∸  ∨ ⊻  ∧ ⊼ )},	# conflict with modifiers: qw( | ‖  _ ‗ )
+		  addtilde   => {qw( 0 ∝  / ∡  \ ∢  ∫ ∱  : ∻  - ≂  ≠ ≆  ~ ≈  ∼ ≈  ≃ ≊  ≈ ≋  = ≌  ( ⟅  ) ⟆ )},	# not on 2A**
+		  addleft    => {qw( = ≔  × ⨴  × ⋉  \ ⋋  + ⨭  → ⧴)},	#  × ⨴ is hidden
+		  addright   => {qw( = ≕  × ⨵  × ⋊  \ ⋌  + ⨮  - ∹ )},	#  × ⨵ is hidden
+		  sharpen    => {qw( < ≺  > ≻  { ⊰  } ⊱  ( ⟨  ) ⟩  ∧ ⋏  ∨ ⋎  . ⋄  ⟨ ⧼  ⟩ ⧽ )},	# ⋆
+		  unsharpen  => {qw( < ⊏  > ⊐  ( ⟮  ) ⟯  ∩ ⊓  ∪ ⊔  ∧ ⊓  ∨ ⊔  . ∷ )},		#   + ⊞  - ⊟  * ⊠  . ⊡  × ⊠
+		  whiten     => {qw( [ ⟦  ] ⟧  ( ⟬  ) ⟭  { ⦃  } ⦄ )},
+		  quasisynon => {qw( ∈ ∊  ∋ ∍  ≠ ≶  ≠ ≷  = ≸  = ≹  ≼ ⊁  ≽ ⊀  ≺ ⋡  ≻ ⋠  < ≱  > ≰  Δ ∆
+		  		     ≤ ≯  ≥ ≮  ⊆ ⊅  ⊇ ⊄  ⊂ ⊉  ⊃ ⊈  ⊏ ⋣  ⊐ ⋢  ⊳ ⋬  ⊲ ⋭  … ⋯  * ⋆  ( ⦅  ) ⦆ )},
+		  amplify    => {qw( < ≪  > ≫  ≪ ⋘  ≫ ⋙  ∩ ⋒  ∪ ⋓  ⊂ ⋐  ⊃ ⋑  ( ⟪  ) ⟫  ∼ ∿  = ≝  ∣ ∥  . ⋮  
+		  		     0 ∅  ∈ ∊  ∋ ∍  - −  / ∕  \ ∖  √ ∛  ∛ ∜  ∫ ∬  ∬ ∭  ∭ ⨌  ∮ ∯  ∯ ∰  ∰ ⨌  
+		  		     : ∶  ≈ ≋  ≏ ≎  ≡ ≣  × ⋈  + ∑ )},	#   ˆ ∧ conflicts with combining-ˆ
+		  turnaround => {qw( ∧ ∨  ∩ ∪  ∕ ∖  ⋏ ⋎  ∼ ≀  ⋯ ⋮  … ⋮  ⋰ ⋱  
+		  		     8 ∞  ∆ ∇  Α ∀  Ε ∃  ∴ ∵  ≃ ≂
+		  		     ∈ ∋  ∉ ∌  ∊ ∍  ∏ ∐  ± ∓  ⊓ ⊔  ≶ ≷  ≸ ≹  ⋀ ⋁  ⋂ ⋃  ⋉ ⋊  ⋋ ⋌  ⋚ ⋛  ≤ ⋜  ≥ ⋝  ≼ ⋞  ≽ ⋟  )},			# XXXX Can't do both directions
+		  round      => {qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸
+		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  )});	#   = ≖  = ≗ hidden = ≈
 
 my $warnUNRES = $ENV{UI_KEYBOARDLAYOUT_UNRESOLVED};
 sub parse_NameList ($$) {
-  my ($self, $f, $k, $kk, $name, %basic, %cached_full, %compose, %into2, %ordered, %candidates, %N, %comp2, %NM, %BL, $BL) = (shift, shift);
+  my ($self, $f, $k, $kk, $name, %basic, %cached_full, %compose, 
+      %into2, %ordered, %candidates, %N, %comp2, %NM, %BL, $BL, %G, %NS) = (shift, shift);
   binmode $f;			# NameList.txt is in Latin-1, not unicode
   while (my $s = <$f>) { # extract compositions, add <upgrade> to char downgrades; -> composition, => compatibility composition
     if ($s =~ /^([\da-f]+)\b\s*(.*?)\s*$/i) {
-      my ($K, $Name) = ($1, $2);
+      my ($K, $Name, $C, $t) = ($1, $2, $self->charhex2key("$1"));
       $N{$Name} = $K;
-      $NM{$self->charhex2key($K)} = $Name;		# Not needed for compositions, but handy for user-visible output
-      $BL{$self->charhex2key($K)} = $self->charhex2key($BL);		# Used for sorting
+      $NM{$C} = $Name;		# Not needed for compositions, but handy for user-visible output
+      $BL{$C} = $self->charhex2key($BL);		# Used for sorting
       # Finish processing of preceding text
-      if (defined $kk					# Did not see (official) decomposition
-#         and $name =~ /^(.*?)\s+(?:WITH\s+|(?=(?:OVER|ABOVE|PRECEDED\s+BY|BELOW(?=\s+LONG\s+DASH)))\s+\b(?!WITH|AND))(.*?)\s*$/) {
-          and $name =~ /^(.*?)\s+(?:WITH\s+|(?=(?:OVER|ABOVE|PRECEDED\s+BY|BELOW(?=\s+LONG\s+DASH))\s+\b(?!WITH\b|AND\b)))(.*?)\s*$/) {
-        $candidates{$k} = [$1, $2];
-      } elsif (defined $kk					# Did not see (official) decomposition
-               and $name =~ /^(.*)\s+(?=OR\s)(.*?)\s*$/) {	# Find the latest possible...
-        $candidates{$k} = [$1, $2];
-      } elsif (defined $kk					# Did not see (official) decomposition
-               and (my $t = $name) =~ s/\b(COMBINING(?=\s+CYRILLIC\s+LETTER)|BARRED|LUNATE|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|SCRIPT|LONG|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED|DOTLESS|FINAL)\s+|\s+(BAR|SYMBOL)$//) {
-        $candidates{$k} = [$t, "calculated-$+"];
-        $candidates{$k}[1] .= '-epigraphic'   if $t =~ /\bEPIGRAPHIC\b/;	# will be massaged away from $t later
-        $candidates{$k}[0] =~ s/\s+SYMBOL$// and $candidates{$k}[1] .= '-symbol' 
-          if $candidates{$k}[1] =~ /\bLUNATE\b/;
+      if (defined $kk) {				# Did not see (official) decomposition
+        $NS{$C}++ if $name =~ /\bCOMBINING\b/ and not ($C =~ /\p{NonSpacingMark}/);
+        if ($name =~ /^(.*?)\s+(?:(WITH)\s+|(?=(?:OVER|ABOVE|PRECEDED\s+BY|BELOW(?=\s+LONG\s+DASH))\s+\b(?!WITH\b|AND\b)))(.*?)\s*$/) {
+          push @{$candidates{$k}}, [$1, $3];
+          my ($b, $with, $ext) = ($1, $2, $3);
+          my @ext = split /\s+AND\s+/, $ext;
+          if ($with and @ext > 1) {
+            for my $i (0..$#ext) {
+              my @ext1 = @ext;
+              splice @ext1, $i, 1;
+              push @{$candidates{$k}}, ["$b WITH ". (join ' AND ', @ext1), $ext[$i]];
+            }
+          }
+        }
+        if ($name =~ /^(.*)\s+(?=OR\s)(.*?)\s*$/) {	# Find the latest possible...
+          push @{$candidates{$k}}, [$1, $2];
+        }
+        if (($t = $name) =~ s/\b(COMBINING(?=\s+CYRILLIC\s+LETTER)|BARRED|SLANTED|APPROXIMATELY|ASYMPTOTICALLY|ALMOST|^SQUARED|LUNATE|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|SCRIPT|LONG|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED|DOTLESS|FINAL)\s+|\s+(BAR|SYMBOL|OPERATOR|SIGN|IN\s+TRIANGLE)$//) {
+          push @{$candidates{$k}}, [$t, "calculated-$+"];
+          $candidates{$k}[-1][1] .= '-epigraphic'   if $t =~ /\bEPIGRAPHIC\b/;	# will be massaged away from $t later
+          $candidates{$k}[-1][0] =~ s/\s+SYMBOL$// and $candidates{$k}[-1][1] .= '-symbol' 
+            if $candidates{$k}[-1][1] =~ /\bLUNATE\b/;
 # warn("smallcapital $name"),
-        $candidates{$k}[1] .= '-smallcaps' if $t =~ /\bSMALL\s+CAPITAL\b/;	# will be massaged away from $t later
+          $candidates{$k}[-1][1] .= '-smallcaps' if $t =~ /\bSMALL\s+CAPITAL\b/;	# will be massaged away from $t later
 # warn "Candidates: <$candidates{$k}[0]>; <$candidates{$k}[1]>";
-      } elsif (defined $kk					# Did not see (official) decomposition
-               and ($t = $name) =~ s/\b(CIRCLED)\s+//) {
-        $candidates{$k} = [$t, "fake-$1"];
-      } elsif (defined $kk					# Did not see (official) decomposition
-               and ($t = $name) =~ s/\b(LETTER\s+SMALL\s+CAPITAL)/CAPITAL LETTER/) {
-        $candidates{$k} = [$t, "smallcaps"];
-      } elsif (defined $kk					# Did not see (official) decomposition
-               and (($t = $name) =~ s/\b(LETTER\s+)E([SZN])[HG]$/$1$2/			# esh/eng/ezh
-               		# next two not triggered since this is actually decomposed:
-                    or ($t = $name) =~ s/(?<=\bLETTER\sV\s)WITH\s+RIGHT\s+HOOK$// 
-                    or ($t = $name) =~ s/\bDOTLESS\s+J\s+WITH\s+STROKE$/J/ 
-               	    or $name eq 'LATIN SMALL LETTER SCHWA' and $t = 'DIGIT ZERO')) {
-        $candidates{$k} = [$t, "phonetized"];
+        }
+        if (($t = $name) =~ s/\b(CIRCLED)\s+//) {
+          push @{$candidates{$k}}, [$t, "fake-$1"];
+        }
+        if (($t = $name) =~ s/\b(LETTER\s+SMALL\s+CAPITAL)/CAPITAL LETTER/) {
+          push @{$candidates{$k}}, [$t, "smallcaps"];
+        }
+        if (($t = $name) =~ s/\b(LETTER\s+)E([SZN])[HG]$/$1$2/			# esh/eng/ezh
+                     # next two not triggered since this is actually decomposed:
+                 or ($t = $name) =~ s/(?<=\bLETTER\sV\s)WITH\s+RIGHT\s+HOOK$// 
+                 or ($t = $name) =~ s/\bDOTLESS\s+J\s+WITH\s+STROKE$/J/ 
+                 or $name eq 'LATIN SMALL LETTER SCHWA' and $t = 'DIGIT ZERO') {
+          push @{$candidates{$k}}, [$t, "phonetized"] if 0;
+        }
       }
       ($k, $name) = ($K, $Name); 
+      $G{$k} = $name if $name =~ /^GREEK\s/;	# Indexed by hex
       $kk = $k;
       next;
     }
@@ -3888,28 +4064,68 @@ sub parse_NameList ($$) {
       $a->[-1] = "<font$type>";
     }}
     push @$a, '<pseudo-upgrade>' unless @$a > 2;
-    $basic{$k} = $a;			# <fraction> 1 2044					--\
-    undef $kk unless $a->[-1] eq '<pseudo-upgrade>' or @$a == 3 and (chr hex $a->[-2]) =~ /\W|\p{Lm}/ and $a->[-1] !~ /^</ and (chr hex $a->[-1]) =~ /\w/;				# Disable guesswork processing
+    push @{$basic{$k}}, $a;			# <fraction> 1 2044					--\
+    undef $kk unless $a->[-1] eq '<pseudo-upgrade>' 				# Disable guesswork processing
+      or @$a == 3 and (chr hex $a->[-2]) =~ /\W|\p{Lm}/ and $a->[-1] !~ /^</ and (chr hex $a->[-1]) =~ /\w/;
     # print "@$a";
   }
 #  $candidates{'014A'} = ['LATIN CAPITAL LETTER N', 'faked-HOOK'];		# Pretend on ENG...
 #  $candidates{'014B'} = ['LATIN SMALL LETTER N',   'faked-HOOK'];		# Pretend on ENG...
   	# XXXX Better have this together with pseudo-upgrade???
-  $candidates{'00b5'} = ['GREEK SMALL LETTER MU',  'faked-calculated-SYMBOL'];	# Pretend on MICRO SIGN...
+  push @{$candidates{'00b5'}}, ['GREEK SMALL LETTER MU',  'faked-calculated-SYMBOL'];	# Pretend on MICRO SIGN...
 #  $candidates{'00b5'} = ['GREEK SMALL LETTER MU',  'calculated-SYMBOL'];	# Pretend on MICRO SIGN...
+  for my $k (keys %basic) {			# hex
+    for my $exp (@{$basic{$k}}) {
+      my $base = $exp->[1];			# hex
+      my $name = $NM{$self->charhex2key($base)};
+      next if not $name and ($k =~ /^[12]?F[89A]..$/ or hex $base >= 0x4E00 and hex $base <= 0x9FCC);		# ideographs; there is also 3400 region...
+      warn "Basic: `$k' --> `@$exp', base=`$base' --> `",$self->charhex2key($base),"'" unless $name;
+      if ((my $NN = $name) =~ s/\s+OPERATOR$//) {
+#warn "operator: `$k' --> <$NN>, `@$exp', base=`$base' --> `",$self->charhex2key($base),"'";
+        push @{$candidates{$k}}, [$_, @$exp[2..$#$exp]] for $NN, @{ $operators{$NN} || []};
+      }
+    }
+  }
+  for my $how (keys %uni_manual) {	# Some stuff is easier to describe in terms of char, not names
+    my $map = $uni_manual{$how};
+    for my $from (keys %$map) {
+      my $to = $map->{$from};
+      for my $shift (0,1) {
+        if ($shift) {
+          my ($F, $T) = (uc $from, uc $to);
+          next unless $F ne $from and $T ne $to;
+          ($from, $to) = ($F, $T);
+        }
+        push @{$candidates{$self->key2hex($to)}}, [$NM{$from}, $how];
+      }
+    }
+  }
+  for my $g (keys %G) {
+    (my $l = my $name = $G{$g}) =~ s/^GREEK\b/LATIN/ or die "Panic";
+    next unless my $L = $N{$l};				# is HEX
+#warn "latinize: $L\t$l";
+    push @{$candidates{$L}}, [$name,  'faked-latinize'];
+    next unless my ($lat, $first, $rest, $add) = ($l =~ /^(LATIN\s+(?:SMALL|CAPITAL)\s+LETTER\s+(\w))(\w+)(?:\s+(\S.*))?$/);
+    $lat =~ s/P$/F/, $first = 'F' if "$first$rest" eq 'PHI';
+    die unless my $LL = $N{$lat};
+    $add = (defined $add ? "-$add" : '');		# None of 6.1; only iIuUaAgGdf present of 6.1
+    push @{$candidates{$LL}}, [$name,  "faked-greekize$add"];
+#warn "latinize++: $L\t$l;\t`$add'\t$lat";
+  }
   for my $c (keys %candidates) {		# Done after all the names are known
-    my ($app, $t, $base, $b) = '';
-# warn "candidates: $c <$candidates{$c}[0]>, <@{$candidates{$c}}[1..$#{$candidates{$c}}]>";
+   my ($CAND, $app, $t, $base, $b) = ($candidates{$c}, '');
+   for my $Cand (@$CAND) {
+#warn "candidates: $c <$Cand->[0]>, <@$Cand[1..$#$Cand]>";
     # An experiment shows that the FORMS are properly marked as non-canonical decompositions; so they are not needed here
-    (my $with = my $raw = $candidates{$c}[1]) =~ s/\s+(SIGN|SYMBOL|(?:FINAL|ISOLATED|INITIAL|MEDIAL)\s+FORM)$//
+    (my $with = my $raw = $Cand->[1]) =~ s/\s+(SIGN|SYMBOL|(?:FINAL|ISOLATED|INITIAL|MEDIAL)\s+FORM)$//
       and $app = " $1";
     for my $Mod ( (map ['', $_], $app, '', ' SIGN', ' SYMBOL', ' OF', ' AS MEMBER', ' TO'),	# `SUBSET OF', `CONTAINS AS MEMBER', `PARALLEL TO'
 		  (map [$_, ''], 'WHITE ', 'WHITE UP-POINTING ', 'N-ARY '), ['WHITE ', ' SUIT'] ) {
       my ($prepend, $append) = @$Mod;
       next if $raw =~ /-SYMBOL$/ and 0 <= index($append, "SYMBOL");	# <calculated-SYMBOL>
-#warn "raw=`$raw', prepend=<$prepend>, append=<$append>, base=$candidates{$c}[0]";
+#warn "raw=`$raw', prepend=<$prepend>, append=<$append>, base=$Cand->[0]";
       $t++;
-      $b = "$prepend$candidates{$c}[0]$append";
+      $b = "$prepend$Cand->[0]$append";
       $b =~ s/\bTWO-HEADED\b/TWO HEADED/ unless $N{$b};
       $b =~ s/\bTIMES\b/MULTIPLICATION SIGN/ unless $N{$b};
       $b =~ s/(?:(?<=\bLEFT)|(?<=RIGHT))(?=\s+ARROW\b)/WARDS/ unless $N{$b};
@@ -3924,50 +4140,67 @@ sub parse_NameList ($$) {
       $b =~ s/^GREEK\s+CAPITAL\b(?!=\s+LETTER)/GREEK CAPITAL LETTER/ unless $N{$b};
       $b =~ s/^GREEK\b(?!\s+(?:CAPITAL|SMALL)\s+LETTER)/GREEK SMALL LETTER/ unless $N{$b};
       $b =~ s/^CYRILLIC\b(?!\s+(?:CAPITAL|SMALL)\s+LETTER)(?=\s+LETTER\b)/CYRILLIC SMALL/ unless $N{$b};
+      $b =~ s/\bEQUAL\s+TO\s+SIGN\b/EQUALS SIGN/ unless $N{$b};
+      $b =~ s/\bMINUS\b/HYPHEN-MINUS/ unless $N{$b};
+#      $b =~ s/\bDOT\b/FULL STOP/ unless $N{$b};
 #      $b =~ s/^MICRO$/GREEK SMALL LETTER MU/ unless $N{$b};
 
-# warn "    b =`$b', prepend=<$prepend>, append=<$append>, base=$candidates{$c}[0]";
+#warn "    b =`$b', prepend=<$prepend>, append=<$append>, base=$Cand->[0]";
       if (defined ($base = $N{$b})) {
+        undef $base, next if $base eq $c;
         $with = $raw if $t;
-# warn "<$candidates{$c}[0]> WITH <$candidates{$c}[1]> resolved via SIGN/SYMBOL/.* FORM: strip=<$app> add=<$prepend/$append>" if $append or $app or $prepend;
+#warn "<$Cand->[0]> WITH <$Cand->[1]> resolved via SIGN/SYMBOL/.* FORM: strip=<$app> add=<$prepend/$append>" if $append or $app or $prepend;
         last 
       }
     }
-    ($warnUNRES and warn("Unresolved: <$candidates{$c}[0]> WITH <$candidates{$c}[1]>")), next unless defined $base;
+    ($warnUNRES and warn("Unresolved: <$Cand->[0]> WITH <$Cand->[1]>")), next unless defined $base;
     my @modifiers = split /\s+AND\s+/, $with;
-    @modifiers = map { s/\s+/-/g; "<pseudo-\L$_>" } @modifiers;
-# warn " --> <$base> <@modifiers>";
-    $basic{$c} = [1, $base, @modifiers]
+    @modifiers = map { s/\s+/-/g; /^[\da-f]{4,}$/i ? $_ : "<pseudo-\L$_>" } @modifiers;
+#warn " --> <$base> <@modifiers>";
+    unshift @{$basic{$c}}, [1, $base, @modifiers];
+    if ($b =~ s/\s+(OPERATOR|SIGN)$//) {	# ASTERISK	(note that RING is a valid name, but has no relation to RING OPERATOR
+      unshift @{$basic{$c}}, [1, $base, @modifiers] if defined ($base = $N{$b});	# ASTERISK
+#warn("operator via <$b>, <$c> => `$base'");
+#warn("operator: `$c' ==> `$_', <@modifiers> via <$b>"),
+      unshift @{$basic{$c}}, [1, $_,    @modifiers] for map $N{$_}, @{ $operators{$b} || [] };	# ASTERISK
+    }
+#        push @{$candidates{$k}}, [$_, @$exp[2..$#$exp]] for $NN, @{ $operators{$NN} || []};
+#    $basic{$c} = [ [1, $base, @modifiers ] ]
+   }
   }
   $self->decompose_r(\%basic, $_, \%cached_full) for keys %basic;	# Now %cached_full is fully expanded - has trivial expansions too
   for my $c (sort keys %cached_full) {		# order of chars in Unicode matters
-    my @exp = @{ $cached_full{$c} };		# deep copy
-    die "Expansion too short: <@exp>" if @exp < 2;	
-    next if @exp < 3;			# Skip trivial decompositions
-    my $compat = shift @exp;
-    my $base = shift @exp;
-    @exp = ($base, sort {toHEX $a <=> toHEX $b or $a cmp $b} @exp);	# Any order will do; do not care about Unicode rules
+    for my $exp (@{ $cached_full{$c} }) {
+      my @exp = @$exp;			# deep copy
+      die "Expansion too short: <@exp>" if @exp < 2;	
+      next if @exp < 3;			# Skip trivial decompositions
+      my $compat = shift @exp;
+      my $base = shift @exp;
+      @exp = ($base, sort {toHEX $a <=> toHEX $b or $a cmp $b} @exp);	# Any order will do; do not care about Unicode rules
 warn "Malformed: [@exp]" if "@exp" =~ /^</ or $compat !~ /^[01]$/;
-    $ordered{$c} = [$compat, @exp];
-    warn qq(Duplicate: $c <== <@exp> ==> <@{$compose{"@exp"}[0]}>)
-      if $compose{"@exp"} and "@exp" !~ /<(font|pseudo-upgrade)>/ and not $known_dups{$c};
-    push @{$compose{"@exp"}}, [$compat, $c];
+      push @{$ordered{$c}}, [$compat, @exp];
+      warn qq(Duplicate: $c <== <@exp> ==> <@{$compose{"@exp"}[0]}>)
+        if $compose{"@exp"} and "@exp" !~ /<(font|pseudo-upgrade)>/ and $c ne $compose{"@exp"}[0][1] and not $known_dups{$c};
+#warn "Compose rule: `@exp' ==> $compat, `$c'";
+      push @{$compose{"@exp"}}, [$compat, $c];
+    }
   }					# compose mapping done
   for my $c (sort keys %ordered) {	# all nontrivial!  Order of chars in Unicode matters...
-    my $v = $ordered{$c};
-    my %seen;
-    for my $off (2..$#$v) {
-      next if $seen{$v->[$off]}++;		# chain of compat, or 2A76	->	?2A75 003D	< = = = >
-      my @r = @$v;				# deep copy
-      splice @r, $off, 1;
-      my $compat = shift @r;
+    for my $v (@{ $ordered{$c} }) {
+      my %seen;
+      for my $off (2..$#$v) {
+        next if $seen{$v->[$off]}++;		# chain of compat, or 2A76	->	?2A75 003D	< = = = >
+        my @r = @$v;				# deep copy
+        splice @r, $off, 1;
+        my $compat = shift @r;
 #      next unless my $contracted = $compose{"@r"};	# This omits trivial compositions
-      my $contracted = $compose{"@r"} || [];
+        my $contracted = $compose{"@r"} || [];
 # warn "Panic $c" if @$contracted and @r == 1;
-      push @$contracted, [0, @r] if @r == 1;		# Not in %compose
-      next unless @$contracted;			# Eg, fractions decompose into 2 3 <fraction> and cannot composed in 2 steps
-      push @{ $into2{$self->charhex2key($c)} }, map [ $compat || $_->[0], $self->charhex2key($_->[1]), $self->charhex2key($v->[$off])], @$contracted;	# each: compat, char, combine
-      push @{ $comp2{$v->[$off]}{$_->[1]} }, [ $compat || $_->[0], $c] for @$contracted;	# each: compat, char
+        push @$contracted, [0, @r] if @r == 1;		# Not in %compose
+        next unless @$contracted;			# Eg, fractions decompose into 2 3 <fraction> and cannot be composed in 2 steps
+        push @{ $into2{$self->charhex2key($c)} }, map [ $compat || $_->[0], $self->charhex2key($_->[1]), $self->charhex2key($v->[$off])], @$contracted;	# each: compat, char, combine
+        push @{ $comp2{$v->[$off]}{$_->[1]} }, [ $compat || $_->[0], $c] for @$contracted;	# each: compat, char
+      }
     }
   }					# (de)compose-into-2 mapping done
   for my $h2 (values %comp2) {	# Massage into the natural order - prefer canonical (de)compositions
@@ -3977,7 +4210,7 @@ warn "Malformed: [@exp]" if "@exp" =~ /^</ or $compat !~ /^[01]$/;
       $h = \@a;
     }
   }
-  \%into2, \%comp2, \%NM, \%BL
+  \%into2, \%comp2, \%NM, \%BL, \%NS
 }
 
 sub print_decompositions($$) {
@@ -4002,11 +4235,11 @@ sub print_compositions($$) {
 }
 
 sub load_compositions($$) {
-  my ($self, $comp) = (shift, shift);
+  my ($self, $comp, @comb) = (shift, shift);
   my %comp = %{ $self->{'[Substitutions]'} || {} };
   return if $self->{Compositions};
   open my $f, '<', $comp or die "Can't open $comp for read";
-  ($self->{Decompositions}, $comp, $self->{UNames}, $self->{UBlock}) = $self->parse_NameList($f);
+  ($self->{Decompositions}, $comp, $self->{UNames}, $self->{UBlock}, $self->{exComb}) = $self->parse_NameList($f);
   close $f or die "Can't close $comp for read";
 #warn "(De)Compositions and UNames loaded";
   # Having hex as index is tricky: is it 4-digits or more?  Is it in uppercase?
@@ -4018,6 +4251,8 @@ sub load_compositions($$) {
     }
   }
   $self->{Compositions} = \%comp;
+  my $comb = join '', keys %{$self->{exComb}};			# should not have metachars here...
+  $rxCombining = qr/\p{nonSpacingMark}|[$comb]/ if $comb;
   $self
 }
 
@@ -4134,6 +4369,17 @@ sub compound_composition ($$$) {
   $C
 }
 
+sub compound_composition_many ($$$) {		# As above, but takes an array of chars
+  my ($self, $M, $CC, @res) = (shift, shift, shift);
+  return undef unless $CC;
+  for my $C (@$CC) {
+    my $in = $self->compound_composition($M, $C);
+    push @res, @$in if defined $in;
+  }
+  return undef unless @res;
+  \@res
+}
+
 # Design goals: we assign several diacritics to a prefix key (possibly with 
 # AltGr on the "Base key" and/or other "multiplexers" in between).  We want: 
 #   *) a lc/uc paired result to sit on Shift-paired keypresses; 
@@ -4160,30 +4406,38 @@ sub sort_compositions ($$$$) {
 # warn "Penalize: <$P>";	# Actually, it is not enough to penalize; one should better put it in a different group...
 	if ($P =~ s/\[(.*)\]$//) {
 	  #$P = $self->stringHEX2string($P);
-	  my $ok;
-	  $char eq $_ and $ok++ for split //, $self->stringHEX2string("$1");
-	  next unless $ok;
+	  my $match;
+	  $char eq $_ and $match++ for split //, $self->stringHEX2string("$1");
+	  next unless $match;
 	}  
 	#$P = $self->stringHEX2string($P);
-        $Penalize{$_}++ for split //, $P;		# Temporarily, we ignore them completely
+        $Penalize{$_}++ for split //, $P;		# XXXX Temporarily, we ignore them completely
         next
       }
       for my $L (0..$#$C) {		# Layer number; indexes a shift-pair
 #        my @res2 = map {defined($_) ? $self->{Compositions}{$M}{$_} : undef } @{ $C->[$L] };
         my @res2 = map $self->compound_composition($M, $_), @{ $C->[$L] };
-        my @res3 = map $self->compound_composition($M, ((defined $_) ? $Sub->{$_} : $_)), @{ $C->[$L] };
+        (my $MM = $M) =~ s/(^|\+)<reveal-greenkey>$//;
+        my @res3 = map $self->compound_composition_many($MM, ((defined $_) ? $Sub->{$_} : $_)), @{ $C->[$L] };
         defined $res2[$_] or $res2[$_] = $res3[$_] for 0..$#res3;
         @res2    = map {defined() ? $_->[0][1] : undef} @res2;			# XXXX ignore additional keys, ignore "HOW"???
         @res2    = map {(not defined() or $seen{$_}++) ? undef : $_} @res2;	# remove duplicates
         next unless my $cnt = grep defined, @res2;
-        my($penalty, $p) = 'zzz';	# above any "5.1", "undef" ("unassigned"???)
-        $penalty gt ($p = ($self->{Age}{$_} || 'undef') . $self->{UBlock}{$_}) and $penalty = $p for grep defined, @res2;
-        $penalty = 'Z', next if grep {defined and $Penalize{$_}} @res2;
-        my $have1 = (not (defined $res2[0] and defined $res2[1]) or 0);
+        my($penalty, $p) = [('zzz') x @res2];	# above any "5.1", "undef" ("unassigned"???)
+        defined $res2[$_] and $penalty->[$_] gt ($p = ($self->{Age}{$res2[$_]} || 'undef') . $self->{UBlock}{$res2[$_]}) 
+          and $penalty->[$_] = $p for 0..$#res2;
+        next if grep {defined and $Penalize{$_}} @res2;
+        my $have1 = (not (defined $res2[0] and defined $res2[1]) or 0);		# Prefer those with both entries
         # Break a non-lc/uc paired translations into separate groups
         my $double_occupancy = ($cnt == 2 and $res2[0] ne $res2[1] and $res2[0] eq lc $res2[1]);
-        push @{ $byPenalty{"$penalty$have1"}[$double_occupancy][$L] }, \@res2;
-        next;
+        if (not $double_occupancy and $cnt == 2 and $penalty->[0] ne $penalty->[1]) {	# Break
+          push @{ $byPenalty{"$penalty->[0]1"}[0][$L] }, [$res2[0]];
+          push @{ $byPenalty{"$penalty->[1]1"}[0][$L] }, [undef, $res2[1]];
+          next;
+        }
+        $p = $penalty->[0];
+        $p = $penalty->[1] if @$penalty > 1 and $p gt $penalty->[1];
+        push @{ $byPenalty{"$p$have1"}[$double_occupancy][$L] }, \@res2;
       }
     }		# sorted bindings, per Layer
     push @res, [ @byPenalty{ sort keys %byPenalty } ];	# each elt is an array ref indexed by layer number; elt of this is [lc uc]

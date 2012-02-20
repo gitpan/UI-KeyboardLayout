@@ -118,7 +118,7 @@ Revision history for Perl extension UI::KeyboardLayout.
 	    should know additional positions on AltGr-layer: ĂÂÊÔƠƯ take 
 	    places of ÅÀÈÒØÙ (which are on AltGr- WZF,LH; call these places 
 	    "green AltGr-keys").  Preceed the green AltGr-key by the 
-	    AltGr-prefix for the diacritic (given above).
+	    AltGr-prefix for the diacritic (given above).  For example, ỡ is AltGr-~ AltGr-l.
 	    
 	    This leaves `, ´ on horns ƠƯ and horns themselves.  For the former,
 	    use AltGr-` and AltGr-´ on O and U with "the opposite ` or ´ accent".
@@ -282,3 +282,48 @@ Revision history for Perl extension UI::KeyboardLayout.
 	  Add Azeri Əə to Ë=AltGr-e, and ditto mark 〃 to " on Copyright face (AltGr-minus).
 	  Add promille ‰ on % on ring/dots face, primes ′,″ on '," on Math (AltGr-M) and ‡ on †=AltGr-" on macron/bar face.
 	  Latin's diacritics prefix keys are available from Cyrillic after Shift-Space. 
+
+0.05	Infrastructure to allow multiple decompositions extracted from the Unicode database.
+	  (Currently only changes the order of (dotless) j with stroke.)
+	Add SLANTED, APPROXIMATELY, ASYMPTOTICALLY, ALMOST to mutiliated.
+	Equate EQUAL TO to EQUALS in unicode names.
+	Treatment of match-(),[] in satellite face processor was completely busted.
+	Significant rework of satellite face processor to change the order of loops: 
+	  now the loop in layers and shift-state are internal.  (So components can operate on a "key as a whole").
+	Via Diacritic2Self(), AltGr-variants of /?, -_, \| access 3 groups of combining characters; AltGr of digits (with or
+	  without Shift) access "missed" combining characters (digits are extended on the left by ` and on the right by +[],.).
+	Add +-like and arrow combining characters to the last category.
+	New mutators latinize and greekize for greek letters put into "LATIN" script (greekize: F |--> PHI etc).
+	New category "Combining for symbols" for diacritics (accessible after diacritic key on AltGr-;: and on [{]}'" ).
+	Allow AltGrCharSubstitutions to be a multimap.
+	Allow adding "OPERATOR" when constructing compositions (TILDE, ASTERISK).
+	Allow stripping OPERATOR when considering explicit decompositions (NOT TILDE).4
+	RAMS HORN is a phonetization of uc V (we ignore that it is "SMALL").
+	phonetize is now done via a hash map as 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ŋ  V ɤ  ! ǃ  ? ʔ  ¿ ʕ .
+	New mogrify (manual):     addline	0 ∅  ( ∈  ) ∋	
+				     sharpen	< ≺  > ≻  { ⊰  } ⊱  ( ⟨  ) ⟩		???	〈〉
+				   unsharpen	< ⊏  > ⊐  ( ⟮  ) ⟯
+				     amplify	< ≪  > ≫  ≪ ⋘  ≫ ⋙  ˆ ∧
+				       round 	< ⊂  > ⊃
+				      whiten	[ ⟦  ] ⟧  ( ⟬ ) ⟭		- now many many more...
+	Document gotchas with ABOVE SINGLE-LINE NOT EQUAL TO etc.
+	Recognize SQUARED as mutiliation (does not make sense for CURLY).
+	Sorting combined keys by Age we were not splitting key/shift-key pairs which were not uc/lc.
+	Use information from loaded UCD to output combining chars in a readable form.
+	Avoid infinite recursion on cutting away SIGN; allows for new calculated-sign decomposition (MINUS SIGN --> HYPHEN-MINUS).
+	Decompositions to MINUS SIGN are duplicated to HYPHEN-MINUS.
+
+	EurKey++:
+	  All combining characters (except for invisible CGJ, musical [BALINESE and high plane], half-diacretics,
+	    combining raised letters, NKO, PHAISTOS, ETHIOPIC, TAI, COPTIC, BAMUM, DEVANAGARI) are available
+	    on AltGr- /?\|-_ `~ (shift-)digits =+ [{ ]} ,< .> after
+	    the corresponding prefix key (one with the visually most similar "principal action").
+	  Lunation was missing on Greek-in-Cyrillic.
+	  Add latinize as one of the functions of AltGr on Greek (active only on γΓδ).
+	  Add latinized-Greek to diaeresis satellite face (all present, with alpha/Alpha sliding to zZ).
+  Misplaced - after adding math, MANY!
+	  Start to acquire some math symbols via ` = unsharpen, ´ = sharpen, ¯ = addline, ° = round, ˆ = amplify/whiten
+	    ¨ - reveals greenkey/converts to an operator/neg-addline/amplify+round/round+round,  ˘ - quasisynon, 
+                         (omit ~ = turnaround - breaks more than it adds...)
+	  (The intent is to cover as large part of 22** and 27[CDE]* and 2980–2aff ranges as possible.)
+	  underbar and stem were missing as action of ¯.
