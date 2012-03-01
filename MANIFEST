@@ -23,4 +23,9 @@ examples/charlists/modifier-chr
 examples/charlists/README
 examples/charlists/Vietnamese
 examples/charlists/WGL4
+examples/charlists/neo2base
+examples/charlists/neo2ext1 
+examples/charlists/neo2ext2
+examples/charlists/currency 
+diff-trade-combining-for-math
 META.yml                                 Module meta-data (added by MakeMaker)

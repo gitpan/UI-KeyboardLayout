@@ -327,3 +327,61 @@ Revision history for Perl extension UI::KeyboardLayout.
                          (omit ~ = turnaround - breaks more than it adds...)
 	  (The intent is to cover as large part of 22** and 27[CDE]* and 2980–2aff ranges as possible.)
 	  underbar and stem were missing as action of ¯.
+	  
+0.06	New mutator adddot.
+	⋌ was put on addright-\, not addright-/.
+	Add neo2base, neo2ext1 to example character repertoirs (the primary face of Neo2).
+	  perl -C31 -wne "print $1 if /\x{2502}(.*?)\x{2502}/" <neo20.txt >oox
+	  perl -C31 -wne "$s{$_}++ for split //; END{print for sort keys %s}" oox >neo2base
+	  grep DEADTRANS kbdneo2.c | perl -wlne "warn $_ unless /DEADTRANS\s*\(\s*([\w]+|L'[^'\s]+')\s*,\s*([\w]+|L'[^'\s]+')\s*,\s*([\w]+|L'[^'\s]+')\s*,\s*0x000([01])\s*\)/; next if $4; print $3" | sort -u >o
+	  perl -C31 -wne "next unless /^0x([\da-f]+)$/i; print chr hex $1" o >neo2ext1
+	    (The file o contains 81 other [symbolic] names which should be pretty common [in Latin-N?].)
+	    I did not check that all bindings in kbdneo2 are reachable under Windows...
+	OPERATORs were not always recognized.
+	Give "round" precedence over dots - gives ⊃ precedence over ⋗.
+	More math greenkeys: on 1,2,3,4.
+	Logic to get greekize mutator was busted.
+	New charlist neo2ext2:
+	  egrep -v "^0x|^L'" o > oo
+	  wget "http://wiki.neo-layout.org/browser/windows/kbdneo2/Quelldateien/keysym4utf16.h?format=txt"
+	  perl -C31 -wane "BEGIN{local @ARGV = my $f= shift; for (<>) {m[^#define\s+(\w+)\s+0x([\da-f]+)\b]i and $map->{$1}=$2}} print chr hex $map->{$F[0]}" keysym4utf16.h@format=txt oo > neo2ext2
+	Switch the "new" Diacritic* subsystem to operate on all layers of the key at once.
+	Add variant "KeepDups" to Diacritic* subsystem; now can (and do) scrap the "old" diacritic subsystem.
+	Sane logic to specify mutually-reverse lists of diacritic recipies.
+	Can define named portions of diacritic recipies.
+	<any-FOO> may be qualified as <any-FOO-!BAR-!BAZ>.
+	Support layer_recipes section.
+	New key PartialFace in face descriptor to denote a purely-parent face.
+	Start allowing migration of keys from a face section to parent sections (Diacritics_* and VK done).
+	New mutators: calculated-small, calculated-mathematical, fake-white, fake-black.
+	Diacritic2Self and sort_compositions: were not handling prefixing prefix keys as expected (did not affect EurKey++).
+	New charlist currency.
+	FlipShift was busted; fix by making it operate in all_layers mode.
+
+	EurKey++:	Use new syntax for Diacritic recipies.
+			No reversion in binding for grave.
+			Add -!operator-!squared-!cirlced to any-calculated.
+			Avoid duplication of companion faces in personalities via layer_recipes.
+			Move up to the parents the shared keys (if possible).
+			Minor cleanup.
+			Add leftwards/rightwards to grave/acute.
+			Add green keys to 3 and (part of) 4.
+			Add digamma, stigma, kai (lc only), koppa, archaic koppa, sampi on Greek AltGr with w,t,K,c,z,x.
+			Ring operator - added as a green key on AltGr-.
+			Add currency map on AltGr-$ (based on bepo, wikipedia articles, and v6.1 currency section of UCD):
+			  all except for ARABIC THAANA DEVANAGARI SINHALA letters and Squared Katakana are included.
+			  Logic of assigning to letters: use the first letter of currency name, or (for versions of rupees) the first
+			    letter of language/region, or (for rial/riel and yuan and cruzeiro) the second letter of the name.  If no
+			    conflict appears, the symbol is duplicated with and without Shift; otherwise 7-bit $ sign,
+			    regional versions of rupees and obsolete currencies are penalized (moved to AltGr-keys,
+			    or Shift keys); if at least one of symbols on the same key is very similar to low-case/upper-case letter, 
+			    then they are assigned due to this similarity, not penalty.  Yuan-1/yen/yen-CJK-1/yen-CJK-2
+			    are put on Y, while yuan-1,yuan-2 are put on U (the order of variants is as in wikipedia).
+			  All symbols are on letter keys; the symbol keys are all assigned the default ¤.
+			  The only keys with two different symbols on AltGr are C,L,Y:  ¢₡₵₢, ლ£₤₶, 元¥円圓.
+			  For completeness, we include all currency symbols, even if BENGALI MARKS make no sense without
+			    a way to enter BENGALI digits/numerators/denominators (see http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3311.pdf).
+			Add business symbols to uc-AltGr of currency face (needed to massage it a little bit).
+			Prohibit 〚〛	LEFT/RIGHT WHITE SQUARE BRACKET [Common; CJK Symbols and Punctuation; 1.1]  301a/301b.
+			Adding underbar to ˆ˜ adds a little bit...
+			Now that dashes are obscured by green keys, add them to AltGr on Greek; remove overrides from macron map.
