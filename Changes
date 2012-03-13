@@ -385,3 +385,57 @@ Revision history for Perl extension UI::KeyboardLayout.
 			Prohibit 〚〛	LEFT/RIGHT WHITE SQUARE BRACKET [Common; CJK Symbols and Punctuation; 1.1]  301a/301b.
 			Adding underbar to ˆ˜ adds a little bit...
 			Now that dashes are obscured by green keys, add them to AltGr on Greek; remove overrides from macron map.
+
+0.07	Add recognition of APL symbols.
+	Report coverage of math symbols in 22**, 27**, 29**, 2A** ranges.
+	Leading whitespace in a layer recipe was not stripped.
+	face_recipes section added (forced to 2 layers???) (do not put on `faces' since such "virtual" faces confuse the engine).
+	Recognize INSULAR, VISIGOTHIC, MIDDLE-WELSH, ROTUNDA, BROKEN, and double-letter names as mutiliation.
+	Add paleo as a mutator (now all pre-v5.1 paleo-latin letters compete).
+	Add oldenglish (not OE!) to the charlists.
+	Rename Diacritic* operators to use Mutate in the name.
+	Start implementing NotId and NotSameKey.
+	Allow auto-creation via `layers' entry of the face (either a recipe, or a key for layer_recipes).
+	Allow auto-creation of layers in a personality via `face_recipes' (in presence of numLayers).
+	   We do not deal with complicated dependencies of faces on each other - we do it linearly???
+	Implement AltGrCharSubstitutionLayers, AltGrCharSubstitutionFaces (later unused).
+	New mutator InheritPrefixKeys (complements NotId and NotSameKey to a useful form).
+	Output html table (use background colors to distinguish "operator-like" and "ipa-like" homographs).
+	New character list: double-accents
+	  perl -I D:\ilya\ru-pho-keyboard\UI-KeyboardLayout\lib  -wC31 D:\ilya\ru-pho-keyboard\UI-KeyboardLayout\examples\grep_nameslist.pl "\bSMALL\b.*\b(AND\s+)?(\w+\s+)?(DIAERESIS|TILDE|GRAVE|BREVE|CARON|ACUTE|MACRON|CEDILLA|OGONEK|CIRCUMFLEX|RING|DOT|COMMA|HORN|HOOK|STROKE)(\s+\w+)?(?(1)| AND)\b" C:\Users\ilya\Downloads\NamesList.txt >double-accents1
+	  perl -C31 -wne "print chr hex $1 if /^([\da-f]{4,}\b)/i" double-accents1 >double-accents
+
+	EurKey++:	Move ®™℗℠© on AltGr-$ face to lc on the base layout (ls is as on all prior art: X11 US Intl/M$ US Intl/Bepo/UK Enchanced/EurKey/Birman's)
+			Filter COLON SIGN ₡ out of AltGr-~/^.
+			Green keys for 2 were significantly mixed up.
+			Ano teleia put on Greek AltGr-; (since ; is occupied by ₋); Likewise for ∐∧⋀∅ on RlLF.
+			Capital ß, ẞ, added as AltGr-~ AltGr-S; þÞ with stroke added to AltGr-^ prefix.
+			Add paleo to hat/tilde pair, rotunda/doubleletter to ¨ (visigothic z conflicts with latinized alpha ɑⱭ).
+			(Insular-g's, and doubleletters do not win the competition...).
+			Add small and large ∨∧∅ to νλΦ (and capitalized variants).
+			Temporarily (???) add insular to circled-face (and deprioritize circled characters).
+				(This finishes access to pre-v5.1 paleolatin.)
+			Add bullet on 6, ∈∋ on () as green keys.
+			Add double-vline and double-addleft/right to AltGr-$.
+			Add more tone bars (all except ꜎).
+			Move most of green keys to AltGrCharSubstitutionLayers.
+			Remove "cyrillic question mark from Russian-II (it had the same codepoint as semicolon!).
+			Add extra chars from Copyright to Business; add KEYBOARD ⌨ to Q on both (finishes bepo coverage).
+			ɚ to AltGr-0 on macron (where phonetize is).
+
+	izKeys:		Split from EurKey++.
+			Non-accented greek from http://help.keymandesktop.com/keyboards/keyboard_galaxiebiblescriptmnemonic/welcome-greek.htm
+			  (Less bizzare correspondence to Latin, AND vowels are on different diagonals.)
+			  (Without other changes, breaks latinized greek on AltGr-; .
+			Dialytica i/u put on "empty" slots j/v.
+			Define Russian, Russian_AltGr via layer_recipe.
+			Unify Russian AltGr map	with Latin one as much as possible.
+			Switch to logical layout of accented letters on AltGr-layer.
+			Split AltGr-; into AltGr-; AltGr-, AltGr-"; swap ˆ˘.
+			Remove © and ± faces.
+			Implement BlueKeys.
+			Pinyin without green keys (¨ on ü to insert ǚ).  (Any diaeresis+accent except ṻ ¯ü can be entered.)
+			Make AltGr-; insert hook above (as the last resort).  Finishes Vietnamese input (but is it "logical"? ê is black and green...).
+			Add double-grave and dot-above to AltGr-;.
+				Currently ȽɾᴁᴙᶏᶒḄḚṂṚ‖′″ⁿ⊠⊦⌐⌙⧇⫴ꟽꟿ missing w.r.t. EurKey++.
+			

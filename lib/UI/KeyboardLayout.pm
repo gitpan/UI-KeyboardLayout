@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION="0.06";
+$VERSION = $VERSION="0.07";
 use strict;
 use utf8;
 
@@ -724,6 +724,7 @@ On keyboard layouts:
   http://bepo.fr/wiki/Accueil
   http://cgit.freedesktop.org/xkeyboard-config/tree/symbols/ru
   http://cgit.freedesktop.org/xkeyboard-config/tree/symbols/keypad
+  http://www.evertype.com/celtscript/type-keys.html			(Old Irish mechanical typewriters)
   http://eklhad.net/linux/app/halfqwerty.xkb			(One-handed layout)
   http://www.doink.ch/an-x11-keyboard-layout-for-scholars-of-old-germanic/   (and references there)
   http://www.neo-layout.org/
@@ -871,6 +872,17 @@ JS code to add "insert these chars": google for editpage_specialchars_cyrilic, o
 
   http://en.wikipedia.org/wiki/User:TEB728/monobook.jsx
 
+Latin paleography
+
+  http://en.wikipedia.org/wiki/Latin_alphabet
+  http://tlt.its.psu.edu/suggestions/international/bylanguage/oenglish.html
+  http://guindo.pntic.mec.es/~jmag0042/LATIN_PALEOGRAPHY.pdf
+  http://www.evertype.com/standards/wynnyogh/ezhyogh.html
+  http://www.wordorigins.org/downloads/OELetters.doc
+  http://www.menota.uio.no/menota-entities.txt
+  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n2957.pdf	(Uncomplete???)
+  http://skaldic.arts.usyd.edu.au/db.php?table=mufi_char&if=mufi	(No prioritization...)
+
 Summary tables for Cyrillic
 
   http://ru.wikipedia.org/wiki/%D0%9A%D0%B8%D1%80%D0%B8%D0%BB%D0%BB%D0%B8%D1%86%D0%B0#.D0.A1.D0.BE.D0.B2.D1.80.D0.B5.D0.BC.D0.B5.D0.BD.D0.BD.D1.8B.D0.B5_.D0.BA.D0.B8.D1.80.D0.B8.D0.BB.D0.BB.D0.B8.D1.87.D0.B5.D1.81.D0.BA.D0.B8.D0.B5_.D0.B0.D0.BB.D1.84.D0.B0.D0.B2.D0.B8.D1.82.D1.8B_.D1.81.D0.BB.D0.B0.D0.B2.D1.8F.D0.BD.D1.81.D0.BA.D0.B8.D1.85_.D1.8F.D0.B7.D1.8B.D0.BA.D0.BE.D0.B2
@@ -937,6 +949,8 @@ Windows shortcuts:
 On meaning of Unicode math codepoints
 
   http://milde.users.sourceforge.net/LUCR/Math/unimathsymbols.pdf
+  http://milde.users.sourceforge.net/LUCR/Math/data/unimathsymbols.txt
+  http://unicode.org/Public/math/revision-09/MathClass-9.txt
 
 Quoting tchrist:
 I<You can snag C<unichars>, C<uniprops>, and C<uninames> from L<http://training.perl.com> if you like.>
@@ -1936,7 +1950,7 @@ sub deep_copy($$) {
 }
 
 # Make symbols from the first half-face ($h1) to be accessible in the second face ($H1/$H2)
-sub pre_link_layers ($$$;$$) {	# Un-obscure non-alphanum bindings from the first keyboard
+sub pre_link_layers ($$$;$$) {	# Un-obscure non-alphanum bindings from the first face; assign in the direction $hh ---> $HH
   my ($self, $hh, $HH, $skipfix, $skipwarn) = (shift, shift, shift, shift, shift);	# [Main, AltGr-Main,...], [Secondary, AltGr-Secondary,...]
   my ($hn,$Hn) = map $self->{faces}{$_}{layers}, $hh, $HH;
 #warn "Link $hh --> $HH;\t(@$hn) -> (@$Hn)" if "$hh $HH" =~ /00a9/i;
@@ -1974,14 +1988,24 @@ sub pre_link_layers ($$$;$$) {	# Un-obscure non-alphanum bindings from the first
       } elsif (defined $H[1][$map{$k}] and ($h[0][$k] =~ /\p{Blank}/ or $H[1][$map{$k}] =~ /\p{Blank}/)) {
 	warn "A hack is needed: attempt to de-obscure `$h[0][$k]' on a supplementary key with `$H[1][$map{$k}]'"
       } else {
-        die "existing secondary AltGr-binding `$H[1][$map{$k}]' blocks de-obscuring `$h[0][$k]'"
-          if defined $H[1][$map{$k}];			# and $H[1][$map{$k}] ne '?';
+        if (defined $H[1][$map{$k}]) {
+          # So far, the only "obscuring" with useful de-obscuring is when the obscuring symbol is a letter
+          die "existing secondary AltGr-binding `$H[1][$map{$k}]' blocks de-obscuring `$h[0][$k]'; symb=[@symb0] in [@{$h[0]}]"
+            unless ($H[0][$k] || '.') =~ /[\W\d_]/;
+          next
+        }
         $H[1][$map{$k}] = $h[0][$k];			# !!!! Modify in place
       }
     }
-
+    # Join in blue keys, and inherit keys from $h
+    for my $L (0..($skipfix? -1 : $#H)) {
+      for my $shift (0,1) {
+        next if defined $H[$L][$shift];
+        $H[$L][$shift] = $h[$L][$shift];
+      }
+    }
     next if $already_linked;
-    for my $i (0..@$hn) {						# half-face type
+    for my $i (0..@$hn) {						# layer type
       for my $j (0,1) {							# case
 #???        ++$seen_hex[$_]{ key2hex(($_ ? $key2 : $key1)->[$i][$j], 'undef') } for 0,1;
         push @{$self->{faces}{$hh}{need_extra_keys_to_access}{$HH}}, $H[$i][$j] if defined $C[$i][$j] and not defined $h[$i][$j];
@@ -2099,6 +2123,24 @@ sub massage_faces ($) {
 # warn "Massaging faces...";
   for my $f (keys %{$self->{faces}}) {		# Needed for (pre_)link_layers...
     next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
+#warn "Massaging face `$f'...";
+    unless ($self->{faces}{$f}{layers}) {
+      next unless $self->{face_recipes}{$f};
+      die "Can't determine number of layers in face `$f': face_recipe exists, but not numLayers" 
+        unless defined (my $n = $self->{faces}{$f}{numLayers});
+      $self->{faces}{$f}{layers} = [('Empty') x $n];		# Preliminary
+      $self->{faces}{$f}{layers} = $self->layers_by_face_recipe($f, $f);
+    }
+    for my $ln ( 0..$#{$self->{faces}{$f}{layers} || []} ) {
+      my $ll = my $l = $self->{faces}{$f}{layers}[$ln];
+      next if $self->{layers}{$l};		# Else, auto-vivify
+#warn "Creating layer `$l' for face `$f'...";
+      ($ll = $self->{layer_recipes}{$ll}) =~ s/^\s+// if exists $self->{layer_recipes}{$ll};
+#warn "... Using recipe `$ll'";
+      $ll = $self->make_translated_layers($ll, $f, [$ln], '0000');
+#warn "... Result `@$ll' --> $self->{layers}{$ll->[0]}";
+      $self->{layers}{$l} = $self->{layers}{$ll->[0]} unless $self->{layers}{$l};		# Could autovivify in between???
+    }
     $self->{faces}{$f}{'[char2key_prefer_first]'}{$_}++ 		# Make a hash
       for @{ $self->{faces}{$f}{char2key_prefer_first} || [] } ;
     $self->{faces}{$f}{'[char2key_prefer_last]'}{$_}++ 		# Make a hash
@@ -2119,6 +2161,38 @@ sub massage_faces ($) {
     s/^\s+//, s/\s+$//, $_ = $self->stringHEX2string($_) for @{ $self->{faces}{$f}{Import_Prefix_Keys} || []};
     my %h = @{ $self->{faces}{$f}{Import_Prefix_Keys} || []};
     $self->{faces}{$f}{'[imported2key]'} = \%h if %h;
+  }
+  for my $f (keys %{$self->{faces}}) {	# Needed for face_make_backlinks: must know which keys in faces will be finally present
+    next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
+    for my $F (@{ $self->{faces}{$f}{AltGrCharSubstitutionFaces} || []}) {	# Now has a chance to have real layers
+      for my $L (0..$#{$self->{faces}{$f}{layers}}) {
+        my $from  = $self->{faces}{$f}{layers}[$L];
+        next unless my $to = $self->{faces}{$F}{layers}[$L];
+        $_ = $self->{layers}{$_} for $from, $to;
+        for my $k (0..$#$from) {
+          next unless $from->[$k] and $to->[$k];
+          for my $shift (0..1) {
+            next unless defined (my $s = $from->[$k][$shift]) and defined (my $ss = $to->[$k][$shift]);
+            push @{ $self->{faces}{$f}{'[AltSubstitutions]'}{$s} }, $ss;
+          }
+        }
+      }
+    }  
+  }		# This is not used yet???
+  for my $f (keys %{$self->{faces}}) {	# Needed for face_make_backlinks: must know which keys in faces will be finally present
+    next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
+    for my $N (0..$#{ $self->{faces}{$f}{AltGrCharSubstitutionLayers} || []}) {	# Now has a chance to have real layers
+      my $to = $self->{faces}{$f}{AltGrCharSubstitutionLayers}[$N];
+      my $from  = $self->{faces}{$f}{layers}[$N] or next;
+      $_ = $self->{layers}{$_} for $from, $to;
+      for my $k (0..$#$from) {
+        next unless $from->[$k] and $to->[$k];
+        for my $shift (0..1) {
+          next unless defined (my $s = $from->[$k][$shift]) and defined (my $ss = $to->[$k][$shift]);
+          push @{ $self->{faces}{$f}{'[AltSubstitutions]'}{$s} }, $ss;
+        }
+      }
+    }  
   }
   for my $f (keys %{$self->{faces}}) {	# Needed for face_make_backlinks: must know which keys in faces will be finally present
     next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
@@ -2270,6 +2344,52 @@ sub print_coverage ($$) {
     $self->print_codepoint($k, '?- ');
   }
   print "############# Per key list:\n";
+  $self->print_table_coverage($F);
+  my ($OUT, $CC) = ('', 0);
+  for my $r ([0x2200, 0x40], [0x2240, 0x40], [0x2280, 0x40], [0x22c0, 0x40], 
+  	     [0x27c0, 0x30], [0x2980, 0x40], [0x29c0, 0x40], 
+             [0x2a00, 0x40], [0x2a40, 0x40], [0x2a80, 0x40], [0x2ac0, 0x40] ) {
+    my $C = join '', grep !$self->{faces}{$F}{'[coverage_hash]'}{$_}, map chr($_), $r->[0]..($r->[0]+$r->[1]-1);
+    $CC += length $C;
+    $OUT .= "-==-\t$C\n";
+  }
+  print "############# Not covered in the math ranges ($CC):\n$OUT";
+  ($OUT, $CC, my $CC1) = ('', 0, 0);
+  for my $r ([0x2200, 0x80], [0x2280, 0x80], 
+  	     [0x27c0, 0x30], [0x2980, 0x80], 
+             [0x2a00, 0x80], [0x2a80, 0x80], [0xa720, 0x100-0x20] ) {
+    my $C = join '', grep {(0xa720 >= ord $_ or $self->{UNames}{$_}) and !$self->{faces}{$F}{'[coverage_hash]'}{$_} 
+    			   and !$self->{faces}{$F}{'[in_dia_chains]'}{$_}} map chr($_), $r->[0]..($r->[0]+$r->[1]-1);
+    ${ $r->[0] < 0xa720 ? \$CC : \$CC1 } += length $C;
+    $OUT .= "-==-\t$C\n";
+  }
+  print "############# Not competing, in the math+latin-D ranges ($CC+$CC1):\n$OUT";
+}
+
+my %html_esc = qw( & &amp; < &lt; > &gt; );
+sub print_table_coverage ($$;$) {
+  my ($self, $F, $html) = (shift, shift, shift);
+  print <<EOP if $html;
+<html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<style type="text/css"><!--
+  /* <!-- Font size 11pt works with Landscape Letter PaperSize, 0.3in margins, 100% --> */
+  table.coverage	{ font-size: 11pt; font-family: DejaVu Sans; }
+  span.dead		{ font-size: 50%; color: red; }
+  span.operator		{ background-color: lightpink; }
+  span.ipa		{ background-color: greenyellow; }
+  span.l		{ margin: 0ex 0.04ex; }
+  table {border-collapse: collapse;}
+  tr, td {
+    padding: 0px 0.2ex !important;
+    margin:  0px       !important;
+    border:  0px       !important;
+  }
+//--></style>
+</head>
+<body>
+<table class=coverage>
+EOP
   my($LL, $INV, %s, @d) = ($self->{faces}{$F}{layers}, $self->{faces}{$F}{Flip_AltGr_Key});
   $s{$self->charhex2key($INV)}++ if defined $INV;	# Skip in reports
   my @LL = map $self->{layers}{$_}, @$LL;
@@ -2278,37 +2398,51 @@ sub print_coverage ($$) {
   my @Dface = map $self->{faces}{$F}{'[deadkeyFace]'}{$self->key2hex($_)}, @d;
 #warn 'prefix key faces to report: <', join('> <', @Dface), '>';
   my @maps = (undef, map $_ && $self->linked_faces_2_hex_map($F, $_), @Dface);	# element of Dface may be false if this is non-autonamed AltGr-inverted face
+  my $dead = $html ? "<span class=dead title='what follows is a prefix key'>\x{2620}</span>" : "\x{2620}";
   for my $n ( 0 .. $#{ $LL[0] } ) {
     my $out = '';
     for my $dn (0..@d) {		# 0 is no-dead
       next if $dn and not $maps[$dn];
-      $out .= "\t" if length $out;
+      $out .= $html ? '</td><td>' : "\t" if length $out;
       my $o = '';
       for my $L (0..$#$LL) {
         for my $shift (0..1) {
           my $pre = '';
           my $c = $LL[$L][$n][$shift];
           $o .= ' ', next unless defined $c;
-          $pre = "\x{2620}", $c = $c->[0] if 'ARRAY' eq ref $c;
+          $pre = $dead, $c = $c->[0] if 'ARRAY' eq ref $c;
           if ($dn) {
             $c = $maps[$dn]{$self->key2hex($c)};
             $c = ' ' unless defined $c;
-            $pre = "\x{2620}", $c = $c->[0] if 'ARRAY' eq ref $c;
+            $pre = $dead, $c = $c->[0] if 'ARRAY' eq ref $c;
             $c = $self->charhex2key($c);
           } else {
-            $pre = "\x{2620}" if $self->{faces}{$F}{'[coverage0_prefix]'}{$c};
+            $pre = $dead if $self->{faces}{$F}{'[coverage0_prefix]'}{$c};
           }
           $c =~ s/(?=$rxCombining)/\x{25cc}/go;	# dotted circle ◌ 25CC
+          $c =~ s/([&<>])/$html_esc{$1}/g if $html;
+	  $c =~ s{(.*(.))}{ 
+	  	  my $title = (ord $2 >= 0x80 && sprintf ' title="%04X  %s"', ord $2, $self->UName("$2", 'verbose'));
+	  	  "<span class=l$title>$1</span>" }ge if $html;
+	  $c = "<span class=operator>$c</span>" if $html and $c =~ /\b(OPERATOR|RELATION|SIGN|PERPENDICULAR|PARALLEL\s*TO|DIVIDES)\s+\[/;
+	  $c = "<span class=ipa>$c</span>" if $html and $c =~ /\[.*\b(IPA)\b|\bCLICK\b/;
           $c = "$pre$c";
-          $o .= $self->control2prt($c);
+          $c =~ s/([\x00-\x1F\x7F])/$self->control2prt("$1")/ge;
+          $o .= $c;
         }
       }
       $out .= $o;
     }
+    $out = "<tr><td>$out</td></tr>" if $html;
     print "$out\n";
   }
+  print <<EOP if $html;
+</table>
+</body>
+</html>
+EOP
 }
-  
+
 sub coverage_face0 ($$) {
   my ($self, $F) = (shift, shift);
   my $LL = $self->{faces}{$F}{layers};
@@ -2471,7 +2605,7 @@ sub massage_deadkeys_win ($$) {
     my (@parts, @h) = split m(/), $k1;
     my %seen = (%$o, %$d);
     for my $kk (keys %seen) {
-warn "DK sec `$k1', deadkey `$kk'. Map: ", $self->array2string( [%{$o->{$kk} || {}}] );
+#warn "DK sec `$k1', deadkey `$kk'. Map: ", $self->array2string( [%{$o->{$kk} || {}}] );
       my $slot = $self->get_deep($h, @parts, $kk);
       warn "Deadkey `$kk' defined for `$k1' conflicts with previous definition" 
         if $slot and grep exists $slot->{$_}, qw(map name);
@@ -3357,7 +3491,7 @@ my %translators = ( Id => sub ($) {shift} );
 sub make_translator ($$$$$) {		# translator may take some values from "environment" 
   # (such as which deadkey is processed), so caching is tricky: if does -> $used_deadkey reflects this
   # The translator should return exactly one value (possibly undef) so that map TRANSLATOR, list works intuitively.
-  my ($self, $name, $deadkey, $face, $N, $used_deadkey) = (shift, shift, shift, shift, shift, '');
+  my ($self, $name, $deadkey, $face, $N, $used_deadkey) = (shift, shift, shift || 0, shift, shift, '');	# $deadkey used eg for diagnostics
   die "Oups..." unless defined $name;
   if ($name =~ /^Imported\[([\/\w]+)(?:,([\da-fA-F]{4,}))?\]$/) {
     my($d, @sec) = (($2 ? "$2" : undef), split m(/), "$1");
@@ -3404,7 +3538,23 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
     }						# Treat prefix keys as usual keys:
     return sub ($) { my $c = shift; defined $c or return $c; $c = $c->[0] if 'ARRAY' eq ref $c; $h{$c} }, '';
   }
-  if ($name =~ /^(De)?Diacritic(SpaceOK)?(Hack)?(2Self)?(DupsOK)?(?:\[(.+)\])?$/) {
+  if ($name =~ /^InheritPrefixKeys\[(.+)\]$/) {
+    my $base = $1;
+    exists $self->{layers}{$_} or $_= ($self->make_translated_layers($_, $face, [$N], $deadkey))->[0]
+      for $base;
+    $base = $self->{layers}{my $B = $base};
+    my (%h);
+    for my $k (0..$#$base) {
+      for my $shift (0..1) {
+        my $C = $base->[$k][$shift] or next;
+        next unless ref $C;
+        my $c = $C->[0];
+        $h{"$N $k $shift $C->[0]"} = $C;
+      }						# Treat prefix keys as usual keys:
+    }						# Treat prefix keys as usual keys:
+    return sub ($) { my $c = shift; defined $c or return $c; return $c if ref $c; $h{"@_ $c"} or $c }, $B;
+  }
+  if ($name =~ /^(De)?(?:Diacritic|Mutate)(SpaceOK)?(Hack)?(2Self)?(DupsOK)?(?:\[(.+)\])?$/) {
     die "DeDiacritic2Self does not make sense" if my $undo = $1 and $4;
     my ($hack, $spaceOK, $toSelf, $dupsOK) = ($3, $2, $4, $5);
     my $Dia = ((defined $6) ? $6 : do {$used_deadkey ="/$deadkey"; $deadkey});	# XXXX `do' is needed, comma does not work
@@ -3426,8 +3576,8 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
     $f = $self->get_AgeList;
     $self->load_uniage($f) if defined $f and not $self->{Age};
     # New processing: - = strip 1 from end; -3/ = strip 1 from the last 3
-#warn "Doing `$Dia' the smart way";
-#print "Doing `$Dia' the new way\n";
+#warn "Doing `$Dia'";
+#print "Doing `$Dia'\n";
 #warn "Age of <à> is <$self->{Age}{à}>";
     $Dia =~ s(<NAMED-([-\w]+)>){ (my $R = $1) =~ s/-/_/g;
     				 die "Named recipe `$1' unknown" unless exists $self->{faces}{$face}{"Named_DIA_Recipe__$R"};
@@ -3453,11 +3603,12 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
       return ([]) x @$K unless grep defined, $self->flatten_arrays($K);		# E.g, ByPairs and SelectRX produce many empty entries...
 #warn "Undefined base key for diacritic <$Dia>: <", join('> <', map {defined() ? $_ : '[undef]'} $self->flatten_arrays($K)), '>' unless defined $K->[0][0];
 #warn "Input for <$Dia>: <", join('> <', map {defined() ? $_ : '[undef]'} $self->flatten_arrays($K)), '>';
-      return ([]) x @$K if not $spaceOK and ($K->[0][0] || '') eq ' ';		# Ignore possiblity that SPACE is a deadKey
+      my $base = $K->[0][0] || '';		# Ignore possiblity that SPACE is a deadKey
+      return ([]) x @$K if not $spaceOK and $base eq ' ';		# Ignore possiblity that SPACE is a deadKey
       my $sorted = $self->sort_compositions(\@groups, $K, $Sub, $dupsOK);
       $self->{faces}{$face}{'[in_dia_chains]'}{$_}++
         for grep defined, ($hack ? () : $self->flatten_arrays($sorted));
-#Dumpvalue->new()->dumpValue(["Key $L[0][$i][0]", $sorted]);
+#Dumpvalue->new()->dumpValue(["Key $base", $sorted]);
       if ($limit) {
         my (@slots, @LL);
         for my $l (0..$#L) {
@@ -3465,12 +3616,13 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
           push @LL, $ll;
 #print 'From Layers  <', join('> <', map {defined() ? $_ : 'undef'} @$ll), ">\n";
         }
-#print 'Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, $slots[0]), ">\n";
-#print 'Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, @slots[1..$#slots]), "> deadKey=$deadkey\n";
+#print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, $slots[0]), ">\n";
+#print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, @slots[1..$#slots]), "> deadKey=$deadkey\n";
         $self->append_keys($sorted, \@slots, \@LL);
-#Dumpvalue->new()->dumpValue(["Key $L[0][$i][0]", $sorted]);
+#Dumpvalue->new()->dumpValue(["Key $base; II", $sorted]);
       }
       my @out = map $self->shift_pop_compositions($sorted, $_), 0..$#L;		# Layer number
+#print 'Extracted ', $self->array2string(\@out), " deadKey=$deadkey\n";
       $self->{faces}{$face}{'[from_dia_chains]'}{$_}++
         for grep defined, ($hack ? () : map $self->flatten_arrays($_), @out);
 #warn "Age of <à> is <$self->{Age}{à}>";
@@ -3535,11 +3687,11 @@ sub depth1_A_translator($$) {		# takes a ref to an array of chars
 
 sub depth2_translator($$) {		# takes a ref to an array of arrays of chars
   my ($self, $tr) = (shift, shift);
-  return sub ($) {
-    my ($in, @out) = shift;
+  return sub ($$) {
+    my ($in, $k, @out) = (shift, shift);
     for my $i (0..$#$in) {
       my $Tr = $tr->[$i];
-      push @out, [map $Tr->($_), @{$in->[$i]}]
+      push @out, [map $Tr->($in->[$i][$_], $i, $k, $_), 0..$#{$in->[$i]}]
     }
     @out
   }
@@ -3558,15 +3710,15 @@ sub make_translated_layers_tr ($$$$$$$) {		# Apply translation map
 # warn "Translating via `$tr' from layer [$layer]: <", join('> <', map "@$_", @{$self->{layers}{$layer}}), '>';
   my (@L, @LL) = map $self->{layers}{$_}, @$layers;
   for my $n (0..$#{$L[0]}) {
-    my @C = $Tr->( [ map $L[$_][$n], 0..$#L ] );
+    my @C = $Tr->( [ map $L[$_][$n], 0..$#L ], $n );
     push @{$LL[$_]}, $C[$_] for 0..$#L;
   }
   $self->{layers}{$new_names[$_]} = $LL[$_] for 0..$#L;
   @new_names
 }
 
-sub make_translated_layers_stack ($@) {		# Stacking
-  my ($self, @out) = (shift);
+sub make_translated_layers_stack ($$@) {		# Stacking
+  my ($self, @out, $ref) = (shift);
   my $c = @{$_[0]};
   @$_ == $c or die "Stacking: number of layers ", scalar(@$_), " != number of layers $c of the first elt"
     for @_;
@@ -3586,6 +3738,51 @@ sub make_translated_layers_stack ($@) {		# Stacking
       }
     }
     $self->{layers}{"@layers"} = \@keys;
+  }
+  @out;
+}
+
+sub make_translated_layers_noid ($$$@) {		# Stacking
+  my ($self, $whole, $refr, @out, $ref, @seen) = (shift, shift, shift);
+  my $c = @$refr;
+#warn "noid: join ", scalar @_, " faces of $c layers; ref=[@$refr] first=[@{$_[0]}]";
+  @$_ == $c or die "Stacking: number of layers ", scalar(@$_), " != number of layers $c of the reference face"
+    for @_;
+  my @R = map $self->{layers}{$_}, @$refr;
+  if ($whole) {
+    my $last = $#{$R[0]};
+    for my $key (0..$last) {
+      for my $l (@R) {
+        $seen[$key]{$_}++ for grep defined, @{ $l->[$key] };
+#warn "$key of $last: keys=", join(',',keys %{$seen[$key]});
+      }
+    }
+  }
+  my $name = 'NOID([' . join('], [', map "@$_", @_) . '])';
+  for my $l (0..$c-1) {
+    my (@layers) = map $_->[$l], @_;
+    if ($whole) {
+      $name .= "'"
+    } else {
+      $name = "NOID[$refr->[$l]](@layers)"
+    }
+    push @out, $name;
+#warn ". Doing layer number $l, name=`$name'...";
+    next if exists $self->{layers}{$name};
+    my ($Refr, @L, @keys) = map $self->{layers}{$_}, $refr->[$l], @layers;
+    for my $ll (@L) {
+#warn "... Another layer for $l...";
+      for my $k (0..$#$ll) {
+        for my $kk (0..$#{$ll->[$k]}) {
+#warn "...... On $k/$kk: I see `$ll->[$k][$kk]'; seen=`$seen[$k]{$ll->[$k][$kk]}'; keys=", join(',',keys %{$seen[$k]}) if defined $ll->[$k][$kk];
+          $keys[$k][$kk] = $ll->[$k][$kk] 	# Deep copy
+            if defined $ll->[$k][$kk] and not defined $keys[$k][$kk] 
+               and ($whole ? !$seen[$k]{$ll->[$k][$kk]} : $ll->[$k][$kk] ne ( defined $R[$l][$k][$kk] ? $R[$l][$k][$kk] : '' ));
+        }
+        $keys[$k] ||= [];
+      }
+    }
+    $self->{layers}{$name} = \@keys;
   }
   @out;
 }
@@ -3612,16 +3809,30 @@ sub join_min_paren_brackets_matched ($$@) {
   @out
 }
 
-sub export_layers ($$) {
-  my ($self, $face) = (shift, shift);
-  $self->{faces}{$face}{'[ini_layers_prefix]'} || $self->{faces}{$face}{'[ini_layers]'} || $self->{faces}{$face}{layers}
+sub layers_by_face_recipe ($$$) {
+  my ($self, $face, $base) = (shift, shift, shift);
+  die "No face recipe for `$face' found" unless my $r = $self->{face_recipes}{$face};
+  $r =~ s/^\s+//;
+#print "face recipe `$face'\n";
+  my $LL = $self->{faces}{$base}{layers};
+  my $L = $self->{faces}{$face}{layers} = $self->make_translated_layers($r, $base, [0..$#$LL]);
+#print "face recipe `$face'  -> ", $self->array2string($L), "\n";
+#warn "face recipe `$face'  -> ", $self->array2string($L);
+#warn "face recipe `$face' --> ", $self->array2string([map $self->{layers}{$_}, @$L]);
+  $L;
+}
+
+sub export_layers ($$$) {
+  my ($self, $face, $base) = (shift, shift, shift);
+  $self->{faces}{$face}{'[ini_layers_prefix]'} || $self->{faces}{$face}{'[ini_layers]'} || $self->{faces}{$face}{layers} 
+    || $self->layers_by_face_recipe($face, $base)
 }
 
 sub pseudo_layer ($$$$) {
   my ($self, $recipe, $face, $N) = (shift, shift, shift, shift);
   my $l = $self->pseudo_layer0($recipe, $face, $N);
 #warn("layer recipe: `$l'"), 
-  $l = $self->{layer_recipes}{$l} if exists $self->{layer_recipes}{$l};
+  ($l = $self->{layer_recipes}{$l}) =~ s/^\s+// if exists $self->{layer_recipes}{$l};
   return $l if $self->{layers}{$l};
   ($self->make_translated_layers($l, $face, [$N]))->[0]
 #  die "Component `$l' of a pseudo-layer cannot be resolved"
@@ -3631,17 +3842,18 @@ sub pseudo_layer0 ($$$$) {
   my ($self, $recipe, $face, $N) = (shift, shift, shift, shift);
   if ($recipe eq 'LinkFace') {
     my $L = $self->{faces}{$face}{LinkFace} or die "Face `$face' has no LinkFace";
-    return ($self->export_layers($L))->[$N];
+    return ($self->export_layers($L, $face))->[$N];
   }
-  return ($self->export_layers($face))->[$N] if $recipe eq 'Self';
+  return ($self->export_layers($face, $face))->[$N] if $recipe eq 'Self';
   return ($1, $2)[$N]			     if $recipe =~ /^Layers\((.*)\+(.*)\)$/;
   my $N1 = $self->flip_layer_N($N, $#{ $self->{faces}{$face}{layers} });
   if ($recipe eq 'FlipLayersLinkFace') {
     my $L = $self->{faces}{$face}{LinkFace} or die "Face `$face' has no LinkFace";
-    return ($self->export_layers($L))->[$N1];
+    return ($self->export_layers($L, $face))->[$N1];
   }
-  return ($self->export_layers($face))->[$N1] if $recipe eq 'FlipLayers';
-  return ($self->export_layers("$2"))->[$1 ? $N : $N1]
+#warn "Doing flip/face via `$recipe', N=$N, N1=$N1, face=`$face'";
+  return ($self->export_layers($face, $face))->[$N1] if $recipe eq 'FlipLayers';
+  return ($self->export_layers("$2", $face))->[$1 ? $N : $N1]
     if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/;
   die "Unrecognized Face recipe `$recipe'"
 }
@@ -3656,8 +3868,8 @@ sub pseudo_layer0 ($$$$) {
 #   face).  
 # In particular: to specify a layer, use Id(LayerName).
 #use Dumpvalue;
-sub make_translated_layers ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipShift, stacking and maps
-  my ($self, $recipe, $face, $NN, $deadkey, $append, $ARG) = (shift, shift, shift, shift, shift, '');
+sub make_translated_layers ($$$$;$$) {		# support Self/FlipLayers/LinkFace/FlipShift, stacking and maps
+  my ($self, $recipe, $face, $NN, $deadkey, $noid, $append, $ARG) = (shift, shift, shift, shift, shift, shift, '');
 # XXX We can't cache created layer by name, since it depends on $recipe and $N too???
 #  return $recipe if exists $self->{layers}{$recipe};
 #  my $FACE = $recipe . join '===', '', @$NN, '';
@@ -3672,6 +3884,8 @@ sub make_translated_layers ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipSh
     my @layers = map $self->make_translated_layers($_, $face, $NN, $deadkey), @parts;
 #print "Stacking for `$recipe'\n" if $DEBUG;
 #Dumpvalue->new()->dumpValue(\@layers) if $DEBUG;
+    return [$self->make_translated_layers_noid($noid eq 'NotSameKey', @layers)]
+      if $noid;
     return [$self->make_translated_layers_stack(@layers)];
   }
   if ( $recipe =~ /\)$/ ) {
@@ -3694,8 +3908,10 @@ sub make_translated_layers ($$$$;$) {		# support Self/FlipLayers/LinkFace/FlipSh
     if (exists $self->{layers}{$ARG}) {
       $ARG = [($ARG) x @$NN];
     } else {
-      $ARG = $self->{layer_recipes}{$ARG} if exists $self->{layer_recipes}{$ARG};
-      $ARG = $self->make_translated_layers($ARG, $face, $NN, $deadkey)
+      ($ARG = $self->{layer_recipes}{$ARG}) =~ s/^\s+// if exists $self->{layer_recipes}{$ARG};
+      ($noid) = ($recipe =~ /^(NotId|NotSameKey)$/);
+      $ARG = $self->make_translated_layers($ARG, $face, $NN, $deadkey, $noid);
+      return $ARG if $noid;
     }
   } else {
     $ARG = [map $self->{faces}{$face}{layers}[$_], @$NN];
@@ -4108,32 +4324,39 @@ my %operators = (DOT => ['MIDDLE DOT', 'FULL STOP'], RING => ['DEGREE SIGN'], DI
 
 #			THIS IS NOT A MULTIMAP!			■□ ◼◻ ◾◽	◇◆◈⟐⟡⟢⟣⌺	△▲▵▴▽▼▿▾⟁⧊⧋
 my %uni_manual = (phonetized => {qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ŋ  V ɤ  ! ǃ  ? ʔ  ¿ ʕ )},
-		  addline    => {qw( 0 ∅  ( ∈  ) ∋  = ≡  ≡ ≣  † ‡  + ∦  / ∠  | ∟  . ∸  ∨ ⊻  ∧ ⊼  ∫ ⨏ 
-		  		     ⊤ ⫧  ⊥ ⫨  ⊢ ⊩  ⊩ ⫢  ⊦ ⊧  ⊣ ⫤  ⊳ ⩥  ⊲ ⩤  □ ⎅ )},	# conflict with modifiers: qw( | ‖  _ ‗ )
-		  addtilde   => {qw( 0 ∝  / ∡  \ ∢  ∫ ∱  ∮ ⨑  : ∻  - ≂  ≠ ≆  ~ ≈  ∼ ≈  ≃ ≊  ≈ ≋  = ≌  ( ⟅  ) ⟆ )},	# not on 2A**
-		  adddot     => {qw( : ⫶  " ∵  ∫ ⨓  ∮ ⨕  □ ⊡  ◇ ⟐  )},	# ⫶ is tricolon, not vert. …   "
-		  addleft    => {qw( = ≔  × ⨴  × ⋉  \ ⋋  + ⨭  → ⧴  ∫ ⨗   ∮ ∳  ⊂ ⟈  ⊃ ⫐  ⊳ ⧐  ⊢ ⊩  ⊩ ⊪  ⊣ ⟞  
-		  		     ◇ ⟢  ▽ ⧨  )},	#  × ⨴ is hidden
-		  addright   => {qw( = ≕  × ⨵  × ⋊  / ⋌  + ⨮  - ∹  ∫ ⨔   ∮ ∲  ⊂ ⫏  ⊃ ⟉  ⊲ ⧏  ⊢ ⟝  ⊣ ⫣  
-		  		     ◇ ⟣  △ ⧩ )},	#  × ⨵ is hidden
+		  paleo	     => {qw( & ⁊  W Ƿ  w ƿ  h ƕ  H Ƕ  G Ȝ  g ȝ )},
+		  addline    => {qw( 0 ∅  + ∦  ∫ ⨏  • ⊝ )},
+		  addhline   => {qw( = ≡  ≡ ≣  † ‡  + ∦  / ∠  | ∟  . ∸  ∨ ⊻  ∧ ⊼  ◁ ⩤  ≟ ≜
+		  		     ⊨ ⫢  ⊦ ⊧  ⊤ ⫧  ⊥ ⫨  ⊣ ⫤  ⊳ ⩥  ⊲ ⩤  ⋄ ⟠  ∫ ⨍  ⨍ ⨎  • ⦵)},	# conflict with modifiers: qw( _ ‗ ); ( ∈  ) ∋ not useful with ∈∋ as greenkeys...
+		  addvline   => {qw( ⊢ ⊩  ⊣ ⫣  ⊤ ⫪  ⊥ ⫫  □ ⎅  | ≬  ∫ ⨒  ‖ ⫴  ≢ ⩨  ⩨ ⩩  • ⦶  
+		  		     \ ⫮  ° ⫯  . ⫰  + ⫲  ⫲ ⫵  ∞ ⧞  = ⧧  ⧺ ⧻  + ⧺ )},		#  + ⫲ hidden
+		  addtilde   => {qw( 0 ∝  / ∡  \ ∢  ∫ ∱  ∮ ⨑  : ∻  - ≂  ≠ ≆  ~ ≈  ∼ ≈  ≃ ≊  ≈ ≋  = ≌  
+		  		     ≐ ≏  ( ⟅  ) ⟆ )},	# not on 2A**
+		  adddot     => {qw( : ⫶  " ∵  ∫ ⨓  ∮ ⨕  □ ⊡  ◇ ⟐  ( ⦑  ) ⦒  ≟ ≗  ≐ ≑)},	# ⫶ is tricolon, not vert. …   "
+		  adddottop  => {qw( + ∔ )},
+		  addleft    => {qw( = ≔  × ⨴  × ⋉  \ ⋋  + ⨭  → ⧴  ∫ ⨗  ∮ ∳  ⊂ ⟈  ⊃ ⫐  ⊳ ⧐  ⊢ ⊩  ⊩ ⊪  ⊣ ⟞  
+		  		     ◇ ⟢  ▽ ⧨  ≡ ⫢  • ⥀  ∅ ⦴  ⋈ ⧑  ≟ ⩻  ≐ ≓ )},	#  × ⨴ is hidden
+		  addright   => {qw( = ≕  × ⨵  × ⋊  / ⋌  + ⨮  - ∹  ∫ ⨔  ∮ ∲  ⊂ ⫏  ⊃ ⟉  ⊲ ⧏  ⊢ ⟝  ⊣ ⫣  
+		  		     ◇ ⟣  △ ⧩  • ⥁  ∅ ⦳  ⋈ ⧒  ≟ ⩼  ≐ ≒ )},	#  × ⨵ is hidden
 		  sharpen    => {qw( < ≺  > ≻  { ⊰  } ⊱  ( ⟨  ) ⟩  ∧ ⋏  ∨ ⋎  . ⋄  ⟨ ⧼  ⟩ ⧽  ∫ ⨘  
-		  		     ⊤ ⩚  ⊥ ⩛  ◇ ⟡  ▽ ⧍ )},	# ⋆
+		  		     ⊤ ⩚  ⊥ ⩛  ◇ ⟡  ▽ ⧍  • ⏣  ≟ ≙)},	# ⋆
 		  unsharpen  => {qw( < ⊏  > ⊐  ( ⟮  ) ⟯  ∩ ⊓  ∪ ⊔  ∧ ⊓  ∨ ⊔  . ∷  ∫ ⨒  ∮ ⨖
-		  		     / ⧄  \ ⧅  ° ⧇  ◇ ⌺ )},		#   + ⊞  - ⊟  * ⊠  . ⊡  × ⊠
-		  whiten     => {qw( [ ⟦  ] ⟧  ( ⟬  ) ⟭  { ⦃  } ⦄  ⊤ ⫪  ⊥ ⫫  ; ⨟  ⊢ ⊫  ⊣ ⫥  
-		  		      )},	# or blacken □ ■  ◻ ◼  ◽ ◾  ◇ ◆  △ ▲  ▵ ▴  ▽ ▼  ▿ ▾ 
+		  		     / ⧄  \ ⧅  ° ⧇  ◇ ⌺  • ⌼  ≟ ≚  ≐ ∺ )},	#   + ⊞  - ⊟  * ⊠  . ⊡  × ⊠
+		  whiten     => {qw( [ ⟦  ] ⟧  ( ⟬  ) ⟭  { ⦃  } ⦄  ⊤ ⫪  ⊥ ⫫  ; ⨟  ⊢ ⊫  ⊣ ⫥  ⊔ ⩏  ⊓ ⩎  ∧ ⩓  ∨ ⩔
+		  		     : ⦂  | ⫾  • ○  < ⪡  > ⪢)},	# or blacken □ ■  ◻ ◼  ◽ ◾  ◇ ◆  △ ▲  ▵ ▴  ▽ ▼  ▿ ▾
 		  quasisynon => {qw( ∈ ∊  ∋ ∍  ≠ ≶  ≠ ≷  = ≸  = ≹  ≼ ⊁  ≽ ⊀  ≺ ⋡  ≻ ⋠  < ≱  > ≰  Δ ∆
 		  		     ≤ ≯  ≥ ≮  ⊆ ⊅  ⊇ ⊄  ⊂ ⊉  ⊃ ⊈  ⊏ ⋣  ⊐ ⋢  ⊳ ⋬  ⊲ ⋭  … ⋯  * ⋆  ( ⦇  ) ⦈
-		  		     ⊤ ⫟  ⊥ ⫠  ⟂ ⫛  □ ∎  ▽ ∀ )},
+		  		     ⊤ ⫟  ⊥ ⫠  ⟂ ⫛  □ ∎  ▽ ∀  ‖ ∥  ≟ ≞ )},
 		  amplify    => {qw( < ≪  > ≫  ≪ ⋘  ≫ ⋙  ∩ ⋒  ∪ ⋓  ⊂ ⋐  ⊃ ⋑  ( ⟪  ) ⟫  ∼ ∿  = ≝  ∣ ∥  . ⋮  
 		  		     0 ∅  ∈ ∊  ∋ ∍  - −  / ∕  \ ∖  √ ∛  ∛ ∜  ∫ ∬  ∬ ∭  ∭ ⨌  ∮ ∯  ∯ ∰  ∰ ⨌  : ⦂
-		  		     : ∶  ≈ ≋  ≏ ≎  ≡ ≣  × ⋈  + ∑  Π ∏  Σ ∑  ⊥ ⟘  ⊤ ⟙  ⟂ ⫡  ; ⨾  □ ⧈  ◇ ◈
-		  		     ⊲ ⨞  ⊢ ⊦  △ ⟁  )},	#   ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden
+		  		     : ∶  ≈ ≋  ≏ ≎  ≡ ≣  × ⨯  + ∑  Π ∏  Σ ∑  ρ ∐  ∐ ⨿  ⊥ ⟘  ⊤ ⟙  ⟂ ⫡  ; ⨾  □ ⧈  ◇ ◈
+		  		     ⊲ ⨞  ⊢ ⊦  △ ⟁  ∥ ⦀  ⫴ ⫼  / ⫽  ⫽ ⫻  • ●  ⊔ ⩏  ⊓ ⩎  ∧ ⩕  ∨ ⩖
+		  		     ⋉ ⧔  ⋊ ⧕  ⋈ ⧓  ⪡ ⫷  ⪢ ⫸  ≟ ≛  ≐ ≎   )},	#   ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden; ∥ ⫴; × ⋈ not needed
 		  turnaround => {qw( ∧ ∨  ∩ ∪  ∕ ∖  ⋏ ⋎  ∼ ≀  ⋯ ⋮  … ⋮  ⋰ ⋱  
 		  		     8 ∞  ∆ ∇  Α ∀  Ε ∃  ∴ ∵  ≃ ≂
 		  		     ∈ ∋  ∉ ∌  ∊ ∍  ∏ ∐  ± ∓  ⊓ ⊔  ≶ ≷  ≸ ≹  ⋀ ⋁  ⋂ ⋃  ⋉ ⋊  ⋋ ⋌  ⋚ ⋛  ≤ ⋜  ≥ ⋝  ≼ ⋞  ≽ ⋟  )},			# XXXX Can't do both directions
-		  round      => {qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸  □ ▢
-		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  ⊤ ⫙  ⊥ ⟒  ( ⦅  ) ⦆  ⊳ ⪧  ⊲ ⪦ )});	#   = ≖  = ≗ hidden = ≈
+		  round      => {qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸  □ ▢  ∥ ≬  ‖ ≬
+		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  ⊤ ⫙  ⊥ ⟒  ( ⦅  ) ⦆  ⊳ ⪧  ⊲ ⪦  ≟ ≘  ≐ ≖)});	#   = ≖  = ≗ hidden = ≈
 
 my $warnUNRES = $ENV{UI_KEYBOARDLAYOUT_UNRESOLVED};
 sub parse_NameList ($$) {
@@ -4164,7 +4387,7 @@ sub parse_NameList ($$) {
         if ($name =~ /^(.*)\s+(?=OR\s)(.*?)\s*$/) {	# Find the latest possible...
           push @{$candidates{$k}}, [$1, $2];
         }
-        if (($t = $name) =~ s/\b(COMBINING(?=\s+CYRILLIC\s+LETTER)|BARRED|SLANTED|APPROXIMATELY|ASYMPTOTICALLY|(?<!\bLETTER\s)SMALL(?!\s+LETTER\b)|ALMOST|^SQUARED|LUNATE|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|SCRIPT|LONG|MATHEMATICAL|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED|DOTLESS|FINAL)\s+|\s+(BAR|SYMBOL|OPERATOR|SIGN|IN\s+TRIANGLE)$//) {
+        if (($t = $name) =~ s/\b(COMBINING(?=\s+CYRILLIC\s+LETTER)|BARRED|SLANTED|APPROXIMATELY|ASYMPTOTICALLY|(?<!\bLETTER\s)SMALL(?!\s+LETTER\b)|ALMOST|^SQUARED|LUNATE|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|SCRIPT|LONG|MATHEMATICAL|INSULAR|VISIGOTHIC|MIDDLE-WELSH|BROKEN|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED|DOTLESS|FINAL)\s+|\s+(BAR|SYMBOL|OPERATOR|SIGN|ROTUNDA|IN\s+TRIANGLE)$//) {
           push @{$candidates{$k}}, [$t, "calculated-$+"];
           $candidates{$k}[-1][1] .= '-epigraphic'   if $t =~ /\bEPIGRAPHIC\b/;	# will be massaged away from $t later
           $candidates{$k}[-1][0] =~ s/\s+SYMBOL$// and $candidates{$k}[-1][1] .= '-symbol' 
@@ -4173,14 +4396,18 @@ sub parse_NameList ($$) {
           $candidates{$k}[-1][1] .= '-smallcaps' if $t =~ /\bSMALL\s+CAPITAL\b/;	# will be massaged away from $t later
 # warn "Candidates: <$candidates{$k}[0]>; <$candidates{$k}[1]>";
         }
-        if (($t = $name) =~ s/\b(CIRCLED)\s+//) {
+        if (($t = $name) =~ s/\b(WHITE|BLACK|CIRCLED)\s+//) {
           push @{$candidates{$k}}, [$t, "fake-$1"];
-        }
-        if (($t = $name) =~ s/\b(WHITE)\s+//) {
-          push @{$candidates{$k}}, [$t, "fake-white"];
         }
         if (($t = $name) =~ s/\bBLACK\b/WHITE/) {
           push @{$candidates{$k}}, [$t, "fake-black"];
+        }
+        if (($t = $name) =~ s/(?:(\bMIDDLE-WELSH)\s+)?\b(\w)(?=\2$)//) {
+          push @{$candidates{$k}}, [$t, "fake-doubleletter" . ($1 ? "-$1" : '')];
+        }
+        if (($t = $name) =~ s/\b(APL\s+FUNCTIONAL\s+SYMBOL)\s+\b(.*?)\b\s*\b(QUAD(?!$)|UNDERBAR|TILDE|DIAERESIS|VANE|STILE|JOT|OVERBAR|BAR)\b/$2/) {
+#warn "APL: $k ($name) --> <$t>; <$1> <$3>";
+          push @{$candidates{$k}}, [$t, "calculated-$1-$3"];
         }
         if (($t = $name) =~ s/\b(LETTER\s+SMALL\s+CAPITAL)/CAPITAL LETTER/) {
           push @{$candidates{$k}}, [$t, "smallcaps"];
@@ -4254,7 +4481,7 @@ sub parse_NameList ($$) {
           next unless $F ne $from and $T ne $to;
           ($from, $to) = ($F, $T);
         }
-        push @{$candidates{$self->key2hex($to)}}, [$NM{$from}, $how];
+        push @{$candidates{$self->key2hex($to)}}, [$NM{$from}, "manual-$how"];
       }
     }
   }
@@ -4300,6 +4527,7 @@ sub parse_NameList ($$) {
       $b =~ s/^CYRILLIC\b(?!\s+(?:CAPITAL|SMALL)\s+LETTER)(?=\s+LETTER\b)/CYRILLIC SMALL/ unless $N{$b};
       $b =~ s/\bEQUAL\s+TO\s+SIGN\b/EQUALS SIGN/ unless $N{$b};
       $b =~ s/\bMINUS\b/HYPHEN-MINUS/ unless $N{$b};
+      $b =~ s/(?<=WARDS)$/ ARROW/ unless $N{$b};	# APL VANE
 #      $b =~ s/\bDOT\b/FULL STOP/ unless $N{$b};
 #      $b =~ s/^MICRO$/GREEK SMALL LETTER MU/ unless $N{$b};
 
@@ -4319,7 +4547,7 @@ sub parse_NameList ($$) {
     ($warnUNRES and warn("Unresolved: <$Cand->[0]> WITH <$Cand->[1]>")), next unless defined $base;
     my @modifiers = split /\s+AND\s+/, $with;
     @modifiers = map { s/\s+/-/g; /^[\da-f]{4,}$/i ? $_ : "<pseudo-\L$_>" } @modifiers;
-#warn " --> <$base> <@modifiers>";
+#warn " $c --> <@$base>; <@modifiers>";
     unshift @{$basic{$c}}, [1, $_, @modifiers] for @$base;
     if ($b =~ s/\s+(OPERATOR|SIGN)$//) {	# ASTERISK	(note that RING is a valid name, but has no relation to RING OPERATOR
       unshift @{$basic{$c}}, [1, $base, @modifiers] if defined ($base = $N{$b});	# ASTERISK
