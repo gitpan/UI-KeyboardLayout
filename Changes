@@ -1,4 +1,56 @@
-Revision history for Perl extension UI::KeyboardLayout.
+============ Design goals for izKeys keyboard group (the main drive for the development of this module):
+
+  0) No gotchas for people who cannot remember anything.
+  1) Doing 3-4 experiments, one must be able to find most (80-90% achievable?) of covered characters
+     knowing only a handful of general rules for "position allocation" [*].
+  2) Gradual degradation: the fewer rules one can keep in mind, the narrower repertoir of characters is
+     *easily* accessible; but "more cumbersome" ways to access characters should be available if they
+     are easier to keep in mind.
+  3) Have most (70%-80% achievable?) of covered characters available in easy-to-remember positions.
+  4) Have whole coverage of certain ranges of Unicode.
+
+     [*] Currently it is unclear if the general rules may be shared by all the "application domains".
+	 For example, to access our layout this way, one needs to know different "handfuls" of allocation rules
+	 for Ancient Greek than for Math Symbols.
+
+Currently achieved (ranges as of Unicode v6.1):
+*) One gotcha (with Shift-SPACE) comparing to US and Russian Phonetic keyboards;
+*) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1 (except for arrows);
+*) Full coverage of Greek ranges (polytonic and esoteric characters need double prefix keys);
+*) 97% coverage of Cyrillic ranges (except for: lc/uc pairs for ԕԡԣꙣꙥꚁ;
+     from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double prefix keys);
+*) Full coverage of currency symbols;
+*) Full coverage of vulgar fractions;
+*) Full coverage of Coptic alphabet (via double prefix keys);
+*) Full coverage of characters covered by EurKey/Bépo keyboards (except arrows and combining 0302, 030a);
+*) 50% coverage of math symbols in BMP (the most useful implemented first);
+*) Full coverage of double-accented letters of MES-3b;
+*) Latin and Cyrillic personalities;
+*) Visual bell to report unrecognized/unsupported combinations;
+*) Documentation of the allocation rules scattered over different files/sections.
+
+Not yet implemented, or lost by upgrades to other goals:
+*) Clear documentation of the allocation rules (needed for "goal 1" above).
+*) Greek personality;
+*) The "compose" prefix key + access by human-guessable sequence of Latin chars;
+*) Full coverage of Cyrillic;
+*) Full coverage of IPA (both visually, and by structure properties of the described sounds);
+*) Full coverage of spacing modifiers and combining characters for Latin scripts, and for symbols;
+*) Full coverage of Unicode's paleo-Latin characters;
+*) Full (is it compatible with other goals???) coverage of math symbol ranges in BMP;
+*) Full coverage of Math Fractur, Math Double-Strike and Math Script English letters (would need to abandon kbdutool...);
+*) reasonable coverage of arrows;
+*) reasonable coverage of ASCII/Unicode drawing characters;
+*) Full coverage of characters covered by Neo keyboard, and X11+Neo composition tables;
+*) Full coverage of MES-2 (currently 21 characters + 55 box drawing symbols missing);
+*) Easy-to-describe quick access to Vietnamese characters.
+
+Possible roadmaps:
+*) Full coverage of Hebrew (and a personality?)
+*) What about other scripts with "small repertoir" of characters (such as arabic with 62 access points on the M$ keyboard;
+   indic)?
+
+=========== Revision history for Perl extension UI::KeyboardLayout.
 
 0.01  Mon Jan  9 23:45:23 2012
 	- original version; created by h2xs 1.23 with options
@@ -439,3 +491,81 @@ Revision history for Perl extension UI::KeyboardLayout.
 			Add double-grave and dot-above to AltGr-;.
 				Currently ȽɾᴁᴙᶏᶒḄḚṂṚ‖′″ⁿ⊠⊦⌐⌙⧇⫴ꟽꟿ missing w.r.t. EurKey++.
 			
+0.08	New charlist latin-derived (from http://en.wikipedia.org/wiki/Latin-derived_alphabet).
+	Work on manual-mutators lists.
+	Decrease font size in HTML tables to 10pt (to compensate for slash-column).
+	Add mutators for paleo-latin contractions and UM-ified contractions.
+	Rename toHEX() to fromHEX().
+	Allow omitting argument to print_decompositions; new subroutine print_compositions_ch().
+	Remove duplicates and trivial id entries from (de)composition mappings.
+	Two bugs in (un)chaining mutators: shallow copy + modify, and case of hex.
+	Penalize out-of-order modifiers.
+	Allow for multiple results of a mutator (to preserve backward compatibility, we need to calculate penalties 
+	  in a very convoluted way...) - STILL NOT WORKING SATISFACTORY...
+	Highlight vietnamese and doubleaccent entries in an HTML table; write line explaining highlights.
+	Store geometry information extracted from the visual representation of layers (with keyline_offsets set in a visual section
+	  or an ancestor); propagate to faces via the first layer, or geometry_via_layer.
+	New mutators uc/lc/Empty.
+	New Mutate[] atoms uc/lc/ucfirst/lcfirst (which act only when they change letter, and the result is of length 1 - see U+1fa6, or rho with aspirations)
+	Fix caching of ancillary layers in for 'all_layers' mode.
+	Add manual-* maps for coptic script.
+	Start documenting the engine of layer recipes.
+	Add more fix-uc/lc pairs for v>5.1.
+	In HTML tables: highlight zero-width chars, soft-hyphen and whitespace; allow manual addition of paragraphs;
+	  auto-generate the table header.
+	New root key of .kbdd: VERSION.
+	New charlists mes1, mes2, mes3b.
+		perl -C2 -wane "next unless /^[\da-f]{2}\s/i; my $p = (hex shift @F)<<8; for (@F) {print(chr($p + hex)), next unless /\W/; my @r = split /\W+/; for my $c (hex $r[0] .. hex $r[1]) {print chr($p+$c)}}" ! >o3b
+		http://web.archive.org/web/20000815100817/http://www.egt.ie/standards/iso10646/pdf/cwa13873.pdf
+
+	izKeys:	Remove duplicates from comma/cedilla/ogonek map, and fuse with dot/ring.
+		Simplify greekize on comma/cedilla/ogonek.
+		Rename layers and faces to better reflect the semantic.
+		Micro-optimize layout (now compatible with all http://en.wikipedia.org/wiki/Latin-derived_alphabet).
+		Add retroflex hook on acute-on-top-of-acute, fishhook to hat, reversed to acute/grave, tilde-below 
+		  on breve-on-grave, Æ-smallcaps on AltGr-$ Æ.
+		Split macron into macron and slash maps (miss therefore and midline ellipsis).	  (All *letters* from EurKey++ accessible now.)
+		Add inverted breve to macron (to reach a/u, allow removing acute; manually slide Ȏȏ to AltGr-less positions Kk).
+		Make AltGr-/ insert macron under diaeresis (so Ṻṻ appear).
+		Remove binding for TONOS and YPOGEGRAMMENI from `_ in the Greek face.
+		Fully implement polytonic Greek vowels; full Coptic alphabet support: the prefix keys working AFTER greek prefix:
+		  [ and ] prefix keys for the corresponding aspiration; each vowels is entered via 4 keys on the
+		    vowel's key's principal diagonal as: digit row: circumflex; QWERTY row: acute, ASDF row: plain,
+		    ZXCV row: grave; add AltGr for diaresis or iotation.  ρ is entered on `.
+		  \ prefix key: the same without aspiration (but "plain without iotation" is replaced by vrachy=breve, and the
+		    next neighbour ASDF-row letter gives macron); all letters are "upgraded", so acute is actually oxia (not tonos),
+		    υ-diaeresis-acute gives ϓ (on AltGr-u), and epsilon/rho are replaced by the corresponding symbols ϵ ϼ (on d 
+		    and `; rho is stroked).
+		       ("Standalone diacritics" are put on the place of non-existing omicron with dialytika: 9ol.-column with AltGr 
+		        [ heuristic: on AltGr-. ];
+		        add Shift to get variants with dialytika.  As exceptions, coronis is entered as psili with shift (on
+		        ] AltGr-L), and the "no-accents position" \ AltGr-l gives YPOGEGRAMMENI/PROSGEGRAMMENI (without/with Shift),
+		        while \ 3 and \ # give lower/upper number signs.  Standalone tonos is on \ AltGr-3; shift to add dialytika.)
+		  ` prefix key: Coptic analogues of greek letters, and j/J --> ḏanḏia, v/V --> fei, hyphen --> double-hyphen;
+		    the letters without Greek analogue are on AltGr-letter where the "letter" is the first letter of the
+		    name on Wikipedia page (or the first letter of Unicode name for DEI and KHEI [ti and xai]).
+		    Additional "random" AltGr-letters: Bactrian sho on b/B; ½-H heta Ͱ/ͱ on i; yot ϳ on j; Pamphylian digamma Ͷ/ͷ 
+		      on g; san Ϻ/ϻ on m, ϒ on Y, lunate sigmas ϲ/Ϲ on l, reversed lunate sigmas ͻ/Ͻ on o, reversed epsilon ϶
+		      on e, kai's Ϗ/ϗ on q, (reversed) dotted lunate sigmas ͽ/Ͽ ͼ/Ͼ on r and u,  and archaic sampi Ͳ/ͳ on n.
+		On Greek face: add ϔ as an AltGr-variant of Ϋ (this completes the coverage of greek ranges).
+		On 0483 Cyrillic: add Modifier-ᵸ and smallcaps ᴫ on Shifted positions;
+				  on AltGr-positions: enter more obscure letters...  
+		Have all letters used in current languages (including Enets with 70 speakers ;-), according to Wikipedia tables;
+		  (old Komi scripts are on comma, and some zee's on zero ;-). But tables in ru.wikipedia mention also
+0514	<Ԕ>	CYRILLIC CAPITAL LETTER LHA [Cyrillic; Cyrillic Supplement; 5.1]
+0520	<Ԡ>	CYRILLIC CAPITAL LETTER EL WITH MIDDLE HOOK [Cyrillic; Cyrillic Supplement; 5.1]
+0522	<Ԣ>	CYRILLIC CAPITAL LETTER EN WITH MIDDLE HOOK [Cyrillic; Cyrillic Supplement; 5.1]
+		  - anyway, what is missing is only 6 lc/uc-pairs (all with: from v5.1, for obsolete scripts, for non-Slavic lang):
+		    ԕԡԣꙣꙥꚁ	(3л, 1н and 2д; one binding slot - on ш - still unused).
+		Repeat greek number signs Shift-inverted on []-prefixes, and add digit subscripts to Coptic 
+		  (to enable access from CyrillicPhonetic - obscured by ъЪёЁ).
+		Set version to 0.01.
+		To access Ȧȧ, add on / (undoing `: on à); for z-hook, put on ¨ z; etc - many small changes.
+		Add obsolete Zhuang tone marks to Coptic (!) AltGr-numbers.
+		Restore compatibility with Bépo, and micro-optimize comparing with M#S-1/2/3b.
+		  
+			-VEND -UM
+		
+	print_nameslist.pl:	Update to use non-beta Unicode files.
+				New option -hex.
+

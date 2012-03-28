@@ -10,9 +10,13 @@ COPYR_YEARS=2011,2012
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia)
 #
+VERSION=0.01
+#
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
 @Vietnamese=åă,àâ,èê,òô,øơ,bư
+@Macron=øō
+@Zuang_tones=2ƨ,3з,4ч,5ƽ,6ƅ,@Ƨ,#З,$Ч,%Ƽ,^Ƅ
 #
 [DEADKEYS]
 #
@@ -23,37 +27,39 @@ SORT_ORDER_ID_=0000
 [visual -> KBD/B/C/D]
 #
 visual_rowcount=4
-@visual_per_row_counts=4,2,4,4
+@visual_per_row_counts=4,4,4,4
 visual_prefixes=  *
 in_key_separator=/
 prefix_repeat=3
 #					Greek-AltGr and CopyRight-AltGr each has only one element: Ω and ©
 @layer_names=Blue,Blue-AltGr,Greek,Greek-AltGr
-@layer_names=Green,Green-AltGr
-@layer_names=Latin,Latin-AltGr,Junk,Junk-AltGr
-@layer_names=Russian0,Russian0-AltGr,Russian-II,Russian-II-AltGr
+@layer_names=Green,Green-AltGr,Cyrillic-Extra,Cyrillic-ExtraExtra
+@layer_names=US-Base,USLatin-AltGr,Junk,Junk-AltGr
+@layer_names=Russian-Base,Cyrillic-AltGr,Cyrillic-II,Cyrillic-II-AltGr
+#					20: access KP_Decimal and KP_Extra_Slash_on_Left on offsets 20,21
+@keyline_offsets=0,1,1,1,20
 #
 # Perl 5.8.8 does not recognize  ҇ as a combining character...
 #
-	--/⋱	--∤/∣∁	--≈/∃∀	--⧣/∛∄	--/∜≀	--◌/★☆	--	--		--/∞		--	--		∓―/±–/⁻		--//⁼⁺
-	--	⊤⊥/≠⟂	∫∮/∭∥	⊳⊲/⊢⊣	□◇/△▽	•⋈/⨯	∨∧	∪∩		≐×		--∈	--∋		--		--
+	--/⋱≀	--∤/∣∁	--≈/∃∀	--⧣/∛∄	--/∜⨋	--◌/☆★	--/⨊	--§/⨄⨃		--⊠/∞⧆		--/--‛	--/◌⧇		∓―/±–/⁻₋	--//⁼⁺
+	--   ⊤⊥/≠⟂/ꙩ/ꚑ ∫∮/∭∥/ꙫ/ꙭ ⊳⊲/⊢⊣/ꙮ □◇/△▽/ꚉ •⋈/⨯/ꙛ	∨∧	∪∩//ꙅ		≐×/≃/ԑ/--꙳	--∈//ꙉ	--∋//ꙃ/ꙁ	--//ҹ		--//ӌ
 ***	`~/ˋ˜	1!/¬¡/¼	2@/ºª/½	3#/√№/¾	4$/¢£/⅓	5%/€¥/⅔	6^/ˇˆ	7&/·©		8*/„‚		9(/“‘	0)/”’		-_/¯—//©	=+/µ±/↔⇔
-	ю//ѫ/ѭ	1!/--∁	2@/∃∀	3ъ	4Ъ	5ё/--€	6Ё/-- ҃	7&/ ҆ ҇// ꙽ꙿ	8*//-- ҅	9(///ҁ	0)/// ꙼꙾	-_		ч//ҷ/ӵ
+	ю//ѫ/ѭ	1!/--∁	2@/∃∀	3ъ	4Ъ	5ё/--€	6Ё/-- ҃	7&/ ҆ ҇// ꙽ꙿ	8*//-- ҅	9(///ҁ	0)/// ꙼꙾	-_//ҿ/ҽ		ч//ҷ/ӵ
 #
-	--//θ	--//ω	--//ε	--//ρ	--//τ	--//ψ	--//υ	--//ι	--//ο	--//π	--//⁽₍	--//⁾₎	--
-	--	--	--	--	--	--	--	--	--	--	--	--	--
-***	q/ä	w/á	e/ê	r/å/®	t/þ/™	y/ÿ	u/ü/↖⇖	i/ĳ/↗⇗	o/œ	p/ø/℗	[{/«‹	]}/»›	\|/†¦
-	я/ѣ/ѧ/ѩ	в/ѵ/ꙍ/ԝ	е/ё/ө/ӫ	р/ ҄®/ѽ	т/ћ/ҭ/ԏ	ы/і/ү/ұ	у/ў/ӯ/ӱ	и/ѷ/ӣ/ӥ	о/ѡ/ѻ/ѿ	п/ѱ/ԥԤ/ҧ	ш//ԧԦ/ѐ	щ//ꚇ/ѝ	э//ѥ/ӧ
+	--//θ	--//ω	--//ε	--//ρ		--//τ	--//ψ	--//υ	--//ι	--//ο	--//π	--//--₍/⁽	--//--₎/⁾	--/◊⧫
+	--	--//ꚍ	--//ӗ	--//ҏ		--//ꚋ	--//ꙑ	--//ꙕ	--//ӊ	--	--//ꚏ	--//ꚅ		--//ꚗ	--//ӭ
+***	q/ä	w/á	e/ê	r/å/®		t/þ/™	y/ÿ	u/ü/↖⇖	i/ĳ/↗⇗	o/œ	p/ø/℗	[{/«‹		]}/»›	\|/†¦
+	я/ѣ/ѧ/ѩ	в/ѵ/ꙍ/ԝ	е/ё/ө/ӫ	р/ ҄®/ѽ/ԗ	т/ћ/ҭ/ԏ	ы/і/ү/ұ	у/ў/ӯ/ӱ	и/ѷ/ӣ/ӥ	о/ѡ/ѻ/ѿ	п/ѱ/ԥԤ/ҧ	ш//ԧԦ/ѐ	щ//ꚇ/ѝ	э//ѥ/ӧ
 #
-	--//α	--//σ	--//δ	--//φ	--//γ	--//η	--//ϊ	--//κ	--//λ	--//₋		∂∇/′″/₌₊
-	--	--	--	--	--	--	--	--	--	--		--
-***	a/æ	s/ß§/℠	d/ð	f/è	g/ý	h/ú/←⇐	j/í/↓⇓	k/ó/↑⇑	l/ö/→⇒	;:/¨÷		'"/´ˮ
+	--//α	--//σ	--//δ	--//φ	--//γ	--//η	--//ϊ	--//κ	--//λ	--		∂∇/′″/₌₊
+	--//ԙ	--//ꚃ	--//ӡ	--	--//ӿ	--//ҩ	--///ꙇ	--//ӄ	--//ԉ	--//ԟ/ҝ		--//ꚓ/ꚕ
+***	a/æ	s/ßẞ/℠	d/ð	f/è	g/ý	h/ú/←⇐	j/í/↓⇓	k/ó/↑⇑	l/ö/→⇒	;:/¨÷		'"/´ˮ
 	а/ә/ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	;://ӹ/ӳ		'"/ ́´/ ̀ ̀/ ́ ́
 #"
-	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ		--		--		∕/⋰
-	--	--	--	--	--	--	--		--		--		--≟
-***	z/à	x/é	c/ç/©	v/ì	b/ù	n/ñ/↙⇙	m/ò/↘⇘		,</¸≤		.>/°≥		/?/…¿
-	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ѹ/ꙋ	н/њ/ң/ҥ	м/µ±/ӎ/ꙟ	,</«/⁘⁙		.>/»/·։/჻⁖	/?/ј/;
+	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ		--		…		⁄�/⋰
+	--	--	--//ꙡ	--//ԃ	--	--//ӈ	--//ꙧ		--//ԇ/ԅ		--//ꙝ/ꙙ		…≟//ꙓ/ҍ
+***	z/à	x/é	c/ç/©	v/ì	b/ù	n/ñ/↙⇙	m/ò/↘⇘		,</¸≤		.>/°≥		/?/0338¿
+	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ѹ/ꙋ	н/њ/ң/ҥ	м/µ±/ӎ/ꙟ	,</«/⁘⁙/ԋ	.>/»/·։/჻⁖	/?/ј/ԛ/ꙏ
 # ×∓  ⁻/− δ/∕ ν/ⁿ
 	--	--
 	--	--
@@ -66,81 +72,81 @@ prefix_repeat=3
 # more to the right, or higher, are on AltGr prefix.  (Same for almost-unrelated letters placed
 # opportunistically.  (Many are inverted w.r.t. Unicode versions!  Later reason in the list wins.)
 #
-# ԃ 	Ꚉ 	ӗ
-# ԅ 	Ԑ 	ӡ
-# ԇ 	ӄ
-# ҝ 	Ԟ 	Ԛ 	Ԡ
-# ԉ 	Ԕ 	ӊ 	ӈ
-# Ԣ 	ԋ 	ҩ
-# ҏ
-# 
-# Ӿ 	Ԧ 	ӌ
-# ҹ 	ҽ 	ҿ 	ҍ 	ӭ
-# Ԙ 	Ӏ
-#
-#		Stressed: ѐ ѝ
+# Ꚉ ԇ Ԛ Ԡ Ԕ Ԣ ԋ Ԧ - missing.   Stressed: ѐ ѝ (have them).
 #
 #Non-obvious: '"/́´/ӹ/ӳ	я/ѣ/ѧ/ѩ	б/ѓ/ѹ/ѽ	д/ђ/ӟ/ԁ  й/ї/ҋ/ӑ  ь/ъ/ӛ/ӕ   ф/ѳ/ғ/Ӻ   м/Ω±/ӎ/ꙟ   ш//ԧ/ѐ	щ//ꚇ/ѝ   з/є/ҙ/ѯ  ц/џ/ҵ/ќ
 #		р/ ҄®/ꙋ	,</«„/⁘⁙	.>/»“/·։/჻⁖	/?/ј/;	+ 6789
 # Coppa is on AltGr since 1/9 fraction pushes it there...
 #
 [layer_recipes]
-#CopyRight_0=		Id(CopyRight)		MutateDupsOK[0327](SelectRX[[eE]](Latin))	ByPairs[$¤ ,¸ qĸ ËƏ ëə "〃 -∓](Latin)
-#CopyRight_1=		Id(CopyRight-AltGr)	MutateDupsOK[00a8](SelectRX[[t]](Latin))	ByPairs[EƏ eə](Latin)
+#CopyRight_0=		Id(CopyRight)		MutateDupsOK[0327](SelectRX[[eE]](US-Base))	ByPairs[$¤ ,¸ qĸ ËƏ ëə "〃 -∓](US-Base)
+#CopyRight_1=		Id(CopyRight-AltGr)	MutateDupsOK[00a8](SelectRX[[t]](US-Base))	ByPairs[EƏ eə](US-Base)
 #
 #Math_PlusPlus=	Id(Math)		ByPairs['′ "″]
 #
 # 0301 over Greek letters=tonos;   0308=dialytika	'
-Greek_Hairy_0=	Id(Greek)	MutateDupsOK[<super>](SelectRX[[0-9]])	MutateDupsOK[<sub>](SelectRX[[0-9]](FlipShift))	ByPairs[/₯ ?; `΄ _ͺ](Latin)
-Greek_Hairy_1=	Id(Greek-AltGr)	MutateDupsOK[0301|<any-calculated-symbol>|<any-calculated-final>|<any-lunate-symbol>|<any-latinize>|<any-quasisynon>,<any-amplify>](Greek)	ByPairs[YϜ yϝ TϚ tϛ Kϗ XϠ xϡ CϘ cϙ ZϞ zϟ ;· R∐ l∧ L⋀ n∨ N⋁ F∅](Latin)	ByPairs[1‐ 2– 3— 4― 0‒ |00ad !‑](Latin)	ShiftFromTo[5,˥](SelectRX[[5-9]](Latin))	ShiftFromTo[5,꜒](SelectRX[[5-9]](FlipShift(Latin))) ShiftFromTo[0,꜍](SelectRX[[0-4]](FlipShift(Latin)))
+Greek_Hairy_0=	Id(Greek)	MutateDupsOK[<super>](SelectRX[[0-9]])	MutateDupsOK[<sub>](SelectRX[[0-9]](FlipShift))	ByPairs[/₯ ?; ;·](US-Base)
+Greek_Hairy_1=	Id(Greek-AltGr)	MutateDupsOK[0301|<any-calculated-symbol>|<any-calculated-final>|<any-lunate-symbol>|<any-latinize>|<any-quasisynon>,<any-amplify>](Greek)	ByPairs[YϜ yϝ TϚ tϛ Kϗ XϠ xϡ CϘ cϙ ZϞ zϟ ;· R∐ l∧ L⋀ n∨ N⋁ F∅](US-Base)	ByPairs[1‐ 2– 3— 4― 0‒ |00ad !‑ -⁃ _‾](US-Base)	ShiftFromTo[5,˥](SelectRX[[5-9]](US-Base))	ShiftFromTo[5,꜒](SelectRX[[5-9]](FlipShift(US-Base))) ShiftFromTo[0,꜍](SelectRX[[0-4]](FlipShift(US-Base)))
+#					This stores in unshifted positions of layer 0 (ρ takes YPOGEGRAMMENI 0345):
+Greek_vowels_lc=	ByColumns[ρ,α,ω,ε,,,η,υ,ι,ο]
+Greek_vowels=		Id(Greek_vowels_lc)		uc(FlipShift(Greek_vowels_lc))
+Greek_vowels_AltGr=	MutateDupsOK[0345|0308](Layers(Empty+Greek_vowels))	ByPairs[.0020 l.0020 o.0020 9.0020](US-Base)
 #
-BusinessA_0=	Imported[business,00a4](Latin)
-BusinessA_1=	Imported[business,00a3](Latin)
-BusinessAdd_0=		ByPairs[qĸ Q⌨ "〃 -∓](Latin)	DefinedTo[¤](SelectRX[[^\da-zA-Z]](Latin))
-BusinessAdd_1=		ByPairs[EƏ eə](Latin)		DefinedTo[¤](SelectRX[[^\da-zA-Z]](Latin))
+BusinessA_0=	Imported[business,00a4](US-Base)
+BusinessA_1=	Imported[business,00a3](US-Base)
+BusinessAdd_0=		ByPairs[qĸ Q⌨ '′ "″ ;‵ :‶ -∓ Oɶ [〈 ]〉 {◄ }► o℅](US-Base)	DefinedTo[¤](SelectRX[[^\da-zA-Z]](US-Base))
+BusinessAdd_1=		ByPairs[EƏ eə OƎ oǝ '‴ "⁗ ;‷ :‱ Aᴁ WΩ 2ƻ f♀ m♂](US-Base)		DefinedTo[¤](SelectRX[[^\da-zA-Z]](US-Base))
 #"
 Business_0=	Id(BusinessA_0)	Face(VLine)		Id(BusinessAdd_0)
 Business_1=	Id(BusinessA_1)	FlipLayers(VLine)	Id(BusinessAdd_1)
 #
-RussianL_0=	Id(Russian0)		Id(Latin)
-RussianL_1=	Id(Russian0-AltGr)	Id(Latin_AltGr_Rus)
-Latin_AltGr_Rus=	FromTo[Latin,Latin-AltGr](SelectRX[[^\[\]{}\\|`~3-6+=]](Latin))
-#
-CyrillicBlue_0= Face(CyrillicBlue)
-# This Face will choose layer 1, not 0 (since CyrillicBlue is called via second layer of CyrillicPhonetic???)
-CyrillicBlue_1= FromTo[Latin,Face(CyrillicBlue)](SelectRX[[^\[\]{}\\|`~3-6+=]](Latin) FromTo[Latin-AltGr,Latin](SelectRX[[°¶❧]](Latin-AltGr)))
-#
 [face_recipes]
-#
-VLine=		Mutate[20d2,20d3,<any-addvline>,20e6,<any-vertical>,<any-stem>|<any-calculated-operator>,0338+<any-manual>,20d2+<any-manual>,20d3+<any-manual>|<any-vline>+<any-vline>,<any-addleft>+<any-addleft>,<any-addright>+<any-addright>](Face(US))
+#					∦ obscures ⦀
+VLine=		Mutate[\\∦[\],20d2,20d3,<any-addvline>,20e6,<any-vertical>,<any-stem>|<any-calculated-operator>,0338+<any-manual>,20d2+<any-manual>,20d3+<any-manual>|<any-addvline>+<any-addvline>,<any-addleft>+<any-addleft>,<any-addright>+<any-addright>](Face(Latin))
 Business=	Layers(BusinessA_0+BusinessA_1)	Face(VLine)	Layers(BusinessAdd_0+BusinessAdd_1)
-CyrillicBlue=	NotSameKey(Face(US)	Layers(Russian0+Russian0-AltGr)	Layers(Blue+Blue-AltGr))	
-CyrillicBlueMax=	Face(CyrillicBlue)	Face(CyrillicPhonetic)
+#
+CyrillicBlue=		NotSameKey(Face(Latin)	Face(CyrillicPhonetic)	Layers(Blue+Blue-AltGr))	
+CyrillicBlueMax=	ByPairs[ˮ〃](Face(Latin))	Face(CyrillicBlue)	Face(CyrillicPhonetic)
+#
+LatinBlue=		NotSameKey(Face(CyrillicPhonetic)	Face(Latin)	Layers(Blue+Blue-AltGr))	
+LatinBlueMax=		ByPairs[ˮ〃](Face(CyrillicPhonetic))	Face(LatinBlue)	Face(Latin)
+#
+Greek_Vowels=	Layers(Greek_vowels+Greek_vowels_AltGr)
+# PERISPOMENI=0342=circumflex=(visually)tilde	[SpaceOK not needed, since it checks the BASE character of a key] [varia does not decompose into SPACE+combining, but into `]
+Greek_Vowels0=	ByRows[ MutateDupsOK[0342] /// MutateDupsOK[0301] ///  Id /// MutateDupsOK[0300] ](Face(Greek_Vowels))	ByPairs[`ρ ~Ρ](Face(Latin))	ByPairs[.`](Layers(Empty+US-Base))
+# plain -> 0306 vrachy; -> 0304 macron	(in poetry: disambiguate short and long: http://www.tlg.uci.edu/~opoudjis/unicode/unicode_gkbkgd.html)
+# They are used (almost always in teaching or dictionaries) to disambiguate the three vowels which might be long or short: alpha, iota, and upsilon. 
+Greek_Vowels0_with_Vrachi=	ByRows[ Empty /// Empty ///  MutateDupsOK[0306] /// Empty ](Face(Greek_Vowels))
+Greek_Vowels0_with_Macron=	ByRows[ Empty /// Empty ///  MutateDupsOK[0304] /// Empty ](Face(Greek_Vowels))
 #
 [faces]
 # Create DeadKey maps basing on (massaged!) visual descriptions:
 #				µ:
-DeadKey_Map00b5=	Layers(Greek_Hairy_0+Greek_Hairy_1)
+DeadKey_Map00b5=	Layers(Greek_Hairy_0+Greek_Hairy_1)	ByPairs[\0342 [0314 ]0313 `03e2](Face(Latin))	ByPairs[Vϔ](FlipLayers(Latin))
+# koronis obscures 0313 psili; breve obscures 0342 perispomeni
+DeadKey_Map0342=	ByPairs[lͺ Lι 0028῁ O΅ 3΄ #΅](FlipLayers(Latin))	ByPairs[3͵ #ʹ](Face(Latin))	Face(Greek_Vowels0_with_Vrachi)	FromTo[US-Base,Face(Greek_Vowels0_with_Macron)](ByPairs[sa SA hj HJ lk LK](US-Base))	Mutate[\\ϔ,<any-stroke-symbol>+<pseudo-calculated-symbol>|<pseudo-upgrade>](Face(Greek_Vowels0))	Face(Greek_Vowels0)
+# some capital characters exist with aspiration, but not without; hence the play with uc (and uc may give something like ὮΙ) [varia needs to be special cased - it decomposes into `)
+# We repeat the Shift-inverted ByPairs[#͵ 3ʹ](Face(Latin)) only to fight access from CyrillicPhonetic (remember ъЪёЁ)
+DeadKey_Map0313=	ByPairs[L᾽](FlipLayers(Latin))	Mutate[\\᾽,0313](Face(Greek_Vowels0))	Mutate[ucfirst+0313](FlipShift(Face(Greek_Vowels0)))	ByPairs[.῍](Layers(Empty+US-Base))	ByPairs[#͵ 3ʹ](Face(Latin))
+DeadKey_Map0314=	Mutate[0314](Face(Greek_Vowels0))	Mutate[ucfirst+0314](FlipShift(Face(Greek_Vowels0)))	ByPairs[.῝](Layers(Empty+US-Base))	ByPairs[#͵ 3ʹ](Face(Latin))
+DeadKey_Map03e2=	Mutate[<any-greek2coptic>|<any-greek2coptic>+<any-archaic>](Layers(Greek_Hairy_0+Greek_Hairy_1))	Mutate[<any-latin2extracoptic>](ByPairs[jj JJ vf VF --](Face(Latin)) ByPairs[dt DT kx KX](FlipLayers(Latin)) FlipLayers(Latin))	ByPairs[BϷ bϸ IͰ iͱ jϳ GͶ gͷ MϺ mϻ Yϒ NͲ nͳ lϲ LϹ oͻ OϽ e϶ QϏ qϗ rͽ RϿ uͼ UϾ](FlipLayers(Latin))	MutateDupsOK[<sub>](SelectRX[[0-9]](Face(Latin)))	Mutate[<subst-Zuang_tones>](FlipLayers(Latin))
 #
-[faces/US]
-@layers=Latin,Latin-AltGr
+geometry_via_layer=US-Base
+#
+[faces/Latin]
+@layers=US-Base,USLatin-AltGr
 LinkFace=CyrillicPhonetic
 #
 MetaData_Index=0
-#faceDeadKeys= 	´  ˋ  ˜  ˆ  ˇ  °  ¯  ¨ ˮ ¸  µ  ±  ©  £
-faceDeadKeys= 	´  ˋ  ˜  ˆ  ˇ  °  ¯  ¨ ˮ ¸  µ  £
-ExportDeadKeys=	´  ˋ  ˜  ˆ  ˇ  °  ¯  ¨ ˮ ¸
+faceDeadKeys= 	´  ˋ |||  ˜  ˆ |||  ° ¸ |||  ˇ  ¯  0338  ¨ ˮ µ  £
+ExportDeadKeys=	´  ˋ  ˜  ˆ  ° ¸  ˇ  ¯  0338  ¨ ˮ
 #
-@faceDeadKeys2= 03a6.03a6
-#			, 0192.02c7,	0192.00b4
-#		=> 0483	=> 0483		=> 03a6
-#
-#						002c = ,
+@faceDeadKeys2= 03a6.03a6,	00b5\,	00b5[,	00b5],	00b5`
+#							002c = ,
 @char2key_prefer_first=\,|,.,002c
 #
 # Will be only considered when putting a diacritic on AltGr-key (~∼, *∗, .⋅ ) perp=⟂' ¹⟂ is good only if ¹ is on 1! key…
-#@AltGrCharSubstitutions=ĳü,|∣,!⊥,1⊤,¡≠,¹⟂,2∫,@∮,ª∭,²‖,²∥,3⊳,#⊲,º⊢,³⊣,4□,$◇,€△,¥▽,ó∘,5•,%⋈,£⨯,6∨,7∪,^∧,&∩,*×,(∈,)∋
-@AltGrCharSubstitutions=|∣,²‖,ó∘
+@AltGrCharSubstitutions=|∣,²‖,ó∘,0338∕
 # ¡≀ - better on bluekeys; #≠ - conflicts too much; ĳü - was good when ĳ was on k, not i
 @AltGrCharSubstitutionLayers=Green,Green-AltGr
 #
@@ -169,31 +175,31 @@ DeadKey_AddMap03a6=	ByPairs[0020.00a0 0192.2007 03a6.0483]
 #				Default map (not used now???):
 DeadKey_Map=		Mutate	Mutate2Self
 #
-# diaeresis 00a8: combine with cedilla 0327(00b8) and ogonek 0328, comma below 0326 (precombined only on SsTt)
-# ogonek is reachable on AltGr layer...)
-# 0309=hook above; ,<any-symbol-diaeresis> does not add anything...   visigothic conflicts with greekized ɑⱭ; pinyin caron-diaeresis
-DeadKey_Map00a8=	Mutate[00a8|0309+<subst-Vietnamese>,<reveal-greenkey>,030c+00a8--00a8|<any-diaeresized>|<any-calculated-operator>|<any-overlay>+<any-addvline>,<any-overlay>+<any-addhline>,<any-overlay>+<any-addline>,<any-amplify>+<any-round>,<any-round>+<any-round>,<any-rotunda>,<any-NONONO-visigothic>,<any-doubleletter>,<any-squirrel>|0309]	MutateDupsOK[<any-latinize>](Greek)	MutateDupsOK[<any-latinize>](FromTo[Latin,Greek](ByPairs[za ZA]))	Mutate2Self
-# cedilla b8
-DeadKey_Map00b8=	Mutate[0328,0327,0326|<any-comma>,<any-calculated-operator>|<any-overlay>+<any-addvline>,<any-overlay>+<any-addhline>,<any-overlay>+<any-addline>,<any-amplify>+<any-round>,<any-round>+<any-round>,<any-rotunda>,<any-visigothic>,<any-doubleletter>]	MutateDupsOK[<any-latinize>](Greek)	MutateDupsOK[<any-latinize>](FromTo[Latin,Greek](ByPairs[za ZA]))	Mutate2Self
+# diaeresis 00a8; 0309=hook above; ,<any-symbol-diaeresis> does not add anything...  pinyin caron=030c-diaeresis
+DeadKey_Map00a8=	Mutate[00a8|0309+<subst-Vietnamese>,<reveal-greenkey>,030c+00a8--00a8|<any-diaeresized>|<any-calculated-operator>|<any-overlay>+<any-addvline>,<any-overlay>+<any-addhline>,<any-overlay>+<any-addline>,<any-amplify>+<any-round>,<any-round>+<any-round>,<any-rotunda>,<any-squirrel>|0309,<any-dot-above>+<any-dot-below>,<any-dot-above>+0301|<any-double-bar>,<pseudo-hook>,<pseudo-palatal-hook>|<pseudo-curl>]	Mutate2Self
 # 2ee ˮ double apostrophe
-DeadKey_Map02ee=	Mutate[00a8|0309+<subst-Vietnamese>|<any-double-grave>|<any-overlay>+<any-addvline>,<any-overlay>+<any-addhline>,<any-overlay>+<any-addline>,<any-amplify>+<any-round>,<any-round>+<any-round>,<any-rotunda>,<any-NONONO-visigothic>,<any-doubleletter>|<any-dot-above>,<any-adddottop>]	MutateDupsOK[<any-latinize>](Greek)	MutateDupsOK[<any-latinize>](FromTo[Latin,Greek](ByPairs[za ZA]))	Mutate2Self
-#     <any-comma> picks up digits with comma which are above 0xffff - better make it last
+DeadKey_Map02ee=	Mutate[00a8|0309+<subst-Vietnamese>|<any-double-grave>|<any-overlay>+<any-addvline>,<any-overlay>+<any-addhline>,<any-overlay>+<any-addline>,<any-amplify>+<any-round>,<any-round>+<any-round>,<any-rotunda>|<any-dot-above>,<any-adddottop>,<any-amplify>+<any-amplify>|<any-dot-above>+<any-calculated>,<any-dot-above>+0304--00a8|0304+<any-dot-below>]	MutateDupsOK[<any-latinize>](Greek)	MutateDupsOK[<any-latinize>](FromTo[US-Base,Greek](ByPairs[za ZA]))	Mutate2Self
 #
 #  Combine macron=00af and stroke (AOUaou missing stroke...)  00ad=SOFT HYPHEN; <any-stroke> should pick up 0338; 20D2 (|) and 20E5 \ do not appear in decompositions...
-# ⩉ masks combining macron
-#DeadKey_Map00af=	ByPairs[4― 0‒ ”ə ¦00ad !‑ ¹ǃ]	Mutate[\\⩉,00af|<pseudo-stroke>,<any-bar>,<any-stroke>,<any-dash>,<any-overbar>,<any-topbar>,<any-diagonal>,<any-strikethrough>,<any-over-equal>,<any-solidus>,<any-equal>,<any-line>,<any-quill>,<any-base>,<any-underbar>,<any-phonetized>,<any-addline>|<any-stroke>+<any-calculated>,<any-right-hook>]	ByPairs[1‐ 2– 3—]	ShiftFromTo[5,˥](SelectRX[[5-9]])	Mutate2Self
-DeadKey_Map00af=	ByPairs[”ɚ ¹ǃ]	Mutate[\\⩉,00af|<pseudo-stroke>,<any-bar>,<any-stroke>,<any-dash>,<any-overbar>,<any-topbar>,<any-diagonal>,<any-strikethrough>,<any-over-equal>,<any-solidus>,<any-equal>,<any-line>,<any-quill>,<any-base>,<any-underbar>,<any-phonetized>,<any-addline>,<any-addhline>|<any-stroke>+<any-calculated>,<any-right-hook>]	ByPairs[1‐ 2– 3—]	ByPairs[4― 0‒ ”ə ¦00ad !‑ ¹ǃ]	ShiftFromTo[5,˥](SelectRX[[5-9]])	Mutate2Self
-#
-# ring above 00b0: combine with dotabove 307 dotbelow 323 
-# (only WÊ miss dot below, AUY miss dot above: Ȧ is Livonian and phonetic; U is not precomposed; Ẉ - WHERE???) ; <any-jot> does not add anything useful now...
-# Ẏ (useful WHERE???) obscures Vietnamese Ỵ, [any-dots does not add anything...]	ByPairs[‚⊗]
-DeadKey_Map00b0=	Mutate[\\Ẏ⋵,00b0||0323+<subst-Vietnamese>|0307,0323|<any-round>,<any-ring>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,<any-circled>,<any-circled>+<reveal-greenkey>,<any-adddot>|<any-insular>|<circle>] ByPairs[%‰]	Mutate2Self
+# ⩉ masks combining macron; 0311 is inverted breve; ⋺ gets in the way of overbar
+DeadKey_Map00af=	ByPairs[”ɚ ¹ǃ]	Mutate[\\⩉∤≤≥,\\⋺[0],00af|0303+<subst-Macron>|<any-bar>,<any-horizontal-stroke>,<any-dash>,<any-overbar>,<any-topbar>,<any-strikethrough>,<any-over-equal>,<any-equal>,<any-line-!vertical>,<any-quill>,<any-base>,<any-underbar>,<any-phonetized>,<any-addhline>|<any-right-hook>|0311--0301,<any-paleocontraction>|0311,<any-horizontal>,0304+<any-dot-below>]	ByPairs[1‐ 2– 3—]	ByPairs[4― 0‒ ”ə ¦00ad !‑ ¹ǃ KȎ kȏ]	ShiftFromTo[5,˥](SelectRX[[5-9]])	Mutate2Self
+# 0304+<any-dot-below> cannot be inverted - there is no intermediate point!
 #
 #  Combine breve=02d8/0306 and caron 02c7/030c (we do not description of breve-like diacretics!)
-#   Note that Ü combines with caron (in 2 ways! Ǖ Ṻ) - but we prefer Ü -> Ǔ;	arc/check not visible
-DeadKey_Map02c7=	Mutate[02c7|030c|<any-breve>,<any-arc>,<any-caron>,<any-loop>,<any-check>,<any-belt>,<any-flourish>|<any-quasisynon>]	ByPairs[þꝥ ÞꝤ]	Mutate2Self
+#   Note that Ü combines with caron (in 2 ways! Ǖ Ṻ) - but we prefer Ü -> Ǔ;	arc/check not visible; ƫꞇꞆ obscure ꝥ
+DeadKey_Map02c7=	Mutate[\\ƫꞇꞆ,02c7|030c|<any-breve>,<any-arc>,<any-caron>,<any-loop>,<any-check>,<any-belt>,<any-flourish>,<any-tilde-below>--0300|<any-quasisynon>,<any-left-hook>|<any-palatal-hook>,<any-insular>,<any-epigraphic>,0306+0327--0301,<any-dot-above>+<any-caron>]	ByPairs[þꝥ ÞꝤ]	Mutate2Self
 #
-Named_DIA_Recipe__acute_more=	<pseudo-hook>,<any-hook>+<any-calculated>,<any-fishhook>+<any-calculated>,<any-hook>,<any-fishhook>,<pseudo-tail>,<any-leg>,<any-tail>,<pseudo-curl>,<any-apostrophe>,<any-tick>,<any-sharpen>,<any-addright>,<any-rightwards>|031b
+Named_DIA_Recipe__ring_dot_more=	0307,0323|0328+<subst-Macron>|<any-round>,<any-ring>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,<any-circled>,<any-circled>+<reveal-greenkey>,<any-adddot>|<any-insular>,<any-equal>+<any-amplify>
+# ring above 00b0: combine with dotabove 307 dotbelow 323 
+# (only WÊ miss dot below, AUY miss dot above: Ȧ is Livonian and phonetic; U is not precomposed; Ẉ - WHERE???) ; <any-jot> does not add anything useful now...
+# Ẏ (useful WHERE???) obscures Vietnamese Ỵ, [any-dots does not add anything...]; ⋵ obscures ⦑
+DeadKey_Map00b0=	Mutate[\\Ẏ⋵,00b0||0323+<subst-Vietnamese>|<NAMED-ring-dot-more>|<circle>] ByPairs[%‰]	Mutate2Self
+#
+# cedilla 0327(00b8) and ogonek 0328, comma below 0326 (precombined only on SsTt); [ᵅ obscures ⦷; let it...; Ꞃꞃ obscures ṛ]
+DeadKey_Map00b8=	Mutate[\\Ẏ⋵Ꞃꞃ,0328,0327,0326|<any-comma>|<any-visigothic>|<any-greekize>,<any-doubleletter>|||00b0||0323+<subst-Vietnamese>|||<NAMED-ring-dot-more>]	Mutate2Self
+#     <any-comma> picks up digits with comma which are above 0xffff - better make it last
+#
+Named_DIA_Recipe__acute_more=	<pseudo-hook>,<any-retroflex-hook>--0301,<any-hook>+<any-calculated>,<any-fishhook>+<any-calculated>,<any-hook>,<any-fishhook>,<pseudo-tail>,<any-leg>,<any-tail>,<pseudo-curl>,<any-apostrophe>,<any-tick>,<any-sharpen>,<any-addright>,<any-rightwards>|031b,<any-african>
 # combine acute 00b4 and hooks/tails/curls and horn 031b	(double acute=030b/2dd - protect against '' --> "; Ǘ is accessible otherwise, hides Ủ)
 DeadKey_Map00b4=	Mutate[\\˝,\\Ǘ[u],00b4|030b--00b4,00b4+031b--0300|<NAMED-acute-more>]	Mutate2Self
 #
@@ -202,18 +208,24 @@ DeadKey_Map00b4=	Mutate[\\˝,\\Ǘ[u],00b4|030b--00b4,00b4+031b--0300|<NAMED-acut
 # double grave 30f, grave 60/2cb/300; append reversed list for acute (horn=031b)	
 # (tnvz have 3 type of hooks attached; the middle one [palatal] on nz are not reached ƫᶇᶌᶎ)
 # Ǜ would get in the way of Vietnamese Ư (it could be available elsewhere, but there it is also penalized...)
-DeadKey_Map02cb=	Mutate[\\Ǜ[u],02cb|030f--0300,02cb+031b--0301,031b--00a8|<any-unsharpen>,<any-calculated-squared>,<any-addleft>,<any-leftwards>|||00b4|030b--00b4,00b4+031b--0300|||<NAMED-acute-more>]	Mutate2Self
+DeadKey_Map02cb=	Mutate[\\Ǜ[u],\\⧆,02cb|030f--0300,02cb+031b--0301,031b--00a8|<any-unsharpen>,<any-calculated-squared>,<any-addleft>,<any-leftwards>|||00b4|030b--00b4,00b4+031b--0300|<any-reversed>|||<NAMED-acute-more>]	Mutate2Self
 #
 # ; <any-overbar>--<any-manual-turnaround> to symmetrize ∈∋.
-Named_DIA_Recipe__hat_more=	<pseudo-smallcaps>,<any-amplify>,<any-whiten>,<any-fake-white>,<any-fake-black>,<any-calculated-!operator-!squared-!circled>,<any-loop>,<any-upturn>,<any-descender>,<any-underbar>,<any-overbar>--<any-manual-turnaround>,<any-paleo>
+Named_DIA_Recipe__hat_more=	<pseudo-smallcaps>,<any-amplify>,<any-whiten>,<any-fake-white>,<any-fake-black>,<any-calculated-!operator-!squared-!circled-!african>,<any-loop>,<any-upturn>,<any-descender>,<any-underbar>,<any-overbar>--<any-manual-turnaround>,<any-paleo>,<any-fishhook>
+# 0303 tilde
 #	(For the purpose of double accents, grave 0300 is considered equivalent to horn 031b or hat 02c6, ring 00b0 to breve 02d8/0306, with-stroke to horn)
-DeadKey_Map02dc=	Mutate[\\ı∼∽≈〚〛₡,02dc|02dc+<subst-Vietnamese>,<any-tilde>,<any-equivalent>,<any-addtilde>|||02c6|||<NAMED-hat-more>]	ByPairs[§ẞ]	Mutate2Self
-# adding <any-turnaround> breaks more than it adds.   \\∽[˜] does not work, since [**] acts BEFORE propagation to AltGr...
+DeadKey_Map02dc=	Mutate[\\ı∼∽≈〚〛₡⍩⍚,02dc|02dc+<subst-Vietnamese>,<any-tilde>,<any-equivalent>,<any-addtilde>|||02c6|||<NAMED-hat-more>]	Mutate2Self
+# adding <any-turnaround> breaks more than it adds.   \\∽[˜] does not work, since [**] acts BEFORE propagation to AltGr... ⍩ hurts ⩾
 #
 # Hat:  (if both smallcaps and turned/etc defined in the same Unicode version, prefer smallcaps) [loop/upturn not visible]
-DeadKey_Map02c6=	Mutate[\\ı≈˜〚〛₡,02c6|<NAMED-hat-more>]	Mutate2Self
+DeadKey_Map02c6=	Mutate[\\ı≈˜〚〛₡⍩⍚,02c6|<NAMED-hat-more>]	Mutate2Self
 #
 DeadKey_Map00a3=	Face(Business)
+#
+# division slash; <any-long-horizontal-stroke> just a micro-optimization; to access Ȧȧ
+DeadKey_Map0338=	Mutate[<pseudo-stroke>,<any-stroke-!horizontal>,<any-long-horizontal-stroke>,<any-diagonal>,<any-solidus>,<any-addline>|<any-stroke>+<any-calculated>,<any-stroke>+<any-phonetized>,<any-umify>,<any-doubleletter>,00a8+00af--00a8,<any-dot-above>--0300]	ByPairs[!‼ 0020∕](Face(Latin))	SpaceSelf2Id
+# Mutate2Self
++TableSummaryAddHTML=	The third Cyrillic map and 4 double-prefix-key Greek maps (3 polytonic, 1 Coptic+extra) are in the report for Cyrillic personality.  (Slightly mutiliated by ъЪёЁ-mirroring.)
 #
 [faces/VK]
 #
@@ -227,20 +239,19 @@ DeadKey_Map00a3=	Face(Business)
 #
 [faces/CyrillicPhonetic]
 #
-#@layers=Russian,Russian_AltGr
-@layers=Russian0,Russian0-AltGr
+@layers=Russian-Base,Cyrillic-AltGr
 #numLayers=2
-BaseLayer=Latin
-LinkFace=US
+BaseLayer=US-Base
+LinkFace=Latin
 #
 MetaData_Index=1
 #
-#faceDeadKeys= 	́	҃	µ  ±  ©  £
 faceDeadKeys= 	́	҃	µ  £
 ExportDeadKeys=	́	҃
 #
-@faceDeadKeys2= 03a6.03a6,	00a0.Ё
+@faceDeadKeys2= 03a6.03a6,	00a0.Ё,	00b5.э,	00b5.ш,	00b5.щ,	00b5.ю
 #		=> 0483	     	=> 0483
+@LayoutTable_add_double_prefix_keys=	00b5.э,	00b5.ш,	00b5.щ,	00b5.ю
 #
 # Pressing AltGr-| produces |; with the setting below, pressing SWITCH AltGr-| produces the expected ¦
 # Otherwise: the keys on OEM_102 (the SECOND \|) (which produce \| when both on Cyrillic and Latin) 
@@ -263,17 +274,19 @@ Diacritic_if_undef=			SpaceSelf2Id
 DeadChar_DefaultTranslation=		♪
 DeadChar_32bitTranslation=		♫
 #
-DeadKey_Map0192=	ByPairs[0020.2422 0192.2423 03a6.2420]	LinkFace
+DeadKey_Map0192=	ByPairs[0020.2422 0192.2423 03a6.2420]		InheritPrefixKeys[Face(Latin)](Face(LatinBlueMax))
 DeadKey_InvMap0192=	ByPairs[0020.00a0 0192.2007 03a6.0483]
 #
-DeadKey_Map0301_0=	Id(Russian-II)		FromTo[Digits,Denominators1](LinkFace)	FromTo[Digits,Numerators1](FlipShift(Latin))
+DeadKey_Map0301_0=	Id(Cyrillic-II)		FromTo[Digits,Denominators1](LinkFace)	FromTo[Digits,Numerators1](FlipShift(US-Base))
 # This ByPairs is tricky: we want to translate AltGr-Shift-Space; one might think one must use the mapping of non-AltGr layer???
-DeadKey_Map0301_1=	Id(Russian-II-AltGr)	FromTo[Digits,Denominators2](Latin)	FromTo[Digits,Numerators2](FromToFlipShift[Latin,Latin](Latin))	ByPairs[$⅘](Latin)
+DeadKey_Map0301_1=	Id(Cyrillic-II-AltGr)	FromTo[Digits,Denominators2](US-Base)	FromTo[Digits,Numerators2](FromToFlipShift[US-Base,US-Base](US-Base))	ByPairs[$⅘](US-Base)
 #				0483 is ҃ titlo, A66F is combining vzmet, 2df5 is combining ST, 2df8 is combining DJERV (which we do not have non-combining???)
-DeadKey_Map0483=	ByPairs[0020.2009 0192.2009 03a6.2009]	Mutate[<pseudo-calculated-combining>](Face(CyrillicPhonetic))	Mutate[<pseudo-calculated-combining>](FlipShift(Layers(Russian-II+Russian-II-AltGr)))	FromTo[Digits,CyrPowersOfTen](Face(US))	ByPairs[-A66F S.2df5 D.2df8](Face(US))
+DeadKey_Map0483=	ByPairs[0020.2009 0192.2009 03a6.2009]	Mutate[<pseudo-calculated-combining>](Face(CyrillicPhonetic))	Mutate[<pseudo-calculated-combining>](FlipShift(Layers(Cyrillic-II+Cyrillic-II-AltGr)))	FromTo[Digits,CyrPowersOfTen](Face(Latin))	ByPairs[-A66F S.2df5 D.2df8 Nᵸ Lᴫ](Face(Latin))	Layers(Cyrillic-ExtraExtra+Cyrillic-Extra)
 DeadKey_InvMap0483=	ByPairs[0192.2009]
 #
 DeadKey_Map00a3=	Face(Business)
+#
++TableSummaryAddHTML=	The satellite maps for Latin (available here on double-prefix-keys) are in the report for Latin personality.  (In this personality, they are going to be slightly mutiliated by ъЪёЁ-mirroring.)
 #
 ####[DEADKEYS/eurkey/1/1]
 #####
@@ -425,6 +438,7 @@ prefix_repeat=3
 /DEGREE_SIGN=		°˚˙/˳/˙ˠʰʱʲˢʷᵊᶣ/˓˒/ ̊ ゚     ᷒ / ̣ ̥ ̤  ̻   ͙   ͚ / ̇ ͘  ̣ ̤ ͘ /   ⃝ ⃘
 /TILDE=			~ ˜/˷¸˛ͺ/ⸯꙿ/˞/ ̃ ̴ ͂ ͊ ͋ ͌   ͠  ᷑  / ̰  ̧  ̨  ̡  ̢  ᷏  ᷐  ᷽  ᷽ / ̾ ̾ /   ⃗  ⃖ ⃯ ⃮ ⃕ ⃔ ⃙ ⃚ ⃡
 /MACRON=		¯ˉ˹˺/ˍ˻˼‗/˭/˔˕˖˗/ ̄ ̅ ̅ ̵ ̶ ̿ ͞   ̚  / ̱  ̲  ̳ ͇ ͟   ̠  /  ͍   ̝  ̞  ̟  ̠  ̘  ̙   ͉ /  ⃒ ⃓ ⃦  ⃪ ⃡  ⃡  ⃗  ⃖ ⃯ ⃮
+#/SLASH=			∕///////
 #
 # These are from "main blocks" of the modifiers and combining; plus Greek standalone diacritics: ͺ΄΅
 # One of ˠ is obscured by vertical line with middle dot...  The Macron-\ 29F7 obscures ˭.
