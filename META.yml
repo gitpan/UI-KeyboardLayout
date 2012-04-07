@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               UI-KeyboardLayout
-version:            0.08
+version:            0.09
 abstract:           Module for designing keyboard layouts
 author:
     - Ilya Zakharevich <ilyaz@cpan.org>

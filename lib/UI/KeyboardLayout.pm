@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION ="0.08";
+$VERSION = $VERSION ="0.09";
 use strict;
 use utf8;
 
@@ -12,7 +12,7 @@ use subs qw(chr lc uc);
 #BEGIN { *CORE::GLOGAL::chr = sub ($) { toU CORE::chr shift };
 #        *CORE::GLOGAL::lc  = sub ($)  { CORE::lc  toU shift };
 #}
-my %fix = qw( ӏ Ӏ ɀ Ɀ ꙡ Ꙡ);		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
+my %fix = qw( ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ß ẞ);		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
 my %unfix = reverse %fix;
 
 sub chr($)  { local $^W = 0; toU CORE::chr shift }	# Avoid illegal character 0xfffe etc warnings...
@@ -22,6 +22,14 @@ sub uc($)   { my $in = shift;   $fix{$in} || CORE::uc toU $in }
 # We use this for printing, not for reading (so we can use //o AFTER the UCD is read)
 my $rxCombining = qr/\p{NonspacingMark}/;	# The initial version matches what Perl knows
 
+my $warnUNRES = $ENV{UI_KEYBOARDLAYOUT_UNRESOLVED};
+BEGIN { my $warnSORTEDLISTS = $ENV{UI_KEYBOARDLAYOUT_REPORT_MUTATORS} || 0;
+	my @warnSORTEDLISTS = map $warnSORTEDLISTS & $_, map 1<<$_, 0..31;
+	my $c = 0;		# printSORTEDLISTS: Dumpvalue to STDOUT (implementation detail!)
+	for (qw(warnSORTEDLISTS printSORTEDLISTS warnSORTCOMPOSE warnDO_COMPOSE warnCACHECOMP dontCOMPOSE_CACHE )) {
+	  eval "sub $_ () {$warnSORTEDLISTS[$c++]}";
+	}
+}
 
 =pod
 
@@ -586,7 +594,7 @@ the words I<letter> and I<character> are used interchangeably.  A I<key>
 means a physical key on a keyboard clicked (possibly together with 
 one of modifiers C<Shift>, C<AltGr> - or, rarely C<Control>.  The key C<AltGr> 
 is either marked as such, or is just the "right" C<Alt> key; at least
-on Windows it can be replaced by C<Control-Alt>.  A I<prefix key> is a keypress
+on Windows it can be replaced by C<Control-Alt>.  A I<prefix key> is a key tapping
 which does not produce any letter, but modifies what the next
 keypress would do (sometimes it is called a I<dead key>; in C<ISO 9995> terms,
 it is probably a I<latching key>).
@@ -767,6 +775,7 @@ On diacritics:
   http://en.wikipedia.org/wiki/Tonos#Unicode
   http://en.wikipedia.org/wiki/Early_Cyrillic_alphabet#Numerals.2C_diacritics_and_punctuation
   http://en.wikipedia.org/wiki/Vietnamese_alphabet#Tone_marks
+  http://diacritics.typo.cz/
 
   http://en.wikipedia.org/wiki/User:TEB728/temp			(Chars of languages)
   http://www.evertype.com/alphabets/index.html
@@ -1043,6 +1052,11 @@ On meaning of Unicode math codepoints
   http://milde.users.sourceforge.net/LUCR/Math/data/unimathsymbols.txt
   http://unicode.org/Public/math/revision-09/MathClass-9.txt
 
+Zapf dingbats encoding, and other fine points of AdobeGL:
+
+  ftp://ftp.unicode.org/Public/MAPPINGS/VENDORS/ADOBE/zdingbat.txt
+  http://web.archive.org/web/20001015040951/http://partners.adobe.com/asn/developer/typeforum/unicodegn.html
+
 Quoting tchrist:
 I<You can snag C<unichars>, C<uniprops>, and C<uninames> from L<http://training.perl.com> if you like.>
 
@@ -1073,6 +1087,10 @@ flexibility the keyboard description would evolve, bloating accumulated
 to incredible amounts.
 
 =head1 UNICODE TABLE GOTCHAS
+
+APL symbols with C<UP TACK> and C<DOWN TACK> look reverted w.r.t. other
+C<UP TACK> and C<DOWN TACK> symbols.  (We base our mutation on the names,
+not glyphs.)
 
 C<LESS-THAN>, C<FULL MOON>, C<GREATER-THAN>, C<EQUALS> C<GREEK RHO>, C<MALE>
 are defined with C<SYMBOL> or C<SIGN> at end, but (may) drop it when combined
@@ -2046,6 +2064,19 @@ sub deep_copy($$) {
   return {map $self->deep_copy($_), %$o} if "$o" =~ /^HASH\(/;
 }
 
+sub deep_undef_by_hash($$@) {
+  my ($self, $h) = (shift, shift);
+  for (@_) {
+    next unless defined;
+    if (ref $_) {
+      die "a reference not an ARRAY in deep_undef_by_hash()" unless 'ARRAY' eq ref $_;
+      $self->deep_undef_by_hash($h, @$_);
+    } elsif ($h->{$_}) {
+      undef $_
+    }
+  }
+}
+
 # Make symbols from the first half-face ($h1) to be accessible in the second face ($H1/$H2)
 sub pre_link_layers ($$$;$$) {	# Un-obscure non-alphanum bindings from the first face; assign in the direction $hh ---> $HH
   my ($self, $hh, $HH, $skipfix, $skipwarn) = (shift, shift, shift, shift, shift);	# [Main, AltGr-Main,...], [Secondary, AltGr-Secondary,...]
@@ -2418,6 +2449,12 @@ sub print_coverage ($$) {
   $f = $self->get_AgeList;
   $self->load_uniage($f) if defined $f and not $self->{Age};
 
+  my $file = $self->{'[file]'};
+  $file = (defined $file) ? "file $file" : 'string descriptor';
+  my $v = $self->{VERSION};
+  $file .= " version $v" if defined $v;
+  print "############# Generated with UI::KeyboardLayout v$UI::KeyboardLayout::VERSION for $file, face=$F\n#\n";
+
   my $is32 = $self->{faces}{$F}{'[32-bit]'};
   my $cnt32 = keys %{$is32 || {}};
   my $c1 = @{ $self->{faces}{$F}{'[coverage1]'} } - $cnt32;
@@ -2496,11 +2533,12 @@ sub print_table_coverage ($$;$) {
   span.WS		{ background-color: maroon; }
   span.lFILL		{ margin: 0ex 0.35ex; }
   span.l		{ margin: 0ex 0.06ex; }
+  span.yyy		{ padding: 0px !important; }
   td.headerbase		{ font-size: 50%; color: blue; }
   td.header		{ font-size: 50%; color: green; }
   table			{ border-collapse: collapse; margin: 0px; padding: 0px; }
   body			{ margin: 1px; padding: 0px; }
-  tr, td {
+  tr, td, .yyy {
     padding: 0px 0.2ex !important;
     margin:  0px       !important;
     border:  0px       !important;
@@ -3658,6 +3696,35 @@ sub diacritic2self_2 ($$$$$$) {		# Takes a key: array of arrays [lc,uc]
 # perl -C31 -MUnicode::UCD=charinfo -le 'sub n($) {(charinfo(ord shift) || {})->{name}} for (0x20..0x10ffff) {next unless (my $c = chr) =~ /\p{NonspacingMark}/; (my $n = n($c)) =~ /^COMBINING\b/ or next; printf qq(%04x\t%s\t%s\n), $_, $c, $n}' >cc
 # perl -C31 -MUnicode::UCD=charinfo -le 'sub n($) {(charinfo(ord shift) || {})->{name}} for (0x20..0x10ffff) {next unless (my $c = chr) =~ /\p{NonspacingMark}/; (my $n = n($c)) =~ /^COMBINING\b/ and next; printf qq(%04x\t%s\t%s\n), $_, $c, $n}' >cc
 
+sub cache_dialist ($@) {	# downstream, it is crucial that a case pair comes from "one conversion"
+  my ($self, %seen, %caseseen, @out) = (shift);     
+warn("caching dia: [@_]") if warnCACHECOMP;
+  for my $d (@_) {
+    next unless my $h = $self->{Compositions}{$d};
+    $seen{$_}++ for keys %$h;
+  }
+  for my $c (keys %seen) {
+    next if $caseseen{$c};
+    my @case = grep { $_ ne $c and $seen{$_} } lc $c, uc $c or next;
+    push @case, $c;
+    $caseseen{$_} = \@case, delete $seen{$_} for @case;
+  }				# Currently (?), downstream does not distinguish case pairs from Shift-pairs...
+  for my $cases ( values %caseseen, map [$_], keys %seen ) {	# To avoid pairing symbols, keep them in separate slots too
+    my (@dia, $to);
+    for my $dia (@_) {
+      push @dia, $dia if grep $self->{Compositions}{$dia}{$_}, @$cases;
+    }
+    for my $diaN (0..$#dia) {
+      $to = $self->{Compositions}{$dia[$diaN]}{$_} and
+(warnCACHECOMP and warn("cache dia; c=`$_' of `@$cases'; dia=[$dia[$diaN]]")),
+         $out[$diaN]{$_} = $to for @$cases;
+    }
+  }
+#warn("caching dia --> ", scalar @out);
+  @out
+}
+
+my %cached_aggregate_Compositions;
 sub dia2list ($$) {
   my ($self, $dia, @dia) = (shift, shift);
 #warn "Split dia `$dia'";
@@ -3668,20 +3735,26 @@ sub dia2list ($$) {
 # warn "Split dia to `@dia'";
     return @dia;
   }
-  return $dia if $dia =~ /^\\\\/;		# Penalization lists
+  return $dia if $dia =~ /^\\/;		# Penalization lists
   $dia = $self->charhex2key($dia);
-  unless ($dia =~ /^(\p{NonspacingMark}|<[-\w!]+>|[ul]c(first)?)$/) {
+  unless ($dia =~ /^-?(\p{NonspacingMark}|<(?:font=)?[-\w!]+>|[ul]c(first)?)$/) {
     die "`  $dia  ' not a known diacritic" unless my $name = $self->{'[map2diac]'}{$dia};
     my $v = $self->{'[diacritics]'}{$name} or die "A spacing character <$dia> was requested to be treated as a composition one, but we do not know translation";
     die "Panic!" unless defined ($dia = $v->[4][0]);
   }
-  if ($dia =~ /^<(reverse-)?any(1)?-(other-)?\b([-\w]+?)\b((?:-![-\w]+\b)*)>$/) {
-    my($rev, $one, $other, $match, $rx, $except, @except) = ($1, $2, $3, $4, "(?<!<)\\b$4\\b", qr((?!)), split /-!/, $5);
+  if ($dia =~ /^(-)?<(reverse-)?any(1)?-(other-)?\b([-\w]+?)\b((?:-![-\w]+\b)*)>$/) {
+    my($neg, $rev, $one, $other, $match, $rx, $except, @except) 
+      = ($1||'', $2, $3, $4, $5, "(?<!<)\\b$5\\b", qr((?!)), split /-!/, $6);
+    my $cached;
+    (my $dia_raw = $dia) =~ s/^-//;
+    $cached = $cached_aggregate_Compositions{$dia_raw} and return map "$neg$_", @$cached;
+
     $except = join('|', @except[1..$#except]), $except = qr($except) if @except;
 #warn "Exceptions: $except" if @except;
     $rx =~ s/-/\\b\\W+\\b/g;
     my ($A, $B, $AA, $BB);
     my @out = keys %{$self->{Compositions}};
+    @out = grep !/^Cached\d+=</, @out;
     @out = grep {length > 1 ? /$rx/ : (lc $self->UName($_) || '') =~ /$rx/ } @out;    	
     @out = grep {length > 1 ? !/$except/ : (lc $self->UName($_) || '') !~ /$except/ } @out;    	
     # make <a> before <a-b>; penalize those with and/over inside
@@ -3689,13 +3762,19 @@ sub dia2list ($$) {
     		 /.\b(and|over)\b./ and s/^/~/ for $A,$B; $AA cmp $BB or $A cmp $B or $a cmp $b} @out;
     @out = grep length($match) != length, @out if $other;
     @out = grep !/\bAND\s/, @out if $one;
-    @out = reverse @out if $rev;
-    push @dia, @out;
+    @out = reverse @out if $rev;				# xor $reverse;
+    if (!dontCOMPOSE_CACHE and @out > 1 and not $neg) {				# Optional caching; will modify composition tables
+      my @cached = $self->cache_dialist(@out);			#     but not decomposition ones, hence `not $neg'
+      @out = map "Cached$_=$dia_raw", 0..$#cached;
+      $self->{Compositions}{$out[$_]} = $cached[$_] for 0..$#cached;
+      $cached_aggregate_Compositions{$dia} = \@out;
+    }
+    @out = map "-$_", @out if $neg;
+    return @out;
   } else {		# <pseudo-curl> <super> etc
 #warn "Dia=`$dia'";
     return $dia;
   }
-  @dia;
 }
 
 sub flatten_arrays ($$) {
@@ -3838,11 +3917,13 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
     			die "Undefined recipe: row=$row; face=`$face'; N=$N; deadkey=`$deadkey'; ARGV=(@_)" unless $subs[$r];
     		      goto &{$subs[$r]} }, '', 'all_layers';
   }
-  if ($name =~ /^(De)?(?:Diacritic|Mutate)(SpaceOK)?(Hack)?(2Self)?(DupsOK)?(?:\[(.+)\])?$/) {
+  if ($name =~ /^(De)?(?:Diacritic|Mutate)(SpaceOK)?(Hack)?(2Self)?(DupsOK)?(32OK)?(?:\[(.+)\])?$/) {
     die "DeDiacritic2Self does not make sense" if my $undo = $1 and $4;
-    my ($hack, $spaceOK, $toSelf, $dupsOK) = ($3, $2, $4, $5);
-    my $Dia = ((defined $6) ? $6 : do {$used_deadkey ="/$deadkey"; $deadkey});	# XXXX `do' is needed, comma does not work
-    $Dia = $self->charhex2key($Dia);
+    my ($hack, $spaceOK, $toSelf, $dupsOK, $w32OK) = ($3, $2, $4, $5, $6);
+    my $Dia = ((defined $7) ? $7 : do {$used_deadkey ="/$deadkey"; $deadkey});	# XXXX `do' is needed, comma does not work
+    my $isPrimary;
+    $Dia =~ s/^\+// and $isPrimary++;				# Wait until <NAMED-*> are expanded
+    $Dia = $self->charhex2key($Dia);				# Needed for 2Self
     my(@sp, %sp) = map {(my $in = $_) =~ s/(?<=.)\@$//s; $in} @{ ($self->get_VK($face))->{SPACE} || [] };
     @sp = map $self->charhex2key($_), @sp;
     my $flip_AltGr = $self->{faces}{$face}{Flip_AltGr_Key};
@@ -3866,14 +3947,24 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
     $Dia =~ s(<NAMED-([-\w]+)>){ (my $R = $1) =~ s/-/_/g;
     				 die "Named recipe `$1' unknown" unless exists $self->{faces}{$face}{"Named_DIA_Recipe__$R"};
     				 (my $r = $self->{faces}{$face}{"Named_DIA_Recipe__$R"}) =~ s/^\s+//; $r }ge;
-    my($skip, $limit, @groups) = (0);
-    if (1 < (my @Dia = split /\|\|\|/, $Dia, -1)) {
-      die "Too many |||-sections in <$Dia>" if @Dia > 3;
-      $skip = (@Dia > 2 ?  1 + ($Dia[1] =~ tr/|/|/) : 0);
-      $limit =  1 + ($Dia[-1] =~ tr/|/|/) + $skip;
-      my @G = map [$self->dialist2lists($_)], @Dia;
-      @groups = @{shift @G};
-      push @groups, map [reverse @$_], reverse @$_ for reverse @G;
+    $Dia =~ s/\|{3,4}/|/g if $isPrimary;
+    my($skip, $limit, @groups, @groups2, @groups3) = (0);
+    my($have4, @Dia) = (1, split /\|\|\|\|/, $Dia, -1);
+    $have4 = 0, @Dia = split /\|\|\|/, $Dia, -1 if 1 == @Dia;
+    if (1 < @Dia) {
+      die "Too many |||- or ||||-sections in <$Dia>" if @Dia > 3;
+      my @Dia2 = split /\|\|\|/, $Dia[1], -1;
+      die "Too many |||-sections in the second ||||-section in <$Dia>" if @Dia2 > 2;
+#      splice @Dia, 1, 1, @Dia2;
+      @Dia2 = @Dia, shift @Dia2 unless $have4;
+      $skip = (@Dia2 > 1 ?  1 + ($Dia2[0] =~ tr/|/|/) : 0);
+      $Dia[1] .= "|$Dia[2]", pop @Dia if not $have4 and @Dia == 3;
+#      $limit =  1 + ($Dia[-1] =~ tr/|/|/) + $skip;
+      $limit = 0;						# Not needed with the current logic...
+      my @G = map [$self->dialist2lists($_)], @Dia;	# will reverse when merging many into one cached...
+      @groups = @{shift @G};      
+      @groups2 = @{shift @G} if @G;
+      @groups3 = @{shift @G} if @G;
     } else {
       @groups = $self->dialist2lists($Dia);
     }
@@ -3887,26 +3978,64 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
       return ([]) x @$K unless grep defined, $self->flatten_arrays($K);		# E.g, ByPairs and SelectRX produce many empty entries...
 #warn "Undefined base key for diacritic <$Dia>: <", join('> <', map {defined() ? $_ : '[undef]'} $self->flatten_arrays($K)), '>' unless defined $K->[0][0];
 #warn "Input for <$Dia>: <", join('> <', map {defined() ? $_ : '[undef]'} $self->flatten_arrays($K)), '>';
-      my $base = $K->[0][0] || '';		# Ignore possiblity that SPACE is a deadKey
+      my $base = $K->[0][0]; 
+      $base = '<?>' unless defined $base;
       return ([]) x @$K if not $spaceOK and $base eq ' ';		# Ignore possiblity that SPACE is a deadKey
-      my $sorted = $self->sort_compositions(\@groups, $K, $Sub, $dupsOK);
+      my $sorted = $self->sort_compositions(\@groups, $K, $Sub, $dupsOK, $w32OK);
+      my ($sorted2, $sorted3, @idx_sorted3);
+      $sorted2 = $self->sort_compositions(\@groups2, $K, $Sub, $dupsOK, $w32OK) if @groups2;
+      $sorted3 = $self->sort_compositions(\@groups3, $K, $Sub, $dupsOK, $w32OK) if @groups3;
+      @idx_sorted3 = @$sorted + (@groups2 ? @$sorted2 : 0) if @groups3;
       $self->{faces}{$face}{'[in_dia_chains]'}{$_}++
-        for grep defined, ($hack ? () : $self->flatten_arrays($sorted));
-#Dumpvalue->new()->dumpValue(["Key $base", $sorted]);
-      if ($limit) {
+        for grep defined, ($hack ? () : $self->flatten_arrays([$sorted, $sorted2 || [], $sorted3 || [] ]));
+require Dumpvalue if printSORTEDLISTS;
+Dumpvalue->new()->dumpValue(["Key $base", $sorted]) if printSORTEDLISTS;
+      warn $self->report_sorted_l($base, [@$sorted, @{$sorted2 || []}, @{$sorted3 || []}], [scalar @$sorted, $skip + scalar @{$sorted || []}, @idx_sorted3])
+        if warnSORTEDLISTS;
+      my $LLL = '';
+      if ($sorted2) {
         my (@slots, @LL);
         for my $l (0..$#L) {
-          push @slots, $self->shift_pop_compositions($sorted, $l, 'from end', $limit, $skip, my $ll = []);
+          push @slots, $self->shift_pop_compositions($sorted2, $l, !'from end', !'omit', $limit, $skip, my $ll = []);
           push @LL, $ll;
-#print 'From Layers  <', join('> <', map {defined() ? $_ : 'undef'} @$ll), ">\n";
+print 'From Layers  <', join('> <', map {defined() ? $_ : 'undef'} @$ll), ">\n" if printSORTEDLISTS;
+	  $LLL .= ' | ' . join(' ', map {defined() ? $_ : 'undef'} @$ll) if warnSORTEDLISTS;
         }
-#print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, $slots[0]), ">\n";
-#print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, @slots[1..$#slots]), "> deadKey=$deadkey\n";
-        $self->append_keys($sorted, \@slots, \@LL);
-#Dumpvalue->new()->dumpValue(["Key $base; II", $sorted]);
+print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, $slots[0]), ">\n" if printSORTEDLISTS;
+print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, @slots[1..$#slots]), "> deadKey=$deadkey\n" if printSORTEDLISTS;
+        my $appended = $self->append_keys($sorted2, \@slots, \@LL, 'prepend');
+Dumpvalue->new()->dumpValue(["Key $base; II", $sorted2]) if printSORTEDLISTS;
+	if (warnSORTEDLISTS) {
+          $LLL =~ s/^[ |]+//;
+          my @KK;
+          for my $slot (@slots) {
+            push @KK, '<' . join('> <', map {defined() ? $_ : 'undef'} map @$_, $slot) . '>';
+          }
+          $_++ for @idx_sorted3;
+          warn "TMP Extracted: ", join(' | ', @KK), " from layers $LLL\n";	# 1 is for what is prepended by append_keys()
+          warn $self->report_sorted_l($base, [@$sorted, @$sorted2, @{$sorted3 || []}],		# Where to put bold/dotted-bold separators:
+          			      [scalar @$sorted, !!$appended + $skip + scalar @$sorted, @idx_sorted3], ($appended ? [1 + scalar @$sorted] : ()));
+	}
       }
-      my @out = map $self->shift_pop_compositions($sorted, $_), 0..$#L;		# Layer number
-#print 'Extracted ', $self->array2string(\@out), " deadKey=$deadkey\n";
+      my(@out, %seen); 
+      for my $Ln (0..$#L) {
+        $out[$Ln] = $self->shift_pop_compositions($sorted, $Ln);
+        $seen{$_}++ for grep defined, @{$out[$Ln]};
+      }
+      for my $extra (['from end', $sorted2], [0, $sorted3]) {
+        next unless $extra->[1];
+        $self->deep_undef_by_hash(\%seen, $extra->[1]);
+        for my $Ln (0..$#L) {
+          my $o = $out[$Ln];
+          unless (defined $o->[0] and defined $o->[1]) {
+            my $o2 = $self->shift_pop_compositions($extra->[1], $Ln, $extra->[0], !'omit', !'limit', 0, undef, defined $o->[0], defined $o->[1]);
+            defined $o->[$_] or $o->[$_] = $o2->[$_] for 0,1;
+            $seen{$_}++ for grep defined, @$o;
+          }
+        }
+      }
+print 'Extracted ', $self->array2string(\@out), " deadKey=$deadkey\n" if printSORTEDLISTS;
+      warn 'Extracted ', $self->array2string(\@out), " deadKey=$deadkey\n" if warnSORTEDLISTS;
       $self->{faces}{$face}{'[from_dia_chains]'}{$_}++
         for grep defined, ($hack ? () : map $self->flatten_arrays($_), @out);
 #warn "Age of <à> is <$self->{Age}{à}>";
@@ -4613,9 +4742,11 @@ sub fromHEX ($) { my $i = shift; $i =~ /^\w/ and hex $i}
 my %operators = (DOT => ['MIDDLE DOT', 'FULL STOP'], RING => ['DEGREE SIGN'], DIAMOND => ['WHITE DIAMOND'],
 		 'DOUBLE SOLIDUS' => ['PARALLEL TO'], MINUS => ['HYPHEN-MINUS']);
 
-#			THIS IS NOT A MULTIMAP!			■□ ◼◻ ◾◽	◇◆◈⟐⟡⟢⟣⌺	△▲▵▴▽▼▿▾⟁⧊⧋
+#			THIS IS A MULTIMAP (later one wins)!			■□ ◼◻ ◾◽	◇◆◈⟐⟡⟢⟣⌺	△▲▵▴▽▼▿▾⟁⧊⧋
 my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ  n ŋ  V ɤ  ! ǃ  ? ʔ  ¿ ʕ  | ǀ  f ʄ  F ǂ  x ʘ  X ǁ
-				     g ʛ  m ɰ  h ɧ  d ᶑ  )],	# z ɮ 
+				     g ʛ  m ɰ  h ɧ  d ᶑ  C ʗ)],	# z ɮ	(C ʗ is "extras")
+		  phonetize2 => [qw( e ɘ  E ɞ  i ɻ  I ɺ)],	# Use some capitalized sources (no uc variants)...
+		  phonetize3 => [qw( a ɒ  A Ɒ  e ɜ  E ɝ)],	# Use some capitalized sources (no uc variants)...
 		  paleo	     => [qw( & ⁊  W Ƿ  w ƿ  h ƕ  H Ƕ  G Ȝ  g ȝ )],
                     # cut&paste from http://en.wikipedia.org/wiki/Coptic_alphabet
                     # perl -C31 -wne "chomp; ($uc,$lc,undef,undef,$gr) = split /\t/;($ug,$lg)=split /,\s+/, $gr; print qq( $lg $lc $ug $uc)" coptic2 >coptic-tr
@@ -4644,24 +4775,23 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
 		  sharpen    => [qw( < ≺  > ≻  { ⊰  } ⊱  ( ⟨  ) ⟩  ∧ ⋏  ∨ ⋎  . ⋄  ⟨ ⧼  ⟩ ⧽  ∫ ⨘  
 		  		     ⊤ ⩚  ⊥ ⩛  ◇ ⟡  ▽ ⧍  • ⏣  ≟ ≙)],	# ⋆
 		  unsharpen  => [qw( < ⊏  > ⊐  ( ⟮  ) ⟯  ∩ ⊓  ∪ ⊔  ∧ ⊓  ∨ ⊔  . ∷  ∫ ⨒  ∮ ⨖
-		  		     / ⧄  \ ⧅  ° ⧇  ◇ ⌺  • ⌼  ≟ ≚  ≐ ∺ )],	#   + ⊞  - ⊟  * ⊠  . ⊡  × ⊠
+		  		     / ⧄  \ ⧅  ° ⧇  ◇ ⌺  • ⌼  ≟ ≚  ≐ ∺  ( 〘  ) 〙  )],	#   + ⊞  - ⊟  * ⊠  . ⊡  × ⊠,   ( ⦗  ) ⦘  ( 〔  ) 〕
 		  whiten     => [qw( [ ⟦  ] ⟧  ( ⟬  ) ⟭  { ⦃  } ⦄  ⊤ ⫪  ⊥ ⫫  ; ⨟  ⊢ ⊫  ⊣ ⫥  ⊔ ⩏  ⊓ ⩎  ∧ ⩓  ∨ ⩔
-		  		     : ⦂  | ⫾  • ○  < ⪡  > ⪢)],	# or blacken □ ■  ◻ ◼  ◽ ◾  ◇ ◆  △ ▲  ▵ ▴  ▽ ▼  ▿ ▾
+		  		     : ⦂  | ⫾  | ⫿  • ○  < ⪡  > ⪢)],	# or blacken □ ■  ◻ ◼  ◽ ◾  ◇ ◆  △ ▲  ▵ ▴  ▽ ▼  ▿ ▾
 		  quasisynon => [qw( ∈ ∊  ∋ ∍  ≠ ≶  ≠ ≷  = ≸  = ≹  ≼ ⊁  ≽ ⊀  ≺ ⋡  ≻ ⋠  < ≨  > ≩  Δ ∆
 		  		     ≤ ⪕  ≥ ⪖  ⊆ ⊅  ⊇ ⊄  ⊂ ⊉  ⊃ ⊈  ⊏ ⋣  ⊐ ⋢  ⊳ ⋬  ⊲ ⋭  … ⋯  * ⋆  ( ⦇  ) ⦈
-		  		     ⊤ ⫟  ⊥ ⫠  ⟂ ⫛  □ ∎  ▽ ∀  ‖ ∥  ≟ ≞  ~ ‿  ~ ⁀ )],	# ( ⟬  ) ⟭ < ≱  > ≰ ≤ ≯  ≥ ≮ 
+		  		     ⊤ ⫟  ⊥ ⫠  ⟂ ⫛  □ ∎  ▽ ∀  ‖ ∥  ≟ ≞  ~ ‿  ~ ⁀  ■ ▬ )],	# ( ⟬  ) ⟭ < ≱  > ≰ ≤ ≯  ≥ ≮ 
 		  amplify    => [qw( < ≪  > ≫  ≪ ⋘  ≫ ⋙  ∩ ⋒  ∪ ⋓  ⊂ ⋐  ⊃ ⋑  ( ⟪  ) ⟫  ∼ ∿  = ≝  ∣ ∥  . ⋮  
 		  		     0 ∅  ∈ ∊  ∋ ∍  - −  / ∕  \ ∖  √ ∛  ∛ ∜  ∫ ∬  ∬ ∭  ∭ ⨌  ∮ ∯  ∯ ∰  : ⦂
 		  		     : ∶  ≈ ≋  ≏ ≎  ≡ ≣  × ⨯  + ∑  Π ∏  Σ ∑  ρ ∐  ∐ ⨿  ⊥ ⟘  ⊤ ⟙  ⟂ ⫡  ; ⨾  □ ⧈  ◇ ◈
-		  		     ⊲ ⨞  ⊢ ⊦  △ ⟁  ∥ ⫴  ⫴ ⫼  / ⫽  ⫽ ⫻  • ●  ⊔ ⩏  ⊓ ⩎  ∧ ⩕  ∨ ⩖
-		  		     ⋉ ⧔  ⋊ ⧕  ⋈ ⧓  ⪡ ⫷  ⪢ ⫸  ≟ ≛  ≐ ≎  ⊳ ⫐  ⊲ ⫏  )],	#   ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden; ∥ ⫴; × ⋈ not needed; ∰ ⨌ - ???; ≃ ≌ not useful
+		  		     ⊲ ⨞  ⊢ ⊦  △ ⟁  ∥ ⫴  ⫴ ⫼  / ⫽  ⫽ ⫻  • ●  ⊔ ⩏  ⊓ ⩎  ∧ ⩕  ∨ ⩖  ▷ ⊳  ◁ ⊲
+		  		     ⋉ ⧔  ⋊ ⧕  ⋈ ⧓  ⪡ ⫷  ⪢ ⫸  ≟ ≛  ≐ ≎  ⊳ ⫐  ⊲ ⫏  { ❴  } ❵ )],	#   ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden; ∥ ⫴; × ⋈ not needed; ∰ ⨌ - ???; ≃ ≌ not useful
 		  turnaround => [qw( ∧ ∨  ∩ ∪  ∕ ∖  ⋏ ⋎  ∼ ≀  ⋯ ⋮  … ⋮  ⋰ ⋱  
 		  		     8 ∞  ∆ ∇  Α ∀  Ε ∃  ∴ ∵  ≃ ≂
 		  		     ∈ ∋  ∉ ∌  ∊ ∍  ∏ ∐  ± ∓  ⊓ ⊔  ≶ ≷  ≸ ≹  ⋀ ⋁  ⋂ ⋃  ⋉ ⋊  ⋋ ⋌  ⋚ ⋛  ≤ ⋜  ≥ ⋝  ≼ ⋞  ≽ ⋟  )],			# XXXX Can't do both directions
 		  round      => [qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸  □ ▢  ∥ ≬  ‖ ≬
 		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  ⊤ ⫙  ⊥ ⟒  ( ⦅  ) ⦆  ⊳ ⪧  ⊲ ⪦  ≟ ≘  ≐ ≖)]);	#   = ≖  = ≗ hidden = ≈
 
-my $warnUNRES = $ENV{UI_KEYBOARDLAYOUT_UNRESOLVED};
 sub parse_NameList ($$) {
   my ($self, $f, $k, $kk, $name, %basic, %cached_full, %compose, 
       %into2, %ordered, %candidates, %N, %comp2, %NM, %BL, $BL, %G, %NS) = (shift, shift);
@@ -4717,6 +4847,8 @@ sub parse_NameList ($$) {
         if (($t = $name) =~ s/\b(APL\s+FUNCTIONAL\s+SYMBOL)\s+\b(.*?)\b\s*\b(QUAD(?!$)|UNDERBAR|TILDE|DIAERESIS|VANE|STILE|JOT|OVERBAR|BAR)\b/$2/) {
 #warn "APL: $k ($name) --> <$t>; <$1> <$3>";
           push @{$candidates{$k}}, [$t, "calculated-$1-$3"];
+          my %s = qw(UP DOWN DOWN UP);				# mispring in the official name???
+          $candidates{$k}[-1][0] =~ s/\b(UP|DOWN)(?=\s+TACK\b)/$s{$1}/;
         }
         if (($t = $name) =~ s/\b(LETTER\s+SMALL\s+CAPITAL)/CAPITAL LETTER/) {
           push @{$candidates{$k}}, [$t, "smallcaps"];
@@ -4831,6 +4963,7 @@ sub parse_NameList ($$) {
       $b =~ s/\s+(?:SHAPE|OPERATOR|NEGATED)$// unless $N{$b};
       $b =~ s/\bCIRCLED\s+MULTIPLICATION\s+SIGN\b/CIRCLED TIMES/ unless $N{$b};
       $b =~ s/^(CAPITAL|SMALL)\b/LATIN $1 LETTER/ unless $N{$b};			# TURNED SMALL F
+      $b =~ s/\b(CAPITAL\s+LETTER)\s+SMALL\b/$1/ unless $N{$b};		# Q WITH HOOK TAIL
       $b =~ s/\bEPIGRAPHIC\b/CAPITAL/ unless $N{$b};			# XXXX is it actually capital?
       $b =~ s/^LATIN\s+LETTER\s+SMALL\s+CAPITAL\b/LATIN CAPITAL LETTER/ # and warn "smallcapital -> <$b>" 
         if not $N{$b} or $with=~ /smallcaps/;			# XXXX is it actually capital?
@@ -4972,8 +5105,8 @@ sub print_compositions_ch($$) {
 
 sub load_compositions($$) {
   my ($self, $comp, @comb) = (shift, shift);
+  return $self if $self->{Compositions};
   my %comp = %{ $self->{'[Substitutions]'} || {} };
-  return if $self->{Compositions};
   open my $f, '<', $comp or die "Can't open $comp for read";
   ($self->{Decompositions}, $comp, $self->{UNames}, $self->{UBlock}, $self->{exComb}) = $self->parse_NameList($f);
   close $f or die "Can't close $comp for read";
@@ -5010,12 +5143,14 @@ sub load_unidata($$) {
   $self->load_uniage(shift);
 }
 
+my(%charinfo, %UName_v);			# Unicode::UCD::charinfo extremely slow
 sub UName($$$) {
   my ($self, $c, $verbose, $app, $n, $i, $A) = (shift, shift, shift, '');
   $c = $self->charhex2key($c);
+  return $UName_v{$c} if $verbose and exists $UName_v{$c};
   if (not exists $self->{UNames} or $verbose) {
     require Unicode::UCD;
-    $i = Unicode::UCD::charinfo(ord $c) || {};
+    $i = ($charinfo{$c} ||= Unicode::UCD::charinfo(ord $c) || {});
     $A = $self->{Age}{$c};
     $n = $self->{UNames}{$c} || ($i->{name}) || "<$c>";
     if ($verbose and (%$i or $A)) {
@@ -5025,6 +5160,7 @@ sub UName($$$) {
       $scr = "Com/MiscSym1.1" if 0x266a == ord $c;	# EIGHT NOTE: we use as "visual bell"
       $app = " [$scr]" if length $scr;
     }
+    return($UName_v{$c} = "$n$app") if $verbose;
     return "$n$app"
   }
   $self->{UNames}{$c} || "[$c]"
@@ -5046,10 +5182,10 @@ sub parse_derivedAge ($$) {
 sub get_compositions ($$$$;$) {
   my ($self, $m, $C, $undo, $unAltGr, @out) = (shift, shift, shift, shift, shift);
 #  return unless defined $C and defined (my $r = $self->{Compositions}{$m}{$C});
-# warn("doing  <$C> <$m>: ", $self->key2hex($m), ", ", $self->key2hex($C)); # if $m eq 'A';
 # Dumpvalue->new()->dumpValue($self->{Compositions}) unless $first_time_dump++;
   return undef unless defined $C;
   $C = $C->[0] if 'ARRAY' eq ref $C;			# Treat prefix keys as usual keys
+warn "doing <$C> <@$m>: undo=$undo C=", $self->key2hex($C),  ", maps=", join ' ', map $self->key2hex($_), @$m if warnDO_COMPOSE; # if $m eq 'A';
   if ($undo) {
     return undef unless my $dec = $self->{Decompositions}{$C};
     # order in @$m matters; so does one in Decompositions - but less so
@@ -5058,7 +5194,7 @@ sub get_compositions ($$$$;$) {
       push @out, $_ for grep $M eq $_->[2], @$dec;
       if (@out) {	# We took the first guy from $m which allows such decomposition
         warn "Decomposing <$C> <$M>: multiple answers: <", (join '> <', map "@$_", @out), ">" unless @out == 1;
-# warn("done   <$C> <$m>: <$r->[0][1]>"); # if $m eq 'A';
+warn "done undo <$C> <@$m>: -> ", $self->array2string(\@out) if warnDO_COMPOSE; # if $m eq 'A';
         return $out[0][1]
       }
     }
@@ -5087,21 +5223,25 @@ sub get_compositions ($$$$;$) {
 sub compound_composition ($$$) {
   my ($self, $M, $C, @res, %seen) = (shift, shift, shift);
   return undef unless defined $C;
-#warn "composing `$M' with base <$C>";
+warn "composing `$M' with base <$C>" if warnDO_COMPOSE;
   $C = [[0,$C]];			# Emulate element of return of Compositions
   for my $m (reverse split /\+|-(?=-)/, $M) {
     my @res;
-    if ($m =~ s/^-//) {
-      @res = map $self->get_compositions([$m], $_->[1], 'undo'), @$C;
-      @res = map [[0,$_]], grep defined, @res;
-    } elsif ($m eq 'lc') {
-      @res = map {($_->[1] eq lc($_->[1]) or 1 != length lc($_->[1])) ? () : [[0, lc $_->[1]]]} @$C
-    } elsif ($m eq 'uc') {
-      @res = map {($_->[1] eq uc($_->[1]) or 1 != length uc($_->[1])) ? () : [[0, uc $_->[1]]]} @$C
-    } elsif ($m eq 'lcfirst') {
-      @res = map {($_->[1] eq lcfirst($_->[1]) or 1 != length lcfirst($_->[1])) ? () : [[0, lcfirst $_->[1]]]} @$C
-    } elsif ($m eq 'ucfirst') {
-      @res = map {($_->[1] eq ucfirst($_->[1]) or 1 != length ucfirst($_->[1])) ? () : [[0, ucfirst $_->[1]]]} @$C
+    if ($m =~ /^(?:-|(?:[ul]c(?:first)?)$)/) {
+      if ($m =~ s/^-//) {
+        @res = map $self->get_compositions([$m], $_->[1], 'undo'), @$C;
+        @res = map [[0,$_]], grep defined, @res;
+      } elsif ($m eq 'lc') {
+        @res = map {($_->[1] eq lc($_->[1]) or 1 != length lc($_->[1])) ? () : [[0, lc $_->[1]]]} @$C
+      } elsif ($m eq 'uc') {
+        @res = map {($_->[1] eq uc($_->[1]) or 1 != length uc($_->[1])) ? () : [[0, uc $_->[1]]]} @$C
+      } elsif ($m eq 'lcfirst') {
+        @res = map {($_->[1] eq lcfirst($_->[1]) or 1 != length lcfirst($_->[1])) ? () : [[0, lcfirst $_->[1]]]} @$C
+      } elsif ($m eq 'ucfirst') {
+        @res = map {($_->[1] eq ucfirst($_->[1]) or 1 != length ucfirst($_->[1])) ? () : [[0, ucfirst $_->[1]]]} @$C
+      } else {
+        die "Panic"
+      }
     } else {
 #warn "compose `$m' with bases <", join('> <', map $_->[1], @$C), '>';
       @res = map $self->{Compositions}{$m}{$_->[1]}, @$C;
@@ -5140,8 +5280,8 @@ sub compound_composition_many ($$$) {		# As above, but takes an array of chars
 ### XXXX Unclear: how to catenate something in front of such a map...
 # we do $composition->[0][1], which means we ignore additional compositions!  And we ignore HOW, instead of putting it into penalty
 
-sub sort_compositions ($$$$$) {
-  my ($self, $m, $C, $Sub, $dupsOK, @res, %seen, %Penalize, %penalize, @C) = (shift, shift, shift, shift, shift);
+sub sort_compositions ($$$$$;$) {
+  my ($self, $m, $C, $Sub, $dupsOK, $w32OK, @res, %seen, %Penalize, %penalize, @C) = (shift, shift, shift, shift, shift, shift);
   for my $c (@$C) {
     push @C, [map {($_ and 'ARRAY' eq ref $_) ? $_->[0] : $_} @$c]
   }
@@ -5149,7 +5289,8 @@ sub sort_compositions ($$$$$) {
   for my $MM (@$m) {			# |-groups
     my(%byPenalty, @byLayers);
     for my $M (@$MM) {			# diacritic in a group; may flatten each layer, but do not flatten separately each shift state: need to pair uc/lc
-      if ((my $P = $M) =~ s/^\\\\//) {
+      if ((my $P = $M) =~ s/^\\(\\)?//) {
+        my $kill = $1;
 # warn "Penalize: <$P>";	# Actually, it is not enough to penalize; one should better put it in a different group...
 	if ($P =~ s/\[(.*)\]$//) {
 	  #$P = $self->stringHEX2string($P);
@@ -5158,16 +5299,26 @@ sub sort_compositions ($$$$$) {
 	  next unless $match;
 	}  
 	#$P = $self->stringHEX2string($P);
-        $Penalize{$_}++ for split //, $P;		# XXXX Temporarily, we ignore them completely
+        $kill ? $Penalize{$_}++ : $penalize{$_}++ for split //, $P;		# XXXX Temporarily, we ignore them completely
         next
       }
       for my $L (0..$#C) {		# Layer number; indexes a shift-pair
 #        my @res2 = map {defined($_) ? $self->{Compositions}{$M}{$_} : undef } @{ $C[$L] };
         my @Res2 = map $self->compound_composition($M, $_), @{ $C[$L] };	# elt: [$synth, $char]
-        (my $MM = $M) =~ s/(^|\+)<reveal-greenkey>$//;
-        my @Res3 = map $self->compound_composition_many($MM, ((defined $_) ? $Sub->{$_} : $_)), @{ $C[$L] };
-        defined $Res2[$_] or $Res2[$_] = $Res3[$_] for 0..$#Res3;
-        @Res2 = @{$self->deep_copy(\@Res2)};
+        my @working_with = grep defined, @{ $C[$L] };				# ., KP_Decimal gives [. undef]
+warn "compound  `$M' of [@working_with] -> ", $self->array2string(\@Res2) if warnSORTCOMPOSE;
+        (my $MMM = $M) =~ s/(^|\+)<reveal-greenkey>$//;
+        my @Res3 = map $self->compound_composition_many($MMM, ((defined $_) ? $Sub->{$_} : $_)), @{ $C[$L] };
+warn "compound+ `$M' of [@working_with] -> ", $self->array2string(\@Res3) if warnSORTCOMPOSE;
+        for my $shift (0..$#Res3) {
+          if (defined $Res2[$shift]) {
+            push @{ $Res2[$shift]}, @{$Res3[$shift]} if $Res3[$shift]
+          } else {
+            $Res2[$shift] = $Res3[$shift]
+          }
+        }
+#        defined $Res2[$_] ? ($Res3[$_] and push @{$Res2[$_]}, @{$Res2[$_]}) : ($Res2[$_] = $Res3[$_]) for 0..$#Res3;
+        @Res2 = @{ $self->deep_copy(\@Res2) };
         my ($ok, @ini_compat);
         do {{
 	  my @res2   = map {defined() ? $_->[0] : undef} @Res2;
@@ -5176,6 +5327,7 @@ sub sort_compositions ($$$$$) {
           @res2    = map {(not defined() or (!$dupsOK and $seen{$_->[1]}++)) ? undef : $_} @res2;	# remove duplicates
 	  my @compat = map {defined() ? $_->[0] : undef} @res2;
 	  @res2      = map {defined() ? $_->[1] : undef} @res2;
+          @res2      = map {0x10000 > ord($_ || 0) ? $_ : undef} @res2 unless $w32OK;	# remove those needing surrogates
 	  defined $ini_compat[$_] or $ini_compat[$_] = $compat[$_] for 0..$#compat;
 	  my @extra_penalty = map {!!$compat[$_] and $ini_compat[$_] < $compat[$_]} 0..$#compat;
           next unless my $cnt = grep defined, @res2;
@@ -5184,19 +5336,27 @@ sub sort_compositions ($$$$$) {
           # for no-compatibility: do not store the level;
           defined $res2[$_] and $penalty->[$_] gt ( $p = ($self->{Age}{$res2[$_]} || 'undef') . "#$extra_penalty[$_]#$self->{UBlock}{$res2[$_]}" )
             and $penalty->[$_] = $p for 0..$#res2;
-          next if grep {defined and $Penalize{$_}} @res2;
           my $have1 = not (defined $res2[0] and defined $res2[1]);		# Prefer those with both entries
           # Break a non-lc/uc paired translations into separate groups
           my $double_occupancy = ($cnt == 2 and $res2[0] ne $res2[1] and $res2[0] eq lc $res2[1]);
-          if (not $double_occupancy and $cnt == 2 and $penalty->[0] ne $penalty->[1]) {	# Break
+          next if $double_occupancy and grep {defined and $Penalize{$_}} @res2;
+          if ($double_occupancy and grep {defined and $penalize{$_}} @res2) {
+            defined $res2[$_] and $penalty->[$_] = "zzz$penalty->[$_]" for 0..$#res2;
+          } else {
+            defined and $Penalize{$_} and $cnt--, $have1=1, undef $_ for @res2;
+            defined $res2[$_] and $penalize{$res2[$_]} and $penalty->[$_] = "zzz$penalty->[$_]" for 0..$#res2;
+          }
+          next unless $cnt;
+          if (not $double_occupancy and $cnt == 2 and (1 or $penalty->[0] ne $penalty->[1])) {	# Break (penalty here is not a good idea???)
             push @{ $byPenalty{"$penalty->[0]1"}[0][$L] }, [$res2[0]];
             push @{ $byPenalty{"$penalty->[1]1"}[0][$L] }, [undef, $res2[1]];
-            next;
+            next;		# Now: $double_occupancy or $cnt == 1 or $penalty->[0] eq $penalty->[1]
           }
           $p = $penalty->[0];
-          $p = $penalty->[1] if @$penalty > 1 and $p gt $penalty->[1];
+          $p = $penalty->[1] if @$penalty > 1 and defined $res2[1] and $p gt $penalty->[1];
           push @{ $byPenalty{"$p$have1"}[$double_occupancy][$L] }, \@res2;
         }} while $ok;
+warn " --> combined of [@working_with] -> ", $self->array2string([\@res, %byPenalty]) if warnSORTCOMPOSE;
       }
     }		# sorted bindings, per Layer
     push @res, [ @byPenalty{ sort keys %byPenalty } ];	# each elt is an array ref indexed by layer number; elt of this is [lc uc]
@@ -5205,8 +5365,58 @@ sub sort_compositions ($$$$$) {
   \@res
 }	# index as $res->[group][penalty_N][double_occ][layer][NN][shift]
 
-sub append_keys ($$$$) {	# $k is [[lc,uc], ...]
-  my ($self, $C, $KK, $LL, @KKK, $cnt) = (shift, shift, shift, shift);
+sub equalize_lengths ($$@) {
+  my ($self, $extra, $l) = (shift, shift || 0, 0);
+  $l <= length and  $l = length for @_;
+  $l += $extra;
+  $l >  length and $_ .= ' ' x ($l - length) for @_;
+}
+
+sub report_sorted_l ($$$;$$) {	# 6 levels: |-group, priority, double-occupancy, layer, count, shift
+  my ($self, $k, $sorted, $bold, $bold1, $top2, %bold) = (shift, shift, shift, shift, shift);
+  $k = $k->[0] if 'ARRAY' eq ref($k || 0);
+  $k = '<undef>' unless defined $k;
+  $k = "<$k>" if defined $k and $k !~ /[^┃┋║│┆\s]/;
+  my @L = ($k, '');			# Up to 100 layers - an overkill, of course???  One extra level to store separators...
+  $bold{$_} = '┋' for @{$bold1 || []};
+  $bold{$_} = '┃' for @{$bold || []};
+  for my $group (0..$#$sorted) { # Top level
+    $self->equalize_lengths(0, @L);
+    $_ .= ' ' . ($bold{$group} || '║') for @L;
+    my $prio2;    
+    for my $prio (@{ $sorted->[$group] }) {
+      if ($prio2++) {
+        $self->equalize_lengths(0, @L);
+        $_ .= ' │' for @L;
+      }
+      my $double2;
+      for my $double (reverse @$prio) {
+        if ($double2++) {
+          $self->equalize_lengths(0, @L);
+          $_ .= ' ┆' for @L;
+        }
+        for my $layer (0..$#$double) {
+          for my $set (@{$double->[$layer]}) {
+            for my $shift (0,1) {
+              next unless defined (my $k = $set->[$shift]);
+              $k = " $k" if $k =~ /$rxCombining/;
+              if (2*$layer + $shift >= $#L) {		# Keep last layer pristine for correct separators...
+                my $add = 2*$layer + $shift - $#L + 1;
+                push @L, ($L[-1]) x $add;
+              }
+              $L[ 2*$layer + $shift ] .= " $k";
+            }
+          }
+        }
+      }
+    }
+  }
+  pop @L while @L and $L[-1] !~ /[^┃┋║│┆\s]/;
+  join "\n", @L, '';
+}
+
+sub append_keys ($$$$;$) {	# $k is [[lc,uc], ...]; modifies $C in place
+  my ($self, $C, $KK, $LL, $prepend, @KKK, $cnt) = (shift, shift, shift, shift, shift);
   for my $L (0..$#$KK) {	# $LL contains info about from which layer the given binding was stolen
     my $k = $KK->[$L];
     next unless defined $k and (defined $k->[0] or defined $k->[1]);
@@ -5223,15 +5433,19 @@ sub append_keys ($$$$) {	# $k is [[lc,uc], ...]
     push @{ $KKK[$paired][$L] }, $k;	# 0: layer has only one slot
   }
 #print "cnt=$cnt\n";
-  push @$C, [[@KKK]] if $cnt;	# one group of one level of penalty
-  $C
+  return unless $cnt;
+  push    @$C, [[@KKK]] unless $prepend;	# one group of one level of penalty
+  unshift @$C, [[@KKK]] if     $prepend;	# one group of one level of penalty
+  1
 }
 
-sub shift_pop_compositions ($$$;$$$$) {
-  my($self, $C, $L, $backwards, $limit, $ignore_groups, $store_level) = (shift, shift, shift, shift, shift || 1e100, shift || 0, shift);
-  my($do_lc, $do_uc) = (1,1);
+sub shift_pop_compositions ($$$;$$$$) {	# Limit is how many groups to process
+  my($self, $C, $L, $backwards, $omit, $limit, $ignore_groups, $store_level, $skip_lc, $skip_uc) 
+    = (shift, shift, shift, shift, shift || 0, shift || 1e100, shift || 0, shift, shift, shift);
+  my($do_lc, $do_uc) = (!$skip_lc, !$skip_uc);
   my($both, $first, $out_lc, $out_uc, @out, @out_levels, $have_out, $groupN) = ($do_lc and $do_uc);
-  for my $group ($backwards ? reverse @$C : @$C) {
+  my @G = $backwards ? reverse @$C : @$C;
+  for my $group (@G[$omit..$#G]) {
     last if --$limit < 0;
     $groupN++;
     for my $penalty_group (@$group) {	# each $penalty_group is indexed by double_occupancy and layer

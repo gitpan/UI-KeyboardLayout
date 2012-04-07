@@ -32,7 +32,9 @@ examples/charlists/oldenglish
 examples/charlists/double-accents
 examples/charlists/latin-derived
 examples/charlists/mes1
-diff-tra/charlists/mes2
-diff-tra/charlists/mes3b
+examples/charlists/mes2
+examples/charlists/mes3b
+examples/charlists/IPA-obsolete-and-capital-small
+examples/charlists/UPA
 diff-trade-combining-for-math
 META.yml                                 Module meta-data (added by MakeMaker)

@@ -5,7 +5,8 @@
      knowing only a handful of general rules for "position allocation" [*].
   2) Gradual degradation: the fewer rules one can keep in mind, the narrower repertoir of characters is
      *easily* accessible; but "more cumbersome" ways to access characters should be available if they
-     are easier to keep in mind.
+     are easier to keep in mind.  So people who can remember have access to easier typing experience,
+     but the covered repertoir should not change much.
   3) Have most (70%-80% achievable?) of covered characters available in easy-to-remember positions.
   4) Have whole coverage of certain ranges of Unicode.
 
@@ -25,6 +26,8 @@ Currently achieved (ranges as of Unicode v6.1):
 *) Full coverage of characters covered by EurKey/Bépo keyboards (except arrows and combining 0302, 030a);
 *) 50% coverage of math symbols in BMP (the most useful implemented first);
 *) Full coverage of double-accented letters of MES-3b;
+*) Full coverage of non-modifiers/combiners of IPA and UPA;
+*) Full coverage of obsolete-IPA and case-extended IPA;
 *) Latin and Cyrillic personalities;
 *) Visual bell to report unrecognized/unsupported combinations;
 *) Documentation of the allocation rules scattered over different files/sections.
@@ -34,16 +37,17 @@ Not yet implemented, or lost by upgrades to other goals:
 *) Greek personality;
 *) The "compose" prefix key + access by human-guessable sequence of Latin chars;
 *) Full coverage of Cyrillic;
-*) Full coverage of IPA (both visually, and by structure properties of the described sounds);
-*) Full coverage of spacing modifiers and combining characters for Latin scripts, and for symbols;
+*) Full coverage of IPA (both visually, and by structure properties of the described sounds) and UPA;
+*) Full coverage of spacing modifiers and combining characters for Latin scripts, and for symbols 
+   (had it before Green keys were implemented);
 *) Full coverage of Unicode's paleo-Latin characters;
 *) Full (is it compatible with other goals???) coverage of math symbol ranges in BMP;
-*) Full coverage of Math Fractur, Math Double-Strike and Math Script English letters (would need to abandon kbdutool...);
+*) Full coverage of Math Fractur, uc Math Double-Strike and Math Script English letters (would need to abandon kbdutool...);
 *) reasonable coverage of arrows;
 *) reasonable coverage of ASCII/Unicode drawing characters;
-*) Full coverage of characters covered by Neo keyboard, and X11+Neo composition tables;
-*) Full coverage of MES-2 (currently 21 characters + 55 box drawing symbols missing);
-*) Easy-to-describe quick access to Vietnamese characters.
+*) Full coverage of non-Eastern characters covered by Neo keyboard, and X11+Neo composition tables;
+*) Full coverage of MES-2 (currently 7 arrows + 9 "5-bit C0 dingbats of cp437" + ⌠⌡ + 48 box drawing symbols missing);
+*) Easy-to-describe quick access to Vietnamese characters (seems to be present - needs documentation).
 
 Possible roadmaps:
 *) Full coverage of Hebrew (and a personality?)
@@ -569,3 +573,140 @@ Possible roadmaps:
 	print_nameslist.pl:	Update to use non-beta Unicode files.
 				New option -hex.
 
+0.09	Cache results of Unicode::UCD::charinfo --> 2.3x speedup of processing.
+	Cache results of <any-foo> - speeds up things another 2x, but behaves bad w.r.t. pairing of uc/lc letters.
+	Report resolution of mutator recipes if UI_KEYBOARDLAYOUT_REPORT_MUTATORS is set in environment;
+	  bit 0x1 for concise report, bit 0x2 for verbose (to STDOUT!), bit 0x4 for details of sorting compositions,
+	  bit 0x8 for composing, bit 0x10 for caching <any-*> compose, bit 0x20 for inhibiting cache-merging <any-*>.
+	Explicit penalization was applied to a Shift-pair of characters even if it is not an lc/uc-pair.
+	Allow partial penalization (via \ú).
+	Extra arguments $omit (not used yet) and $do_lc, $do_uc for shift_pop_composition().
+	Allow for fallbacks in prefix keys sharing a recipe in opposite direction (after the second ||||).
+	Penalize lists start anew in every ||||- (or top |||-) section.
+	New semantic of repetition on these sections: we do not extract a char already extracted in previous section,
+	  but may extract a char mentioned there, but not extracted.
+	New variant of Mutate*(): Mutate32OK[].
+	+ starting Mutate[]'s directives means "primary recipe"; ||| etc are the same as |.  
+	  (Now can share the whole primary directives.)
+	Allow -recipe1+recipe2 in a mutator (including <any-foo> in recipe1 - need to switch off caching!).
+	Fix the UP/DOWN TACK mixup in Unicode names.
+	Add version numbers to the coverage report.
+	New coverage lists: IPA-obsolete-and-capital-small and UPA (Uralic PA).
+	Penalization via \ọ was not working on double-occupation slots.
+	Add Cʗ to phonetize.
+	Add uc/lc fixes for Ɋ and ß.
+	Fix IPA-obsolete/etc coverage set (had 2 PUA from WikiPedia page; fix one of them both here and there).
+
+	izKeys.kbdd:	Add `turned' to AltGr-'.
+			Tortoise parens supported (again!), 3 variants of 4, and bold braces.
+			Micro-optimize to the level of 0.01 - only much better.
+			Swap ␠/␢; add symbols for special keys to Shift-Space; add images for special keys to Business;
+			  with ↹ on Tab, ⇤ on C-[, ⇥ on C-];
+			  NL and NUL considered as images (on C-Enter and C-\), and CR LF as symbols.
+			Bump the version to 0.02.
+			Optimize IPA coverage "by visual resemblance" (now all symbols except for modifiers/combiners are present);
+			  [but broke case-preservation: ɞ/ɝ/ɺ are on upper-case E,È,AltGr-I with AltGr-/].
+			Swap AltGr-Y/U on Coptic (have exotic Greek letter forms); move Ohm from Business to Coptic, add inverted.
+			Put fi/fl ligatures on AltGr-w/W, and HOUSE ⌂ on AltGr-h on Business.
+			[Only graphics + arrows + 9 5-bit C0 dingbats of cp437 not supported from MES-2 now.]
+			Add ⌈⌉⌊⌋ to {}[] on AltGr-/ (heuristic: cut off a piece).
+			Try adding double-struck on AltGr-/ (CHN fit, PQRZ not).
+			Penalize ọ to have all of dots below accessible the same way (on AltGr; having them all without
+			  AltGr makes Scandinavian å, Turkish ı and Lithuanian ė harder to enter; I presume that Vietnamese
+			  input with this layout will not be the prime-time usage).
+  			Switch ủ and ǚ and other clean ups.
+  			Pinyin ǚ now entered the natural way; Latin-Belorussian/Esperanto ŭ moved to AltGr-/.
+  			Business map: move (CJK) Yuans to AltGr-u/U; move schwa case pairs to z/Z (African to AltGr);
+  			  put hooks on u/o; move c/o to / and AltGr-o, ℮ to AltGr-e; 
+  			  add Double-Female/Male and "Female and Male" signs on AltGr: F/M/a.
+  			Add case pair for ʔ on AltGr-?/ on Greek (this finishes "obsolete+case-pairs of IPA").
+  			Add smallcaps Greek and OU on breve + AltGr-Shift (this finishes non-modifiers/combiners of UPA).
+  			  (This did not cover smallcaps-Γ [not in UPA according to WikiPedia!], so duplicate on grave.)
+  			Penalize ⊠ to allow for ???.
+
+  Vietnamese vowels; input:
+    The vowels with 1 diacritic (except horn and hook above): only ê can be 
+      entered via AltGr (as AltGr-e); all may be entered by the corresponding 
+      dead key (as AltGr-6/^/`/'/~ for ˘/ˆ/`/´/˜ followed by the base vowel;
+      and AltGr-. AltGr-vowel for the dot-below diacritic).
+    Ư/Ơ: put ` on AltGr-vowel (as AltGr-` AltGr-vowel); or on AltGr-$ map;
+    Ư/Ơ with ` or ´: put ` or ´ on U/O with the opposite tick (´ or `);
+      as AltGr-` (or AltGr-') AltGr-key; here key is one (or two, for ´) keys
+      below the u/o key.
+    Hook above: put ¨ on AltGr-vowel (as AltGr-; AltGr-vowel).     (!!! Except ủ: do AltGr-' AltGr-u)
+    Double diacritics involving ê, or `, or ´ (except ê?=ể/ệ and those 
+      involving hook above or horn): put the OTHER diacritic on the
+      AltGr-key accessing ê or the vowel with ` or ´.  
+        Example: ầ via AltGr-^ AltGr-z (since AltGr-z gives à).
+    Tilde or dot-below on â/ê/ô or ă/ơ/ư:
+      Tap AltGr-~ or AltGr-. and press the corresponding GREEN KEY (replace the
+      ˆ-vowel by `-vowel, and ă/ơ/ư by å/ø/b and use the key accessing
+      the replacement (AltGr-z/AltGr-f/AltGr-m/AltGr-r/AltGr-p/b).
+        Example: AltGr-~ AltGr-z gives ẫ since AltGr-z gives à which
+		is a GREEN KEY for â.
+    Likewise, hook-above on â/ê/ô or ă/ơ/ư: tap AltGr-; then the GREEN key.
+
+    Symbolic representation of these rules (with diaeresis=AltGr-; )
+           (the GREEN one is a generalization of grave one above it):
+      grave + diaeresis		==>	horn
+        or (same)
+      grave + AltGr		==>	horn		(or use AltGr-$ prefix)
+      grave + acute		==>	grave + horn 
+      acute + grave		==>	acute + horn
+      diaeresis + AltGr		==>	hook above
+      tilde/dot-below + grave	==>	tilde/dot-below + hat
+      tilde/dot-below + GREEN	==>	tilde/dot-below + horn/hat/breve
+      diaeresis + grave		==>	hook-above + hat
+      diaeresis + GREEN		==>	hook-above + horn/hat/breve
+
+    In the shortest form:
+      diaeresis 	+ AltGr	==>	hook above
+      diaeresis		+ GREEN	==>	hook-above	+ horn/hat/breve
+
+      tilde/dot-below	+ GREEN	==>	tilde/dot-below	+ horn/hat/breve
+
+      grave		+ AltGr	==>	horn		(or use AltGr-$ prefix)
+      grave		+ acute	==>	grave + horn 
+      acute		+ grave	==>	acute + horn
+
+      GREEN-for-hat	= grave	= AltGr-z/AltGr-f/AltGr-m for à/è/ò.
+      GREEN-for-ă/ơ/ư	= å/ø/b	= AltGr-r/AltGr-p/b
+
+    One must remember positions of quick-access 
+    AltGr-vowels with ` or ´, of additional "green keys" for ĂÂÊÔƠƯ,
+    how to enter diacritics `, ´, ˜, ... via AltGr-prefix keys
+    (`, ´, ˜ are where expected, dot below on AltGr-7 [possibly with
+    AltGr on the vowel key], ˘ on AltGr-^, ˆ on AltGr-6; hook above on 
+    "English vowels" is on AltGr-´ with AltGr-vowel, and on "green keys"
+    it is on AltGr-;).  Also: đ/Đ is AltGr-& before d/D.
+    
+
+    THE RULES:
+
+    All characters with at most one "accent" (except "horny" ƠƯ) can be 
+    entered "normally" (following the rules for AltGr-diacritics 
+    on "English letters", or via quick-access AltGr-vowels with ` or ´).
+	    
+    For characters with ` or ´ tone mark and another ornament 
+    (except "horn"), use the AltGr-prefix key for this 
+    "other ornament" with the quick-access AltGr-vowel for `/´-vowel.
+	    
+    To put tilde, dot below, or hook as the "second" diacritic, one
+    should know additional positions on AltGr-layer: ĂÂÊÔƠƯ take 
+    places of ÅÀÈÒØÙ (which are on AltGr- WZF,LH; call these places 
+    "green AltGr-keys").  Preceed the green AltGr-key by the 
+    AltGr-prefix for the diacritic (given above).  For example, ỡ is AltGr-~ AltGr-l.
+	    
+    This leaves `, ´ on horns ƠƯ and horns themselves.  For the former,
+    use AltGr-` and AltGr-´ on O and U with "the opposite ` or ´ accent".
+    For ƠƯ, use AltGr-` on AltGr-O and AltGr-U (which are ÖÜ).
+	  
+    =====
+
+    Desired heuristic for semantic: under the weight of additional 
+    accent, `-accent on letters collapses to a different accent:
+      under ´ it collapses to a horn on O and U (Ơ and Ư) so
+      one gets Ớ and Ứ (likewise for ´-accent under `).
+      Over ¨-accent ` again collapses to horn (but ¨ evaporates, so
+      one gets a pure horn).
+	      
