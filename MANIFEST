@@ -4,12 +4,14 @@ MANIFEST
 README
 t/UI-KeyboardLayout.t
 lib/UI/KeyboardLayout.pm
+lib/UI/KeyboardLayout/izKeys.pod
 examples/EurKey++.kbdd
 examples/izKeys.kbdd
 examples/txt2html_bubbles.pl
 examples/diff-Vietnamese
 examples/print_nameslist.pl
 examples/grep_nameslist.pl 
+examples/build-iz.pl
 examples/quotes-e
 examples/Sorted-mod_Unicode.txt
 examples/charlists/Adobe-GL-chars
@@ -36,5 +38,7 @@ examples/charlists/mes2
 examples/charlists/mes3b
 examples/charlists/IPA-obsolete-and-capital-small
 examples/charlists/UPA
+examples/charlists/UGL
+examples/charlists/all-greekish
 diff-trade-combining-for-math
 META.yml                                 Module meta-data (added by MakeMaker)

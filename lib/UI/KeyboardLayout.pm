@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION ="0.09";
+$VERSION = $VERSION ="0.10";
 use strict;
 use utf8;
 
@@ -12,7 +12,7 @@ use subs qw(chr lc uc);
 #BEGIN { *CORE::GLOGAL::chr = sub ($) { toU CORE::chr shift };
 #        *CORE::GLOGAL::lc  = sub ($)  { CORE::lc  toU shift };
 #}
-my %fix = qw( ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ß ẞ);		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
+my %fix = qw( ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ß ẞ  ꞩ Ꞩ  ȿ Ȿ  ꞓ Ꞓ  ꞥ Ꞥ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
 my %unfix = reverse %fix;
 
 sub chr($)  { local $^W = 0; toU CORE::chr shift }	# Avoid illegal character 0xfffe etc warnings...
@@ -45,7 +45,7 @@ UI::KeyboardLayout - Module for designing keyboard layouts
   use UI::KeyboardLayout; 
   use strict;
   
-  UI::KeyboardLayout::->set_NamesList("$ENV{HOME}/Downloads/NamesList-6.1.0d8.txt"); 
+  UI::KeyboardLayout::->set_NamesList("$ENV{HOME}/Downloads/NamesList.txt"); 
   
   my $i = do {local $/; open $in, '<', 'MultiUni.kbdd' or die; <$in>}; 
   # Init from in-memory copy of the configfile
@@ -53,7 +53,7 @@ UI::KeyboardLayout - Module for designing keyboard layouts
              -> fill_win_template( 1, [qw(faces CyrillicPhonetic)] ); 
   print $k;
   
-  open my $f, '<', "$ENV{HOME}/Downloads/NamesList-6.1.0d8.txt" or die;
+  open my $f, '<', "$ENV{HOME}/Downloads/NamesList.txt" or die;
   my $k = UI::KeyboardLayout::->new();
   my ($d,$c,$names,$blocks,$extraComb) = $k->parse_NameList($f);
   close $f or die;
@@ -75,13 +75,92 @@ UI::KeyboardLayout - Module for designing keyboard layouts
     $l->print_coverage(q(US));
   }
 
+  perl -wC31 UI-KeyboardLayout\examples\grep_nameslist.pl "\b(ALPHA|BETA|GAMMA|DELTA|EPSILON|ZETA|ETA|THETA|IOTA|KAPPA|LAMDA|MU|NU|XI|OMICRON|PI|RHO|SIGMA|TAU|UPSILON|PHI|CHI|PSI|OMEGA)\b" ~/Downloads/NamesList.txt >out-greek
+
 =head1 AUTHORS
 
 Ilya Zakharevich, ilyaz@cpan.org
 
 =head1 DESCRIPTION
 
-[To be continued]
+In this section, a "keyboard" has a certain "character repertoir" (which characters may be
+entered using this keyboard), and a mapping associating a character in the repertoir
+to a keypress or to several (sequential or simultaneous) keypresses.  A small enough keyboard
+may have a pretty arbitrary mapping and remain useful (witness QUERTY
+vs Dvorak vs Colemac).  However, if a keyboard has a sufficiently large repertoir,
+there must be a strong logic ("orthogonality") in this association - otherwise
+the most part of the repertoir will not be useful (except for people who have an
+extraordinary memory - and are ready to invest part of it into the keyboard).
+
+"Character repertoir" needs of different people vary enormously; observing
+the people around me, I get a very narrow point of view.  But it is the best
+I can do; what I observe is that many of them would use 1000-2000 characters
+if they had a simple way to enter them; and the needs of different people do 
+not match a lot.  So to be helpful to different people, a keyboard should have 
+at least 2000-3000 different characters in the repertoir.  (Some ballpark
+comparisons: L<MES-3B|http://web.archive.org/web/20000815100817/http://www.egt.ie/standards/iso10646/pdf/cwa13873.pdf> 
+has about 2800 characters; L<Adobe Glyph list|http://en.wikipedia.org/wiki/Adobe_Glyph_List> corresponds 
+to about 3600 Unicode characters.)
+
+To access these characters, how much structure one needs to carry in memory?  One can
+make a (trivial) estimate from below: on Windows, the standard US keyboard allows 
+entering 100 - or 104 - characters (94 ASCII keys, SPACE, ENTER, TAB - moreover, C-ENTER, 
+BACKSPACE and C-BACKSPACE also produce characters; so do C-[, C-] and C-\
+C-Break in most layouts!).  If one needs about 30 times more, one could do
+with 5 different ways to "mogrify" a character; if these mogrifications 
+are "orthogonal", then there are 2^5 = 32 ways of combining them, and
+one could access 32*104 = 3328 characters.
+
+Of course, the characters in a "reasonable repertoir" form a very amorphous
+mass; there is no way to introduce a structure like that which is "natural"
+(so there is a hope for "ordinary people" to keep it in memory).  So the
+complexity of these mogrification is not in their number, but in their
+"nature".  One may try to decrease this complexity by having very easy to
+understand mogrifications - but then there is no hope in having 5 of them
+- or 10, or 15, or 20.
+
+However, we B<know> that many people I<are> able to memorise the layout of 
+70 symbols on a keyboard.  So would they be able to handle, for example, 30 
+different "natural" mogrifications?  And how large a repertoir of characters
+one would be able to access using these mogrifications?
+
+This module does not answer these questions directly, but it provides tools
+for investigating them, and tools to construct the actually working keyboard
+layouts based on these ideas.  It consists of the following principal
+components:
+
+=over 4
+
+=item Unicode table examiner
+
+distills relations between different Unicode characters from the Unicode tables,
+and combines the results with user-specified "manual mogrification" rules.
+From these automatic/manual mogrifications, it constructs orthogonal scaffolding 
+supporting Unicode characters (we call it I<composition/decomposition>, but it
+is a major generalization of the corresponding Unicode consortium's terms).
+
+=item Layout constructor
+
+allows building keyboard layouts based on the above mogrification rules, and
+on other visual and/or logical directives.  It combines the bulk-handling
+ability of automatic rule-based approach with a flexibility provided by 
+a system of manual overrides.   (The rules are read from a F<.kbdd> L<I<Keyboard
+Description> file|/"Keyboard description files">.
+
+=item System-specific software layouts
+
+may be created basing on the "theoretical layout" made by the layout constructor
+(currently only on Windows, and only via F<KBDUTOOL> route).
+
+=item Report/Debugging framework
+
+creates human-readable descriptions of the layout, and/or debugging reports on
+how the layout creation logic proceeded.
+
+=back
+
+The last (and, probably, the most important) component of the distribution is
+L<an example keyboard layout|http://k.ilyaz.org/iz> created using this toolset.
 
 =head1 Keyboard description files
 
@@ -92,7 +171,7 @@ farced to invent yet-another-config-file-format.  Sorry...
 
 Config file is for initialization of a tree implementing a hash of hashes of
 hashes etc whole leaves are either strings or arrays of strings, and keys are
-words.  The file consists of I<"sections">; each section filles a certain hash
+words.  The file consists of I<"sections">; each section fills a certain hash
 in the tree.
 
 Sections are separated by "section names" which are sequences of word
@@ -104,7 +183,7 @@ C<< [visual -> wordsAndSlashes] >>.
 
 Sections are of two type: normal and visual.  A normal section
 consists of comments (starting with C<#>) and assignments.  An assignment is
-in one of 3 forms:
+in one of 4 forms:
 
    word=value
    +word=value
@@ -124,7 +203,7 @@ Visual sections consist of comments, assignments, and C<content>, which
 is I<the rest> of the section.  Comments
 after the last assignment become parts of the content.  The content is
 preserved as a whole, and assigned to the key C<unparsed_data>; trailing
-whitespace is stripped.  (This is the way to insert a value which contains
+whitespace is stripped.  (This is the way to insert a value containing
 end-of-line-characters.)
 
 In the context of this distribution, the intent of visual sections is to be
@@ -141,9 +220,10 @@ mappings and deadkey names from such sections.  The name of the section becomes 
 name of the mapping functions which may be used inside the C<Diacritic_*> rule
 (or in a recipe for a computed layer).
 
-A content of C<KBD> section consists of C<#>-comment lines and lines
-encoding one row of a keyboard.  (But the layout of rows of this keyboard may
-be purely imaginary; it is normal to have a "keyboard" with one row of numbers.)
+A content of C<KBD> section consists of C<#>-comment lines and "the mapping 
+lines"; every "mapping line" encodes one row in a keyboard (in one or several 
+layouts).  (But the make up of rows of this keyboard may be purely imaginary; 
+it is normal to have a "keyboard" with one row of numbers 0...9.)
 Configuration settings specify how many lines are per row, and how many layers
 are encoded by every line, and what are the names of these layers:
 
@@ -156,14 +236,16 @@ are encoded by every line, and what are the names of these layers:
 
 Each line consists of prefix (which is ignored except for sanity checking), and
 whitespace-separated list of key descriptions.  (Whitespace followed by a
-combining character is not separating.)  Each key description is
-C<in_key_separator>-separated list of descriptions of the key in a particular
-layout.  (The leading C<in_key_separator> is not separating.)  Each layout
+combining character is not separating.)  Each key description is split using
+C<in_key_separator> into slots, one slot per layout.  (The leading 
+C<in_key_separator> is not separating.)  Each key/layout
 description consists of one or two entries.  An entry is either two dashes
 C<--> (standing for empty), or a character, or a hex number of length >=4.
-(A hex numbers must be separated by C<.> if C<.> is between two word
-characters.)  A character which has a different uppercase is
-auto-replicated in uppercase form (if it comes alone).
+(A hex numbers must be separated by C<.> from neighbor word
+characters.)  A loner character which has a different uppercase is
+auto-replicated in uppercase form.  Missing or empty key/layout description
+gives two empty entries (note that the leading key/layout description cannot
+be empty; same for "the whole key description" - use the leading C<-->.
 
 For compatibility with other components, layer names should not contain characters C<+()[]>.
 
@@ -172,11 +254,12 @@ For compatibility with other components, layer names should not contain characte
 Instead of including a F<.klc> file (or its part) verbatim in a visual
 section, one can make a section C<DEADKEYS/NAME/name1/nm2> with
 a key C<klc_filename>.  Filename will be included and parsed as a C<DEADKEYS>
-visual section.
+visual section (with name C<DEADKEYS/name1/nm2>???).  (Currently only UTF-16
+files are supported.)
 
 =head2 Metadata
 
-A metadata entry is either a string, or an array.  A scalar behaves as
+A metadata entry is either a string, or an array.  A string behaves as
 if were an array with the string repeated sufficiently many times.  Each
 personality defines C<MetaData_Index> which chooses the element of the array.
 The entries
@@ -192,47 +275,51 @@ Optional metadata currently consists only of C<VERSION> key.
 =head2 Layer/Face/Prefix-key Recipes
 
 The sections C<layer_recipes> and C<face_recipes> contain instructions how
-to build Layers and Faces of simpler elements.  Such a "recipe" is
+to build Layers and Faces out of simpler elements.  Similar recipes appear  
+as values of C<DeadKey_*> entries in a face.  Such a "recipe" is
 executed with I<parameters>: a base face name, a layer number, and a prefix
 character (the latter is undefined when the recipe is a layer recipe or
 face recipe).  (The recipe is free to ignore the parameters; for example, most
 recipes ignore the prefix character even when they are "prefix key" recipes.)
 
-The recipes and theh visual sections are the most important components of the description
-of the keyboard group.
+The recipes and the visual sections are the most important components of the description
+of a keyboard group.
 
 To construct layers of a face, a face recipe is executed several times with different 
 "layer number" parameter.  In contrast, in simplest cases a layer recipe is executed
 once.  However, when the layer is a part of a compound ("parent") recipe, it inherits 
-the "parameters" from the parent.  In particular, it may be executed several times 
-if the parents' "base face name" and/or "layer number" is not shared.  Depending on
-the recipe, these calls may result in the same layout of the result layers, or in
-different layouts.
+the "parameters" from the parent.  In particular, it may be executed several times with
+different face name (if used in different faces), or with different layer number (if used
+- explicitly or explicitly - in different layer slots; for example, C<Mutator(LayerName)>
+in a face/prefix-key recipe will execute the C<LayerName> recipe separately for all the
+layer numbers; or one can use C<Layers(Empty+LayerName)> together with
+C<Layers(LayerName+Other)>).  Depending on the recipe, these calls may result in the same layout 
+of the resulting layers, or in different layouts.
 
-A recipe may be of three kinds: it is either a "first comer wins": a space-separated collection of
-simpler recipes, or C<CHOOSER(COMPONENTS)>, or a "mutator": C<MUTATOR(BASE)> or just C<MUTATOR>.
+A recipe may be of three kinds: it is either a "first comer wins" which is a space-separated collection of
+simpler recipes, or C<SELECTOR(COMPONENTS)>, or a "mutator": C<MUTATOR(BASE)> or just C<MUTATOR>.
 All recipes must be C<()>-balanced
 and C<[]>-balanced; so must be C<MUTATOR>; in turn, the C<BASE> is either a 
-layer name, or a recipe.  A layer name must be defined either in a visual C<KBD> section,
+layer name, or another recipe.  A layer name must be defined either in a visual C<KBD> section,
 or be a key in the C<layer_recipes> section (so it should not have C<+()[]> characters),
 or be the literal C<Empty>.
 When C<MUTATOR(BASE)> is processed, first, the resulting layer(s) of the C<BASE> recipe 
-are calculated; then the layer(s) are processed by the C<MUTATOR> (one key at a time)
+are calculated; then the layer(s) are processed by the C<MUTATOR> (one key at a time).
 
-The most important C<CHOOSER> keywords are C<Face> (with argument a face name, defined either
+The most important C<SELECTOR> keywords are C<Face> (with argument a face name, defined either
 via a C<faces/FACENAME> section, or via C<face_recipes>) and C<Layers> (with argument
 of the form C<LAYER_NAME+LAYER_NAME+...>, with layer names defined as above).  Both
-choose the layer with number corresponding to the "layer number parameter" in the context
+select the layer (out of a face, or out of a list) with number equal to the "layer number parameter" in the context
 of the recipe.  The C<FlipLayers> builder is similar to C<Face>, but chooses the "other" 
 layer ("cyclically the next" layer if more than 2 are present).
 
-The other choosers are C<Self>, C<LinkFace> and C<FlipLayersLinkFace>; they
+The other selectors are C<Self>, C<LinkFace> and C<FlipLayersLinkFace>; they
 operate on the base face or face associated to the base face.
 
 The simplest forms of C<MUTATORS> are C<Id, lc, uc, Empty>.  Recall that a layer
-is nothing more than something associating a pair "unshifted/shifted character" to the key number, and that
+is nothing more than a structure associating a pair "unshifted/shifted character" to the key number, and that
 these characters may be undefined.  These simplest mutators modify these characters
-independently of their key numbers and shift positions (with C<Empty> making all of
+independently of their key numbers and shift state (with C<Empty> making all of
 them undefined).  Similar user-defined simple mutators are C<ByPairs[PAIRS]>;
 here C<PAIRS> consists of pairs "FROM TO" of characters (with optional spaces between pairs);
 "unknown" characters are undefined.
@@ -241,19 +328,19 @@ separate the number from a neighboring word character by C<.> [dot].)
 
 All mutators must have a form C<WORD> or C<WORD[PARAMETERS]>, with C<PARAMETERS>
 C<(),[]>-balanced.  Other simple mutators are C<FlipShift> ..................
-.........................  Note that C<Id(LAYERNAME)> is similar to a chooser;
+.........................  Note that C<Id(LAYERNAME)> is similar to a selector;
 it is the only way to insert a
-layer without a chooser, since a bareword is interpreted as a C<MUTATOR>; C<Id(LAYERNAME)> is a synonym
+layer without a selector, since a bareword is interpreted as a C<MUTATOR>; C<Id(LAYERNAME)> is a synonym
 of C<Layers(LAYERNAME+LAYERNAME+...)> (repeated as many times as there are layers
 in the parameter "base face").
 
 C<Mutate> (and its flavors) is the most important mutator.
 
-The recipes in a space-separated list of recipes are processed independently to give
-a collection of layers to combine; then,
-for every key numbers and both shift states, one takes the corresponding collection
-of characters ("same position" in the the layers to combine);
-first defined character at this "position" is put into the result layer.
+The recipes in a space-separated list of recipes ("first comer wins") are 
+interpreted independently to give a collection of layers to combine; then,
+for every key numbers and both shift states, one takes the leftmost recipe 
+which produces a defined character for this position, and the result is put 
+into the resulting layer.
 
 Keep in mind that sometimes to understand what a recipe does, one should trace 
 its description in opposite order: for example, C<ByPairs[.:](FlipLayers)> creates
@@ -457,6 +544,20 @@ type C<AltGr>-key with the physical keyboard's key sitting below the vowel key")
 If everything else fails, the user should be able to enter a character by
 its Unicode number (preferably in the most frequently referenced format:
 hexadecimal).
+
+=back
+
+=over
+
+B<NOTE:> This does not seem to be easily achievable, but it looks like a very nifty
+UI: a certain HotKey is reserved (e.g., C<AltGr-AppMenu>);
+when it is tapped, and a character-key is pressed (for example, B<B>) a
+menu-driven interface pops up where user may navigate to different variants
+of B, Beta, etc - each of variants with a hotkey to reach I<NOW>, and with
+instructions how to reach it later from the keyboard without this UI.
+
+Also: if a certain timeout passes after pressing the initial HotKey, an instruction
+what to do next should appear.
 
 =back
 
@@ -767,7 +868,7 @@ currently hardwired.  Some pictures and tables are available on
 
 =head1 SEE ALSO
 
-The keyboard(s) generated with this module: L<http://k.ilyaz.org/>
+The keyboard(s) generated with this module: L<UI::KeyboardLayout::izKeys>, L<http://k.ilyaz.org/>
 
 On diacritics:
 
@@ -954,12 +1055,19 @@ Problems on X11:
   EIGHT_LEVEL FOUR_LEVEL_ALPHABETIC FOUR_LEVEL_SEMIALPHABETIC PC_SYSRQ : see
   http://cafbit.com/resource/mackeyboard/mackeyboard.xkb
 
-  ./xkb in /etc/X11 /usr/local/X11 /usr/share/local/X11 but what dead_diaresis means is defined here:
+  ./xkb in /etc/X11 /usr/local/X11 /usr/share/local/X11 /usr/share/X11
+    (maybe it is more productive to try
+      ls -d /*/*/xkb  /*/*/*/xkb
+     ?)
+  but what dead_diaresis means is defined here:
      Apparently, may be in /usr/X11R6/lib/X11/locale/en_US.UTF-8/Compose /usr/share/X11/locale/en_US.UTF-8/Compose
   http://wiki.maemo.org/Remapping_keyboard
   http://www.x.org/releases/current/doc/man/man8/mkcomposecache.8.xhtml
   
 B<Note:> have XIM input method in GTK disables Control-Shift-u way of entering HEX unicode.
+
+    How to contribute:
+  http://www.freedesktop.org/wiki/Software/XKeyboardConfig/Rules
 
 B<Note:> the problems with handling deadkeys via .Compose are that: .Compose is handled by
 applications, while keymaps by server (since they may be on different machines, things can
@@ -1489,7 +1597,7 @@ Long s and "preceded by" are not handled since the table has its own (useless) c
 ┏┳┓
 ┣╋┫
 ┗┻┛
-    On top of the light grid:
+    On top of a light-lines grid (3×2, 2×3, 2×2; H, V, V+H):
 ┲┱
 ╊╉
 ┺┹
@@ -1521,7 +1629,15 @@ Long s and "preceded by" are not handled since the table has its own (useless) c
 ◟▽◞
 ◕◓◔
 ◐○◑
- ◒
+ ◒ 
+▗▄▖
+▐█▌
+▝▀▘
+▛▀▜
+▌ ▐
+▙▄▟
+
+░▒▓
 
 
 =head1 WINDOWS GOTCHAS
@@ -1542,12 +1658,13 @@ this character starts a "chained sequence".
 
 On the other hand, the behaviour of chained keys is governed I<ONLY> by Unicode
 characters they generate: if there are several physical keypresses generating
-the same Unicode characters, these keypresses are completely interchangeable.
-(The only restriction is that the first keypress should be marked as "prefix
-key"; there may be two keys producing B<'> so that one is producing a "real
-tick", and another is producing a "prefix" B<'>.)
+the same Unicode characters, these keypresses are completely interchangeable
+inside a chained sequence.  (The only restriction is that the first keypress
+should be marked as "prefix key"; for example, there may be two keys producing
+B<-> so that one is producing a "real dash sign", and another is producing a
+"prefix" B<->.)
 
-The table allows: map C<ScanCode>s to C<VK_key>s; associate a C<VK_key> to several
+The table allows: to map C<ScanCode>s to C<VK_key>s; to associate a C<VK_key> to several
 (numbered) choices of characters to output, and mark some of these choices as prefixes
 (deadkeys).  (These "base" choices may contain up to 4 16-bit characters (with 32-bit
 characters mapped to 2 16-bit surrogates); but only those with 1 16-bit character may
@@ -2425,6 +2542,16 @@ sub print_codepoint ($$;$) {
   printf "%s%s\t<%s>\t%s\n", $prefix, $self->key2hex($k), $K, $self->UName($k, 'verbose');  
 }
 
+sub require_unidata_age ($) {
+  my $self = shift;
+  my $f = $self->get_NamesList;
+  $self->load_compositions($f) if defined $f;
+    
+  $f = $self->get_AgeList;
+  $self->load_uniage($f) if defined $f and not $self->{Age};
+  $self;
+}
+
 sub print_coverage_string ($$) {
   my ($self, $s, %seen) = (shift, shift);
   $seen{$_}++ for split //, $s;
@@ -2491,7 +2618,8 @@ sub print_coverage ($$) {
   for my $r ([0x2200, 0x40], [0x2240, 0x40], [0x2280, 0x40], [0x22c0, 0x40], 
   	     [0x27c0, 0x30], [0x2980, 0x40], [0x29c0, 0x40], 
              [0x2a00, 0x40], [0x2a40, 0x40], [0x2a80, 0x40], [0x2ac0, 0x40], [0xa720, 0x80-0x20], [0xa780, 0x80] ) {
-    my $C = join '', grep !$self->{faces}{$F}{'[coverage_hash]'}{$_}, map chr($_), $r->[0]..($r->[0]+$r->[1]-1);
+    my $C = join '', grep { (0xa720 >= ord $_ or $self->{UNames}{$_}) and !$self->{faces}{$F}{'[coverage_hash]'}{$_} } 
+    			  map chr($_), $r->[0]..($r->[0]+$r->[1]-1);	# before a720, the tables are filled up...
     ${ $r->[0] < 0xa720 ? \$CC : \$CC1 } += length $C;
     $OUT .= "-==-\t$C\n";
   }
@@ -2526,6 +2654,7 @@ sub print_table_coverage ($$;$) {
   span.operator		{ background-color: pink; }
   span.relation		{ background-color: lightsalmon; }
   span.ipa		{ background-color: greenyellow; }
+  span.nAry		{ background-color: lightgreen; }
   span.paleo		{ background-color: Khaki; }
   span.viet		{ background-color: Gainsboro; }
   span.doubleaccent	{ background-color: Bisque; }
@@ -2625,6 +2754,8 @@ EOP
   }
   print "  <thead><tr class=headerRow title='Prefix key (or key sequence) accessing this column; in the table below, ☠ is put before the corresponding keypresses'>$header</tr></thead>\n  <tbody>\n"
     if $html;
+  my %special = qw( \r Enter \n Control-Enter \b BackSpace \x7f Control-Backspace \t Tab 
+  		    \x1b Control-[ \x1c Control-] \x1d Control-\ \x03 Control-Break );
   for my $n ( 0 .. $#{ $LL[0] } ) {
     my $out = '';
     my @baseK;
@@ -2667,7 +2798,9 @@ EOP
 	    undef $type 
 	  } elsif ($fill) {
 	    $type = 'ZW';
-	  } elsif ($c =~ /\b(OPERATOR|SIGN|SYMBOL|PROOF|EXISTS|FOR\s+ALL|(N-ARY|DIVISION)\b.*)\s+\[/) {
+	  } elsif ($c =~ /(\bN-ARY|"\w+\s+(?:BIG|LARGE))\b.*\s+\[/) {	# "0134	BIG GUY#"
+	    $type = 'nAry';
+	  } elsif ($c =~ /\b(OPERATOR|SIGN|SYMBOL|PROOF|EXISTS|FOR\s+ALL|(DIVISION|LOGICAL)\b.*)\s+\[/) {
 	    $type = 'operator';
 	  } elsif ($c =~ /\b(RELATION|PERPENDICULAR|PARALLEL\s*TO|DIVIDES|FRACTION\s+SLASH)\s+\[/) { 
 	    $type = 'relation';
@@ -2683,7 +2816,8 @@ EOP
 	  }
 	  $c = "<span class=$type>$c</span>" if $html and $type;
           $c = "$pre$c";
-          $c =~ s/([\x00-\x1F\x7F])/$self->control2prt("$1")/ge;
+          $c =~ s{([\x00-\x1F\x7F])}{ my $C = $self->control2prt("$1"); my $S = $special{$C};
+          			      $C = "<span class=yyy title='$S'>$C</span>" if $html and $S; $C }ge;
           $o .= $c;
         }
       }
@@ -2701,13 +2835,14 @@ EOP
 @extra<p>Highlights (homographs and special needs): zero-width or SOFT HYPHEN: <span class=ZW><span class=l title="ANY ZEROWIDTH CHAR"><span class=lFILL></span></span></span>, whitespace: <span class=WS><span class=l title="ANY SPACE CHAR"> <span class=lFILL></span></span></span>, <span class=viet>Vietnamese</span>; <span class=doubleaccent>other double-accent</span>; <span class=paleo>paleo-Latin</span>; 
 or <span class=ipa>IPA</span>.
 Or name having <span class=relation>RELATION, PERPENDICULAR,
-PARALLEL, DIVIDES, FRACTION SLASH</span>; or <span class=operator>OPERATOR, SIGN, SYMBOL, PROOF, EXISTS, FOR ALL, N-ARY, DIVISION</span>.
+PARALLEL, DIVIDES, FRACTION SLASH</span>; or <span class=nAry>BIG, LARGE, N-ARY</span>; or <span class=operator>OPERATOR, SIGN, 
+SYMBOL, PROOF, EXISTS, FOR ALL, DIVISION, LOGICAL</span>.
 (Some browsers fail to show highlights for whitespace/zero-width.)
 <p>Vertical lines separate: the column of the base face, paired 
 prefix keys with "inverted bindings", and explicitly selected multi-key prefixes.  Horizontal lines separate key rows of
-the keyboard (including a fake row with the "left extra key" [one with &lt;&gt; or \| - it is missing on many keyboards]
+the keyboard (including a fake row with the "left extra key" [one with &lt;&gt; or \\| - it is missing on many keyboards]
 and the KP_Decimal key [often marked as . Del on numeric keypad]); the last group is for semi-fake keys for
-Enter/C-Enter/Tab/Backspace/C-Backspace and C-[/]/\ (make sense after prefix keys) and special keys explicitly added
+Enter/C-Enter/Tab/Backspace/C-Backspace and C-[/]/\\/Break (make sense after prefix keys) and special keys explicitly added
 in .kbdd files (usually SPACE).
 <p>Hover mouse over specific elements to get more information.
 </body>
@@ -3705,7 +3840,9 @@ warn("caching dia: [@_]") if warnCACHECOMP;
   }
   for my $c (keys %seen) {
     next if $caseseen{$c};
-    my @case = grep { $_ ne $c and $seen{$_} } lc $c, uc $c or next;
+    # uc may include a wrong guy: uc(ſ) is S, and this may break the pair s/S if ſ comes before s, and S gets a separate binding;
+    # so be very conservative with which case pair we include...
+    my @case = grep { $_ ne $c and $seen{$_} and lc $_ eq lc $c } lc $c, uc $c or next;
     push @case, $c;
     $caseseen{$_} = \@case, delete $seen{$_} for @case;
   }				# Currently (?), downstream does not distinguish case pairs from Shift-pairs...
@@ -3749,6 +3886,7 @@ sub dia2list ($$) {
     (my $dia_raw = $dia) =~ s/^-//;
     $cached = $cached_aggregate_Compositions{$dia_raw} and return map "$neg$_", @$cached;
 
+    @except = map { s/^(?=\w)/\\b/; s/(?<=\w)$/\\b/; $_} @except;
     $except = join('|', @except[1..$#except]), $except = qr($except) if @except;
 #warn "Exceptions: $except" if @except;
     $rx =~ s/-/\\b\\W+\\b/g;
@@ -3763,7 +3901,7 @@ sub dia2list ($$) {
     @out = grep length($match) != length, @out if $other;
     @out = grep !/\bAND\s/, @out if $one;
     @out = reverse @out if $rev;				# xor $reverse;
-    if (!dontCOMPOSE_CACHE and @out > 1 and not $neg) {				# Optional caching; will modify composition tables
+    if (!dontCOMPOSE_CACHE and @out > 1 and not $neg) {		# Optional caching; will modify composition tables
       my @cached = $self->cache_dialist(@out);			#     but not decomposition ones, hence `not $neg'
       @out = map "Cached$_=$dia_raw", 0..$#cached;
       $self->{Compositions}{$out[$_]} = $cached[$_] for 0..$#cached;
@@ -4003,7 +4141,7 @@ print 'From Layers  <', join('> <', map {defined() ? $_ : 'undef'} @$ll), ">\n" 
         }
 print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, $slots[0]), ">\n" if printSORTEDLISTS;
 print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, @slots[1..$#slots]), "> deadKey=$deadkey\n" if printSORTEDLISTS;
-        my $appended = $self->append_keys($sorted2, \@slots, \@LL, 'prepend');
+        my $appended = $self->append_keys($sorted3 || $sorted2, \@slots, \@LL, !$sorted3 && 'prepend');
 Dumpvalue->new()->dumpValue(["Key $base; II", $sorted2]) if printSORTEDLISTS;
 	if (warnSORTEDLISTS) {
           $LLL =~ s/^[ |]+//;
@@ -4758,39 +4896,41 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
                      π ⲡ Π Ⲡ ρ ⲣ Ρ Ⲣ σ ⲥ Σ Ⲥ τ ⲧ Τ Ⲧ υ ⲩ Υ Ⲩ φ ⲫ Φ Ⲫ χ ⲭ Χ Ⲭ ψ ⲯ Ψ Ⲯ ω ⲱ Ω Ⲱ  )],
 		  latin2extracoptic => [qw( - ⸗
                      s ϣ S Ϣ f ϥ F Ϥ x ϧ X Ϧ h ϩ H Ϩ j ϫ J Ϫ t ϯ T Ϯ p ⳁ P Ⳁ a ⳉ A Ⳉ )],
-		  addline    => [qw( 0 ∅  + ∦  ∫ ⨏  • ⊝  / ⫽  ⫽ ⫻)],
-		  addhline   => [qw( = ≡  ≡ ≣  † ‡  + ∦  / ∠  | ∟  . ∸  ∨ ⊻  ∧ ⊼  ◁ ⩤  ≟ ≜  * ⩮
+		  addline    => [qw( 0 ∅  ∅ ⦱  + ∦  ∫ ⨏  • ⊝  / ⫽  ⫽ ⫻  ∮ ⨔  × ⨳  × ⩐ )],	#   ∮ ⨔ a cheat
+		  addhline   => [qw( = ≣  = ≡  ≡ ≣  † ‡  + ∦  / ∠  | ∟  . ∸  ∨ ⊻  ∧ ⊼  ◁ ⩤  * ⩮
 		  		     ⊨ ⫢  ⊦ ⊧  ⊤ ⫧  ⊥ ⫨  ⊣ ⫤  ⊳ ⩥  ⊲ ⩤  ⋄ ⟠  ∫ ⨍  ⨍ ⨎  • ⦵
-		  		     ∪ ⩌  ∩ ⩍  ≃ ≅ )],	# conflict with modifiers: qw( _ ‗ ); ( ∈  ) ∋ not useful with ∈∋ as greenkeys...
+		  		     ∪ ⩌  ∩ ⩍  ≃ ≅  ⨯ ⨲ )],	# conflict with modifiers: qw( _ ‗ ); ( ∈  ) ∋ not useful with ∈∋ as greenkeys...
 		  addvline   => [qw( ⊢ ⊩  ⊣ ⫣  ⊤ ⫪  ⊥ ⫫  □ ⎅  | ‖  ‖ ⦀  ∫ ⨒  ≢ ⩨  ⩨ ⩩  • ⦶  
-		  		     \ ⫮  ° ⫯  . ⫰  ⫲ ⫵  ∞ ⧞  = ⧧  ⧺ ⧻  + ⧺  ∩ ⨙  ∪ ⨚ )],		#  + ⫲ 
-		  addtilde   => [qw( 0 ∝  / ∡  \ ∢  ∫ ∱  ∮ ⨑  : ∻  - ≂  ≠ ≆  ~ ≈  ∼ ≈  ≃ ≊  ≈ ≋  = ≌  
+		  		     \ ⫮  ° ⫯  . ⫰  ⫲ ⫵  ∞ ⧞  = ⧧  ⧺ ⧻  + ⧺  ∩ ⨙  ∪ ⨚  0 ⦽ )],		#  + ⫲ 
+		  addtilde   => [qw( 0 ∝  / ∡  \ ∢  ∫ ∱  ∮ ⨑  : ∻  - ≂  ≠ ≆  ~ ≋  ~ ≈  ∼ ≈  ≃ ≊  ≈ ≋  = ≌  
 		  		     ≐ ≏  ( ⟅  ) ⟆  ∧ ⩄  ∨ ⩅  ∩ ⩆  ∪ ⩇  )],	# not on 2A**
 		  adddot     => [qw( : ⫶  " ∵  ∫ ⨓  ∮ ⨕  □ ⊡  ◇ ⟐  ( ⦑  ) ⦒  ≟ ≗  ≐ ≑)],	# ⫶ is tricolon, not vert. …   "
 		  adddottop  => [qw( + ∔ )],
-		  addleft    => [qw( = ≔  × ⨴  × ⋉  \ ⋋  + ⨭  → ⧴  ∫ ⨗  ∮ ∳  ⊂ ⟈  ⊃ ⫐  ⊳ ⧐  ⊢ ⊩  ⊩ ⊪  ⊣ ⟞  
-		  		     ◇ ⟢  ▽ ⧨  ≡ ⫢  • ⥀  ∅ ⦴  ⋈ ⧑  ≟ ⩻  ≐ ≓  | ⩘  ≔ ⩴  ⊲ ⫷)],	#  × ⨴ is hidden
+		  addleft    => [qw( = ≔  × ⨴  × ⋉  \ ⋋  + ⨭  → ⧴  ∫ ⨐  ∫ ⨗  ∮ ∳  ⊂ ⟈  ⊃ ⫐  ⊳ ⧐  ⊢ ⊩  ⊩ ⊪  ⊣ ⟞  
+		  		     ◇ ⟢  ▽ ⧨  ≡ ⫢  • ⥀  ⋈ ⧑  ≟ ⩻  ≐ ≓  | ⩘  ≔ ⩴  ⊲ ⫷)],	#  × ⨴ is hidden
 		  addright   => [qw( = ≕  × ⨵  × ⋊  / ⋌  + ⨮  - ∹  ∫ ⨔  ∮ ∲  ⊂ ⫏  ⊃ ⟉  ⊲ ⧏  ⊢ ⟝  ⊣ ⫣  
-		  		     ◇ ⟣  △ ⧩  • ⥁  ∅ ⦳  ⋈ ⧒  ≟ ⩼  ≐ ≒  | ⩗  ⊳ ⫸ )],	#  × ⨵ is hidden
+		  		     ◇ ⟣  △ ⧩  • ⥁  ⋈ ⧒  ≟ ⩼  ≐ ≒  | ⩗  ⊳ ⫸  : ⧴)],	#  × ⨵ is hidden
 		  sharpen    => [qw( < ≺  > ≻  { ⊰  } ⊱  ( ⟨  ) ⟩  ∧ ⋏  ∨ ⋎  . ⋄  ⟨ ⧼  ⟩ ⧽  ∫ ⨘  
-		  		     ⊤ ⩚  ⊥ ⩛  ◇ ⟡  ▽ ⧍  • ⏣  ≟ ≙)],	# ⋆
-		  unsharpen  => [qw( < ⊏  > ⊐  ( ⟮  ) ⟯  ∩ ⊓  ∪ ⊔  ∧ ⊓  ∨ ⊔  . ∷  ∫ ⨒  ∮ ⨖
+		  		     ⊤ ⩚  ⊥ ⩛  ◇ ⟡  ▽ ⧍  • ⏣  ≟ ≙  + ⧾  - ⧿)],	# ⋆
+		  unsharpen  => [qw( < ⊏  > ⊐  ( ⟮  ) ⟯  ∩ ⊓  ∪ ⊔  ∧ ⊓  ∨ ⊔  . ∷  ∫ ⨒  ∮ ⨖  { ⦉  } ⦊
 		  		     / ⧄  \ ⧅  ° ⧇  ◇ ⌺  • ⌼  ≟ ≚  ≐ ∺  ( 〘  ) 〙  )],	#   + ⊞  - ⊟  * ⊠  . ⊡  × ⊠,   ( ⦗  ) ⦘  ( 〔  ) 〕
 		  whiten     => [qw( [ ⟦  ] ⟧  ( ⟬  ) ⟭  { ⦃  } ⦄  ⊤ ⫪  ⊥ ⫫  ; ⨟  ⊢ ⊫  ⊣ ⫥  ⊔ ⩏  ⊓ ⩎  ∧ ⩓  ∨ ⩔
-		  		     : ⦂  | ⫾  | ⫿  • ○  < ⪡  > ⪢)],	# or blacken □ ■  ◻ ◼  ◽ ◾  ◇ ◆  △ ▲  ▵ ▴  ▽ ▼  ▿ ▾
+		  		     : ⦂  | ⫾  | ⫿  • ○  < ⪡  > ⪢  ⊓ ⩎  ⊔ ⩏  )],	# or blacken □ ■  ◻ ◼  ◽ ◾  ◇ ◆  △ ▲  ▵ ▴  ▽ ▼  ▿ ▾
 		  quasisynon => [qw( ∈ ∊  ∋ ∍  ≠ ≶  ≠ ≷  = ≸  = ≹  ≼ ⊁  ≽ ⊀  ≺ ⋡  ≻ ⋠  < ≨  > ≩  Δ ∆
-		  		     ≤ ⪕  ≥ ⪖  ⊆ ⊅  ⊇ ⊄  ⊂ ⊉  ⊃ ⊈  ⊏ ⋣  ⊐ ⋢  ⊳ ⋬  ⊲ ⋭  … ⋯  * ⋆  ( ⦇  ) ⦈
-		  		     ⊤ ⫟  ⊥ ⫠  ⟂ ⫛  □ ∎  ▽ ∀  ‖ ∥  ≟ ≞  ~ ‿  ~ ⁀  ■ ▬ )],	# ( ⟬  ) ⟭ < ≱  > ≰ ≤ ≯  ≥ ≮ 
+		  		     ≤ ⪕  ≥ ⪖  ⊆ ⊅  ⊇ ⊄  ⊂ ⊉  ⊃ ⊈  ⊏ ⋣  ⊐ ⋢  ⊳ ⋬  ⊲ ⋭  … ⋯  / ⟋  \ ⟍
+		  		     ( ⦇  ) ⦈  [ ⨽  ] ⨼
+		  		     ⊤ ⫟  ⊥ ⫠  ⟂ ⫛  □ ∎  ▽ ∀  ‖ ∥  ≟ ≞  ≟ ≜  ~ ‿  ~ ⁀  ■ ▬ )],	# ( ⟬  ) ⟭ < ≱  > ≰ ≤ ≯  ≥ ≮  * ⋆
 		  amplify    => [qw( < ≪  > ≫  ≪ ⋘  ≫ ⋙  ∩ ⋒  ∪ ⋓  ⊂ ⋐  ⊃ ⋑  ( ⟪  ) ⟫  ∼ ∿  = ≝  ∣ ∥  . ⋮  
-		  		     0 ∅  ∈ ∊  ∋ ∍  - −  / ∕  \ ∖  √ ∛  ∛ ∜  ∫ ∬  ∬ ∭  ∭ ⨌  ∮ ∯  ∯ ∰  : ⦂
+		  		     ∈ ∊  ∋ ∍  - −  / ∕  \ ∖  √ ∛  ∛ ∜  ∫ ∬  ∬ ∭  ∭ ⨌  ∮ ∯  ∯ ∰  : ⦂
 		  		     : ∶  ≈ ≋  ≏ ≎  ≡ ≣  × ⨯  + ∑  Π ∏  Σ ∑  ρ ∐  ∐ ⨿  ⊥ ⟘  ⊤ ⟙  ⟂ ⫡  ; ⨾  □ ⧈  ◇ ◈
 		  		     ⊲ ⨞  ⊢ ⊦  △ ⟁  ∥ ⫴  ⫴ ⫼  / ⫽  ⫽ ⫻  • ●  ⊔ ⩏  ⊓ ⩎  ∧ ⩕  ∨ ⩖  ▷ ⊳  ◁ ⊲
-		  		     ⋉ ⧔  ⋊ ⧕  ⋈ ⧓  ⪡ ⫷  ⪢ ⫸  ≟ ≛  ≐ ≎  ⊳ ⫐  ⊲ ⫏  { ❴  } ❵ )],	#   ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden; ∥ ⫴; × ⋈ not needed; ∰ ⨌ - ???; ≃ ≌ not useful
+		  		     ⋉ ⧔  ⋊ ⧕  ⋈ ⧓  ⪡ ⫷  ⪢ ⫸  ≟ ≛  ≐ ≎  ⊳ ⫐  ⊲ ⫏  { ❴  } ❵  × ⨶  )],	#   ⋆ ☆  ⋆ ★ ;  ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden; ∥ ⫴; × ⋈ not needed; ∰ ⨌ - ???; ≃ ≌ not useful
 		  turnaround => [qw( ∧ ∨  ∩ ∪  ∕ ∖  ⋏ ⋎  ∼ ≀  ⋯ ⋮  … ⋮  ⋰ ⋱  
 		  		     8 ∞  ∆ ∇  Α ∀  Ε ∃  ∴ ∵  ≃ ≂
 		  		     ∈ ∋  ∉ ∌  ∊ ∍  ∏ ∐  ± ∓  ⊓ ⊔  ≶ ≷  ≸ ≹  ⋀ ⋁  ⋂ ⋃  ⋉ ⋊  ⋋ ⋌  ⋚ ⋛  ≤ ⋜  ≥ ⋝  ≼ ⋞  ≽ ⋟  )],			# XXXX Can't do both directions
-		  round      => [qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸  □ ▢  ∥ ≬  ‖ ≬
-		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  ⊤ ⫙  ⊥ ⟒  ( ⦅  ) ⦆  ⊳ ⪧  ⊲ ⪦  ≟ ≘  ≐ ≖)]);	#   = ≖  = ≗ hidden = ≈
+		  round      => [qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸  □ ▢  ∥ ≬  ‖ ≬  • ⦁
+		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  ⊤ ⫙  ⊥ ⟒  ( ⦖  ) ⦕  ( ⦓  ) ⦔  ( ⦅  ) ⦆  ⊳ ⪧  ⊲ ⪦  ≟ ≘  ≐ ≖  . ∘
+		  		     [ ⟬  ] ⟭  { ⧼  } ⧽  % ⦼  % ‰  × ⦻  ⨯ ⨷  )]);	#   = ≖  = ≗ hidden = ≈
 
 sub parse_NameList ($$) {
   my ($self, $f, $k, $kk, $name, %basic, %cached_full, %compose, 
@@ -4820,7 +4960,7 @@ sub parse_NameList ($$) {
         if ($name =~ /^(.*)\s+(?=OR\s)(.*?)\s*$/) {	# Find the latest possible...
           push @{$candidates{$k}}, [$1, $2];
         }
-        if (($t = $name) =~ s/\b(COMBINING(?=\s+CYRILLIC\s+LETTER)|BARRED|SLANTED|APPROXIMATELY|ASYMPTOTICALLY|(?<!\bLETTER\s)SMALL(?!\s+LETTER\b)|ALMOST|^SQUARED|LUNATE|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|SCRIPT|LONG|MATHEMATICAL|AFRICAN|INSULAR|VISIGOTHIC|MIDDLE-WELSH|BROKEN|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED|DOTLESS|FINAL)\s+|\s+(BAR|SYMBOL|OPERATOR|SIGN|ROTUNDA|IN\s+TRIANGLE)$//) {
+        if (($t = $name) =~ s/\b(COMBINING(?=\s+CYRILLIC\s+LETTER)|BARRED|SLANTED|APPROXIMATELY|ASYMPTOTICALLY|(?<!\bLETTER\s)SMALL(?!\s+LETTER\b)|ALMOST|^(?:SQUARED|BIG|N-ARY|LARGE)|LUNATE|SIDEWAYS(?:\s+(?:DIAERESIZED|OPEN))?|INVERTED|ARCHAIC|SCRIPT|LONG|MATHEMATICAL|AFRICAN|INSULAR|VISIGOTHIC|MIDDLE-WELSH|BROKEN|TURNED(?:\s+(?:INSULAR|SANS-SERIF))?|REVERSED|OPEN|CLOSED|DOTLESS|TAILLESS|FINAL)\s+|\s+(BAR|SYMBOL|OPERATOR|SIGN|ROTUNDA|LONGA|IN\s+TRIANGLE)$//) {
           push @{$candidates{$k}}, [$t, "calculated-$+"];
           $candidates{$k}[-1][1] .= '-epigraphic'   if $t =~ /\bEPIGRAPHIC\b/;	# will be massaged away from $t later
           $candidates{$k}[-1][0] =~ s/\s+SYMBOL$// and $candidates{$k}[-1][1] .= '-symbol' 
@@ -4835,7 +4975,10 @@ sub parse_NameList ($$) {
         if (($t = $name) =~ s/\bBLACK\b/WHITE/) {
           push @{$candidates{$k}}, [$t, "fake-black"];
         }
-        if (($t = $name) =~ s/(^LATIN\b.*\b\w)UM$/$1/) {	# Paleo-latin
+        if (($t = $name) =~ s/\bBUT\s+NOT\b/OR/) {
+          push @{$candidates{$k}}, [$t, "fake-but-not"];
+        }
+        if (($t = $name) =~ s/(^LATIN\b.*\b\w)UM((?:\s+ROTUNDA)?)$/$1$2/) {	# Paleo-latin
           push @{$candidates{$k}}, [$t, "fake-umify"];
         }
         if ((0xa7 == ((hex $k)>>8)) and ($t = $name) =~ s/\b(\w|CO|VEN)(?!\1)(\w)$/$2/) {	# Paleo-latin (CON/VEND + digraph)
@@ -4941,6 +5084,11 @@ sub parse_NameList ($$) {
     push @{$candidates{$L}}, [$lat,  "faked-greekize$add"];
 #warn "latinize++: $L\t$l;\t`$add'\t$lat";
   }
+  my %iu_TR = qw(INTERSECTION CAP UNION CUP);
+  my %_TR   = map { (my $in = $_) =~ s/_/ /g; $in } qw(SMALL_VEE		LOGICAL_OR   
+  						       UNION_OPERATOR_WITH_DOT	MULTISET_MULTIPLICATION
+  						       UNION_OPERATOR_WITH_PLUS	MULTISET_UNION);
+  my $_TR_rx = map qr/$_/, join '|', keys %_TR;
   for my $c (keys %candidates) {		# Done after all the names are known
    my ($CAND, $app, $t, $base, $b) = ($candidates{$c}, '');
    for my $Cand (@$CAND) {	# (all keys in hex)
@@ -4972,7 +5120,9 @@ sub parse_NameList ($$) {
       $b =~ s/^CYRILLIC\b(?!\s+(?:CAPITAL|SMALL)\s+LETTER)(?=\s+LETTER\b)/CYRILLIC SMALL/ unless $N{$b};
       $b =~ s/\bEQUAL\s+TO\s+SIGN\b/EQUALS SIGN/ unless $N{$b};
       $b =~ s/\bMINUS\b/HYPHEN-MINUS/ unless $N{$b};
+      $b =~ s/\b(SQUARE\s+)(INTERSECTION|UNION)(?:\s+OPERATOR)?\b/$1$iu_TR{$2}/ unless $N{$b};
       $b =~ s/(?<=WARDS)$/ ARROW/ unless $N{$b};	# APL VANE
+      $b =~ s/\b($_TR_rx)\b/$_TR{$1}/ unless $N{$b};
 #      $b =~ s/\bDOT\b/FULL STOP/ unless $N{$b};
 #      $b =~ s/^MICRO$/GREEK SMALL LETTER MU/ unless $N{$b};
 
@@ -5424,13 +5574,14 @@ sub append_keys ($$$$;$) {	# $k is [[lc,uc], ...]; modifies $C in place
     my $paired = (@$k == 2 and defined $k->[0] and defined $k->[1] and $k->[0] ne $k->[1] and $k->[0] eq lc $k->[1]);
     my @need_special = map { $LL and $L and defined $k->[$_] and defined $LL->[$L][$_] and 0 == $LL->[$L][$_]} 0..$#$k;
     if (my $special = grep $_, @need_special) {	# count
-       push(@{ $KKK[$paired][0] }, $k), next if $special == grep defined, @$k;
+       ($prepend ? push(@{ $KKK[$paired][0] }, $k) : unshift(@{ $KKK[$paired][0] }, $k)), 
+         next if $special == grep defined, @$k;
        $paired = 0;
        my $to_level0 = [map { $need_special[$_] ? $k->[$_] : undef} 0..$#$k];
        $k            = [map {!$need_special[$_] ? $k->[$_] : undef} 0..$#$k];
-       push @{ $KKK[$paired][0] }, $to_level0;
+       $prepend ? push @{ $KKK[$paired][0] }, $to_level0 : unshift @{ $KKK[$paired][0] }, $to_level0;
     }
-    push @{ $KKK[$paired][$L] }, $k;	# 0: layer has only one slot
+    $prepend ? push @{ $KKK[$paired][$L] }, $k : unshift @{ $KKK[$paired][$L] }, $k;	# 0: layer has only one slot
   }
 #print "cnt=$cnt\n";
   return unless $cnt;

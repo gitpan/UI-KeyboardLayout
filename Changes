@@ -17,7 +17,7 @@
 Currently achieved (ranges as of Unicode v6.1):
 *) One gotcha (with Shift-SPACE) comparing to US and Russian Phonetic keyboards;
 *) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1 (except for arrows);
-*) Full coverage of Greek ranges (polytonic and esoteric characters need double prefix keys);
+*) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys);
 *) 97% coverage of Cyrillic ranges (except for: lc/uc pairs for ԕԡԣꙣꙥꚁ;
      from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double prefix keys);
 *) Full coverage of currency symbols;
@@ -46,7 +46,7 @@ Not yet implemented, or lost by upgrades to other goals:
 *) reasonable coverage of arrows;
 *) reasonable coverage of ASCII/Unicode drawing characters;
 *) Full coverage of non-Eastern characters covered by Neo keyboard, and X11+Neo composition tables;
-*) Full coverage of MES-2 (currently 7 arrows + 9 "5-bit C0 dingbats of cp437" + ⌠⌡ + 48 box drawing symbols missing);
+*) Full coverage of MES-2 (currently 7 arrows + ⌠⌡ + 48 box drawing symbols missing);
 *) Easy-to-describe quick access to Vietnamese characters (seems to be present - needs documentation).
 
 Possible roadmaps:
@@ -54,7 +54,7 @@ Possible roadmaps:
 *) What about other scripts with "small repertoir" of characters (such as arabic with 62 access points on the M$ keyboard;
    indic)?
 
-=========== Revision history for Perl extension UI::KeyboardLayout.
+=========== Revision history for Perl module UI::KeyboardLayout.
 
 0.01  Mon Jan  9 23:45:23 2012
 	- original version; created by h2xs 1.23 with options
@@ -710,3 +710,32 @@ Possible roadmaps:
       Over ¨-accent ` again collapses to horn (but ¨ evaporates, so
       one gets a pure horn).
 	      
+0.10	Update uc/lc maps.
+	When determining case pairs for merge of diacritics (during caching), be most conservative:
+	   ($c,uc $c) form a pair only if $c eq lc uc $c (only applicable to ſ/S).
+	Add UGL character repertoir (from http://www.borgendale.com/codepage/os2ugl.htm) and all-greekish
+	   from perl -wC31 UI-KeyboardLayout\examples\grep_nameslist.pl "\b(ALPHA|BETA|GAMMA|DELTA|EPSILON|ZETA|ETA|THETA|IOTA|KAPPA|LAMDA|MU|NU|XI|OMICRON|PI|RHO|SIGMA|TAU|UPSILON|PHI|CHI|PSI|OMEGA)\b" ~/Downloads/NamesList.txt >out-greek.
+	Add DESCRIPTION POD section.
+	New pseudo-fake-mutator but-not.
+	Add popup on control-chars in HTML output.
+	The duplicated overflow from the first key on a second key in a pair has lower precedence than $map3.
+	
+	izKeys.kbdd:	Update VERSION to 0.03
+		Put playing cards suits of cp437 to p/P on AltGr-" ("reds" on AltGr) (but ℙ obscures one).
+		Add a few dingbats at start of cp437 to Shift-Numbers (and _, AltGr- -/_) of Coptic
+		  (3 of 4 card suits not accessible from CyrillicPhonetic).
+		Add "lean CR" and Undo images to Greek Enter/Backspace.
+		Add ƺʓ to j on Business; ɿ to AltGr-"; stroked paleo-contraction.
+		Move Greek ϲ/Ϲ from l to v, and Heta ͱ/Ͱ from i/I to 1/! (on Coptic).
+		Add stroke+latinize (including manual ƛ) to Coptic.
+		  (Of embellished Latin letters of MES-3b, only digraphs and ^¯°¨-below and half-ring are not present now.)
+		AltGr-j to ℩ on cedilla.
+		Micro-optimize so that all non-modifier Paleo-latins now at least compete...
+		Micro-optimize more Greek stuff not from Greek ranges 
+		  (this finishes all Greek except modifier/combining/subscript/double-struck)
+		Micro-optimize ⧔, and make back ∘ (removed by removal of ó∘ greek key).
+		Micro-optimize math; now more than 60% of math ranges is covered...
+		Exchange ҽҼҿҾ.
+		Rename deadkey ˮ to ˵.
+		Add Zodiak to Shifted digit-row on ~-Greek.
+		Greek numerals: move left and right keraya to [ 3 and ] 3 (with # having the opposite binding).

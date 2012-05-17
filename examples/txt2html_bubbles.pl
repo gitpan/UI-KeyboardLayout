@@ -4,9 +4,11 @@ use strict;
 
 #open my $f, '<', 
 my $d = "$ENV{HOME}/Downloads";
-my $f = "$ENV{HOME}/Downloads/NamesList-6.1.0d8.txt";		# or die;
--e "$d/NamesList-6.1.0d8.txt" or $d = '/cygdrive/c/Users/ilya/Downloads';
-my $k = UI::KeyboardLayout::->new()->load_unidata("$d/NamesList-6.1.0d8.txt", "$d/DerivedAge-6.1.0d13.txt");
+my $f = 'NamesList.txt';		# or die;
+-e "$d/$f" or $ENV{HOMEDRIVE} and $ENV{HOMEPATH} and $d = '$ENV{HOMEDRIVE}$ENV{HOMEPATH}';
+-e "$d/$f" or $d = '/cygdrive/c/Users/ilya/Downloads';
+UI::KeyboardLayout::->set_NamesList("$d/$f", "$d/DerivedAge.txt"); 
+my $k = UI::KeyboardLayout::->new()->require_unidata_age;	# ->load_unidata("$d/$f", "$d/DerivedAge.txt");
 
 print <<EOP;
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/></head><body><table>
