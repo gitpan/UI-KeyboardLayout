@@ -1,7 +1,12 @@
-use UI::KeyboardLayout; 
+use UI::KeyboardLayout;
 use strict;
-UI::KeyboardLayout::->set_NamesList(q(C:\Users\ilya\Downloads\NamesList.txt), 
-				    q(C:\Users\ilya\Downloads\DerivedAge.txt)); 
+my $home = $ENV{HOME} || '';
+$home = "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" if $ENV{HOMEDRIVE} and $ENV{HOMEPATH};
+UI::KeyboardLayout::->set_NamesList(qq($home/Downloads/NamesList.txt),
+				    qq($home/Downloads/DerivedAge.txt))
+  if -r qq($home/Downloads/NamesList.txt)
+  and -r qq($home/Downloads/DerivedAge.txt);
+die "Usage: $0 KBDD_FILE\n" unless @ARGV == 1;
 my $l = UI::KeyboardLayout::->new_from_configfile(shift);
 
 open my $kbdd, '>', 'ooo-us' or die;
@@ -18,6 +23,6 @@ close $kbdd1 or die;
 
 select STDOUT;
 open STDOUT, q(>), q(coverage-1prefix-Latin.html); 
-$l->print_table_coverage(q(Latin),1);
+$l->print_table_coverage(q(Latin),		'html');
 open STDOUT, q(>), q(coverage-1prefix-Cyrillic.html);
-$l->print_table_coverage(q(CyrillicPhonetic),1);
+$l->print_table_coverage(q(CyrillicPhonetic),	'html');

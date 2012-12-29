@@ -18,7 +18,7 @@ Currently achieved (ranges as of Unicode v6.1):
 *) One gotcha (with Shift-SPACE) comparing to US and Russian Phonetic keyboards;
 *) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1 (except for arrows);
 *) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys);
-*) 97% coverage of Cyrillic ranges (except for: lc/uc pairs for ԕԡԣꙣꙥꚁ;
+*) 98% coverage of Cyrillic ranges (except for: lc/uc pairs for ԡꙣꙥꚁ;
      from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double prefix keys);
 *) Full coverage of currency symbols;
 *) Full coverage of vulgar fractions;
@@ -739,3 +739,74 @@ Possible roadmaps:
 		Rename deadkey ˮ to ˵.
 		Add Zodiak to Shifted digit-row on ~-Greek.
 		Greek numerals: move left and right keraya to [ 3 and ] 3 (with # having the opposite binding).
+
+0.11	The header row for HTML tables contained the most obscure access code, not the most convenient.
+	Do not complain when de-obscured fails with a symbold which was already de-obscured earlier.
+	reveal-substkey replaces (deprecated) reveal-greenkey.
+	Make Auto_Diacritic_Start, Flip_AltGr_Key, Diacritic_if_undef, DeadChar_DefaultTranslation/32bitTranslation inheritable.
+	Add a couple of new links to Mike Kaplan's stuff.
+	New cmd script doing .C --> DLLs build using only the standard compilers from MSKLC (no utils!).
+	Scancode for VK_KANA, VK_(NON)CONVERT, VK_OEM_8 (put on YEN,|-key), OEM_AX
+	   (kbdutool produces 1 wrong line for each .H and .C - with #ERROR# - for OEM_AX, KANA, (NON)CONVERT)
+	Start supporting UI_KEYBOARDLAYOUT_DEBUG (0x1..0x4 for face/layer_recipes, guess name-normalization, OPERATOR in names).
+	Support scancode/VK difference between JIS and ISO,ABNT keyboards (102 vs C1, C2 vs 8; throw in NONCONVERT --> CONVERT too);
+		only one of the pair may be described, the other one (if not defined) will be a duplicate.
+	Allow "extra" deadkeys to be reported via extra_report_DeadChar.
+	Shut up warnings about new discovered duplicates for composition (after manual inspection).
+	Shut up warning for `no [deadkeyFace]'.
+	Allow for a deadkey recipe to be an array reference (split on space, or after comma or |).
+	Quiet warnings for double prefix keys, make those for triple (and more) less verbose; "attempt to separate... with comma".
+	Queit wide-char warning during debugging on $DB::OUT, $DB::LINEINFO.
+	Hack with $m1 to work about a bug (???) in Perl 5.10.  The result without 0x1000000 is different:
+	  env UI_KEYBOARDLAYOUT_DEBUG=0x1000000 perl -wC31 -Ilib examples/build-iz.pl examples/izKeys.kbdd
+	Make things work (not necessarily correct) without downloaded Unicode
+		tables.
+	Add (unsorted) list of references to Unicode mailing list.
+	Add pre-docs for .XCompose and summary of behaviour of different .XCompose's.
+	Propagate new %fix from HTML visual formatter.
+
+	izKeys.kbdd:	Update VERSION to 0.04.
+			ъЪёЁ were interchanged w.r.t. X11. ( Search for "phonetic" in [/usr/share/]X11/xkb/symbols/ru )
+			Add ⁻⁼⁺⁽⁾ to BlueKeys; (natural places, except: ⁽⁾ on AltGr, and only accessible from Latin)
+			Exchange ⁻ and ∓, so they are now in more natural positions.
+			Exchange · and √  --- now miss:
+-27de	<⟞>	LONG LEFT TACK [Common; Miscellaneous Mathematical Symbols-A; 3.2]
+-2aa6	<⪦>	LESS-THAN CLOSED BY CURVE [Common; Supplemental Mathematical Operators; 3.2]
+			Add ъЪ to the OTHER \| key (leads to a certain rehashing of ъЪёЁ-mirroring).
+			Start splitting into TILDE/CEDILLA groups of modifiers/combiners (now cedilla may be entered as expected).
+			Swap "Green" and "Blue" in the names.
+			Make RipeKey introduce Greek; replace μ by appropriate symbols (ԣ en with middle hook on Cyr, ≈ on Latin).  
+			  Now miss:
+-2422   <␢>     BLANK SYMBOL [Common; Control Pictures; 1.1]
+-2a73   <⩳>     EQUALS SIGN ABOVE TILDE OPERATOR [Common; Supplemental Mathematical Operators; 3.2]
+			Cyrillic: Move palatization to AltGr-' AltGr-^ (slide things back on AltGr-рР; add ԕ at freed space).
+			Exchange RipeKey and GreenKey w.r.t. Cyrillic/Greek (now greek on Green, cyrillic on ripe).
+			Cleanup LatinGreenMax.  (But DITTO is missing on Cyrillic personality...)
+			26ce ⛎ OPHIUCHUS added to the left of ARIES (for "extended completeness"), obscuring useless CAPITAL RHO.
+			Remove ₯ DRACHMA SIGN from the Greek map (remains on Business).
+			Swap Green and Ripe (not on Cyrillic yet).
+				Currently some tone marks missing.
+				Also: ByPairs[Vϔ](FlipLayers(Latin)) omitted (leads to bugs).
+			Swap ¦†.
+			Replace Junk, Junk-AltGr with Ripe/-AltGr in the visual table.
+			In Cyrillic, move psili/pokrytie to AltGr-2/@ (from 7); dup palatization to AltGr-!
+				[instead of ºª¡ of Latin!].
+			Bind ABNT_C2 to (future) Compose, and easier access to some other stuff (Flip-AltGr, Business, Cyr-II).
+			Add primes ′″ to the Ripe face.
+	#######	Keyboard name is now out of sync...  #####################
+
+			Now compiled with (currently, patching is not needed; for an example, see examples/fix-MSKLC.patch):
+%Keyboard_Layout_Creator%\bin\i386\kbdutool.exe -v -w -s ooo-us
+%Keyboard_Layout_Creator%\bin\i386\kbdutool.exe -v -w -s ooo-ru
+	####  Do patching if needed...
+..\..\UI-KeyboardLayout\examples\compile_link_kbd.cmd iz-la-ru 2>&1 | tee 00c
+..\..\UI-KeyboardLayout\examples\compile_link_kbd.cmd iz-ru-la 2>&1 | tee 00c3
+
+	New file: examples/enable-hex-unicode-entry.reg
+		On Windows:
+			reg import enable-hex-unicode-entry.reg
+		(active after a reboot).	Alt(keep it pressed)	+ NumPad+	+ any hex digits (release Alt)
+		(Not with a numlock... ???)
+	New files: *.cmd - DLL build environment.
+
+		time env PERLDB_OPTS="frame=7 LineInfo=oo-dd NonStop=1 AutoTrace=1" perl -d -wC31 -I UI-KeyboardLayout/lib UI-KeyboardLayout/examples/build-iz.pl UI-KeyboardLayout/examples/izKeys.kbdd |& tee ooxx-us-ru 

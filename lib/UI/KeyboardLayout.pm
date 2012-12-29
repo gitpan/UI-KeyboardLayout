@@ -1,8 +1,26 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION ="0.10";
+$VERSION = $VERSION ="0.11";
+
+binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
+binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
+
 use strict;
 use utf8;
+BEGIN { my $n = ($ENV{UI_KEYBOARDLAYOUT_DEBUG} || 0); 
+	if ($n =~ /^0x/i) {
+	  $n = hex $n;
+	} else {
+	  $n += 0;
+	}
+	eval "sub debug() { $n }" }
+sub debug_face_layout_recipes () { debug & 0x01 }
+sub debug_GUESS_MASSAGE ()	 { debug & 0x02 }
+sub debug_OPERATOR ()		 { debug & 0x02 }
+sub debug_import ()		 { debug & 0x04 }
+sub debug_stacking ()		 { debug & 0x08 }
+sub debug_noid ()		 { debug & 0x10 }
+sub debug_PERL_dollar1_scoping ()		 { debug & 0x1000000 }
 
 sub toU($) { substr+(qq(\x{fff}).shift),1 }	# Some bullshit one must do to make perl's Unicode 8-bit-aware (!)
 
@@ -12,7 +30,9 @@ use subs qw(chr lc uc);
 #BEGIN { *CORE::GLOGAL::chr = sub ($) { toU CORE::chr shift };
 #        *CORE::GLOGAL::lc  = sub ($)  { CORE::lc  toU shift };
 #}
-my %fix = qw( ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ß ẞ  ꞩ Ꞩ  ȿ Ȿ  ꞓ Ꞓ  ꞥ Ꞥ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
+### Remove ß ẞ :
+## my %fix = qw( ԥ Ԥ ԧ Ԧ ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ꞩ Ꞩ  ȿ Ȿ  ꞓ Ꞓ  ꞥ Ꞥ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
+my %fix = qw( ԥ Ԥ ԧ Ԧ ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ß ẞ  ꞩ Ꞩ  ȿ Ȿ  ꞓ Ꞓ  ꞥ Ꞥ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
 my %unfix = reverse %fix;
 
 sub chr($)  { local $^W = 0; toU CORE::chr shift }	# Avoid illegal character 0xfffe etc warnings...
@@ -346,6 +366,9 @@ Keep in mind that sometimes to understand what a recipe does, one should trace
 its description in opposite order: for example, C<ByPairs[.:](FlipLayers)> creates
 a layout where C<:> is at position of C<.>, but on the second [=other] layer (essentially,
 if the base layout is the standard one, it binds character C<:> to keypress C<AltGr-.>).
+
+To simplify formatting of F<.kbdd> files, a recipe may be an array reference.
+The string may be split on spaces, or split after comma or C<|>.
 
 =head2 Personalities
 
@@ -865,6 +888,493 @@ currently hardwired.  Some pictures and tables are available on
 
 =head1 FILES
 
+=head1 Useful tidbits from Unicode mailing list (unsorted)
+
+.... skew-orthogonal complement
+
+Drachma: http://unicode.org/mail-arch/unicode-ml/y2012-m05/0167.html
+
+  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3866.pdf
+
+Pound
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m05/0242.html
+
+MS keyboard (wrong?)
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m05/0268.html
+
+w-ring is a stowaway
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m04/0043.html
+
+History of squared pH
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m02/0123.html
+
+Why and how to introduce innovative characters
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0045.html
+
+Upside-down text in CSS (remove position?)
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0037.html
+
+Classification of Dings (bats etc)
+
+  std.dkuug.dk/jtc1/sc2/wg2/docs/n4115.pdf
+
+	Escape: 2be9 2b9b
+	ARROW SHAFT - various
+
+Math Almost-Text encoding
+
+  http://unicode.org/notes/tn28/UTN28-PlainTextMath-v3.pdf
+  http://unicode.org/mail-arch/unicode-ml/y2011-m10/0018.html
+    For me 1/2/3/4 means unambiguously ((1/2)/3)/4, i.e. 1/(2*3*4)
+
+    Unicode mostly encodes characters that are in use or have been
+    encoded in other standards. While not semantically agnostic, it is
+    much less oriented towards semantic clarifications and
+    distinctions than many people might hope for (and this includes
+    me, some of the time at least).
+
+Unicode knows the concept of a provisional property
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m11/0142.html
+  http://unicode.org/reports/tr23/
+  http://unicode.org/mail-arch/unicode-ml/y2011-m11/0161.html
+    If you want to make analogies, however, the ISO ballots constitute
+    the *provisional* publication for character code points and names.
+    	that needs to be available from day one for a character to be
+	implementable at all (such as decomp mappings, bidi class,
+	code point, name, etc.).
+
+	     ZERO-WIDTH UNDEFINED DECOMPOSITION MARK
+	     		- to define decomposition, prepend it
+
+Yiddish digraphs
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m10/0121.html
+
+Locales
+
+  http://blog.kyero.com/2011/11/14/what-is-the-common-locale-data-repository/
+  http://blog.kyero.com/2010/12/02/lost-in-translation-locales-not-languages/
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0203.html
+
+Silly quotation marks: 201b, 201f
+
+  http://en.wikipedia.org/wiki/Quotation_mark_glyphs
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0300.html
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0317.html
+  http://en.wikipedia.org/wiki/Comma
+  http://en.wikipedia.org/wiki/%CA%BBOkina
+  http://en.wikipedia.org/wiki/Saltillo_%28linguistics%29
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0367.html
+  http://unicode.org/unicode/reports/tr8/ 
+  		under "4.6 Apostrophe Semantics Errata"
+
+COMBINING GREEK YPOGEGRAMMENI equilibristic (depends on a vowel?)
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0299.html
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0308.html
+  http://www.tlg.uci.edu/~opoudjis/unicode/unicode_adscript.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0046.html
+
+General
+
+  http://ebixio.com/online_docs/UnicodeDemystified.pdf
+
+Keyboard keys:
+
+  http://unicode.org/mail-arch/unicode-ml/Archives-Old/UML009/0204.html
+
+Horizontal/vertical line/arrow extensions
+
+  http://unicode.org/charts/PDF/U2300.pdf
+  http://unicode.org/mail-arch/unicode-ml/y2003-m07/0513.html
+  http://std.dkuug.dk/JTC1/SC2/WG2/docs/n2508.htm
+
+Cyrillic Script, Unicode status (+combining)
+
+  http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ngc339csy8
+  http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ktxptbccph
+
+OHM: In modern usage, for new documents, this character should not be used. 
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m08/0060.html
+
+Substitute blank
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m07/0101.html
+
+Representing invisible characters
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m07/0094.html
+
+Diacritics in fonts
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m05/0047.html
+  http://www.user.uni-hannover.de/nhtcapri/combining-marks.html#greek
+
+Unicode in 1889
+
+  http://www.archive.org/stream/unicodeuniversa00unkngoog#page/n3/mode/2up
+
+On the other hand, having access to text only math symbols makes it possible to implement it in computer languages, making source code easier to read.
+
+Right now, I feel there is a lack of keyboard maps. You can develop them on your own, but that is very time consuming.
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m04/0117.html
+
+Licences (GPL etc) in TV sets
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m12/0092.html
+
+Exciting new letter forms for English
+
+  http://www.theonion.com/articles/alphabet-updated-with-15-exciting-new-replacement,2869/
+
+Similar glyphs:
+
+  http://unicode.org/reports/tr39/data/confusables.txt
+
+Hyphens:
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m10/0038.html
+
+GOST 10859
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m09/0082.html
+  http://www.mailcom.com/besm6/ACPU-128.jpg
+
+Unicode to PostScript
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0056.html
+  http://www.linuxfromscratch.org/blfs/view/svn/pst/enscript.html
+  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0062.html
+
+Linguists mailing lists
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0066.html
+
+GeoLocation by IP
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m04/0197.html
+
+Per language character repertoir:
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m04/0253.html
+  http://unicode.org/mail-arch/unicode-ml/y2009-m04/0255.html
+
+Compromizes vs reality
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m02/0106.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m02/0117.html
+
+Dates/numbers in Unicode
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m02/0122.html
+
+Normalization FAQ
+
+  http://www.macchiato.com/unicode/nfc-faq
+
+Hebrew char input
+
+  http://rishida.net/scripts/pickers/hebrew/
+  http://rishida.net/scripts/uniview/#title
+
+Obsolete IPA
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m01/0487.html
+
+Teutonista (vowel guide p11, kbd p13)
+
+  http://www.sprachatlas.phil.uni-erlangen.de/materialien/Teuthonista_Handbuch.pdf
+
+Greek letters for non-Greek
+
+  http://stephanus.tlg.uci.edu/~opoudjis/unicode/unicode_interloping.html#ipa
+
+Pretty-printing text math
+
+  http://code.google.com/p/sympy/wiki/PrettyPrinting
+
+Sub/Super on a terminal
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m07/0028.html
+
+Apostrophe
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0060.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0063.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0066.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0251.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0309.html
+
+Rubi
+
+  http://en.wikipedia.org/wiki/Ruby_character#Unicode
+
+Cyrillic soup
+
+  http://czyborra.com/charsets/cyrillic.html
+
+Glottals
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0151.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0163.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0202.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0205.html
+
+Tamil/ISCII
+
+  http://unicode.org/faq/indic.html
+  http://unicode.org/versions/Unicode6.1.0/ch09.pdf
+
+CGI and OpenType
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m02/0097.html
+
+Numbers in scripts ;-)
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m02/0120.html
+
+Indicating coverage of the font
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m02/0152.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m02/0167.html
+
+Proposing new stuff
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m01/0238.html
+
+NOT and BROKEN BAR
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m12/0207.html
+  http://www.cs.tut.fi/~jkorpela/latin1/ascii-hist.html#5C
+
+Accessing ligatures
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m11/0210.html
+
+Should not use (roman numerals)
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m11/0253.html
+
+Folding characters
+
+  http://unicode.org/reports/tr30/tr30-4.html
+
+Ignorable glyphs
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0132.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0138.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0120.html
+
+Spacing: English and French
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m09/0167.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0103.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0138.html
+
+HOWTO: (non)dummy VS in fonts
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0118.html
+
+OXIA vs TONOS
+
+  http://www.tlg.uci.edu/~opoudjis/unicode/unicode_gkbkgd.html#oxia
+
+ZWSP ZWNJ WJ SHY NON-BREAKING HYPHEN
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0123.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0188.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0199.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0201.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m06/0122.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0297.html
+
+On which base to draw a "standalone" diacretic
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0075.html
+
+Universality vs affordability
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0157.html
+
+The IBM 1401 Hebrew Letter Key
+
+  http://www.qsm.co.il/Hebrew/HebKey.htm
+
+Structure of development of Unicode
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m07/0056.html
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0099.html
+      I don't have a problem with Unicode. It is what it is; it cannot
+      possibly be all things to all people:
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0101.html
+
+CR symbols
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m07/0163.html
+
+Chicago Manual of Style
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m01/0127.html
+
+Stability of normalization
+
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0055.html
+
+Writing systems vs written languages
+
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0198.html
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0241.html
+
+MS Visual OpenType tables
+
+  http://www.microsoft.com/typography/VOLT.mspx
+  http://www.microsoft.com/typography
+
+Coloring parts of ligatures
+    Implemenations:
+
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0195.html
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0233.html
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0208.html
+    GPOS
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0167.html
+
+Combining power of generative features - implementor's view
+
+  http://unicode.org/mail-arch/unicode-ml/y2004-m09/0145.html
+
+"Same" character Oacute used for different "functions" in the same text
+
+  http://unicode.org/mail-arch/unicode-ml/y2004-m08/0019.html
+	etc:
+  http://unicode.org/mail-arch/unicode-ml/y2004-m07/0227.html
+
+Diacritics
+
+  http://www.sil.org/~gaultney/ProbsOfDiacDesignLowRes.pdf
+  http://en.wikipedia.org/wiki/Sylfaen_%28typeface%29
+    http://tiro.com/Articles/sylfaen_article.pdf
+
+Variation sequences
+
+  http://unicode.org/mail-arch/unicode-ml/y2004-m07/0246.html
+
+Federal vs regional aspects of Latinization (a lot of flak; cp1251)
+
+  http://peoples.org.ru/stenogramma.html
+
+Sign writing
+
+  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n4342.pdf
+
+Writing digits in non-decimal
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m03/0050.html
+	Which separator is less ambiguous?  Breve ˘ ? ␣ ?  Inverted ␣ ?
+
+Colors in Unicode names
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m03/0100.html
+
+Use to identify a letter:
+
+  http://unicode.org/charts/collation/
+
+A useful set of criteria for encoding symbols is found in
+Annex H of this document:
+
+  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3002.pdf 
+
+What is a "Latin" char
+
+  http://unicode.org/forum/viewtopic.php?f=23&t=102
+
+Perl has problems with unpaired surrogates (whole thread)
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m11/0034.html
+
+Complex fonts (e.g., Indic)
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m10/0049.html
+
+Complex glyphs in Symbola (pre-6.01) font may crash older versions of Windows
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m10/0082.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m10/0084.html
+
+Window 7 SP1 improvements
+
+  http://babelstone.blogspot.de/2010/05/prototyping-tangut-imes-or-why-windows.html
+
+Middle dot is ambiguous
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m09/0023.html
+
+Apostroph as soft sign
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m08/0123.html
+
+Chinese typesetting
+
+  http://idsgn.org/posts/the-end-of-movable-type-in-china/
+
+Keyboards - agreement (5 scripts at end)
+
+  ftp://ftp.cen.eu/CEN/Sectors/List/ICT/CWAs/CWA-16108-2010-MEEK.pdf
+
+LAMBDA vs LAMDA
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m06/0063.html
+
+U+01BE LATIN LETTER INVERTED GLOTTAL STOP WITH STROKE; oi etc
+
+  http://unicode.org/notes/tn27/
+
+Superscript == modifiers
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m03/0133.html
+
+Need for a keyboard, keyman examples; why "standard" keyboards are doomed
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0015.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0022.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0036.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0053.html
+
+@fonts and non-URL URIs
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0156.html
+
+How to encode Latin-in-fraktur
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0279.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0263.html
+
+Math layout
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0303.html
+
+Book Spine reading direction
+
+  http://www.artlebedev.com/mandership/122/
+
+Xerox and interrobang
+
+  http://unicode.org/mail-arch/unicode-ml/y2005-m04/0035.html
+
+Translation of Unicode names
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m12/0066.html
+  http://unicode.org/mail-arch/unicode-ml/y2012-m12/0076.html
 
 =head1 SEE ALSO
 
@@ -998,6 +1508,16 @@ By author of MSKLC Michael S. Kaplan (do not forget to follow links)
       Install/Load/Activate an input method/layout
   http://blogs.msdn.com/b/michkap/archive/2007/12/01/6631463.aspx
   http://blogs.msdn.com/b/michkap/archive/2008/05/23/8537281.aspx
+      Reset to a TT font from an application:
+  http://blogs.msdn.com/b/michkap/archive/2011/09/22/10215125.aspx
+      How to (not) treat C-A-Q
+  http://blogs.msdn.com/b/michkap/archive/2012/04/26/10297903.aspx
+      Treating Brazilian ABNT c1 c2 keys
+  http://blogs.msdn.com/b/michkap/archive/2006/10/07/799605.aspx
+      And JIS |¥-key
+	 (compare with  http://www.scs.stanford.edu/11wi-cs140/pintos/specs/kbd/scancodes-7.html
+			http://hp.vector.co.jp/authors/VA003720/lpproj/others/kbdjpn.htm )
+  http://blogs.msdn.com/b/michkap/archive/2006/09/26/771554.aspx
       Suggest a topic:
   http://blogs.msdn.com/b/michkap/archive/2007/07/29/4120528.aspx#7119166
 
@@ -1005,6 +1525,15 @@ VK_OEM_8 Kana modifier - Using instead of AltGr
   http://www.kbdedit.com/manual/ex13_replacing_altgr_with_kana.html
 Limitations of using KANA toggle
   http://www.kbdedit.com/manual/ex12_trilang_ser_cyr_lat_gre.html
+  
+FE (Far Eastern) keyboard source code example:
+  http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/ntos/w32/ntuser/kbd/fe_kbds/jpn/ibm02/kbdibm02.c__.htm
+
+	Investigation on relation between VK_ asignments, KBDEXT, KBDNUMPAD etc:
+  http://code.google.com/p/ergo-dvorak-for-developers/source/browse/trunk/kbddvp.c
+
+    PowerShell vs ISE
+  http://blogs.msdn.com/b/powershell/archive/2009/04/17/differences-between-the-ise-and-powershell-console.aspx
 
 HTML consolidated entity names and discussion, MES charsets:
 
@@ -1109,7 +1638,7 @@ IPA
   http://www.staff.uni-marburg.de/~luedersb/IPA_CHART2005-UNICODE.pdf
 			(except for "Lateral flap" and "Epiglottal" column/row.
     (Extended) IPA explained by consortium:
-  http://www.unicode.org/charts/PDF/U0250.pdf
+  http://unicode.org/charts/PDF/U0250.pdf
     IPA keyboard
   http://www.rejc2.co.uk/ipakeyboard/
 
@@ -1149,6 +1678,10 @@ Display (how WikiPedia does it):
     In CSS:  .IPA, .Unicode { font-family: "Arial Unicode MS", "Lucida Sans Unicode"; }
   http://web.archive.org/web/20060913000000/http://en.wikipedia.org/wiki/Template:Unicode_fonts
 
+Inspect which font is used by Firefox:
+
+  https://addons.mozilla.org/en-US/firefox/addon/fontinfo/
+
 Windows shortcuts:
 
   http://windows.microsoft.com/en-US/windows7/Keyboard-shortcuts
@@ -1160,13 +1693,258 @@ On meaning of Unicode math codepoints
   http://milde.users.sourceforge.net/LUCR/Math/data/unimathsymbols.txt
   http://unicode.org/Public/math/revision-09/MathClass-9.txt
 
+Monospaced fonts with combining marks (!)
+
+  https://bugs.freedesktop.org/show_bug.cgi?id=18614
+  https://bugs.freedesktop.org/show_bug.cgi?id=26941
+
+Indic ISCII - any hope with it?  (This is not representable...:)
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m09/0053.html
+
+(Persieved) problems of Unicode (2001)
+
+  http://www.ibm.com/developerworks/library/u-secret.html
+
+On a need to have input methods for unicode
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m07/0226.html
+
+On info on Unicode chars
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m07/0415.html 
+
 Zapf dingbats encoding, and other fine points of AdobeGL:
 
   ftp://ftp.unicode.org/Public/MAPPINGS/VENDORS/ADOBE/zdingbat.txt
   http://web.archive.org/web/20001015040951/http://partners.adobe.com/asn/developer/typeforum/unicodegn.html
 
+Yet another (IMO, silly) way to handle '; fight: ' vs ` ´
+
+  http://www.cl.cam.ac.uk/~mgk25/ucs/apostrophe.html
+
 Quoting tchrist:
 I<You can snag C<unichars>, C<uniprops>, and C<uninames> from L<http://training.perl.com> if you like.>
+
+Tom's unicode scripts
+
+  http://search.cpan.org/~bdfoy/Unicode-Tussle-1.03/lib/Unicode/Tussle.pm
+
+=head2 F<.XCompose>: on docs and examples
+
+Syntax of C<.XCompose> is (partially) documented in
+
+  http://www.x.org/archive/current/doc/man/man5/Compose.5.xhtml
+  http://cgit.freedesktop.org/xorg/lib/libX11/tree/man/Compose.man
+
+ #   Modifiers are not documented
+ #	 (Shift, Alt, Lock, Ctrl with aliases Meta, Caps; apparently,
+ # 	 	 ! is applied to a sequence without ~ ???) 
+
+Semantic (e.g., which of keybindings has a preference) is not documented.
+Experiments (see below) show that a longer binding wins; if same
+length, one which is loaded later wins.
+Relation with presence of modifiers is not clear.
+
+ #      (the source of imLcPrs.c shows that the explansion of the
+ #      shorter sequence is stored too - but the presence of
+ #      ->succession means that the code to process the resulting
+ #      tree ignores the expansion).
+ 
+Before the syntax was documented: For the best approximation,
+read the parser's code, e.g., google for
+
+    inurl:compose.c XCompose
+    site:cgit.freedesktop.org "XCompose"
+    site:cgit.freedesktop.org "XCompose" filetype:c
+    _XimParseStringFile
+
+    http://cgit.freedesktop.org/xorg/lib/libX11/tree/modules/im/ximcp/imLcIm.c
+    http://cgit.freedesktop.org/xorg/lib/libX11/tree/modules/im/ximcp/imLcPrs.c
+    http://uim.googlecode.com/svn-history/r6111/trunk/gtk/compose.c
+    http://uim.googlecode.com/svn/tags/uim-1.5.2/gtk/compose.c
+
+The actual use of the compiled compose table:
+
+ http://cgit.freedesktop.org/xorg/lib/libX11/tree/modules/im/ximcp/imLcFlt.c
+
+Apparently, the first node (= defined last) in the tree which
+matches keysym and modifiers is chosen.  So to override C<< <Foo> <Bar> >>,
+looks like (checked to work!) C<< ~Ctrl <Foo> >> may be used...
+On the other hand, defining both C<< <Foo> <Bar> <Baz> >> and (later) C<< <Foo> ~Ctrl <Bar> >>,
+one would expect that C<< <Foo> <Ctrl-Bar> <Baz> >> should still trigger the
+expansion of C<< <Foo> <Bar> <Baz> >> — but it does not...  See also:
+
+  http://cgit.freedesktop.org/xorg/lib/libX11/tree/modules/im/ximcp/imLcLkup.c
+
+The file F<.XCompose> is processed by X11 I<clients> on startup.  The changes
+to this file should be seen immediately by all newly started clients
+(but GTK or QT applications may need extra config - see below)
+unless the directory F<~/.compose-cache> is present and has a cache
+file compatible with binary architecture (then until cache
+expires - one day after creation - changes are not seen).  The
+name F<.XCompose> may be overriden by environment variable C<XCOMPOSEFILE>. 
+
+To get (better?) examples, google for C<"multi_key" partial alpha "DOUBLE-STRUCK">.
+
+  # include these first, so they may be overriden later
+  include "%H/my-Compose/.XCompose-kragen"
+  include "%H/my-Compose/.XCompose-ootync"
+  include "%H/my-Compose/.XCompose-pSub"
+
+Check success: kragen: C<\ space> --> ␣; ootync: C<o F> --> ℉; pSub: C<0 0> --> ∞ ...
+
+Older versions of X11 do not understand %L %S. - but understand %H
+    
+E.g. Debian Squeeze 6.0.6; according to
+      
+   http://packages.debian.org/search?keywords=x11-common
+    
+it has C<v 1:7.5+8+squeeze1>).
+
+   include "/etc/X11/locale/en_US.UTF-8/Compose"
+   include "/usr/share/X11/locale/en_US.UTF-8/Compose"
+
+Import default rules from the system Compose file:
+usually as above (but supported only on newer systems):
+
+   include "%L"
+
+detect the success of the lines above: get C<#> by doing C<Compose + +> ...
+
+The next file to include have been generated by
+
+  perl -wlne 'next if /#\s+CIRCLED/; print if />\s+<.*>\s+<.*>\s+<.*/' /usr/share/X11/locale/en_US.UTF-8/Compose
+  ### Std tables contain quadruple prefix for GREEK VOWELS and CIRCLED stuff
+  ### only.  But there is a lot of triple prefix...  
+  perl -wne 'next if /#\s+CIRCLED/; $s{$1}++ or print qq( $1) if />\s+<.*>\s+<.*>\s+<.*"(.*)"/' /usr/share/X11/locale/en_US.UTF-8/Compose
+  ##  – — ☭ ª º Ǖ ǖ Ǘ ǘ Ǚ ǚ Ǜ ǜ Ǟ ǟ Ǡ ǡ Ǭ ǭ Ǻ ǻ Ǿ ǿ Ȫ ȫ Ȭ ȭ Ȱ ȱ ʰ ʱ ʲ ʳ ʴ ʵ ʶ ʷ ʸ ˠ ˡ ˢ ˣ ˤ ΐ ΰ Ḉ ḉ Ḕ ḕ Ḗ ḗ Ḝ ḝ Ḯ ḯ Ḹ ḹ Ṍ ṍ Ṏ ṏ Ṑ ṑ Ṓ ṓ Ṝ ṝ Ṥ ṥ Ṧ ṧ Ṩ ṩ Ṹ ṹ Ṻ ṻ Ấ ấ Ầ ầ Ẩ ẩ Ẫ ẫ Ậ ậ Ắ ắ Ằ ằ Ẳ ẳ Ẵ ẵ Ặ ặ Ế ế Ề ề Ể ể Ễ ễ Ệ ệ Ố ố Ồ ồ Ổ ổ Ỗ ỗ Ộ ộ Ớ ớ Ờ ờ Ở ở Ỡ ỡ Ợ ợ Ứ ứ Ừ ừ Ử ử Ữ ữ Ự ự ἂ ἃ ἄ ἅ ἆ ἇ Ἂ Ἃ Ἄ Ἅ Ἆ Ἇ ἒ ἓ ἔ ἕ Ἒ Ἓ Ἔ Ἕ ἢ ἣ ἤ ἥ ἦ ἧ Ἢ Ἣ Ἤ Ἥ Ἦ Ἧ ἲ ἳ ἴ ἵ ἶ ἷ Ἲ Ἳ Ἴ Ἵ Ἶ Ἷ ὂ ὃ ὄ ὅ Ὂ Ὃ Ὄ Ὅ ὒ ὓ ὔ ὕ ὖ ὗ Ὓ Ὕ Ὗ ὢ ὣ ὤ ὥ ὦ ὧ Ὢ Ὣ Ὤ Ὥ Ὦ Ὧ ᾀ ᾁ ᾂ ᾃ ᾄ ᾅ ᾆ ᾇ ᾈ ᾉ ᾊ ᾋ ᾌ ᾍ ᾎ ᾏ ᾐ ᾑ ᾒ ᾓ ᾔ ᾕ ᾖ ᾗ ᾘ ᾙ ᾚ ᾛ ᾜ ᾝ ᾞ ᾟ ᾠ ᾡ ᾢ ᾣ ᾤ ᾥ ᾦ ᾧ ᾨ ᾩ ᾪ ᾫ ᾬ ᾭ ᾮ ᾯ ᾲ ᾴ ᾷ ῂ ῄ ῇ ῒ ῗ ῢ ῧ ῲ ῴ ῷ ⁱ ⁿ ℠ ™ שּׁ שּׂ а̏ А̏ е̏ Е̏ и̏ И̏ о̏ О̏ у̏ У̏ р̏ Р̏ 🙌
+
+The folloing exerpt from NEO compose tables may be good if you use
+keyboards which do not generate dead keys, but may generate Cyrillic keys;
+in other situations, edit filtering/naming on the following download
+command and on the C<include> line below.  (For my taste, most bindings are
+useless since they contain keysymbols which may be generated with NEO, but
+not with less intimidating keylayouts.)
+
+(Filtering may be important, since having a large file may
+significantly slow down client's startup (without F<~/.compose-cache>???).) 
+
+  # perl -wle 'foreach (qw(base cyrillic greek lang math)) {my @i=@ARGV; $i[-1] .= qq($_.module?format=txt); system @i}' wget -O - http://wiki.neo-layout.org/browser/Compose/src/ | perl -wlne 'print unless /<(U[\dA-F]{4,6}>|dead_|Greek_)/' >  .XCompose-neo-no-Udigits-no-dead-no-Greek
+  include "%H/.XCompose-neo-no-Udigits-no-dead-no-Greek"
+  # detect the success of the line above: get ♫ by doing Compose Compose (but this binding is overwritten later!)
+
+  ###################################### Neo's Math contains junk at line 312
+
+Print with something like (loading in a web browser after this):
+
+  perl -l examples/filter-XCompose ~/.XCompose-neo-no-Udigits-no-dead-no-Greek > ! o-neo
+  env LC_ALL=C sort -f o-neo | column -x -c 130 > ! /tmp/oo-neo-x
+
+=head2 “Systematic” parts of rules in a few F<.XCompose>
+
+        ================== .XCompose	b=bepo		o=ootync	k=kragen	p=pSub	s=std
+        b	Double-Struck		b
+        o	circled ops		b
+        O	big circled ops		b
+        r	rotated			b	8ACETUv  ∞
+
+        -	sub			p
+        =	double arrows		po
+        g	greek			po
+        m	math			p	|=Double-Struck		rest haphasard...
+        O	circles			p	Oo
+        S	stars			p	Ss
+        ^	sup			p	added: i -
+        |	daggers			p
+
+        Double	mathop			ok	+*&|%8CNPQRZ AE
+
+        #	thick-black arrows	o
+        -,Num-	arrows			o
+        N/N	fractions		o
+        hH	pointing hands		o
+        O	circled ops		o
+        o	degree			o
+        rR	roman nums		o
+        \ UP	upper modifiers		o
+        \ DN	lower modifiers		o
+        {	set theoretic		o
+        |	arrows |-->flavors	o
+        UP /	roots			o
+        LFT DN	6-quotes, bold delim	o
+        RT DN	9-quotes, bold delim	o
+        UP,DN	super,sub		o
+
+        DOUBLE-separated-by-&	op	k	 ( ) 
+        in-()	circled			k	xx for tensor
+        in-[]	boxed, dice, play-cards	k
+        BKSP after	revert		k
+        < after		revert		k
+        ` after		small-caps	k
+        ' after 	hook		k
+        , after 	hook below	k
+        h after		phonetic	k
+
+        #	musical			k
+        %0	ROMAN			k	%_0 for two-digit
+        %	roman			k	%_  for two-digit
+        *	stars			k
+        *.	var-greek		k
+        *	greek			k
+        ++, 3	triple			k
+        +	double			k
+        ,	quotes			k
+        !, /	negate			k
+        6,9	6,9-quotes		k
+        N N	fractions		k
+        =	double-arrows, RET	k
+        CMP x2	long names		k
+        f	hand, pencils 		k
+        \	combining???		k
+        ^	super, up modifier	k
+        _	low modifiers		k
+        |B, |W	chess, checkers, B&W	k
+        |	double-struck		k
+        ARROWS	ARROWS			k
+
+        !	dot below		s
+        "	diaeresis		s
+        '	acute			s
+        trail <	left delimiter		s
+        trail >	right delimiter		s
+        trail \ slopped variant		s
+        ( ... )	circled			s
+        (	greek aspirations	s
+        )	greek aspirations	s
+        +	horn			s
+        ,	cedilla			s
+        .	dot above		s
+        -	hor. bar		s
+        /	diag, vert hor. bar	s
+        ;	ogonek			s
+        =	double hor.bar		s
+        trail =	double hor.bar		s
+        ?	hook above		s
+        b	breve			s
+        c	check above		s
+        iota	iota below		s
+        trail 0338	negated		s
+        o	ring above		s
+        U	breve			s
+                        SOME HEBREW
+        ^	circumblex		s
+        ^ _	superscript		s
+        ^ undbr	superscript		s
+        _	bar			s
+        _	subscript		s
+        underbr	subscript		s
+        `	grave			s
+        ~	greek dieresis		s
+        ~	tilde			s
+        overbar	bar			s
+        ´	acute			s	´ is not '
+        ¸	cedilla			s	¸ is cedilla
 
 =head1 LIMITATIONS
 
@@ -2197,7 +2975,7 @@ sub deep_undef_by_hash($$@) {
 # Make symbols from the first half-face ($h1) to be accessible in the second face ($H1/$H2)
 sub pre_link_layers ($$$;$$) {	# Un-obscure non-alphanum bindings from the first face; assign in the direction $hh ---> $HH
   my ($self, $hh, $HH, $skipfix, $skipwarn) = (shift, shift, shift, shift, shift);	# [Main, AltGr-Main,...], [Secondary, AltGr-Secondary,...]
-  my ($hn,$Hn) = map $self->{faces}{$_}{layers}, $hh, $HH;
+  my ($hn,$Hn, %seen_deobsc) = map $self->{faces}{$_}{layers}, $hh, $HH;
 #warn "Link $hh --> $HH;\t(@$hn) -> (@$Hn)" if "$hh $HH" =~ /00a9/i;
   die "Can't link sets of layers `$hh' `$HH' of different sizes: ", scalar @$hn, " != ", scalar @$Hn if @$hn != @$Hn;
   
@@ -2234,12 +3012,14 @@ sub pre_link_layers ($$$;$$) {	# Un-obscure non-alphanum bindings from the first
 	warn "A hack is needed: attempt to de-obscure `$h[0][$k]' on a supplementary key with `$H[1][$map{$k}]'"
       } else {
         if (defined $H[1][$map{$k}]) {
+          next if $seen_deobsc{$h[0][$k]};	# See ъЪ + palochkas obscuring \| on the secondary \|-key in RussianPhonetic
           # So far, the only "obscuring" with useful de-obscuring is when the obscuring symbol is a letter
-          die "existing secondary AltGr-binding `$H[1][$map{$k}]' blocks de-obscuring `$h[0][$k]'; symb=[@symb0] in [@{$h[0]}]"
+          die "existing secondary AltGr-binding `$H[1][$map{$k}]' blocks de-obscuring `$h[0][$k]';\n symbols to de-obscure are at positions [@symb0] in [@{$h[0]}]"
             unless ($H[0][$k] || '.') =~ /[\W\d_]/;
           next
         }
         $H[1][$map{$k}] = $h[0][$k];			# !!!! Modify in place
+        $seen_deobsc{$h[0][$k]}++;
       }
     }
     # Join in blue keys, and inherit keys from $h
@@ -2373,18 +3153,22 @@ sub massage_faces ($) {
       next unless $self->{face_recipes}{$f};
       die "Can't determine number of layers in face `$f': face_recipe exists, but not numLayers" 
         unless defined (my $n = $self->{faces}{$f}{numLayers});
-      $self->{faces}{$f}{layers} = [('Empty') x $n];		# Preliminary
+      warn "Massaging face `$f': use face_recipes...\n" if debug_face_layout_recipes;
+      $self->{faces}{$f}{layers} = [('Empty') x $n];		# Preliminary (so know the length???)
       $self->{faces}{$f}{layers} = $self->layers_by_face_recipe($f, $f);
     }
     for my $ln ( 0..$#{$self->{faces}{$f}{layers} || []} ) {
       my $ll = my $l = $self->{faces}{$f}{layers}[$ln];
       next if $self->{layers}{$l};		# Else, auto-vivify
 #warn "Creating layer `$l' for face `$f'...";
-      ($ll = $self->{layer_recipes}{$ll}) =~ s/^\s+// if exists $self->{layer_recipes}{$ll};
-#warn "... Using recipe `$ll'";
+      $ll = $self->recipe2str($self->{layer_recipes}{$ll}) if exists $self->{layer_recipes}{$l};
+      warn "Massaging: Using layout_recipe `$ll' for layer '$l'\n" if debug_face_layout_recipes and exists $self->{layer_recipes}{$l};
       $ll = $self->make_translated_layers($ll, $f, [$ln], '0000');
 #warn "... Result `@$ll' --> $self->{layers}{$ll->[0]}";
       $self->{layers}{$l} = $self->{layers}{$ll->[0]} unless $self->{layers}{$l};		# Could autovivify in between???
+    }
+    for my $key ( qw(Flip_AltGr_Key Diacritic_if_undef DeadChar_DefaultTranslation DeadChar_32bitTranslation extra_report_DeadChar) ) {
+      $self->{faces}{$f}{"[$key]"} = $self->get_deep_via_parents($self, undef, 'faces', (split m(/), $f), $key);
     }
     $self->{faces}{$f}{'[char2key_prefer_first]'}{$_}++ 		# Make a hash
       for @{ $self->{faces}{$f}{char2key_prefer_first} || [] } ;
@@ -2482,7 +3266,8 @@ sub massage_faces ($) {
       ($s{$_}++ or push @d, $_), $DDD->{$_} = 1 for @k;
       $c++;
     }
-    for my $k (split /\p{Blank}+(?:\|{3}\p{Blank}+)?/, (defined $self->{faces}{$f}{faceDeadKeys} ? $self->{faces}{$f}{faceDeadKeys} : '')) {
+    for my $k (split /\p{Blank}+(?:\|{3}\p{Blank}+)?/, 
+    		(defined $self->{faces}{$f}{faceDeadKeys} ? $self->{faces}{$f}{faceDeadKeys} : '')) {
       next unless length $k;
       $k = $self->charhex2key($k);
       1 < length $k and die "not a character as a deadkey: `$k'";
@@ -2520,6 +3305,8 @@ sub massage_faces ($) {
       2 != @k and die "not two characters as a chained deadkey: `@k'";
 #warn "dead2 for <@k>";
       $self->{faces}{$f}{'[dead2]'}{$k[0]}{$k[1]}++;
+      # $k[1] is "untranslated"; it is not good for [DEAD]:
+      #$self->{faces}{"$f###" . $self->key2hex($k[0])}{'[DEAD]'}{$k[1]}++;
     }
   }
   $self
@@ -2597,17 +3384,17 @@ sub print_coverage ($$) {
   for my $k (@{ $self->{faces}{$F}{'[coverage1]'} }) {
     $self->print_codepoint($k);
   }
-  print "############# In prefix keys, but available only elsewhere:\n";
+  print "############# Have lost the competition (for prefixed position), but available elsewhere:\n";
   for my $k (sort keys %{ $self->{faces}{$F}{'[in_dia_chains]'} }) {
     next unless $self->{faces}{$F}{'[coverage_hash]'}{$k} and not $self->{faces}{$F}{'[from_dia_chains]'}{$k};
     $self->print_codepoint($k, '+ ');		# May be in from_dia_chains, but be obscured later...
   }
-  print "############# Lost in prefix keys (not counting those explicitly prohibited by \\\\):\n";
+  print "############# Have lost the competition (not counting those explicitly prohibited by \\\\):\n";
   for my $k (sort keys %{ $self->{faces}{$F}{'[in_dia_chains]'} }) {
     next if $self->{faces}{$F}{'[coverage_hash]'}{$k};
     $self->print_codepoint($k, '- ');
   }
-  print "############# Lost in known classified modifiers/standalone/combining:\n";
+  print "############# Lost among known classified modifiers/standalone/combining:\n";
   for my $k (sort keys %{ $self->{'[map2diac]'} }) {
     next if $self->{faces}{$F}{'[coverage_hash]'}{$k};
     $self->print_codepoint($k, '?- ');
@@ -2686,22 +3473,25 @@ sub print_table_coverage ($$;$) {
 <body>
 <table class=coverage>
 EOP
-  my($LL, $INV, %s, @d, %access) = ($self->{faces}{$F}{layers}, $self->{faces}{$F}{Flip_AltGr_Key});
+  my($LL, $INV, %s, @d, %access) = ($self->{faces}{$F}{layers}, $self->{faces}{$F}{'[Flip_AltGr_Key]'});
   $s{$self->charhex2key($INV)}++ if defined $INV;	# Skip in reports	'
   my @LL = map $self->{layers}{$_}, @$LL;
-  $s{$_}++ or push @d, $_ for map @{ $self->{faces}{$F}{"[$_]"} || [] }, qw(dead_array dead_in_VK_array);
-  my (@A, %isD2, @Dface) = [];
+  $s{$_}++ or push @d, $_ for map @{ $self->{faces}{$F}{"[$_]"} || [] }, qw(dead_array dead_in_VK_array extra_report_DeadChar);
+  my (@A, %isD2, @Dface, %d_seen) = [];
 #warn 'prefix keys to report: <', join('> <', @d), '>';
-  for my $dK (@d) {
-    my $c = $self->key2hex($dK);
-    next unless defined (my $FF = $self->{faces}{$F}{'[deadkeyFace]'}{$c});
+  for my $ddK (@d) {
+    (my $dK = $ddK) =~ s/^\s+//;
+    my $c = $self->key2hex($self->charhex2key($dK));
+    next if $d_seen{$c}++;
+    warn("??? Skip prefix key `$c' for face `$F', k=`$dK'"), next unless defined (my $FF = $self->{faces}{$F}{'[deadkeyFace]'}{$c});
     $access{$FF} = [$self->charhex2key($dK)];
     push @Dface, $FF;
     push @A, [$self->charhex2key($dK)];
   }
 
   my ($lastDface, $prevCol, $COLS, @colOrn, %S, @joinedPairs) = ($#Dface, -1, '', [qw(0 column1)]);
-  for my $kk (split /\p{Blank}+\|{3}\p{Blank}+/, (defined $self->{faces}{$F}{faceDeadKeys} ? $self->{faces}{$F}{faceDeadKeys} : ''), -1) {
+  for my $kk (split /\p{Blank}+\|{3}\p{Blank}+/, 
+  		(defined $self->{faces}{$F}{faceDeadKeys} ? $self->{faces}{$F}{faceDeadKeys} : ''), -1) {
     my $cnt = 0;
     length and $cnt++ for split /\p{Blank}+/, $kk;
     push @joinedPairs, $cnt;
@@ -2722,7 +3512,7 @@ EOP
       defined (my $ddd = $self->{faces}{$F}{'[deadkeyFace]'}{$Dead2}) or die "Can't find prefix key face for `$D[1]' -> `$Dead2' in `$F'+prefix `$D[0]'";
       next if $S{"@D"}++;
       push @Dface, $ddd if $reported;
-      $access{$ddd} = \@D;
+      $access{$ddd} ||= \@D;
       push @A, \@D if $reported;
 # warn "set is_D2: @D";
       $isD2{$D[0]}{$D[1]}++;
@@ -2850,25 +3640,31 @@ in .kbdd files (usually SPACE).
 EOP
 }
 
-sub coverage_face0 ($$) {
-  my ($self, $F) = (shift, shift);
-  my $LL = $self->{faces}{$F}{layers};
-  return $self->{faces}{$F}{'[coverage0]'} if exists $self->{faces}{$F}{'[coverage0]'};
+sub coverage_face0 ($$;$) {
+  my ($self, $F, $after_import) = (shift, shift, shift);
+  my $H = $self->{faces}{$F};
+  my $LL = $H->{layers};
+  return $H->{'[coverage0]'} if exists $H->{'[coverage0]'};
   my (%seen, %seen_prefix, %imported);
-  my $d = { %{ $self->{faces}{$F}{'[DEAD]'} || {} }, %{ $self->{faces}{$F}{'[dead_in_VK]'} || {} } };
+  my $d = { %{ $H->{'[DEAD]'} || {} }, %{ $H->{'[dead_in_VK]'} || {} } };
+  # warn "coverage0 for `$F'" if $after_import;
   for my $l (@$LL) {
     my $L = $self->{layers}{$l};
     for my $k (@$L) {
+      warn "Face `$F', layer `$l': coverage check is run too late: after the importation translation is performed"         		   
+      					    if not $after_import and $F !~ /^(.*)##Inv#([a-f0-9]{4,})$/is and grep {defined and ref and $_->[3]} @$k;
       $seen{$_}++        		   for grep {defined and !ref and !$d->{$_}} @$k;
       $seen_prefix{ref() ? $_->[0] : $_}++ for grep {defined and (ref or $d->{$_})} @$k;
-      $imported{"$_->[0]:$_->[1]"}++	   for grep {defined and ref and !$_->[2]} @$k;
+      $imported{"$_->[0]:$_->[1]"}++	   for grep {defined and ref and !$_->[2]} @$k;		# exportable
     }
   }
-  $self->{faces}{$F}{'[coverage0_prefix]'} = \%seen_prefix;
-  $self->{faces}{$F}{'[coverage0]'} = [sort keys %seen];
-  $self->{faces}{$F}{'[imported]'} = [sort keys %imported];
+  $H->{'[coverage0_prefix]'} = \%seen_prefix;
+  $H->{'[coverage0]'} = [sort keys %seen];
+  $H->{'[imported]'} = [sort keys %imported];
 }
 
+# %imported is analysed: if manual deadkey is specified, this value is used, otherwised new value is generated and rememebered.
+#   (but is not put in the keymap???]
 sub massage_imported ($$) {
   my ($self, $f, $K) = (shift, shift);
   return unless my ($F, $KKK) = $f =~ /^(.*)###([a-f0-9]{4,})$/is;
@@ -2877,7 +3673,7 @@ sub massage_imported ($$) {
     my($k,$face) = $i =~ /^(.):(.*)/s or die "Unrecognized imported: `$i'";
     if (exists $H->{'[imported2key]'}{$i} or exists $H->{'[imported2key_auto]'}{$i}) {
       $K = exists $H->{'[imported2key]'}{$i} ? $H->{'[imported2key]'}{$i} : $H->{'[imported2key_auto]'}{$i};
-    } elsif ($H->{'[coverage0_prefix]'}{$k} or $H->{'[auto_dead]'}{$k}) {
+    } elsif ($H->{'[coverage0_prefix]'}{$k} or $H->{'[auto_dead]'}{$k}) {	# it is already used
       # Assign a fake prefix key to imported map
       warn("Imported prefix keys exist, but Auto_Diacritic_Start is not defined in face `$F'"), return 
         unless defined $H->{'[first_auto_dead]'};
@@ -2886,16 +3682,16 @@ sub massage_imported ($$) {
       $K = $H->{'[imported2key_auto]'}{$i} = $k;
       $H->{'[auto_dead]'}{$k}++;
     }
-    my $LL = $self->{faces}{$face}{'[deadkeyLayer]'}{$self->key2hex($k)}
+    my $LL = $self->{faces}{$face}{'[deadkeyLayers]'}{$self->key2hex($k)}
       or die "Cannot import a deadkey `$k' from `$face'";
-    $LL = [@$LL];		# So may override
+    $LL = [@$LL];		# Deep copy, so may override
     my $KK = $self->key2hex($K);
-    if (my $over = $H->{'[AdddeadkeyLayer]'}{$KK}) {
+    if (my $over = $H->{'[AdddeadkeyLayers]'}{$KK}) {
 #warn "face `$F': additional bindings for deadkey $KK exist.\n";
       $LL = [$self->make_translated_layers_stack($over, $LL)];
     }
-    $H->{'[imported2key_all]'}{"$k:$face"} = $KK;
-    $H->{'[deadkeyLayer]'}{$KK} = $LL;
+    $H->{'[imported2key_all]'}{"$k:$face"} = $self->charhex2key($KK);
+    $H->{'[deadkeyLayers]'}{$KK} = $LL;
     my $new_facename = "$F#\@#\@#\@$i";
     $self->{faces}{$new_facename}{layers} = $LL;
     $H->{'[deadkeyFace]'}{$KK} = $new_facename;
@@ -2903,6 +3699,34 @@ sub massage_imported ($$) {
 
     $self->coverage_face0($new_facename);
   }
+}
+
+sub massage_imported2 ($$) {
+  my ($self, $f) = (shift, shift);
+  warn "... Importing into face=`$f" if debug_import;
+  return unless my ($F, $KKK) = ($f =~ /^(.*)###([a-f0-9]{4,})$/is);		# what about multiple prefixes???
+  return unless my $HH = $self->{faces}{$F}{'[imported2key_all]'};
+  my $H  = $self->{faces}{$f};
+  warn "Importing into face=`$F' prefix=$KKK" if debug_import;
+  my $LL = $H->{layers};
+  my @unresolved;
+  for my $l (@$LL) {
+    my $L = $self->{layers}{$l};
+    for my $k (@$L) {
+      for my $kk (grep {defined and ref and !$_->[2]} @$k) {	# exportable
+        my $v = (defined $kk->[3] ? $kk->[3] : $kk->[0]);
+        my $j = $HH->{"$v:$kk->[1]"};
+#        push(@unresolved, "$v:$kk->[1]"),
+          warn "Can't resolve `$v:$kk->[1]' to an imported dead key, face=`$F' prefix=$KKK; layer=$l" 
+            unless defined $j;
+        warn "Importing `$v:$kk->[1]' as `$j', face=`$F' prefix=$KKK; layer=$l" if debug_import;
+        @$kk[0,3] = ($j, $kk->[0]);
+      }
+    }
+  }
+  delete $self->{faces}{$f}{'[coverage0]'};
+  $self->coverage_face0($f, 'after_import');		# recalculate
+#  $H->{'[unresolved_imported]'} = \@unresolved if @unresolved;
 }
 
 sub massage_char_substitutions($$) {	# Read $self->{Substitutions}
@@ -2954,11 +3778,15 @@ sub new_from_configfile_string ($$) {
 
     for my $F (keys %{ $data->{faces} }) {
       next if 'HASH' ne ref $data->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
-      $data->coverage_face0($F);		# creates coverage0,imported array (c0 excludes diacritics), coverage0_prefix hash
+      $data->coverage_face0($F);		# creates coverage0, imported array (c0 excludes diacritics), coverage0_prefix hash
     }
     for my $F (keys %{ $data->{faces} }) {
       next if 'HASH' ne ref $data->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
-      $data->massage_imported($F);		# creates coverage0,imported array (c0 excludes diacritics), coverage0_prefix hash
+      $data->massage_imported($F);		# calc new values for imported prefix keys, augments imported maps with Add-maps
+    }
+    for my $F (keys %{ $data->{faces} }) {
+      next if 'HASH' ne ref $data->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
+      $data->massage_imported2($F);		# changes imported prefix keys to appropriate values for the target personality
     }
     $data->create_inverted_faces;
 
@@ -2966,22 +3794,40 @@ sub new_from_configfile_string ($$) {
       next if 'HASH' ne ref $data->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
       next if $F =~ /#\@?#\@?(Inv)?#\@?/;		# Face-on-a-deadkey
       my($seen_prefix, %seen0, %seen1) = $data->{faces}{$F}{'[coverage0_prefix]'};
-      warn("Face `$F' has no [deadkeyFace]"), next unless $data->{faces}{$F}{'[deadkeyFace]'};
+      # warn("Face `$F' has no [deadkeyFace]"), 
+      next unless $data->{faces}{$F}{'[deadkeyFace]'};
 #      next;
+      my (%check_later, %coverage1_prefix);
+#      warn "......  face `$F',\tprefixes0 ", keys %$seen_prefix;
+#      $seen_prefix = {%$seen_prefix};			# Deep copy
+#      $seen_prefix->{$_}++ for @{ $data->{faces}{$F}{'[dead_in_VK_array]'} || [] };
       for my $deadKEY ( sort keys %{ $data->{faces}{$F}{'[deadkeyFace]'}} ) {
         unless (%seen0) {				# Do not calculate if $F has no deadkeys...
           $seen0{$_}++ for @{ $data->{faces}{$F}{'[coverage0]'} };
         }
         ### XXXXX Directly linked faces may have some chars unreachable via the switch-prefixKey
-        my $deadKey = $data->charhex2key($deadKEY);
+        my ($deadKey, $not_in_0) = $data->charhex2key($deadKEY);
         # It does not make sense to not include it into the summary: 0483 on US is such...
-        warn("Prefix key `$deadKey' not reached (without other prefix keys?) in face `$F'")
-          unless $seen_prefix->{$deadKey};
-        my $FFF = $data->{faces}{$F}{'[deadkeyFace]'}{$deadKEY};
+        $not_in_0++, $check_later{$deadKey}++ unless $seen_prefix->{$deadKey};
+        my ($FFF, @dd2) = $data->{faces}{$F}{'[deadkeyFace]'}{$deadKEY};
         my $cov2 = $data->{faces}{$FFF}{'[coverage0]'} 
           or warn("Deadkey `$deadKey' on face `$F' -> unmassaged face"), next;
-        ref or $seen0{$_}++ or $seen1{$_}++ for @$cov2;		# Skip inherited deadkeys
+        ref or $seen0{$_}++ or $seen1{$_}++ for @$cov2;		# Skip 2nd level deadkeys
+        if (my $d2 = $data->{faces}{$F}{'[dead2]'}{$deadKey}) {
+          my $map = $data->linked_faces_2_hex_map($F, $FFF);
+          @dd2 = map $data->charhex2key($map->{$data->key2hex($_)}), keys %$d2;
+        }
+        #warn "2nd level prefixes for `$deadKey': ",  keys %{$data->{faces}{$FFF}{'[coverage0_prefix]'} || {}};
+        #warn "2nd level prefixes for `$deadKey':  <@dd2> ", keys %{$data->{faces}{$F}{'[dead2]'}{$deadKey} || {}};
+        unless ($not_in_0) {
+          $coverage1_prefix{$_}++  for keys %{ $data->{faces}{$FFF}{'[coverage0_prefix]'} || {} };
+          $coverage1_prefix{$_}++  for @dd2;
+        }
+#        warn "......  deadkey `$deadKey' reached0 in face `$F'" unless $not_in_0;
       }
+      my @check = grep !$coverage1_prefix{$_}, keys %check_later;
+      my $_s = (@check > 1 ? 's' : '');
+      warn("Prefix key$_s <@check> not reached (without double prefix keys?) in face `$F'; later=", keys %check_later) if @check;
       $data->{faces}{$F}{'[coverage1]'} = [sort keys %seen1];
       $data->{faces}{$F}{'[coverage_hash]'} = \%seen0;
     }
@@ -3032,7 +3878,7 @@ sub massage_deadkeys_win ($$) {
 # http://www.phon.ucl.ac.uk/home/wells/dia/diacritics-revised.htm#two
 # http://msdn.microsoft.com/en-us/library/windows/desktop/ms646280%28v=vs.85%29.aspx
 
-my %oem_keys = reverse (qw(
+my %oem_keys = do {{ no warnings 'qw' ; reverse (qw(
      OEM_MINUS	-
      OEM_PLUS	=
      OEM_4	[
@@ -3047,9 +3893,10 @@ my %oem_keys = reverse (qw(
      OEM_102	\#
      SPACE	#
      DECIMAL	.#
-));			#'# Here # marks keys which need special attention...
+)) }};			#'# Here # marks keys which need special attention...
 
-	# For type 4 of keyboard (same as types 1,3)
+	# For type 4 of keyboard (same as types 1,3, except OEM_AX, (NON)CONVERT, ABNT_C1)
+	#   except KANA,(NON)CONVERT,; scancode of YEN,| for OEM_8 is our invention; after OEM_8 all is junk (non-scancodes???)...
 my %scan_codes = (reverse qw(
   02	1
   03	2
@@ -3156,6 +4003,7 @@ my %scan_codes = (reverse qw(
   5A	OEM_WSCTRL
   5B	OEM_FINISH
   5C	OEM_JUMP
+  5C	OEM_AX
   5D	EREOF
   5E	OEM_BACKTAB
   5F	OEM_AUTO
@@ -3173,9 +4021,12 @@ my %scan_codes = (reverse qw(
   6D	F22
   6E	F23
   6F	OEM_PA3
+  70	KANA
   71	OEM_RESET
   73	ABNT_C1
   76	F24
+  79	CONVERT
+  7B	NONCONVERT
   7B	OEM_PA1
   7C	TAB
   7E	ABNT_C2
@@ -3220,6 +4071,8 @@ my %scan_codes = (reverse qw(
   e06C	LAUNCH_MAIL
   e06D	LAUNCH_MEDIA_SELECT
   e11D	PAUSE
+
+  7D	OEM_8
 
   10	SHIFT
   11	CONTROL
@@ -3349,10 +4202,13 @@ sub auto_capslock($$) {
   return 0;
 }
 
-{ my %seen;
-  sub reset_units ($) { %seen = () }
+my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
+		      '7E ABNT_C2' => '7D OEM_8',	# ABNT vs JIS keyboard
+		      '7B NONCONVERT' => '79 CONVERT');	# JIS keyboard: left of SPACE, right of SPACE
+{ my(%seen, %seen_scan, %seen_VK, @add_scan_VK);
+  sub reset_units ($) { @add_scan_VK = %seen_scan = %seen_VK = %seen = () }
 
-  sub output_unit0 ($$$$$;$) {
+  sub output_unit00 ($$$$$;$) {
     my ($self, $k, $u, $deadkeys, $Used, $known_dead) = (shift, shift, shift, shift, shift, shift);  
     my $sc = ($known_dead or $scan_codes{$k}) or warn("Can't find the scancode for the key `$k'"), return;
     my $cntrl;	# Set Control-KEY if is [ or ] or \
@@ -3368,9 +4224,28 @@ sub auto_capslock($$) {
     my $expl1 = exists $self->{UNames} ? "\t// " . join ", ", map +((defined $_) ? $self->UName($_) : ' '), 
                   $u->[0][0], $u->[0][1], $cntrl, $u->[1][0], $u->[1][1] : '';
     my $capslock = ($self->auto_capslock($u->[0])) | (($self->auto_capslock($u->[1])) << 2);
-    <<EOP;
-$sc\t$k$fill\t$capslock\t$keys\t// $expl$expl1
+    $seen_scan{$sc}++;
+    $seen_VK{$k}++;
+    ($sc, $k, $fill, <<EOP);
+$capslock\t$keys\t// $expl$expl1
 EOP
+  }
+
+  sub output_unit0 ($$$$$;$) {
+    my @i = &output_unit00;
+    my $add = $double_scan_VK{uc "$i[0] $i[1]"};
+#warn "<<<<< Secondary key <$add> for <$i[0] $i[1]>" if $add;
+    push @add_scan_VK, [split(/ /, $add), @i[2,3]] if $add;
+    "$i[0]\t$i[1]$i[2]\t$i[3]"
+  }
+  
+  sub output_added_units ($) {
+    my @o;
+    for my $i (@add_scan_VK) {
+      next if $seen_scan{$i->[0]} or $seen_VK{$i->[1]};	# Cannot duplicate either one...
+      push @o, "$i->[0]\t$i->[1]$i->[2]\t$i->[3]";
+    }
+    @o
   }
   
   sub output_unit ($$$$$$) {
@@ -3391,8 +4266,7 @@ sub output_layout_win ($$$$$$) {
   $self->reset_units;
   die "Count of non-VK entries mismatched: $cnt vs ", scalar @{$self->{layers}{$layers->[0]}}
     unless $cnt <= scalar @{$self->{layers}{$layers->[0]}};
-  map $self->output_unit($layers, $basesub, $_, $deadkeys, $Used),
-    0..$cnt-1;
+  map $self->output_unit($layers, $basesub, $_, $deadkeys, $Used), 0..$cnt-1;
 }
 
 sub output_VK_win ($$$) {
@@ -3446,7 +4320,7 @@ sub read_deadkeys_win ($$) {
      $self->{'[seen_knames]'} ||= {};
      @{$self->{'[seen_knames]'}}{map {chr hex $_} keys %d} = values %d;		# XXXX Overwrites older values
    } elsif ($dead =~ /\S/) {
-     warn "no KEYNAME_DEAD section found"
+     warn "no KEYNAME_DEAD section found" if 0;
    }
    \%o, \%d, $t;		# %o - translation tables; %d - names; $t is what is left of input
 }
@@ -3633,11 +4507,15 @@ sub control2prt ($$) {
   return $c unless ord $c < 0x20 or ord $c == 0x7f;
   $control{$c} or sprintf '\\x%02x', ord $c;
 }
+
 sub print_deadkey_win ($$$$$$) {
   my ($self, $nameF, $d, $dead2, $flip_AltGr_hex, $altGr_key_hex) = (shift, shift, shift, shift, shift, shift);
 #warn "emit `$nameF' d=`$d'";
   my $H = $self->{faces}{$nameF};
-  my $b = $H->{'[deadkeyFace]'}{$d};
+#  if (my $unres = $H->{'[unresolved_imported]'}) {
+#    warn "Can't resolve `@$unres' to an imported dead key; face=`$nameF'" unless $H->{'[unresolved_imported_warned]'}++;
+#  }
+  my $b = $H->{'[deadkeyFace]'}{$d};	# $d is hex
   my $b1 = $altGr_key_hex && $H->{'[deadkeyFaceInvFace]'}{$self->charhex2key($altGr_key_hex)};
 #warn "See dead2 in <$nameF> for <$d>" if $dead2;
   my $Dead2 = $dead2;
@@ -3676,21 +4554,22 @@ sub print_deadkey_win ($$$$$$) {
     $d = $DD[$invertAlt0];
     $OUT .= "DEADKEY\t$d\n\n";
     # Good order: first alphanum, then punctuation, then space
-    my @keys = sort keys %$map;			# Not OK for 6-byte keys
+    my @keys = sort keys %$map;			# Sorting not OK for 6-byte keys - but can't have them on Win
     @keys = (grep(( lc(chr hex $_) ne uc(chr hex $_) and not $sp{chr hex $_} ),		      @keys),
              grep(((lc(chr hex $_) eq uc chr hex $_ and (chr hex $_) !~ /\p{Blank}/) and not $sp{chr hex $_}), @keys),
              grep((((lc(chr hex $_) eq uc chr hex $_ and (chr hex $_) =~ /\p{Blank}/) or $sp{chr hex $_}) and $_ ne '0020'), @keys),
-             grep(				                    $_ eq '0020',  @keys));
-    for my $n (@keys) {	# Not OK for 6-byte keys (impossible on Win): make SPACE last
+             grep(				                    $_ eq '0020',  @keys));	# make SPACE last
+    for my $n (@keys) {	# Not OK for 6-byte keys (impossible on Win)
 #      warn "doing $n\n";
       my ($to, $int_dead) = $map->{$n};
       if ('ARRAY' eq ref $to) {
         $int_dead = !$to->[2]; 
         my $i = $self->charhex2key($to->[0]) . ":$to->[1]";
-        if (defined (my $j = exists $H->{'[imported2key_auto]'}{$i} ? $H->{'[imported2key_auto]'}{$i} : $H->{'[imported2key]'}{$i})) {
+        if (0 and defined (my $j = $H->{'[imported2key_all]'}{$i})) {
+          # warn "... got i = < $i >; j = < $j >; face=`$nameF'\n";
           $to = $self->key2hex($j);
         } else {
-          warn "Can't resolve `$to->[0]:$to->[1]' to an imported dead key" if $int_dead;
+          # warn "Can't resolve `$to->[0]:$to->[1]' to an imported dead key" if $int_dead;
           $to = $to->[0];
         }
         
@@ -3698,7 +4577,7 @@ sub print_deadkey_win ($$$$$$) {
       $H->{'[32-bit]'}{chr hex $map->{$n}}++, next if hex $n > 0xFFFF;	# Cannot be put in a map...
       if (hex $to > 0xFFFF) {		# Value cannot be put in a map...
         $H->{'[32-bit]'}{chr hex $map->{$n}}++;
-        next unless defined ($to = $H->{DeadChar_32bitTranslation});
+        next unless defined ($to = $H->{'[DeadChar_32bitTranslation]'});
         $to =~ s/^\s+//;	$to =~ s/\s+$//;
         $to = $self->key2hex($to);
       }
@@ -4001,17 +4880,17 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
     my $base = $1;
     exists $self->{layers}{$_} or $_= ($self->make_translated_layers($_, $face, [$N], $deadkey))->[0]
       for $base;
-    $base = $self->{layers}{my $B = $base};
+    my $baseL = $self->{layers}{$base};
     my (%h);
-    for my $k (0..$#$base) {
+    for my $k (0..$#$baseL) {
       for my $shift (0..1) {
-        my $C = $base->[$k][$shift] or next;
+        my $C = $baseL->[$k][$shift] or next;
         next unless ref $C;
         my $c = $C->[0];
         $h{"$N $k $shift $C->[0]"} = $C;
-      }						# Treat prefix keys as usual keys:
+      }
     }						# Treat prefix keys as usual keys:
-    return sub ($) { my $c = shift; defined $c or return $c; return $c if ref $c; $h{"@_ $c"} or $c }, $B;
+    return sub ($) { my $c = shift; defined $c or return $c; return $c if ref $c; $h{"@_ $c"} or $c }, $base;
   }
   if ($name =~ /^ByColumns\[(.+)\]$/) {
     my @chars = map {length() ? $self->charhex2key($_) : undef} split /,/, "$1";
@@ -4064,7 +4943,7 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
     $Dia = $self->charhex2key($Dia);				# Needed for 2Self
     my(@sp, %sp) = map {(my $in = $_) =~ s/(?<=.)\@$//s; $in} @{ ($self->get_VK($face))->{SPACE} || [] };
     @sp = map $self->charhex2key($_), @sp;
-    my $flip_AltGr = $self->{faces}{$face}{Flip_AltGr_Key};
+    my $flip_AltGr = $self->{faces}{$face}{'[Flip_AltGr_Key]'};
     $flip_AltGr = $self->charhex2key($flip_AltGr) if defined $flip_AltGr;
     @sp = grep $flip_AltGr ne $_, @sp if defined $flip_AltGr;			# It has a different function...
     @sp{@sp[1..$#sp]} = (0..$#sp);		# The leading elt is the scancode
@@ -4275,28 +5154,53 @@ sub make_translated_layers_tr ($$$$$$$) {		# Apply translation map
   @new_names
 }
 
+sub key2string ($$) {
+  my ($self, $key, @o) = (shift, shift);
+  return '<>' unless defined $key;
+  return '[]' unless grep defined, @$key;
+  for my $k (@$key) {
+    push(@o, 'undef'), next unless defined $k;
+    push @o, ((ref $k) ? (defined $k->[0] ? $k->[0] : '<undef>') : $k);
+  }
+  "[@o]"
+}
+
+sub layer2string ($$) {
+  my ($self, $layer, $last, $rest) = (shift, shift, -1, '');
+  my @o = map $self->key2string($_), @$layer;
+  2 < length $o[$_] and $last = $_ for 0..$#o;
+  $rest = '...' if $last != $#o;
+  (join ' ', @o[0..$last]) . $rest
+}
+
 sub make_translated_layers_stack ($$@) {		# Stacking
   my ($self, @out, $ref) = (shift);
   my $c = @{$_[0]};
   @$_ == $c or die "Stacking: number of layers ", scalar(@$_), " != number of layers $c of the first elt"
     for @_;
-  for my $l (0..$c-1) {
-    my @layers = map $_->[$l], @_;
+  for my $lN (0..$c-1) {	# layer Number
+    my @layers = map $_->[$lN], @_;
     push @out, "@layers";
+    if (debug_stacking) {
+      warn "Stack in-layer $lN `$_': ", $self->layer2string($self->{layers}{$_}), "\n" for @layers;
+    }
     next if exists $self->{layers}{"@layers"};
     my (@L, @keys) = map $self->{layers}{$_}, @layers;
-    for my $l (@L) {
-  # warn "... Another layer...";
+    for my $lI (0..$#L) {
+      my $l = $L[$lI];
+      # warn "... Layer$lN: `$layers[$lI]'..." if debug_stacking;
       for my $k (0..$#$l) {
         for my $kk (0..$#{$l->[$k]}) {
-  # warn "...... On $k/$kk: I see `$l->[$k][$kk]'" if defined $l->[$k][$kk];
+	  #warn "...... On $k/$kk: I see `$l->[$k][$kk]'" if debug_stacking and defined $l->[$k][$kk];
           $keys[$k][$kk] = $l->[$k][$kk] if defined $l->[$k][$kk] and not defined $keys[$k][$kk];	# Deep copy
         }
         $keys[$k] ||= [];
       }
     }
     $self->{layers}{"@layers"} = \@keys;
+    warn "Stack out-layer $lN `@layers':\n\t", $self->layer2string(\@keys), "\n" if debug_stacking;
   }
+  warn 'Stack out-layers:', (join "\n\t", '', @out), "\n" if debug_stacking;
   @out;
 }
 
@@ -4316,13 +5220,13 @@ sub make_translated_layers_noid ($$$@) {		# Stacking
       }
     }
   }
-  my $name = 'NOID([' . join('], [', map "@$_", @_) . '])';
+  my $name = 'NOID([' . join('], [', map {join ' +++ ', @$_} @_) . '])';
   for my $l (0..$c-1) {
     my (@layers) = map $_->[$l], @_;
     if ($whole) {
-      $name .= "'"
+      $name .= "'"	# Keep names of layers distinct, but since they are all interdependent, do not construct basing on layer names
     } else {
-      $name = "NOID[$refr->[$l]](@layers)"
+      $name = "NOID[$refr->[$l]](" . (join ' +++ ', @layers) . ')'
     }
     push @out, $name;
 #warn ". Doing layer number $l, name=`$name'...";
@@ -4342,6 +5246,7 @@ sub make_translated_layers_noid ($$$@) {		# Stacking
     }
     $self->{layers}{$name} = \@keys;
   }
+  warn "NOID --> <@out>\n" if debug_noid;
   @out;
 }
 
@@ -4370,12 +5275,14 @@ sub join_min_paren_brackets_matched ($$@) {
 sub layers_by_face_recipe ($$$) {
   my ($self, $face, $base) = (shift, shift, shift);
   die "No face recipe for `$face' found" unless my $r = $self->{face_recipes}{$face};
-  $r =~ s/^\s+//;
+  $r = $self->recipe2str($r);
 #print "face recipe `$face'\n";
   my $LL = $self->{faces}{$base}{layers};
+  warn "Using face_recipes for `$face', base=$base ==> `$r'\n" if debug_face_layout_recipes;
   my $L = $self->{faces}{$face}{layers} = $self->make_translated_layers($r, $base, [0..$#$LL]);
 #print "face recipe `$face'  -> ", $self->array2string($L), "\n";
-#warn "face recipe `$face'  -> ", $self->array2string($L);
+#  warn "Using face_recipes `$face'  -> ", $self->array2string($L) if debug_face_layout_recipes;
+  warn "Massaged face `$face' ->", (join "\n\t", '', @$L), "\n" if debug_face_layout_recipes;
 #warn "face recipe `$face' --> ", $self->array2string([map $self->{layers}{$_}, @$L]);
   $L;
 }
@@ -4388,9 +5295,11 @@ sub export_layers ($$$) {
 
 sub pseudo_layer ($$$$) {
   my ($self, $recipe, $face, $N) = (shift, shift, shift, shift);
-  my $l = $self->pseudo_layer0($recipe, $face, $N);
+  my $ll = my $l = $self->pseudo_layer0($recipe, $face, $N);
+#  warn "Pseudo-layer recipe `$recipe', face=`$face', N=$N ->\n\t$l\n" if $recipe =~ /Greek__/;
 #warn("layer recipe: `$l'"), 
-  ($l = $self->{layer_recipes}{$l}) =~ s/^\s+// if exists $self->{layer_recipes}{$l};
+  ($l = $self->{layer_recipes}{$l}) =~ s/^\s+// if exists $self->{layer_recipes}{$ll};
+  warn "pseudo_layer(`$recipe'): Using layout_recipe `$l' for layer '$ll'\n" if debug_face_layout_recipes and exists $self->{layer_recipes}{$ll};
   return $l if $self->{layers}{$l};
   ($self->make_translated_layers($l, $face, [$N]))->[0]
 #  die "Component `$l' of a pseudo-layer cannot be resolved"
@@ -4411,8 +5320,16 @@ sub pseudo_layer0 ($$$$) {
   }
 #warn "Doing flip/face via `$recipe', N=$N, N1=$N1, face=`$face'";
   return ($self->export_layers($face, $face))->[$N1] if $recipe eq 'FlipLayers';
-  return ($self->export_layers("$2", $face))->[$1 ? $N : $N1]
-    if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/;
+#  my $gr_debug = ($recipe =~ /Greek__/);
+  if (debug_PERL_dollar1_scoping) {
+    return ($self->export_layers("$2", $face))->[$1 ? $N : $N1]
+      if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/;
+  } else {
+    my $m1;	# Apparently, in perl5.10, if replace $m1 by $1 below, $1 loses its TRUE value between match and evaluation of $1
+#  ($gr_debug and warn "Pseudo-layer `$recipe', face=`$face', N=$N, N1=$N1\n"),
+    return ($self->export_layers("$2", $face))->[$m1 ? $N : $N1]
+      if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/ and ($m1 = $1, 1);
+  }
   die "Unrecognized Face recipe `$recipe'"
 }
 
@@ -4440,6 +5357,7 @@ sub make_translated_layers ($$$$;$$) {		# support Self/FlipLayers/LinkFace/FlipS
   if (@parts > 1) {
 #warn "parts of the translation spec: <", join('> <', @parts), '>';
     my @layers = map $self->make_translated_layers($_, $face, $NN, $deadkey), @parts;
+    warn "Stacking/NOID for layers `@parts'", (join "\n\t", '', map {join ' &&& ', @$_} @layers), "\n" if debug_noid or debug_stacking;
 #print "Stacking for `$recipe'\n" if $DEBUG;
 #Dumpvalue->new()->dumpValue(\@layers) if $DEBUG;
     return [$self->make_translated_layers_noid($noid eq 'NotSameKey', @layers)]
@@ -4466,7 +5384,8 @@ sub make_translated_layers ($$$$;$$) {		# support Self/FlipLayers/LinkFace/FlipS
     if (exists $self->{layers}{$ARG}) {
       $ARG = [($ARG) x @$NN];
     } else {
-      ($ARG = $self->{layer_recipes}{$ARG}) =~ s/^\s+// if exists $self->{layer_recipes}{$ARG};
+      ($ARG = $self->{layer_recipes}{$ARG}) =~ s/^\s+// if exists $self->{layer_recipes}{my $a = $ARG};
+      warn "make_translated_layers: Using layout_recipe `$ARG' for layer '$a'\n" if debug_face_layout_recipes and exists $self->{layer_recipes}{$a};
       ($noid) = ($recipe =~ /^(NotId|NotSameKey)$/);
       $ARG = $self->make_translated_layers($ARG, $face, $NN, $deadkey, $noid);
       return $ARG if $noid;
@@ -4481,7 +5400,7 @@ sub make_translated_layers ($$$$;$$) {		# support Self/FlipLayers/LinkFace/FlipS
 sub massage_translated_layers ($$$$;$) {
   my ($self, $in, $face, $NN, $deadkey) = (shift, shift, shift, shift, shift, '');
 #warn "Massaging `$deadkey' for `$face':$N";
-  return $in unless my $r = $self->get_deep($self, 'faces', (my @p = split m(/), $face), 'Diacritic_if_undef');
+  return $in unless my $r = $self->get_deep($self, 'faces', (my @p = split m(/), $face), '[Diacritic_if_undef]');
   $r =~ s/^\s+//;
 #warn "	-> end recipe `$r'";
   my $post = $self->make_translated_layers($r, $face, $NN, $deadkey);
@@ -4490,7 +5409,7 @@ sub massage_translated_layers ($$$$;$) {
 
 sub default_char ($$) {
   my ($self, $F) = (shift, shift);
-  my $default = $self->get_deep($self, 'faces', $F, 'DeadChar_DefaultTranslation');
+  my $default = $self->get_deep($self, 'faces', $F, '[DeadChar_DefaultTranslation]');
   $default =~ s/^\s+//, $default = $self->charhex2key($default) if defined $default;
   $default;
 }
@@ -4500,19 +5419,19 @@ sub create_inverted_face ($$$$$) {
   my $H = $self->{faces}{$F};
   my $auto_chr = $H->{'[deadkeyInvFace]'}{$KK};
   my $new_facename = $H->{'[deadkeyFaceInvFace]'}{$auto_chr};
-  my $LL = $H->{'[deadkeyLayer]'}{$KK};
+  my $LL = $H->{'[deadkeyLayers]'}{$KK};
   $LL = $H->{layers} if $KK eq '';
-  $self->create_inverted_AltGr_face($LL, $new_facename, $H->{"[InvdeadkeyLayer]"}{$KK}, $chain->{$KK and $self->charhex2key($KK)}, $flip_AltGr, $F);
+  $self->create_inverted_AltGr_face($LL, $new_facename, $H->{"[InvdeadkeyLayers]"}{$KK}, $chain->{$KK and $self->charhex2key($KK)}, $flip_AltGr, $F);
 
 # warn "Joining <$F>, <$new_facename>";
   $self->link_layers($F, $new_facename, 'skipfix', 'no-slot-warn', $self->default_char($F));
   if ($KK eq '' and defined $flip_AltGr) {
     $H->{'[deadkeyFace]'}{$self->key2hex($flip_AltGr)} = $H->{'[deadkeyFaceInvFace]'}{$auto_chr};
   }
-  if ($H->{"[InvdeadkeyLayer]"}{$KK}) {		# There are overrides for the inverted face.  Make a map for them...
+  if ($H->{"[InvdeadkeyLayers]"}{$KK}) {		# There are overrides for the inverted face.  Make a map for them...
 #warn "Overriding face for inverted `$KK' in face $F; new_facename=$new_facename";
     $H->{'[InvAltGrFace]'}{$KK} = "$new_facename\@override";
-    $self->{faces}{"$new_facename\@override"}{layers} = $H->{"[InvdeadkeyLayer]"}{$KK};
+    $self->{faces}{"$new_facename\@override"}{layers} = $H->{"[InvdeadkeyLayers]"}{$KK};
     $self->link_layers($F, "$new_facename\@override", 'skipfix', 'no-slot-warn', $self->default_char($F));
   }
   $new_facename;
@@ -4522,6 +5441,18 @@ sub next_auto_dead ($$) {
   my ($self, $H, $o) = (shift, shift);
   1 while $H->{'[auto_dead]'}{ $o = $H->{'[first_auto_dead]'}++ }++;
   chr $o;
+}
+
+sub recipe2str ($$) {
+  (undef, my $recipe) = (shift, shift);
+   if ('ARRAY' eq ref $recipe) {
+     $recipe = [@$recipe];			# deep copy
+     s/\s+$//, s/^\s+// for @$recipe;
+     s/(?<![|,])$/ / for @$recipe[0..($#$recipe - 1)];	# Join by spaces unless after comma or |
+     $recipe = join '', @$recipe;
+   }
+   $recipe =~ s/^\s+//;
+   $recipe
 }
 
 #use Dumpvalue;
@@ -4534,7 +5465,8 @@ sub create_composite_layers ($) {
     (my $F = $FF) =~ s(^faces/?)();
     my(@FF, @HH) = split m(/), $FF;
     next if @FF == 1 or $FF[-1] eq 'VK';
-    push(@HH, $self->get_deep($self, @FF)), pop @FF while @FF;
+    my @FF1 = @FF;
+    push(@HH, $self->get_deep($self, @FF1)), pop @FF1 while @FF1;
     my $H = $HH[0];
     next if $H->{PartialFace};
     $self->{faces}{$F} = $H if $F =~ m(/) and exists $H->{layers};			# Make a direct-access copy
@@ -4562,7 +5494,7 @@ sub create_composite_layers ($) {
       $layers = ((defined $layers) ? [$layers] : [ 0 .. $#{$self->{faces}{$face}{layers}} ]);
       my @keys = ((defined $key) ? $key : (grep {not $seen{$_}} map $self->key2hex($_), keys %{ $H->{'[DEAD]'} }));
       @keys = '' if $inv and "$inv @keys" eq "Inv 0000";
-      (my $recipe = $HH->{$k}) =~ s/^\s+//;
+      my $recipe = $self->recipe2str($HH->{$k});
       my $massage = !($recipe =~ s/\s+NoDefaultTranslation$//);
       for my $KK (@keys) {
 #warn "Doing key `$KK' inv=`$inv' face=`$face', recipe=`$recipe'";
@@ -4574,26 +5506,26 @@ sub create_composite_layers ($) {
 #print "Doing key `$KK' face=$face  layer=`$layer' recipe=`$recipe'\n" if $DEBUG;
 #Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $DEBUG;
 #warn "new=<<<", join('>>> <<<', @$new),'>>>';
-          $H->{"[${inv}deadkeyLayer]"}{$KK}[$layers->[$NN]] = $new->[$NN];
+          $H->{"[${inv}deadkeyLayers]"}{$KK}[$layers->[$NN]] = $new->[$NN];
 #warn "Face `$face', layer=$layer key=$KK\t=> `$new'" if $H->{layers}[$layer] =~ /00a9/i;
 #Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $self->charhex2key($key) eq chr 0x00a9;
         }
       }
     }
-    next unless $H->{'[deadkeyLayer]'};		# Are we in a no-nonsense Face-hash with defined deadkeys?
+    next unless $H->{'[deadkeyLayers]'};		# Are we in a no-nonsense Face-hash with defined deadkeys?
 #warn "Face: <", join( '> <', %$H), ">";
     my $layerL = @{ $self->{layers}{ $H->{layers}[0] } };	# number of keys in the face (in the principal layer)
-    my $first_auto_dead = $H->{Auto_Diacritic_Start};
+    my $first_auto_dead = $self->get_deep_via_parents($self, undef, @FF, 'Auto_Diacritic_Start');
     $H->{'[first_auto_dead]'} = ord $self->charhex2key($first_auto_dead) if defined $first_auto_dead;
-    for my $KK (sort keys %{$H->{'[deadkeyLayer]'}}) {		# Given a deadkey: join layers into a face, and link to it
+    for my $KK (sort keys %{$H->{'[deadkeyLayers]'}}) {		# Given a deadkey: join layers into a face, and link to it
       for my $layer ( 0 .. $#{ $H->{layers} } ) {
 #warn "Checking for empty layers, Face `$face', layer=$layer key=$KK";
-        $self->{layers}{"[empty$layerL]"} ||= [map[], 1..$layerL], $H->{'[deadkeyLayer]'}{$KK}[$layer] = "[empty$layerL]"
-          unless defined $H->{'[deadkeyLayer]'}{$KK}[$layer]
+        $self->{layers}{"[empty$layerL]"} ||= [map[], 1..$layerL], $H->{'[deadkeyLayers]'}{$KK}[$layer] = "[empty$layerL]"
+          unless defined $H->{'[deadkeyLayers]'}{$KK}[$layer]
       }
       # Join the syntetic layers (now well-formed) into a new synthetic face:
       my $new_facename = "$F###$KK";
-      $self->{faces}{$new_facename}{layers} = $H->{'[deadkeyLayer]'}{$KK};
+      $self->{faces}{$new_facename}{layers} = $H->{'[deadkeyLayers]'}{$KK};
       $H->{'[deadkeyFace]'}{$KK} = $new_facename;
 #warn "Joining <$F>, <$new_facename>";
       $self->link_layers($F, $new_facename, 'skipfix', 'no-slot-warn', $self->default_char($F));
@@ -4608,22 +5540,22 @@ sub create_inverted_faces ($) {
   for my $F (keys %{$self->{faces} }) {
     next if 'HASH' ne ref $self->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
     my $H = $self->{faces}{$F};
-    next unless $H->{'[deadkeyLayer]'};		# Are we in a no-nonsense Face-hash with defined deadkeys?
+    next unless $H->{'[deadkeyLayers]'};		# Are we in a no-nonsense Face-hash with defined deadkeys?
     my $expl = $self->get_deep($self, 'faces', (split m(/), $F), 'Explicit_AltGr_Invert') || [];
     $expl = [], warn "Odd number of elements of Explicit_AltGr_Invert in face $F, ignore" if @$expl % 2;
     $expl = {map $self->charhex2key($_), @$expl};
 
 #warn "Face: <", join( '> <', %$H), ">";
     my $layerL = @{ $self->{layers}{ $H->{layers}[0] } };	# number of keys in the face (in the principal layer)
-    for my $KK (sort keys %{$H->{'[deadkeyLayer]'}}) {  # Create AltGr-inverted face if there is at least one key in the AltGr face:
-      my $LL = $H->{'[deadkeyLayer]'}{$KK};
+    for my $KK (sort keys %{$H->{'[deadkeyLayers]'}}) {  # Create AltGr-inverted face if there is at least one key in the AltGr face:
+      my $LL = $H->{'[deadkeyLayers]'}{$KK};
       next unless defined $H->{'[first_auto_dead]'} and grep defined, map $self->flatten_arrays($_), map $self->{layers}{$_}, @$LL[1..$#$LL];
       $H->{'[deadkeyInvFace]'}{''} = $self->next_auto_dead($H) unless exists $H->{'[deadkeyInvFace]'}{''};	# Make principal invertred face
       my $auto_chr = $H->{'[deadkeyInvFace]'}{$KK} = 
         ((exists $expl->{$self->charhex2key($KK)}) ? $expl->{$self->charhex2key($KK)} : $self->next_auto_dead($H));
       $H->{'[deadkeyFaceInvFace]'}{$auto_chr} = "$F##Inv#$KK";
     }
-    next unless defined (my $flip_AltGr =  $H->{Flip_AltGr_Key});
+    next unless defined (my $flip_AltGr =  $H->{'[Flip_AltGr_Key]'});
     $flip_AltGr = $self->charhex2key($flip_AltGr) if defined $flip_AltGr;
     $H->{'[deadkeyFaceInvFace]'}{ $H->{'[deadkeyInvFace]'}{''} } = "$F##Inv#" if exists $H->{'[deadkeyInvFace]'}{''};
     my ($prev, %chain) = '';
@@ -4685,8 +5617,9 @@ sub fill_win_template ($$$) {
   my $b = $F->{BaseLayer};
   $F->{'[dead-used]'} = [map {}, @{$F->{layers}}];		# Which of deadkeys are reachable on the keyboard
   my $cnt = $F->{'[non_VK]'};
-  $h{LAYOUT_KEYS} = join '', $self->output_layout_win($F->{layers}, $b, $F->{'[dead]'}, $F->{'[dead-used]'}, $cnt);
+  $h{LAYOUT_KEYS}  = join '', $self->output_layout_win($F->{layers}, $b, $F->{'[dead]'}, $F->{'[dead-used]'}, $cnt);
   $h{LAYOUT_KEYS} .= join '', $self->output_VK_win($k->[-1], $F->{'[dead-used]'});
+  $h{LAYOUT_KEYS} .= join '', $self->output_added_units();
 
   if (0) {
 #warn "Translate: ", %h;
@@ -4728,7 +5661,7 @@ sub fill_win_template ($$$) {
   my $f = $self->get_AgeList;
   $self->load_uniage($f) if defined $f and not $self->{Age};
 
-  my $flip_AltGr_hex =  $F->{Flip_AltGr_Key};
+  my $flip_AltGr_hex =  $F->{'[Flip_AltGr_Key]'};
   $flip_AltGr_hex = $self->key2hex($self->charhex2key($flip_AltGr_hex)) if defined $flip_AltGr_hex;
   for my $deadKey ( sort keys %{ $F->{'[deadkeyFace]'} } ) {
     my $auto_inv_AltGr = $F->{'[deadkeyInvFace]'}{$deadKey};
@@ -4848,11 +5781,122 @@ Duplicate: FE34 <== [ 005F <vertical> ] ==> <1 FE33> (prefered)
 	<︴>	PRESENTATION FORM FOR VERTICAL WAVY LOW LINE
 	<︳>	PRESENTATION FORM FOR VERTICAL LOW LINE at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 4224, <$f> line 38879.
 
+Duplicate: 0273 <== [ 006E <pseudo-manual-phonetized> ] ==> <1 014B> (prefered)
+	<ɳ>	LATIN SMALL LETTER N WITH RETROFLEX HOOK
+	<ŋ>	LATIN SMALL LETTER ENG at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 1DAF <== [ 006E <pseudo-manual-phonetized> <super> ] ==> <1 1D51> (prefered)
+	<ᶯ>	MODIFIER LETTER SMALL N WITH RETROFLEX HOOK
+	<ᵑ>	MODIFIER LETTER SMALL ENG at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2040 <== [ 007E <pseudo-manual-quasisynon> ] ==> <1 203F> (prefered)
+	<⁀>	CHARACTER TIE
+	<‿>	UNDERTIE at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 207F <== [ 004E <pseudo-manual-phonetized> ] ==> <1 014A> (prefered)
+	<ⁿ>	SUPERSCRIPT LATIN SMALL LETTER N
+	<Ŋ>	LATIN CAPITAL LETTER ENG at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 224B <== [ 007E <pseudo-manual-addtilde> ] ==> <1 2248> (prefered)
+	<≋>	TRIPLE TILDE
+	<≈>	ALMOST EQUAL TO at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2256 <== [ 003D <pseudo-manual-round> ] ==> <1 224D> (prefered)
+	<≖>	RING IN EQUAL TO
+	<≍>	EQUIVALENT TO at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2257 <== [ 003D <pseudo-manual-round> ] ==> <1 224D> (prefered)
+	<≗>	RING EQUAL TO
+	<≍>	EQUIVALENT TO at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 225E <== [ 225F <pseudo-manual-quasisynon> ] ==> <1 225C> (prefered)
+	<≞>	MEASURED BY
+	<≜>	DELTA EQUAL TO at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2263 <== [ 003D <pseudo-manual-addhline> ] ==> <1 2261> (prefered)
+	<≣>	STRICTLY EQUIVALENT TO
+	<≡>	IDENTICAL TO at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2277 <== [ 003D <pseudo-manual-quasisynon> 0338 ] ==> <1 2276> (prefered)
+	<≷>	GREATER-THAN OR LESS-THAN
+	<≶>	LESS-THAN OR GREATER-THAN at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2279 <== [ 003D <pseudo-manual-quasisynon> ] ==> <1 2278> (prefered)
+	<≹>	NEITHER GREATER-THAN NOR LESS-THAN
+	<≸>	NEITHER LESS-THAN NOR GREATER-THAN at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2279 <== [ 003D <pseudo-manual-quasisynon> 0338 0338 ] ==> <1 2278> (prefered)
+	<≹>	NEITHER GREATER-THAN NOR LESS-THAN
+	<≸>	NEITHER LESS-THAN NOR GREATER-THAN at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2982 <== [ 003A <pseudo-manual-amplify> ] ==> <1 2236> (prefered)
+	<⦂>	Z NOTATION TYPE COLON
+	<∶>	RATIO at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2993 <== [ 0028 <pseudo-manual-round> ] ==> <1 2985> (prefered)
+	<⦓>	LEFT ARC LESS-THAN BRACKET
+	<⦅>	LEFT WHITE PARENTHESIS at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2994 <== [ 0029 <pseudo-manual-round> ] ==> <1 2986> (prefered)
+	<⦔>	RIGHT ARC GREATER-THAN BRACKET
+	<⦆>	RIGHT WHITE PARENTHESIS at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2995 <== [ 0029 <pseudo-manual-round> ] ==> <1 2986> (prefered)
+	<⦕>	DOUBLE LEFT ARC GREATER-THAN BRACKET
+	<⦆>	RIGHT WHITE PARENTHESIS at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2996 <== [ 0028 <pseudo-manual-round> ] ==> <1 2985> (prefered)
+	<⦖>	DOUBLE RIGHT ARC LESS-THAN BRACKET
+	<⦅>	LEFT WHITE PARENTHESIS at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 29BC <== [ 0025 <pseudo-manual-round> ] ==> <1 2030> (prefered)
+	<⦼>	CIRCLED ANTICLOCKWISE-ROTATED DIVISION SIGN
+	<‰>	PER MILLE SIGN at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2A17 <== [ 222B <pseudo-manual-addleft> ] ==> <1 2A10> (prefered)
+	<⨗>	INTEGRAL WITH LEFTWARDS ARROW WITH HOOK
+	<⨐>	CIRCULATION FUNCTION at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2A34 <== [ 00D7 <pseudo-manual-addleft> ] ==> <1 22C9> (prefered)
+	<⨴>	MULTIPLICATION SIGN IN LEFT HALF CIRCLE
+	<⋉>	LEFT NORMAL FACTOR SEMIDIRECT PRODUCT at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2A35 <== [ 00D7 <pseudo-manual-addright> ] ==> <1 22CA> (prefered)
+	<⨵>	MULTIPLICATION SIGN IN RIGHT HALF CIRCLE
+	<⋊>	RIGHT NORMAL FACTOR SEMIDIRECT PRODUCT at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2A36 <== [ 00D7 <pseudo-manual-amplify> ] ==> <1 2A2F> (prefered)
+	<⨶>	CIRCLED MULTIPLICATION SIGN WITH CIRCUMFLEX ACCENT
+	<⨯>	VECTOR OR CROSS PRODUCT at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2A50 <== [ 00D7 <pseudo-manual-addline> ] ==> <1 2A33> (prefered)
+	<⩐>	CLOSED UNION WITH SERIFS AND SMASH PRODUCT
+	<⨳>	SMASH PRODUCT at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2ACF <== [ 25C1 <pseudo-manual-amplify> <pseudo-manual-amplify> ] ==> <1 2A1E> (prefered)
+	<⫏>	CLOSED SUBSET
+	<⨞>	LARGE LEFT TRIANGLE OPERATOR at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2AFB <== [ 2223 <pseudo-manual-amplify> <pseudo-manual-amplify> ] ==> <1 2AF4> (prefered)
+	<⫻>	TRIPLE SOLIDUS BINARY RELATION
+	<⫴>	TRIPLE VERTICAL BAR BINARY RELATION at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2AFB <== [ 007C <pseudo-manual-addvline> <pseudo-manual-amplify> <pseudo-manual-quasisynon> ] ==> <1 2AF4> (prefered)
+	<⫻>	TRIPLE SOLIDUS BINARY RELATION
+	<⫴>	TRIPLE VERTICAL BAR BINARY RELATION at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2AFD <== [ 002F <pseudo-manual-amplify> ] ==> <1 2215> (prefered)
+	<⫽>	DOUBLE SOLIDUS OPERATOR
+	<∕>	DIVISION SLASH at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 2AFF <== [ 007C <pseudo-manual-whiten> ] ==> <1 2AFE> (prefered)
+	<⫿>	N-ARY WHITE VERTICAL BAR
+	<⫾>	WHITE VERTICAL BAR at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 3018 <== [ 0028 <pseudo-manual-unsharpen> ] ==> <1 27EE> (prefered)
+	<〘>	LEFT WHITE TORTOISE SHELL BRACKET
+	<⟮>	MATHEMATICAL LEFT FLATTENED PARENTHESIS at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 3019 <== [ 0029 <pseudo-manual-unsharpen> ] ==> <1 27EF> (prefered)
+	<〙>	RIGHT WHITE TORTOISE SHELL BRACKET
+	<⟯>	MATHEMATICAL RIGHT FLATTENED PARENTHESIS at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: A760 <== [ 0059 <pseudo-fake-paleocontraction-by-last> ] ==> <1 A73C> (prefered)
+	<Ꝡ>	LATIN CAPITAL LETTER VY
+	<Ꜽ>	LATIN CAPITAL LETTER AY at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: A761 <== [ 0079 <pseudo-fake-paleocontraction-by-last> ] ==> <1 A73D> (prefered)
+	<ꝡ>	LATIN SMALL LETTER VY
+	<ꜽ>	LATIN SMALL LETTER AY at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 1D4C1 <== [ 006C <font=script> ] ==> <1 2113> (prefered)
+	<𝓁>	MATHEMATICAL SCRIPT SMALL L
+	<ℓ>	SCRIPT SMALL L at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 1F12B <== [ 0043 <circle> ] ==> <1 24B8> (prefered)
+	<🄫>	CIRCLED ITALIC LATIN CAPITAL LETTER C
+	<Ⓒ>	CIRCLED LATIN CAPITAL LETTER C at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 1F12C <== [ 0052 <circle> ] ==> <1 24C7> (prefered)
+	<🄬>	CIRCLED ITALIC LATIN CAPITAL LETTER R
+	<Ⓡ>	CIRCLED LATIN CAPITAL LETTER R at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+Duplicate: 1F14B <== [ 004D <square> 0056 ] ==> <1 33B9> (prefered)
+	<🅋>	SQUARED MV
+	<㎹>	SQUARE MV MEGA at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
+
 EOR
 
 my (%known_dups) = map +($_,1), qw(0296 0384 1D43 1D52 1D9F 1E7A 1E7B 1FBF 2007
   202F 2113 24B8 24C7 2E1E 33B9 FC03 FC68 FD55 FD56 FD57 FD5D FD87 FD8C
-  FD92 FDB5 FE34);		# As of Unicode 6.1-beta
+  FD92 FDB5 FE34
+  0273 1DAF 2040 207F 224B 2256 2257 225E 2263 2277 2279 2982 2993 2994 2995 2996 29BC
+  2A17 2A34 2A35 2A36 2A50 2ACF 2AFB 2AFD 2AFF 3018 3019 A760 A761 1D4C1 1F12B 1F12C 1F14B);		# As of Unicode 6.1 (questionable: 2982 2ACF)
 
 sub decompose_r($$$$);		# recursive
 sub decompose_r($$$$) {		# returns array ref, elts are [$compat, @expand]
@@ -4899,7 +5943,7 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
 		  addline    => [qw( 0 ∅  ∅ ⦱  + ∦  ∫ ⨏  • ⊝  / ⫽  ⫽ ⫻  ∮ ⨔  × ⨳  × ⩐ )],	#   ∮ ⨔ a cheat
 		  addhline   => [qw( = ≣  = ≡  ≡ ≣  † ‡  + ∦  / ∠  | ∟  . ∸  ∨ ⊻  ∧ ⊼  ◁ ⩤  * ⩮
 		  		     ⊨ ⫢  ⊦ ⊧  ⊤ ⫧  ⊥ ⫨  ⊣ ⫤  ⊳ ⩥  ⊲ ⩤  ⋄ ⟠  ∫ ⨍  ⨍ ⨎  • ⦵
-		  		     ∪ ⩌  ∩ ⩍  ≃ ≅  ⨯ ⨲ )],	# conflict with modifiers: qw( _ ‗ ); ( ∈  ) ∋ not useful with ∈∋ as greenkeys...
+		  		     ∪ ⩌  ∩ ⩍  ≃ ≅  ⨯ ⨲ )],	# conflict with modifiers: qw( _ ‗ ); ( ∈  ) ∋ not useful with ∈∋ as bluekeys...
 		  addvline   => [qw( ⊢ ⊩  ⊣ ⫣  ⊤ ⫪  ⊥ ⫫  □ ⎅  | ‖  ‖ ⦀  ∫ ⨒  ≢ ⩨  ⩨ ⩩  • ⦶  
 		  		     \ ⫮  ° ⫯  . ⫰  ⫲ ⫵  ∞ ⧞  = ⧧  ⧺ ⧻  + ⧺  ∩ ⨙  ∪ ⨚  0 ⦽ )],		#  + ⫲ 
 		  addtilde   => [qw( 0 ∝  / ∡  \ ∢  ∫ ∱  ∮ ⨑  : ∻  - ≂  ≠ ≆  ~ ≋  ~ ≈  ∼ ≈  ≃ ≊  ≈ ≋  = ≌  
@@ -5100,7 +6144,7 @@ sub parse_NameList ($$) {
 		  (map [$_, ''], 'WHITE ', 'WHITE UP-POINTING ', 'N-ARY '), ['WHITE ', ' SUIT'] ) {
       my ($prepend, $append) = @$Mod;
       next if $raw =~ /-SYMBOL$/ and 0 <= index($append, "SYMBOL");	# <calculated-SYMBOL>
-#warn "raw=`$raw', prepend=<$prepend>, append=<$append>, base=$Cand->[0]";
+      warn "raw=`$raw', prepend=<$prepend>, append=<$append>, base=$Cand->[0]\n" if debug_GUESS_MASSAGE;
       $t++;
       $b = "$prepend$Cand->[0]$append";
       $b =~ s/\bTWO-HEADED\b/TWO HEADED/ unless $N{$b};
@@ -5126,11 +6170,12 @@ sub parse_NameList ($$) {
 #      $b =~ s/\bDOT\b/FULL STOP/ unless $N{$b};
 #      $b =~ s/^MICRO$/GREEK SMALL LETTER MU/ unless $N{$b};
 
-#warn "    b =`$b', prepend=<$prepend>, append=<$append>, base=$Cand->[0]";
+      warn "    b =`$b', prepend=<$prepend>, append=<$append>, base=$Cand->[0]\n" if debug_GUESS_MASSAGE;
       if (defined ($base = $N{$b})) {
         undef $base, next if $base eq $c;
         $with = $raw if $t;
-#warn "<$Cand->[0]> WITH <$Cand->[1]> resolved via SIGN/SYMBOL/.* FORM: strip=<$app> add=<$prepend/$append>" if $append or $app or $prepend;
+	warn "<$Cand->[0]> WITH <$Cand->[1]> resolved via SIGN/SYMBOL/.* FORM: strip=<$app> add=<$prepend/$append>\n"
+	  if debug_GUESS_MASSAGE and ($append or $app or $prepend);
         last 
       }
     }
@@ -5148,8 +6193,8 @@ sub parse_NameList ($$) {
       unshift @{$basic{$c}}, [1, $base, @modifiers] if defined ($base = $N{$b});	# ASTERISK
 #$base = '[undef]' unless defined $base;
 #warn("operator via <$b>, <$c> => `$base'");
-#warn("operator: `$c' ==> `$_', <@modifiers> via <$b>"),
-      unshift @{$basic{$c}}, [1, $_,    @modifiers] for map $N{$_}, @{ $operators{$b} || [] };	# ASTERISK
+      (debug_OPERATOR and warn "operator: `$c' ==> `$_', <@modifiers> via <$b>\n"),
+        unshift @{$basic{$c}}, [1, $_,    @modifiers] for map $N{$_}, @{ $operators{$b} || [] };	# ASTERISK
     }
 #        push @{$candidates{$k}}, [$_, @$exp[2..$#$exp]] for $NN, @{ $operators{$NN} || []};
 #    $basic{$c} = [ [1, $base, @modifiers ] ]
@@ -5457,7 +6502,7 @@ sub sort_compositions ($$$$$;$) {
         my @Res2 = map $self->compound_composition($M, $_), @{ $C[$L] };	# elt: [$synth, $char]
         my @working_with = grep defined, @{ $C[$L] };				# ., KP_Decimal gives [. undef]
 warn "compound  `$M' of [@working_with] -> ", $self->array2string(\@Res2) if warnSORTCOMPOSE;
-        (my $MMM = $M) =~ s/(^|\+)<reveal-greenkey>$//;
+        (my $MMM = $M) =~ s/(^|\+)<reveal-(?:green|subst)key>$//;
         my @Res3 = map $self->compound_composition_many($MMM, ((defined $_) ? $Sub->{$_} : $_)), @{ $C[$L] };
 warn "compound+ `$M' of [@working_with] -> ", $self->array2string(\@Res3) if warnSORTCOMPOSE;
         for my $shift (0..$#Res3) {
@@ -5484,7 +6529,7 @@ warn "compound+ `$M' of [@working_with] -> ", $self->array2string(\@Res3) if war
           my($penalty, $p) = [('zzz') x @res2];	# above any "5.1", "undef" ("unassigned"???)
           # Take into account the "compatibility", but give it lower precedence than the layer:
           # for no-compatibility: do not store the level;
-          defined $res2[$_] and $penalty->[$_] gt ( $p = ($self->{Age}{$res2[$_]} || 'undef') . "#$extra_penalty[$_]#$self->{UBlock}{$res2[$_]}" )
+          defined $res2[$_] and $penalty->[$_] gt ( $p = ($self->{Age}{$res2[$_]} || 'undef') . "#$extra_penalty[$_]#" . ($self->{UBlock}{$res2[$_]} || '') )
             and $penalty->[$_] = $p for 0..$#res2;
           my $have1 = not (defined $res2[0] and defined $res2[1]);		# Prefer those with both entries
           # Break a non-lc/uc paired translations into separate groups

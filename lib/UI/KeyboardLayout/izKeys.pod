@@ -153,7 +153,7 @@ Full coverage of IPA (both visually, and by structure properties of the describe
 =item *
 
 Full coverage of spacing modifiers and combining characters for Latin scripts, and for symbols
-(had it before Green keys were implemented);
+(had it before Blue keys were implemented);
 
 =item *
 
@@ -223,7 +223,7 @@ C<AltGr>-ing a key to have more logical connections.
 
 Every personality has a few personality-specific prefix keys (to access accented and other
 "more exotic" characters of Latin/Cyrillic scripts).  Additionally, there are prefix keys to access
-"common pools" of extra characters (so-called I<Blue Keys>, Greek, Business symbols
+"common pools" of extra characters (so-called I<Green Keys>, Greek, Business symbols
 etc).  To finish, there is a common "C<AltGr>-access" prefix key which emulates pressing
 the C<AltGr>-modifier with the key (especially useful when an application or a system
 steals some particular C<AltGr-letter> combinations to become hotkeys).  (Currently,

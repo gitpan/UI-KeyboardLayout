@@ -40,5 +40,12 @@ examples/charlists/IPA-obsolete-and-capital-small
 examples/charlists/UPA
 examples/charlists/UGL
 examples/charlists/all-greekish
+examples/enable-hex-unicode-entry.reg
 diff-trade-combining-for-math
+examples/compile_link_kbd.cmd
+examples/refresh-it.cmd
+examples/mkkbd.cmd 
+examples/filter_kbd_tables.pl
+examples/fix-MSKLC.patch
+examples/filter-XCompose
 META.yml                                 Module meta-data (added by MakeMaker)
