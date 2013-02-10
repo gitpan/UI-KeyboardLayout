@@ -26,3 +26,12 @@ open STDOUT, q(>), q(coverage-1prefix-Latin.html);
 $l->print_table_coverage(q(Latin),		'html');
 open STDOUT, q(>), q(coverage-1prefix-Cyrillic.html);
 $l->print_table_coverage(q(CyrillicPhonetic),	'html');
+
+open F, '<', 'visual-base.html' or die "Can't open visual-base.html for read";
+my $html = do {local $/; <F>};
+close F or die "Can't close visual-base.html for read";
+
+open STDOUT, q(>), q(visual-out.html); 
+print $l->apply_filter_div($l->apply_filter_style($html));
+open STDOUT, q(>), q(visual-out-fake.html); 
+print $l->apply_filter_div($l->apply_filter_style($html, {fake => 1}), {fake => 1});

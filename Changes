@@ -14,11 +14,11 @@
 	 For example, to access our layout this way, one needs to know different "handfuls" of allocation rules
 	 for Ancient Greek than for Math Symbols.
 
-Currently achieved (ranges as of Unicode v6.1):
+Currently achieved (ranges as of Unicode v6.2):
 *) One gotcha (with Shift-SPACE) comparing to US and Russian Phonetic keyboards;
 *) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1 (except for arrows);
 *) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys);
-*) 98% coverage of Cyrillic ranges (except for: lc/uc pairs for ԡꙣꙥꚁ;
+*) Full coverage of Cyrillic ranges (with ԡꙣꙥꚁ [temporarily?] put on free slots in Business map);
      from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double prefix keys);
 *) Full coverage of currency symbols;
 *) Full coverage of vulgar fractions;
@@ -34,7 +34,7 @@ Currently achieved (ranges as of Unicode v6.1):
 
 Not yet implemented, or lost by upgrades to other goals:
 *) Clear documentation of the allocation rules (needed for "goal 1" above).
-*) Greek personality;
+*) Greek personality; Hebrew characters; Hebrew personality;
 *) The "compose" prefix key + access by human-guessable sequence of Latin chars;
 *) Full coverage of Cyrillic;
 *) Full coverage of IPA (both visually, and by structure properties of the described sounds) and UPA;
@@ -42,7 +42,7 @@ Not yet implemented, or lost by upgrades to other goals:
    (had it before Green keys were implemented);
 *) Full coverage of Unicode's paleo-Latin characters;
 *) Full (is it compatible with other goals???) coverage of math symbol ranges in BMP;
-*) Full coverage of Math Fractur, uc Math Double-Strike and Math Script English letters (would need to abandon kbdutool...);
+*) Full coverage of Math Fractur, uc Math Double-Strike and Math Script Latin letters (would need to abandon kbdutool...);
 *) reasonable coverage of arrows;
 *) reasonable coverage of ASCII/Unicode drawing characters;
 *) Full coverage of non-Eastern characters covered by Neo keyboard, and X11+Neo composition tables;
@@ -50,7 +50,6 @@ Not yet implemented, or lost by upgrades to other goals:
 *) Easy-to-describe quick access to Vietnamese characters (seems to be present - needs documentation).
 
 Possible roadmaps:
-*) Full coverage of Hebrew (and a personality?)
 *) What about other scripts with "small repertoir" of characters (such as arabic with 62 access points on the M$ keyboard;
    indic)?
 
@@ -801,6 +800,7 @@ Possible roadmaps:
 	####  Do patching if needed...
 ..\..\UI-KeyboardLayout\examples\compile_link_kbd.cmd iz-la-ru 2>&1 | tee 00c
 ..\..\UI-KeyboardLayout\examples\compile_link_kbd.cmd iz-ru-la 2>&1 | tee 00c3
+				- see examples/build_here.cmd
 
 	New file: examples/enable-hex-unicode-entry.reg
 		On Windows:
@@ -810,3 +810,116 @@ Possible roadmaps:
 	New files: *.cmd - DLL build environment.
 
 		time env PERLDB_OPTS="frame=7 LineInfo=oo-dd NonStop=1 AutoTrace=1" perl -d -wC31 -I UI-KeyboardLayout/lib UI-KeyboardLayout/examples/build-iz.pl UI-KeyboardLayout/examples/izKeys.kbdd |& tee ooxx-us-ru 
+
+0.12	Change internal representation of exportable prefixes from [*, *] to [*, *, 2] (so now all prefixes have $k->[2] TRUE).
+	Enhance doc section on Windows problems.
+	Clearer popups in output .html.
+	Change internal structure of representation of a character-in-a-key-slot: $c or [$c, $face_from, $is_prefix, ...].
+	New in-prefix-map directive PrefixDocs[DESCR]; DESCR is put into html popups for prefix keys.
+	Start adding docstrings on the generation pathway of the slot (up to FromTo, which has problems now???;
+			Does not work on DEADKEYS and InheritPrefixKeys???).
+		Format of char-to-emit now is [char, from_face, dead/inheritable, generation_pathway, old_prefix] 
+		with all but 0th optional.
+	Improve the order of control-chars in the output tables.
+	Allow arbitrary number of “+”s in the Layers(*) directive (untested).
+	Allow arbitrary number of layers in output_unit00() (untested).
+	Trace provenance up to a visual layer.
+	Add DOCTYPE to the generated HTML.
+	Update year in the .kbdd's copyright.
+	Trace provenance of AltGrSubstitutions.
+	Mark EIGHTH NOTE meaning vbell as such in HTML.
+	Mark positions involving/being AltGrSubst in blue in HTML.
+	Restore addhline () --> ∈∋.
+	Report separately "via single prefix key" and "via repeated prefix key" in the output tables.
+		BUG: ignores DeadKeys2...
+	Implement mutator ByPairs(Inv)Prefix.  (These BUGS are now fixed:)
+		BUGS: in print_deadkey_win() (sp?) we need to <<3 - apparently, only the inverted map is shifted by 3...
+			in massage_imported2(), one can't make a deep copy 
+				(related??? makes 03a6@ into 0301@, but only in the not-inverted face???
+					- old value is cached during link_layers()!)
+	Recognize YEN, BROKEN BAR and "the second SLASH" in BaseLayer as ABNT_C2 (so as JIS ¥¦ via duplication).
+	Make default_char() to be used as late as possible.
+	Remove repeated-dead-key magic from print_deadkey_win() (except for AltGr-inverted base face).
+	Merge all the debugging flags into UI_KEYBOARDLAYOUT_DEBUG.
+	Link layers AFTER the imported keys are (re)assigned (fixes BUGS mentioned above).
+	New configuration key for a face: PrefixChains.
+	layer_recipes entries could not be arrays.
+	Allow variation of the column where Ctrl-keys go in the output .klc; omit missing CTRL if at end 
+		(does not fix the Control-Shift-Letter bug).
+	Allow generation of Ctrl-letter and Ctrl-Shift-letter (works about a bug in File Commander with C-S-letter).
+		(XXXX currently hidden in the output tables - need to put a fifth char in a “prefixed” cell)
+	Add new translation filters: ucfirst_not_lc (etc for uc/lc; behave as uc/lc/ucfirst pseudo-compositing rules), dectrl.
+	Add new pseudo-compositing: dectrl.
+	ShiftFromTo was not allowing chars-by-hex.
+	Document the problem with Control-Shift-letter in MSKLC-generated keyboards.
+		Why only the last of these works??? ByPairs[0020␢](FlipLayers(Latin))	ByPairs[0192␢](Face(Latin))	ByPairs[0192␢]
+	Control-\ and Control-] were mixed up in several cases.
+	Output of visual keyboard layouts (non-surrogates hardwired).
+	Use to_ne class instead of from_sw in visual layouts (is not obscured due to z-order).
+	New toplevel .kbdd key face_shortcuts (used in [re]generation of visual diagrams).
+	New in-prefix-map directive HTML_classes[(WHERE,CLASS,chars,)*].  (Can be put also in DeadKey_InvMap0000.)
+	Add what-is-prefix info to the base layers.
+		(In RU, it now thinks that 0301 needs double-prefix???)
+	Consider KORONIS, PROSGEGRAMMENI, ANO TELEIA, GREEK QUESTION MARK as homographs.
+	When process visual map, use ucfirst() instead of uc() (does not matter with izKeys.kbdd).
+	Mark lc/ucfirst pairs with 3 case forms by yellow dotted outline in visual keymaps (relevant for polytonic).
+		(Before, we were pairing on the base of lc/uc, not lc/ucfirst.)
+	The visual table was based on “pure” layers, not layers marred by prefix mapping.
+	We did not mark prefix-keys-from-VK as $c->[2] = 1.
+	Optimize depth of span inclusion in generated HTML tables.
+	Use the classes/docs generated on TABLE HTML when doing visual HTML (some cause visual clutter, so
+		should be explicitly enabled on the enclosing DIV). 
+			VIET has background which is not visible???
+	Add info on the used unicode tables version to the outputs.
+	When looking a prefix in the diacritics table, prefer the row with the earliest occurence.
+	Move "next combining" from AltGr-/,? to '/",AltGr-'/"
+		We had prime-like stuff there - which was nice too???
+
+	izKeys.kbdd:	Update VERSION to 0.05.
+			Add PrefixDocs.
+			Fix prefer_(first|last).
+			Fix AltGr-- with () --> ∈∋.
+			Use ByPairsPrefix for greek double prefix keys.
+			Use PrefixChains for 00b5, 0192; first char moves to 4th press, the other is killed:
+-2423   <␣>     OPEN BOX [Common; Control Pictures; 1.1]
+-2007   < >     FIGURE SPACE [Common; General Punctuation; 1.1]
+				Having ¨ inside the chain kills modifier-colon...
+                            Latin				Cyr
+    AltGr	Greek -> Cyr -> Cyr-II -> Cyr-III	Latin -> Cyr-II -> Greek -> Cyr-III
+    Green				Greek -> Busns -> Coptic
+    Ripe	Cyr -> Cyr-II -> Cyr-III		Latin -> Negate -> Blue
+			Improve £ on the £-map (now £ is obtained by doubling the prefix), ¤ is still on # and @ (hi, Tom!).
+			Add ␣⍽/␢ to Green/Ripe keys (well, it would be nicer to have honest whitespace on Ripe keys, but this
+				conflicts with having text-Control-key symbols there...)
+			Add textual-symbols for remaining control keys (XXXX 0x1e and 0x1f still missing).
+			Add circled letter to Round-Ctrl (uppercased to the sibling map Cedilla+Ctrl).
+			Same for letter super- (on ^/~) and sub-scripts (on / - there is no uppercase subscripts in 6.2!).
+				Note that the alternative (case-switched) letters are also available on AltGr-flipped face ???
+			Reorder dead keys in the report closer to accordance with Green/Ripe.
+			Control-\ and Control-] were mixed up in several cases.
+			Exchange Control-key-symbols and Control-key-other-images (hides £ on AltGr-$ SPACE...).
+			Add non-break spaces (usual and narrow) on spaces in Ripe face.
+			Add 9=thin, a=Hair, 7=figure(noBreak), 8=Punctuation spaces to 2nd/3rd Ripe maps (only on Latin now)
+			Add @ -> ƻ to macron (on 2 it would hide useful bluekeys+macron).	[case/shift twisting!]
+			Assign classes to chars for use in visual HTML output.
+			We were missing ῭ in Greek-polytonic (\) AltGr-L-column.
+			Put ԡꙣꙥꚁ [temporarily?] onto the free slots in Business map (this finishes the Cyrillic coverage);
+				SOFT are on X=Ь; DWE on V...
+			Move … from Green to Ripe, and put · to Green (on fullstop=.).
+			Add €/£ to Green $/^.
+			Add ⌧,⎚ as other-iconic on Control-Backspace, Control-C; ␥/substitute-2=U+2426 as iconic on Control-C/SUB=^Z.
+			Downgrade LAS from l to AltGr-L on Business (Wikipedia article on Lari does not include ლ).
+			Downgrade LIVRE TOURNOIS SIGN from AltGr-L to AltGr-i/I on business (by the second letter now!).
+			Add TURKISH LIRA SIGN on l on Business.
+			Fix CEDILLA modifier/combiners list; lost:
+	-1dfd   < <U+1DFD>>     COMBINING ALMOST EQUAL TO BELOW [5.2]
+			Fix double-presses-with-AltGr of , . " ~ / ^ ˘.
+			Add faky-diacritics-type for DBL_GRAVE.
+			Add diacritics type for SLASH.
+
+	Add examples/console-fonts00-added.reg
+	Add examples/build_here.cmd (run in subdirectory of a directory with the distribution subdirectory, after creation of oo-*)
+	New file examples/izkeys-visual-base.html
+
+Perl bug with 2Self auto-docs (not debugged yet).  Already "my $c =" leads to a bug...
+

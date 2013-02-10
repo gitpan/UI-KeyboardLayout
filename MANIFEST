@@ -48,4 +48,7 @@ examples/mkkbd.cmd
 examples/filter_kbd_tables.pl
 examples/fix-MSKLC.patch
 examples/filter-XCompose
+examples/console-fonts00-added.reg
+examples/build_here.cmd
+examples/izkeys-visual-base.html
 META.yml                                 Module meta-data (added by MakeMaker)
