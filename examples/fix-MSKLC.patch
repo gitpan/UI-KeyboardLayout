@@ -72,3 +72,22 @@ Alternative modifications (work):
 //    - but this generates AltGr key which acts as a toggle [Caps]Lock-for-AltGr (on chars with KANALOK)
 //    - changing KANA (same in VK_KANA) to OEM_AX makes it non-togglable, but CapsLock does not affect AltGr-keys
 //	--- but CapsLock affects Ctrl-Alt keys... - not very useful...
+
+--- iz-la-ru.C-pre	2013-03-05 02:34:54.368881800 -0800
++++ iz-la-ru.C	2013-03-05 02:39:11.632596500 -0800
+@@ -142,6 +142,7 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVk
+     { VK_SHIFT    ,   KBDSHIFT     },
+     { VK_CONTROL  ,   KBDCTRL      },
+     { VK_MENU     ,   KBDALT       },
++    { VK_OEM_AX     ,   KBDKANA       },
+     { 0           ,   0           }
+ };
+ 
+--- iz-la-ru.H-pre	2013-03-05 02:34:54.309878500 -0800
++++ iz-la-ru.H	2013-03-05 02:41:09.646346500 -0800
+@@ -37,3 +37,5 @@
+ #undef  T7D
+  #define T7D _EQ(                                      OEM_8                      )
+ 
++#undef X5D
++#define X5D _EQ(                                    OEM_AX                      )

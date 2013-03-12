@@ -1,0 +1,76 @@
+--- iz-ru-la.C.orig	2013-03-09 16:06:20.451537200 -0800
++++ iz-ru-la.C	2013-03-09 16:48:00.444528600 -0800
+@@ -142,6 +142,8 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVk
+     { VK_SHIFT    ,   KBDSHIFT     },
+     { VK_CONTROL  ,   KBDCTRL      },
+     { VK_MENU     ,   KBDALT       },
++    { VK_RMENU    ,   KBDALT + KBDCTRL       },
++    { VK_OEM_AX   ,   KBDKANA      },
+     { 0           ,   0           }
+ };
+ 
+@@ -238,6 +240,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
+ //                      |=========|=========|=========|=========|=========|=========|
+   {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
+   {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
++  {VK_CONVERT   ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
++  {VK_NONCONVERT,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
+   {VK_ABNT_C2   ,0      ,0x2016   ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+   {0xff         ,0      ,WCH_NONE ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
+   {VK_OEM_8     ,0      ,0x2016   ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+--- iz-ru-la.H.orig	2013-03-09 16:06:20.394533900 -0800
++++ iz-ru-la.H	2013-03-09 16:48:18.378554400 -0800
+@@ -37,3 +37,13 @@
+ #undef  T7D
+  #define T7D _EQ(                                      OEM_8                      )
+ 
++#undef X5D			/* Was: APPS; move to non-special "kinda-KANA" */
++#define X5D _EQ(                                    OEM_AX                      )
++
++#undef T70			/* KANA */
++#define T70 _EQ(                                    APPS                      )
++
++#undef  T7B
++#define T7B _EQ(                                    NONCONVERT                      )
++#undef  T79
++#define T79 _EQ(                                    CONVERT                      )
+--- iz-la-ru.C.orig	2013-03-09 16:06:20.268526700 -0800
++++ iz-la-ru.C	2013-03-09 16:48:12.713230300 -0800
+@@ -142,6 +142,8 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVk
+     { VK_SHIFT    ,   KBDSHIFT     },
+     { VK_CONTROL  ,   KBDCTRL      },
+     { VK_MENU     ,   KBDALT       },
++    { VK_RMENU    ,   KBDALT + KBDCTRL       },
++    { VK_OEM_AX   ,   KBDKANA      },
+     { 0           ,   0           }
+ };
+ 
+@@ -238,6 +240,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
+ //                      |=========|=========|=========|=========|=========|=========|
+   {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
+   {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
++  {VK_CONVERT   ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
++  {VK_NONCONVERT,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
+   {VK_ABNT_C2   ,0      ,0x2016   ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+   {0xff         ,0      ,WCH_NONE ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
+   {VK_OEM_8     ,0      ,0x2016   ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+--- iz-la-ru.H.orig	2013-03-09 16:06:20.205523100 -0800
++++ iz-la-ru.H	2013-03-09 16:48:24.179886200 -0800
+@@ -37,3 +37,13 @@
+ #undef  T7D
+  #define T7D _EQ(                                      OEM_8                      )
+ 
++#undef X5D			/* Was: APPS; move to non-special "kinda-KANA" */
++#define X5D _EQ(                                    OEM_AX                      )
++
++#undef T70			/* KANA */
++#define T70 _EQ(                                    APPS                      )
++
++#undef  T7B
++#define T7B _EQ(                                    NONCONVERT                      )
++#undef  T79
++#define T79 _EQ(                                    CONVERT                      )

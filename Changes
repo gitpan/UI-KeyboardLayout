@@ -15,26 +15,29 @@
 	 for Ancient Greek than for Math Symbols.
 
 Currently achieved (ranges as of Unicode v6.2):
-*) One gotcha (with Shift-SPACE) comparing to US and Russian Phonetic keyboards;
+*) Two gotcha (with Shift-SPACE and ApplicationMenu keys) comparing to US and Russian Phonetic keyboards;
+*) Support of all keys (ISO/ABNT/ABNT2/JIS) on all contemporary hardware layouts;
 *) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1 (except for arrows);
 *) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys);
 *) Full coverage of Cyrillic ranges (with ԡꙣꙥꚁ [temporarily?] put on free slots in Business map);
      from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double prefix keys);
+*) Full coverage of Hebrew/Yiddish/Ladino characters, points, cantillation, punctuation
+     (except alternative/wide forms and precomposed chars)
 *) Full coverage of currency symbols;
 *) Full coverage of vulgar fractions;
-*) Full coverage of Coptic alphabet (via double prefix keys);
+*) Full coverage of Coptic alphabet (via double prefix keys — except from Greek personality);
 *) Full coverage of characters covered by EurKey/Bépo keyboards (except arrows and combining 0302, 030a);
 *) 50% coverage of math symbols in BMP (the most useful implemented first);
 *) Full coverage of double-accented letters of MES-3b;
 *) Full coverage of non-modifiers/combiners of IPA and UPA;
 *) Full coverage of obsolete-IPA and case-extended IPA;
-*) Latin and Cyrillic personalities;
+*) Latin and Cyrillic personalities (pre-release of Greek and Hebrew personality);
 *) Visual bell to report unrecognized/unsupported combinations;
 *) Documentation of the allocation rules scattered over different files/sections.
 
 Not yet implemented, or lost by upgrades to other goals:
 *) Clear documentation of the allocation rules (needed for "goal 1" above).
-*) Greek personality; Hebrew characters; Hebrew personality;
+*) Finish implementing usable Greek and Hebrew personality;
 *) The "compose" prefix key + access by human-guessable sequence of Latin chars;
 *) Full coverage of Cyrillic;
 *) Full coverage of IPA (both visually, and by structure properties of the described sounds) and UPA;
@@ -922,4 +925,76 @@ Possible roadmaps:
 	New file examples/izkeys-visual-base.html
 
 Perl bug with 2Self auto-docs (not debugged yet).  Already "my $c =" leads to a bug...
+
+0.13	Add ∩/∪ as round-∧/∨.
+	Add names of extra keys we (may) use with the keyboards to the .klc template.
+	Flip MUTATORS uc/uc_not_lc etc with uc_maybe/uc (does not change the output for izKeys).
+	Add documentation for mutators (except for Mutate(2Self)).
+	*Really* case-fold when checking for double-occupancy in sort_compositions.
+	Our code to find extra combining characters was off by 1.
+	Add prefix2 highlight for inverted prefixes in visual HTML.
+	Merge Shift-doubled-prefixes in visual HTML.
+	Better warning for mismatched length of lines in a visual map.
+	Allow space before NonspacingMark in HTML_classes.
+	Put BDO into generated HTML tables.
+		BUG: Can't put Meteq | to secondary AltGr-|.
+	Explicitly recognize [\xAD\x{200b}-\x{200f}\x{2060}-\x{2064}\x{fe00}-\x{fe0f}\x{034f}] as ZERO WIDTH.
+	Quiet warnings when non-AltGr positions are copied from LinkFace.
+	Add Shift if needed when copying form LinkFace to AltGr layer.
+	Allow visualization of LTR/RTL mirroring in HTML visual output by class rtl-hover and options rtl-hover/rtl-hover-Trivia.
+	Allow visualization of zero-width and whitespace characters. 
+		(Whitespaces lost the representation of the width.)
+	Allow in_key_separator2 as a separator of keys in visual keymaps (but only if one of the chunks is ≥2 chars long).
+	Output ligatures.
+		Not good in HTML output, or in coverage, or in deadkey tables???
+		Not for out-of-BMP
+	Add more documentation of mutators.
+	Simplify output_unit00() a lot.
+	Make ctrl_after_modcol create_alpha_ctrl keep_missing_ctrl into configuration variables (inheritable).
+	Support LRO/RLO at start (and then PDF at ends) of visual layout lines.
+	Implement extra layers per face.  (Via extra_layers, layers_modifiers configuration variables)
+
+			(Visual bell is not working for the added keys...)
+		Needs a patch to the generated .C and .H files.
+		kbdutool overfulls with too long lines unless one manually removes comments.
+		kbdutool ignores all the added layers but one (looks like it is limited by: up to 8 chars per key).
+		
+
+	izKeys.kbdd:	Update version to 0.06.
+			Change µ to ĸ (00b5 to 0138) as the GreenKey prefix (so it is not directly in any personality).
+				In RU personality, ɣ/Ɣ moved from double-prefix to triple prefix in the report???
+			Remove vestigal 03a6 from Cyrillic personality.
+			Regularize whitespace in Cyrillic.
+				(Still: 2009/200a are not on the 2nd Ripe...).
+			Beginning of Greek personality 
+				(did not remove they-are-prefix-in-Latin characters)
+				Green keys are missing,	AltGr-decimal becomes « ; GLOTTAL STOP is obscuring "?"...
+				Greek Number signs added to AltGr-6/^ and «» are as in Cyrillic.
+			Beginning of Hebrew map ( perl -C31 cvt_apple.pl Hebrew-ZC.keylayout >hebrew-ZC-visual )
+				(Start with http://bc.tech.coop/Hebrew-ZC.html; make SWUIO produce PRESENTATION (?!) forms, 
+				have <> not inverted, remove "lo" לֹ and typographic marks, add punctuation gershon/gershoim
+				longest vowels and YOD-YOD-PATAH, exchange v and u, add HET on H.  Then regularize niqqud 
+				— deoptimize for finger movement, optimize for memorization.)
+			Add accessor Į 012E for Hebrew (and corresponding extra columns in HTML tables).
+				(◌ 25cc moves to the double-prefix section in the report???)
+			Double-Green face MathBlue.
+			Exchange ѹ/ꙋ (per http://www.synaxis.info/azbuka/ponomar/charset/charset_1.htm).
+			Add extra layers (in Latin personality: Greek; in Cyrillic personality: Latin).  (Currently on AppMenu)
+			Regularize order of personalities on S-␣ AGr-␣ 2×AGr-␣: Latin/Greek/Cyrillic/Hebrew (Cyrillic₂/Cyrillic₃???)
+			Make Control-keys generate super/SUPER/txt-Ctrl on 1×,2×,3× S-␣, sub/icon-Ctrl/icon₂-Ctrl on 1×,2×,3× AGr-␣
+				(at least on Latin).
+			Make AltGr-/ generate SmallCaps on Control-keys (on Latin).
+
+	examples/cvt_apple.pl:	new script to convert Apple layout to a visual layout
+					(does not process correctly strings of length > 1)
+	examples/hebrew-ZC-visual:	example output of cvt_apple.pl
+	build_here.cmd			Cut longer lines in the generated .klc; preserve more related files.
+					Add patching to workflow.
+	examples/izKeys.patch		Switch ApplicationMenu key and KANA (as OEM_AX which works as KBDKANA modifier).
+					Apparently, with KBDKANA present (???), KLLF_ALTGR is not processed;
+						so manually process RMENU as Control+Alt.
+					Support (NON)CONVERT keys.
+	build-iz.pl			Prepair a copy of visual-base.html unless it exists.
+	examples/izkeys-visual-maps-base.html	Rename from examples/izkeys-visual-base.html
+					Major improvements.
 
