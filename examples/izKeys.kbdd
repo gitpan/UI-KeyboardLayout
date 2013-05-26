@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2013
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.06
+VERSION=0.07
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -67,7 +67,7 @@ prefix_repeat=3
 ‭???	א ָ/ ַ ֲ סשׂ/ ׂ ֒ ד ֶ/ ְ ֧ פף/פּףּ	ג״/׳ ֞ הח/ ֢ ֜ ח ֻ/ ﬞ ֝ כך/ ֦ ֫ ל ֹ/ ׇ ֳ --/ ֛ ֔	--/׳״ ‬
 #???	א׃/ ַ	ס ׂ/ ָ ׇ ד/ ְ	פף/ ֲ	ג/ ֳ	ה/ ֽ	ח/ ֻ	כך/ ִ	ל ֹ/ ֵ	--/ ֶ		--/ ֱ
 #"
-	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	--		·		⁄/⋰
+	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	‼200a—200a/--1d11e ·/--‼1d121.1d121	⁄/⋰
 	--	--	--//ꙡ	--//ԃ	--	--//ӈ	--//ꙧ	≲//ԇ/ԅ		≳//ꙝ/ꙙ		…≟//ꙓ/ҍ
 ***	z/à	x/é	c/ç	v/ì	b/ù	n/ñ	m/ò	,</¸≤		.>/°≥/…		/?/0338¿/÷�
 	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ꙋ/ѹ	н/њ/ң/ҥ	м/ӎ/ꙟ/ԣ	,</«/⁘⁙/ԋ	.>/»/·։/჻⁖	/?/ј/ԛ/ꙏ
@@ -144,8 +144,16 @@ MathBlue=	Mutate[\ℯℹ,<reveal-substkey>|<font=double-struck>+uc|<font=double-
 LGreekGreenMax=	Face(LGreekGreen)	Face(Greek__Letters)
 #
 +CGreekGreen=	NotSameKey(Face(CyrillicPhonetic)	Face(Greek__Letters)	Layers(Green+Green-AltGr))	
-+CGreekGreen=		MutateDupsOK[<super>](SelectRX[[0-9]])	
-CGreekGreenMax=	Face(LGreekGreen)	Face(Greek__Letters)
++CGreekGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
+CGreekGreenMax=	Face(CGreekGreen)	Face(Greek__Letters)
+#
++CGreekRipe=	NotSameKey(Face(CyrillicPhonetic)	Face(Greek__Letters)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))	
++CGreekRipe=		MutateDupsOK[<sub>](SelectRX[[0-9]])	
+CGreekRipeMax=	Face(CGreekRipe)	Face(Greek__Letters)
+#
++CLatinGreen=	NotSameKey(Face(CyrillicPhonetic)	Face(Latin)	Layers(Green+Green-AltGr))	
++CLatinGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
+CLatinGreenMax=	Face(CLatinGreen)	Face(Latin)
 #
 LatinRipe=	NotSameKey(Face(CyrillicPhonetic)	Face(Latin)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))
 LatinRipeMax=	Face(LatinRipe)	Face(Latin)
@@ -167,7 +175,10 @@ SpecialKey_Images=	ByPairs[ 000a␤ 000d⏎ 0009↹ 001b⇤ 001d⇥ 001c␀ 0008
 SpecialKey_Symbols=	ShiftFromTo[0001,2401](SelectRX[[\x00-\x20]])	ByPairs[␡]
 SpecialKey_Images2=	ByPairs[000d↲ 000a⤶ 0008⎌ 001b⎗ 001d⎘ 007f⌧ 0003⎚]
 #
-Add_Green1=	Mutate[\ªº,<super>+lc+dectrl]	ByPairs[0020␣ 0192⍽]
++Add_Green1=	Mutate[\ªº,<super>+lc+dectrl]	ByPairs[0020␣ 0192⍽]
++Add_Green1=			AssignTo[FKEYS,12](Id(DashesEtc) FlipShift(FractionEmSpacesEtc))
++Add_Green1=			AssignTo[ARROWS,16](Id(Arrows) FlipShift(Arrows2))
++Add_Green1=			AssignTo[NUMPAD,16](Id(Frame11))
 Add_Ripe1=	Mutate[<sub>+lc+dectrl|<sub>+dectrl]	ByPairs[0020.00a0 0138.202f]
 Add_Ripe3=	ByPairs[0020.2009 0138.200a]	Face(SpecialKey_Images2)
 #
@@ -205,7 +216,8 @@ Add_Ripe3=	ByPairs[0020.2009 0138.200a]	Face(SpecialKey_Images2)
 +DeadKey_Map03e2= HTML_classes[C,special,ⲇⲕϒ,C,very-special,ϸͷϻΩ϶ᵼᵿƛ,C,may-guess,ͱϫϥ,C,need-learn,ϲͻͽͼͳ℧ϗ♫♪]
 #
 +DeadKey_Map00a3=	PrefixDocs[Currencies, horn, add-vertical-line(s) {AND: double addleft/addright, “text” control-key symbols, etc}]
-+DeadKey_Map00a3=		ByPairs[££]	Face(Business)	HTML_classes[k=businessAlt,from_w,u,C,special,©®℠™℗℅℮‱,C,very-special,ĸươəǝ,C,need-learn,៛﷼ԡꙣꙥꚁ,C1,need-learn,元圆]
++DeadKey_Map00a3=	HTML_classes[k=businessAlt,from_w,u,C,special,©®℠™℗℅℮‱,C,very-special,ĸươəǝ,C,need-learn,៛﷼ԡꙣꙥꚁ,C1,need-learn,元圆]
++DeadKey_Map00a3=		ByPairs[££]	Face(Business)	
 #
 +DeadKey_Map012e=	PrefixDocs[Hebrew {AND: iconic control-key symbols}]
 +DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]
@@ -220,7 +232,7 @@ Auto_Diacritic_Start=0f00
 #
 Flip_AltGr_Key=00a0
 @layers_modifiers=,CA,K,KC,KCA
-@extra_layers=prefix=0138,prefix=0192,prefix=012e
+@output_layers=0,1,prefixNOTSAME=0138,prefix=0192,prefix=012e
 #
 Diacritic_if_undef=			SpaceSelf2Id
 DeadChar_DefaultTranslation=		♪
@@ -355,7 +367,7 @@ DeadKey_Map=		Mutate	Mutate2Self
 +DeadKey_Map0338=		ByPairs[ !‼ 0020∕ {⌈ }⌉ [⌊ ]⌋ ](Face(Latin))	ByPairs[ [⧘ ]⧙ {⧚ }⧛ |⦙ \⦚](FlipLayers(Latin))	
 +DeadKey_Map0338=		Mutate2Self
 #   =============================================================
-Named_DIA_Recipe__ring_dot=	\\⋵ꞃ,\\⧔⧕[5],\Ẏọ,00b0|0323+<subst-Vietnamese>|||\⊛,0307,0323|0328+<subst-Macron>|<any-round>,<any-ring-!above>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,<any-circled>,<any-circled>+<reveal-substkey>,<any-adddot>,-<any-amplify>,<any-black>--<any-amplify>|<any-insular>,<any-equal>+<any-amplify>
+Named_DIA_Recipe__ring_dot=	\\⋵ꞃ,\\⧔⧕[5],\Ẏọ,00b0|0323+<subst-Vietnamese>|||\⊛,!\⊆⊇,0307,0323|0328+<subst-Macron>|<any-round>,<any-ring-!above>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,<any-circled>,<any-circled>+<reveal-substkey>,<any-adddot>,-<any-amplify>,<any-black>--<any-amplify>|<any-insular>,<any-equal>+<any-amplify>
 # ring above 00b0: combine with dotabove 0307 dotbelow 0323 
 # (only WÊ miss dot below, AUY miss dot above: Ȧ is Livonian and phonetic; U is not precomposed; Ẉ - WHERE???) ; <any-jot> does not add anything useful now...
 # Ẏ (useful WHERE???) obscures Vietnamese Ỵ, [any-dots does not add anything...]; ⋵ obscures ⦑
@@ -443,6 +455,13 @@ ExportDeadKeys=	́	҃
 +PrefixChains=0192,0192,012e,0301,0338,¨,⍽
 +PrefixChains=0138,0138,019c,£,03e2,␣
 #
+###+DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), “Ripe Keys”, Subscript digits/symbols, dashes]
+###+DeadKey_Map0192=	Face(CGreekRipeMax)	Face(Add_Ripe1)
+#
+#				ĸ: ↹⇤ 0009⇥
+###+DeadKey_Map0138=	PrefixDocs[Latin, Superscript digits/symbols, “Green Keys”]
+###+DeadKey_Map0138=	Face(CLatinGreenMax)	Face(Add_Green1)
+#
 +DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), Superscript digits/symbols, “Green Keys”]
 +DeadKey_Map0192=	Face(CGreekGreenMax)	Face(Add_Ripe1)
 #
@@ -479,7 +498,7 @@ ExportDeadKeys=	́	҃
 BaseLayer=US-Base
 LinkFace=Latin
 #
-MetaData_Index=1
+MetaData_Index=2
 #
 faceDeadKeys= 	0342 0314 0313 03e2  £	ĸ
 ExportDeadKeys=	0342 0314 0313 03e2
@@ -512,7 +531,7 @@ ExportDeadKeys=	0342 0314 0313 03e2
 BaseLayer=US-Base
 LinkFace=Latin
 #
-MetaData_Index=1
+MetaData_Index=3
 #
 # Prefering both picks 2nd from the end (2nd of 3 for Ъ,ъ) - but picking the third makes layout nicer!
 @char2key_prefer_first=\,|,.,002c,£
@@ -641,6 +660,29 @@ DEADKEY	00A3
 0055	5706	// U -> 圆	yuan-2
 0075	5143	// u -> 元	yuan-1
 
+[visual -> RECT/keypad]
+@rect_rows_cols=4,4 
+@rect_horizontal_counts=11,10,11
+@layer_names=Base-Keypad,Frame11,Frame22,Frame12,Frame21,FrameBB,Frame1B,FrameB1,BFrameOnH,BFrameOnV,BFrameOnHV
+@layer_names=BlackTriang,WhiteTriang,PartBlackCircles,WhiteFrame,BlackFrame,RoundDirections,RoundDirectionsPlus,Arcs,PartCircles,RectArr
+@layer_names=Arrows,Arrows2,ArrowsMapsTo,ArrowsWhite,ArrowsBlack,Arrows3,ArrowsDtip,ArrowsDoubled,ArrowsDashedCurved,ArrowDStroked,ArrowsPlay
+empty=!
+COLgap=0
+ROWgap=0
+# Arrows: Mid: Hor/Ver Extension, bottom row: LeftRight, LongLeftRight-or-LongRight, UpDown
+789/┌┬┐!╔╦╗!╓╥╖!╒╤╕!┏┳┓!┎┰┒!┍┯┑!┲!┱!┢╈┪!╆!╅!
+456*├┼┤!╠╬╣!╟╫╢!╞╪╡!┣╋┫!┠╂┨!┝┿┥!╊!╉!!!!!!!!!
+123-└┴┘!╚╩╝!╙╨╜!╘╧╛!┗┻┛!┖┸┚!┕┷┙!┺!┹!┡╇┩!╄!╇!
+0.↲+─│!!═║!!!!!!!!!!━┃!!!!!!!!!!!!!!!!!!!!!!
+◤▲◥!⌌△⌍!◕◓◔!▗▄▖!▛▀▜!◜∩◝⊘⌈⋂⌉!╭◠╮!◴◚◷!⌜⊓⌝⍁
+◀■▶!◁□▷!◐○◑!▐█▌!▌ ▐!⊂⥀⊃⊗⊆⥁⊇⨂◖⚪◗!!!➲!⊏□⊐⊠
+◣▼◢!⌎▽⌏!!◒!!▝▀▘!▙▄▟!◟∪◞⊖⌊⋃⌋!╰◡╯!◵◛◶!⌞⊔⌟⊟
+!!!!!!!!!!!!!!!!!!!!!!!⊕!!!⨁!!!!!!!!!!!⊞
+↖↑↗÷⇖⇑⇗∕↰↥↱!⬁⇧⬀!⬉⬆⬈!⬑⤊⬏!⇱↟!!↫⇈↬!↻⇡↺!↸⇞!!⏮⏫⏭!
+←⎯→×⇐⏐⇒⨯↤!↦!⇦○⇨!⬅●➡!⇚◯⇛!↞!↠!⇇!⇉!⇠◌⇢!⇺❍⇻!⏪!⏩!
+↙↓↘‒⇙⇓⇘−↲↧↳!⬃⇩⬂!⬋⬇⬊!⬐⤋⬎!!↡⇲!↩⇊↪!↶⇣↷!↵⇟↴!!⏬!!
+↔⟷↕﬩⇔⟺⇕∑↹⟼↨!⬄⟾⇳!⬌!⬍!!!!!!!!!⇆!⇅!!!!!!!!﬩⏯!!!
+# Elementary-school minus is FIGURE DASH
 [visual -> KBD/Digits]
 #
 # For fractions, we look for fractions with minimal denominator/numerator which contain the given digit in numerator/denominator.  We take the first one and the second one from the list.
@@ -648,28 +690,39 @@ DEADKEY	00A3
 # All Unicoded fractions appear in these lists.  So each one can be entered via a DeadKeyMap.
 #
 #
-visual_rowcount=12
-@visual_per_row_counts=1,1,1,2,1,1,1,1,1,1,1,1
+visual_rowcount=16
+@visual_per_row_counts=1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1
 visual_prefixes= <* *<> < +
 in_key_separator=/
 prefix_repeat=3
+in_key_separator2=‼
 #
 # Note that we no longer use the tables for super/subscript, and generate them operatically
-@layer_names=Zodiak,Numerators2,Numerators1,Digits,OverDigits,Denominators1,Denominators2,Super,SuperExtraLetters,Sub,SubExtraLetters,CyrPowersOfTen,cp437-Start
+@layer_names=Zodiak,Numerators2,Numerators1,Digits,OverDigits,Denominators1,Denominators2
+@layer_names=Super,SuperExtraLetters,Sub,SubExtraLetters,CyrPowersOfTen,cp437-Start,DashesEtc0,FractionEmSpacesEtc0
+@layer_names=DashesEtc,FractionEmSpacesEtc
 # ↉ 0/3  ⅐ 1/7 ⅑ 1/9
-	♈	♉	♊	♋	♌	♍	♎	♏	♐	♑	--	♒	♓	--	--	--	--	--	--
+	♈	♉	♊	♋	♌	♍	♎	♏	♐	♑	♒	♓	--	--	--	--	--	--	--
 <<<	½	⅖	⅗	--	⅝	--	--	--	--	--	--	--	--	--	--	--	--	--	--
 ***	⅟	⅔	¾	⅘	⅚	--	⅞	--	--	↉	--	--	--	--	--	--	--	--	--
 	1/!	2/@	3/#	4/$	5/%	6/^	7/&	8/*	9/(	0/)	--	--	--	--	--	--	--	--	--
 ***	⅒	½	⅓	¼	⅕	⅙	⅐	⅛	⅑	⅒	--	--	--	--	--	--	--	--	--
 <<<	--	--	⅔	¾	⅖	⅚	--	⅜	--	--	--	--	--	--	--	--	--	--	--
->>>	¹	²	³	⁴	⁵	⁶	⁷	⁸	⁹	⁰	ⁱ	⁲	⁳	⁺	⁻	⁼	⁽	⁾	ⁿ
-	--	--	--	--	--	--	--	--	--	--	i	--	--	+	-	=	(	)	n
-<<<	₁	₂	₃	₄	₅	₆	₇	₈	₉	₀	₊	₋	₌	₍	₎	₏	--	--	--
-	--	--	--	--	--	--	--	--	--	--	+	-	=	(	)	ə	--	--	--
+>>>	¹	²	³	⁴	⁵	⁶	⁷	⁸	⁹	⁰	⁲	⁳	ⁱ	⁺	⁻	⁼	⁽	⁾	ⁿ
+	--	--	--	--	--	--	--	--	--	--	--	--	i	+	-	=	(	)	n
+<<<	₁	₂	₃	₄	₅	₆	₇	₈	₉	₀	₋	₌	₊	₍	₎	₏	--	--	--
+	--	--	--	--	--	--	--	--	--	--	-	=	+	(	)	ə	--	--	--
 +++	--	--	҂	 ⃝	 ҈	 ҉	꙰	꙱	꙲	--	--	--	--	--	--	--	--	--	--
 	☺	☻	♥	♦	♣	♠	•	◘	○	◙	--	--	--	--	--	--	--	--	--
-#
+	‐ 	–	—	― 	⸏	⸓	⸎	⁃	‑	‒	‑	‾	--	--	--	--	--	--	--
+	2003	2002	2004	2005	2009	2006	205f	200a	2001	200b	2008	2007	--	--	--	--	--	--	--
+	‐ 	200a—200a‼	—	― 	⸏	⸓	⸎	⁃	‑	‒	‑	‾	--	--	--	--	--	--	--
+	2003	‼2009—2009 2004	2005	2009	2006	205f	200a	2001	200b	2008	2007	--	--	--	--	--	--	--
+#	‐ 	‼2009—2009 —	― 	⸏	⸓	⸎	⁃	‑	‒	‑	‾	--	--	--	--	--	--	--
+#	2003	‼200a—200a 2004	2005	2009	2006	205f	200a	2001	200b	2008	2007	--	--	--	--	--	--	--
+#	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--
+#	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--
+# 4/18 --> 1/7; EM QUAD --> 1/9
 #
 # Most of the above are very optional now: Super and Sup are obsoleted by Mutate[<super>] etc
 # combined with Select[] clauses.  Register mapping is not done yet (2011) but can be easily done.
@@ -681,6 +734,7 @@ prefix_repeat=3
 [Diacritics]
 # Surrogate + 8bit + Modifiers, Modifiers below-or-opposite, Vertical (or Comma-like or Doubled or Dotlike or Rotated or letter-like) Modifiers, 
 # Prime-like or Centered modifiers, Combining, Combining below-or-opposite, Vertical/plus-like/arrows and dotlike Combining, Combining for symbols
+# ⎖ in prime-like apostrophe??? - is currently obscured…
 /APOSTROPHE=		'´ʼʾˀˊ΄/ˏˌ/ˈˌˡ/ʹˑ/ ́ ̉ ̛ ̷ ̸ ́ ͗  ᷎  ᷄  ᷇  ᷁/ ̗ ̩  ̦  ̹  ͅ / ̍ ̓  ̓ ̕ ̩  /  ⃬  ⃐ ⃫  ⃬
 /QUOTATION_MARK=	"¨˝˸ː΅/˶˵/ˮ/ʺ/ ̈ ̋ ̏ ̈́  ᷉  ᷈  ゙    / ̤  ͈ / ̎  ͛   ͈ /  ⃛   ⃜  ⃨
 /GRAVE_ACCENT=		`ˋʿˁˤ/ˎ/ʻʽ/˴˵/ ̀ ̀  ͑  ᷆  ᷅  ᷀ / ̖  ̜   ᷂ / ̒ ̔ /  ⃑ ⃭   ⃠ ⃥

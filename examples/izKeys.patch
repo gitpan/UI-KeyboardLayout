@@ -1,6 +1,14 @@
 --- iz-ru-la.C.orig	2013-03-09 16:06:20.451537200 -0800
 +++ iz-ru-la.C	2013-03-09 16:48:00.444528600 -0800
-@@ -142,6 +142,8 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVk
+@@ -92,6 +92,7 @@ static ALLOC_SECTION_LDATA VSC_VK aE0Vsc
+         { 0x2E, X2E | KBDEXT              },  // Speedracer: Volume Down
+         { 0x30, X30 | KBDEXT              },  // Speedracer: Volume Up
+         { 0x32, X32 | KBDEXT              },  // Speedracer: Browser Home
++        { 0x35, X35 | KBDEXT              },  // Numpad Divide
+         { 0x37, X37 | KBDEXT              },  // Snapshot
+         { 0x38, X38 | KBDEXT              },  // RMenu
+         { 0x47, X47 | KBDEXT              },  // Home
+@@ -142,6 +143,8 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVk
      { VK_SHIFT    ,   KBDSHIFT     },
      { VK_CONTROL  ,   KBDCTRL      },
      { VK_MENU     ,   KBDALT       },
@@ -9,7 +17,7 @@
      { 0           ,   0           }
  };
  
-@@ -238,6 +240,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
+@@ -238,6 +241,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
  //                      |=========|=========|=========|=========|=========|=========|
    {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
    {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
@@ -38,7 +46,15 @@
 +#define T79 _EQ(                                    CONVERT                      )
 --- iz-la-ru.C.orig	2013-03-09 16:06:20.268526700 -0800
 +++ iz-la-ru.C	2013-03-09 16:48:12.713230300 -0800
-@@ -142,6 +142,8 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVk
+@@ -92,6 +92,7 @@ static ALLOC_SECTION_LDATA VSC_VK aE0Vsc
+         { 0x2E, X2E | KBDEXT              },  // Speedracer: Volume Down
+         { 0x30, X30 | KBDEXT              },  // Speedracer: Volume Up
+         { 0x32, X32 | KBDEXT              },  // Speedracer: Browser Home
++        { 0x35, X35 | KBDEXT              },  // Numpad Divide
+         { 0x37, X37 | KBDEXT              },  // Snapshot
+         { 0x38, X38 | KBDEXT              },  // RMenu
+         { 0x47, X47 | KBDEXT              },  // Home
+@@ -142,6 +143,8 @@ static ALLOC_SECTION_LDATA VK_TO_BIT aVk
      { VK_SHIFT    ,   KBDSHIFT     },
      { VK_CONTROL  ,   KBDCTRL      },
      { VK_MENU     ,   KBDALT       },
@@ -47,7 +63,7 @@
      { 0           ,   0           }
  };
  
-@@ -238,6 +240,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
+@@ -238,6 +241,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
  //                      |=========|=========|=========|=========|=========|=========|
    {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
    {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },

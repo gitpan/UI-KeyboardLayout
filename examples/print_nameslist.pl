@@ -6,7 +6,7 @@ use strict;
 #open my $f, '<', 
 my $d = "$ENV{HOME}/Downloads";
 my $f = "NamesList.txt";		# or die;
--e "$d/$f" or $d = '/cygdrive/c/Users/ilya/Downloads';
+-e "$d/$f" or $d = "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/Downloads";	# '/cygdrive/c/Users/ilya/Downloads';
 my $k = UI::KeyboardLayout::->new()->load_unidata("$d/$f", "$d/DerivedAge.txt");
 
 my $s;

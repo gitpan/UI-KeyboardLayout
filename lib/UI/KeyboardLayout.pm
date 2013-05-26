@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION ="0.13";
+$VERSION = $VERSION ="0.14";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -18,6 +18,8 @@ BEGIN { my $n = ($ENV{UI_KEYBOARDLAYOUT_DEBUG} || 0);
 	my @dbg = (qw( debug_face_layout_recipes debug_GUESS_MASSAGE debug_OPERATOR debug_import debug_stacking debug_noid ),
 	#		0x40			0x80		0x100	0x200		0x400		0x800		0x1000
 		   qw(warnSORTEDLISTS printSORTEDLISTS warnSORTCOMPOSE warnDO_COMPOSE warnCACHECOMP dontCOMPOSE_CACHE warnUNRES),
+	#		0x2000
+		   qw(debug_STACKING),
 		   '_debug_PERL_dollar1_scoping');
 	my $c = 0;		# printSORTEDLISTS: Dumpvalue to STDOUT (implementation detail!)
 	my @dbg_b = map $n & (1<<$_), 0..31;
@@ -29,6 +31,13 @@ sub debug_PERL_dollar1_scoping ()		 { debug & 0x1000000 }
 
 my $ctrl_after = 1;	# In "pairs of nonShift/Shift-columns" (1 simplifies output of BACK/ESCAPE/RETURN/CANCEL)
 my $create_alpha_ctrl = 2;
+my %start_SEC = (FKEYS => [96, 24, sub { my($self,$u,$v)=@_; 'F' . (1+$u-$v->[0]) }],
+		 ARROWS => [128, 16,
+		 	    sub { my($self,$u,$v)=@_;
+		 	          (qw(HOME UP PRIOR DIVIDE LEFT CLEAR RIGHT MULTIPLY END DOWN NEXT SUBTRACT INSERT DELETE RETURN ADD))[$u-$v->[0]]}],
+		 NUMPAD => [144, 16,
+		 	    sub { my($self,$u,$v)=@_;
+		 	          ((map { ($_ > 10 ? 'F' : "NUMPAD") . $_} 7..9,14,4..6,15,1..3,16,0), 'DECIMAL')[$u-$v->[0]]}]);
 
 sub toU($) { substr+(qq(\x{fff}).shift),1 }	# Some bullshit one must do to make perl's Unicode 8-bit-aware (!)
 
@@ -274,7 +283,7 @@ be empty; same for "the whole key description" - use the leading C<-->.
 
 If one of the entries in a slot is a string of length ≥ 2, one must separate 
 the entries by C<in_key_separator2>.  Likewise, if a slot has only one entry,
-and it is longer than 1 char, it must be terminated by C<in_key_separator2>.
+and it is longer than 1 char, it must be started or terminated by C<in_key_separator2>.
 
 To simplify BiDi keyboards, a line may optionally be prefixed with the L<C<LRO/RLO>|http://en.wikipedia.org/wiki/Unicode_character_property#Bidirectional_writing>
 character; if so, it may optionally be ended by spaces and the L<C<PDF>|http://en.wikipedia.org/wiki/Unicode_character_property#Bidirectional_writing> character.
@@ -482,14 +491,48 @@ On top of what is explained above, there is a way to arrange “linking” of tw
 this linking allows characters which cannot be fit on one (prefixed) key to
 “migrate” to unassigned positions on the otherwise-prefixed key.  (This is
 similar to migration from non-C<AltGr>-position to C<AltGr>-position.)
-Moreover, to simplify writing the rules, these prefix keys may I<share>
-the recipe: there is a way to inline of the recipes into another one;
-then two prefix recipes inline the same chunk, but one of them precedes
-the chunk by the C<+> character.  This leading character changes the way
-C<||||>-groups are interpreted, so two prefixes produce different results
-— which are automatically linked into each other.
+This is achieved by using mutator rules of the following form:
 
-TBC  ..................................
+  primary	= 		+PRE-GROUPS1|||SHARED||||POST-GROUPS1
+  secondary	= PRE-GROUPS2||||PRE-GROUPS1|||SHARED||||POST-GROUPS2
+
+Groups with digits are not shared (specific to a particular prefix); C<SHARED> is
+(effectively) reverted when accessed from the secondary prefix; for the
+secondary key, the recipies from C<SHARED> which were used in the primary 
+key are removed from C<SHARED>, and are appended to the end of C<POST-GROUPS2>;
+the C<PRE-GROUPS1> are skipped when finding assignments for the secondary
+prefix.
+
+In the primary recipe, C<|||> and C<||||> are interchangeable with C<|>.
+Moreover, if C<POST-GROUPS2> is empty, the secondary recipe should be written as
+
+  secondary	= PRE-GROUPS2|||PRE-GROUPS1|||SHARED
+
+if C<PRE-GROUPS1> is empty, this should be written as one of
+
+  secondary	= PRE-GROUPS2|||SHARED
+  secondary	= PRE-GROUPS2||||SHARED
+  secondary	= PRE-GROUPS2||||SHARED||||POST-GROUPS2
+
+These rules are to allow macro-ization of the common parts of the primary
+and secondary recipe.  Put the common parts as a value of the key
+C<Named_DIA_Recipe__***> (here C<***> denotes a word), and replace them by
+the macro C<< <NAMED-***> >> in the recipes.
+
+B<Implementation>: the primary key recipe starts with the C<+> character; it
+forces interpretation of C<|||> and C<||||> as of ordinary C<|>.
+
+If not I<primary>, the top-level groups are formed by C<||||> (if present), otherwise by C<|||>. 
+The number of top-level groups should be at most 3.  The second of C<||||>-groups
+may have at most 2 C<|||>-groups; there should be no other subdivision.  This way,
+there may be up to 4 groups with different roles.
+
+The second of 3 toplevel C<|||>-groups, or the first of two sublevel C<|||>-groups
+is the “skip” group.  The last of two or three toplevel C<|||>-groups (or of 
+sublevel C<|||>-groups, or the 2nd toplevel C<||||>-group without subdivisions) is the 
+inverted group; the 3rd of toplevel C<||||>-groups is the “extra” group.
+
+“Penalize/prohibit” lists start anew in every top-level group.
 
 =head2 Atomic mutators rules
 
@@ -521,6 +564,9 @@ following types:
 A hex number with ≥4 digits, or a character: implements the composition
 inverting (compatibility or not) Unicode decompositions into two characters;
 the character in the rule must the first character of the decomposition.
+Here “Unicode decompositions” are either deduced from Unicode decomposition
+rules (with compatibility decompositions having lower priority), or deduced
+basing on splitting the name of the character into parts.
 
 =item *
 
@@ -536,7 +582,7 @@ or C<< <final> >>.
 
 =item *
 
-C<< <font=***> rules TBC ..........................................
+C<< <font=***> >> rules TBC ..........................................
 
 =item *
 
@@ -558,20 +604,20 @@ are separators;
   BROKEN, TURNED, INSULAR, SANS-SERIF, REVERSED, OPEN, CLOSED, DOTLESS, TAILLESS, FINAL
   BAR, SYMBOL, OPERATOR, SIGN, ROTUNDA, LONGA, IN TRIANGLE, SMALL CAPITAL (as smallcaps)
 
-are modifiers.  For an C<APL FUNCTIONAL SYMBOL), one scans for
+are modifiers.  For an C<APL FUNCTIONAL SYMBOL>, one scans for
 
   QUAD, UNDERBAR, TILDE, DIAERESIS, VANE, STILE, JOT, OVERBAR, BAR
 
 TBC ..........................................
 
-=itme *
+=item *
 
 Additionally, C<esh/eng/ezh> are considered C<pseudo-phonetized> variants of
 their middle letter, as well as C<SCHWA> of C<0>.
 
 =item *
 
-C<< <pseudo-fake-***> rules are obtained by scanning the name for
+C<< <pseudo-fake-***> >> rules are obtained by scanning the name for
 
   WHITE, BLACK, CIRCLED, BUT NOT 
 
@@ -644,6 +690,71 @@ On characters
 
 In additional, several CSS classes are auto-generated basing on Unicode
 properties of the character.  TBC ........................
+
+=head2 Debugging mutators
+
+If the bit 0x40 of the environment variable C<UI_KEYBOARDLAYOUT_DEBUG> 
+(decimal or C<0xHEX>) is set, debugging output for mutators is enabled:
+
+  r ║ ║   ┆ ║ ṙ ṛ ┆ ║ ║ ║ ║ ⓡ ┆
+    ║ ║   ┆ ║ Ṙ Ṛ ┆ ║ ║ ║ ║ Ⓡ ┆
+    ║ ║ ặ ┆ ║     ┆ ║ ║ ║ ║   ┆
+    ║ ║ Ặ ┆ ║     ┆ ║ ║ ║ ║   ┆
+  Extracted [ …list… ] deadKey=00b0
+
+The output contains a line per character assigned to the keyboard key (if 
+there are 2 layers, each with lc/uc variants, there are 4 lines); empty lines are 
+omitted.  The first column indicates the base character (lc of the 1st layer) of 
+the key; the separator C<║> indicates C<|>-groups in the mutator.  Above, the first
+group produces no mutations, the second group mutates only the characters in
+the second layer, and the third group produces two mutations per a character in
+the first layer.  The 7th group is also producing mogrifications on the 1st layer.
+
+The next example clarifies C<┆>-separator: to the left of it are mogrifications which 
+come in case pairs, to the right are mogrifications where mogrified-lc is not
+a case pair of mogrified-uc:
+
+  t ║ ║ ᵵ ║ ꞇ ┆ ʇ ║   ┆ ║
+    ║ ║   ║ Ꞇ ┆ ᴛ ║   ┆ ║
+    ║ ║   ║   ┆   ║ ꝧ ┆ ║
+    ║ ║   ║   ┆   ║ Ꝧ ┆ ║
+  Extracted [ …list… ] deadKey=02dc
+
+In this one, C<│> separates mogrifications with different priorities (based on
+Unicode ages, whether the atomic mutator was compatibility/synthetic one, and the
+Unicode block).
+
+  / ║ ║ ║ ║ ║   │ ∴   ║ ║
+    ║ ║ ║ ║ ║   │ ≘ ≗ ║ ║
+    ║ ║ ║ ║ ║ / │ ⊘   ║ ║
+  Extracted [ …list… ] deadKey=00b0
+
+For secondary mogrifiers, where the distinction between C<|||> and C<|> 
+matters, some of the C<║>-separators are replaced by C<┃>.  Additionally,
+there are two rounds of extraction: first the characters corresponding
+to the primary mogrifier are TMP-extracted (from the groups PRE-GROUPS1, 
+COMMON); then what is the extracted from COMMON is put back at the 
+effective end (at the end of POST-GROUPS2, or, if no such, at 
+the beginning of COMMON):
+
+  t ║ ║ ᵵ ┃ ┃ ʇ │   │ ꞇ ┆ ║
+    ║ ║   ┃ ┃   │ ᴛ │ Ꞇ ┆ ║
+    ║ ║   ┃ ┃   │   │ ꝧ ┆ ║
+    ║ ║   ┃ ┃   │   │ Ꝧ ┆ ║
+  TMP Extracted: <…list…> from layers 0 0 | 0 0
+  t ║ ║ ᵵ ┃ ꞇ ┆ ʇ ┋ ┃ ┆ │ ┆ │   ┆ ║
+    ║ ║   ┃ Ꞇ ┆ ᴛ ┋ ┃ ┆ │ ┆ │   ┆ ║
+    ║ ║   ┃   ┆   ┋ ┃ ┆ │ ┆ │ ꝧ ┆ ║
+    ║ ║   ┃   ┆   ┋ ┃ ┆ │ ┆ │ Ꝧ ┆ ║
+  Extracted [ …list… ] deadKey=02dc
+
+In the second part of the debugging output, the part of common which is put
+back is separated by C<┋>.
+
+When bit 0x80 is set, much more lower-level debugging info is printed.  The
+arrays at separate depth mean: group number, priority, not-cased-pair, layer
+number, subgroup, is-uc.  When bit 0x100 is set, the debugging output for
+combining atomic mutators is enabled.
 
 =head2 Personalities
 
@@ -1422,6 +1533,7 @@ Tamil/ISCII
 
   http://unicode.org/faq/indic.html
   http://unicode.org/versions/Unicode6.1.0/ch09.pdf
+  http://www.brainsphere.co.in/keyboard/tm.pdf
 
 CGI and OpenType
 
@@ -1607,6 +1719,7 @@ Window 7 SP1 improvements
 Middle dot is ambiguous
 
   http://unicode.org/mail-arch/unicode-ml/y2010-m09/0023.html
+  http://unicode.org/mail-arch/unicode-ml/y2013-m03/0151.html
 
 Apostroph as soft sign
 
@@ -1665,6 +1778,11 @@ Translation of Unicode names
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0066.html
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0076.html
 
+Tibetian (history of encoding, relative difficulty of handling comparing to cousins)
+
+  http://unicode.org/mail-arch/unicode-ml/y2013-m04/0036.html
+  http://unicode.org/mail-arch/unicode-ml/y2013-m04/0040.html
+
 =head1 SEE ALSO
 
 The keyboard(s) generated with this module: L<UI::KeyboardLayout::izKeys>, L<http://k.ilyaz.org/>
@@ -1700,6 +1818,10 @@ On keyboard layouts:
   http://www.pentzlin.com/info2-9995-3-V3.pdf		(used almost nowhere - only half of keys in Canadian multilanguage match)
       Discussion of layout changes and position of €:
   https://www.libreoffice.org/bugzilla/show_bug.cgi?id=5981
+  
+    History of QUERTY
+  http://kanji.zinbun.kyoto-u.ac.jp/~yasuoka/publications/PreQWERTY.html
+  http://kanji.zinbun.kyoto-u.ac.jp/db-machine/~yasuoka/QWERTY/
 
   http://msdn.microsoft.com/en-us/goglobal/bb964651
   http://eurkey.steffen.bruentjen.eu/layout.html
@@ -1720,6 +1842,8 @@ On keyboard layouts:
   http://www.tinkerwithabandon.com/twa/keyboarding.html
       Physical keyboard:
   http://www.konyin.com/?page=product.Multilingual%20Keyboard%20for%20UNITED%20STATES
+      Polytonic Greek
+  http://www.polytoniko.org/keyb.php?newlang=en
       Portable keyboard layout
   http://www.autohotkey.com/forum/viewtopic.php?t=28447
       One-handed
@@ -1737,6 +1861,16 @@ On keyboard layouts:
   http://www.jlg-utilities.com
       Medievist's
   http://www.personal.leeds.ac.uk/~ecl6tam/
+      Yandex visual keyboards
+  http://habrahabr.ru/company/yandex/blog/108255/
+      Implementation in FireFox
+  http://mxr.mozilla.org/mozilla-central/source/widget/windows/KeyboardLayout.cpp#1085
+      Implementation in Emacs 24.3 (ToUnicode() in fns)
+  http://fossies.org/linux/misc/emacs-24.3.tar.gz:a/emacs-24.3/src/w32inevt.c
+  http://fossies.org/linux/misc/emacs-24.3.tar.gz:a/emacs-24.3/src/w32fns.c
+  http://fossies.org/linux/misc/emacs-24.3.tar.gz:a/emacs-24.3/src/w32term.c
+      Naive implementations:
+  http://social.msdn.microsoft.com/forums/en-US/windowssdk/thread/07afec87-68c1-4a56-bf46-a38a9c2232e9/
 
 By author of MSKLC Michael S. Kaplan (do not forget to follow links)
 
@@ -1802,6 +1936,10 @@ By author of MSKLC Michael S. Kaplan (do not forget to follow links)
   http://blogs.msdn.com/b/michkap/archive/2006/09/26/771554.aspx
       Suggest a topic:
   http://blogs.msdn.com/b/michkap/archive/2007/07/29/4120528.aspx#7119166
+
+Convert Apple to MSKLC
+
+  http://typophile.com/node/90606
 
 VK_OEM_8 Kana modifier - Using instead of AltGr
   http://www.kbdedit.com/manual/ex13_replacing_altgr_with_kana.html
@@ -1995,6 +2133,7 @@ Windows shortcuts:
 
   http://windows.microsoft.com/en-US/windows7/Keyboard-shortcuts
   http://www.redgage.com/blogs/pankajugale/all-keyboard-shortcuts--very-useful.html
+  https://skydrive.live.com/?cid=2ee8d462a8f365a0&id=2EE8D462A8F365A0%21141
 
 On meaning of Unicode math codepoints
 
@@ -2011,7 +2150,7 @@ Indic ISCII - any hope with it?  (This is not representable...:)
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m09/0053.html
 
-(Persieved) problems of Unicode (2001)
+(Percieved) problems of Unicode (2001)
 
   http://www.ibm.com/developerworks/library/u-secret.html
 
@@ -2031,6 +2170,12 @@ Zapf dingbats encoding, and other fine points of AdobeGL:
 Yet another (IMO, silly) way to handle '; fight: ' vs ` ´
 
   http://www.cl.cam.ac.uk/~mgk25/ucs/apostrophe.html
+
+Surrogate characters on IE
+
+  HKEY_CURRENT_USER\Software\Microsoft\Internet Explorer\International\Scripts\42
+  http://winvnkey.sourceforge.net/webhelp/surrogate_fonts.htm
+  http://msdn.microsoft.com/en-us/library/aa918682.aspx				Script IDs
 
 Quoting tchrist:
 I<You can snag C<unichars>, C<uniprops>, and C<uninames> from L<http://training.perl.com> if you like.>
@@ -2264,8 +2409,6 @@ symbols" are supported (think of German physical keyboards where Y/Z keycaps
 are swapped: Z is etched between T and U, and Y is to the left of X, or French
 which swaps A and Q, or French or Russian physical keyboards which have more
 alphabetical keys than 26).
-
-Currently no C<LIGATURES> are supported.
 
 While the architecture of assembling a keyboard of small easy-to-describe
 pieces is (IMO) elegant and very powerful, and is proven to be useful, it 
@@ -2614,7 +2757,7 @@ But we do not need to separate case-differing keys!  How to fix?
 All done, but this works only on the current face!  To fix, need to pass
 to the translator all the face-characters present on the given key simultaneously.
 
-===== Accent-key TAB accesses extra bindinges (including NUM->numbered one)
+  ===== Accent-key TAB accesses extra bindinges (including NUM->numbered one)
 	(may be problematic with some applications???
 	 -- so duplicate it on + and @ if they is not occupied
 	 -- there is nothing related to AT in Unicode)
@@ -2794,9 +2937,48 @@ the keyboard.
 For development cycle, one does not need to rebuild the install package
 while recompiling.
 
-=over 4
+=head2 MSKLC keyboards not working on Windows 8
 
-=item Several similar F<MSKLC> created keyboards may confuse the system
+The layout is shown as active, but "preview" is grayed out,
+and is not shown on the Win-Space list.    See also:
+
+  http://www.errordetails.com/125726/activate-custom-keyboard-layout-created-with-msklc-windows
+
+(I know no workaround right now.)
+
+=head2 It is hard to understand what a keyboard really does
+
+To inspect the output of the keyboard in the console mode (may be 8-bit,
+depending on how Perl is compiled), one can run
+
+  perl -we "sub mode2s($){my $in = shift; my @o; $in & (1<<$_) and push @o, (qw(rAlt lAlt rCtrl lCtrl Shft NumL ScrL CapL Enh ? ??))[$_] for 0..10; qq(@o)} use Win32::Console; my $c = Win32::Console->new( STD_INPUT_HANDLE); my @k = qw(T down rep vkey vscan ch ctrl); for (1..20) {my @in = $c->Input; print qq($k[$_]=), ($in[$_] < 0 ? $in[$_] + 256 : $in[$_]), q(; ) for 0..$#in; print(@in ? mode2s $in[-1] : q(empty)); print qq(\n)}"
+
+This reports 20 following console events (press and keep C<Alt> key
+to exit by generating a “harmless” chain of events).  B<Limitations:> the reported
+input character is not processed (via ToUnicode(); hence chained keys and
+multiple chars per key are reported only as low-level), and is reported as
+a signed 8-bit integer (so the report for above-8bit characters is
+completely meaningless).
+
+  T=1; down=1; rep=1; vkey=65; vscan=30; ch=-26; ctrl=9; rAlt lCtrl
+  T=1; down=0; rep=1; vkey=65; vscan=30; ch=-26; ctrl=9; rAlt lCtrl
+
+This reports single (T=1) events for keypress/keyrelease (down=1/0) of
+C<AltGr-a>.  One can see that C<AltGr> generates C<rAlt lCtrl> modifiers
+(this is just a transcription of C<ctrl=9>,
+that C<a> is on virtual key 65 (this is C<VK_A>) with virtual scancode
+30, and that the generated character (it was C<æ>) is C<-26 mod 0x100>.
+
+The character is approximated to the current codepage.  For example, this is
+C<Kana-b> entering C<β = U+03b2> in codepage C<cp1252>:
+
+  T=1; down=1; rep=1; vkey=66; vscan=48; ch=-33; ctrl=0;
+  T=1; down=0; rep=1; vkey=66; vscan=48; ch=-33; ctrl=0;
+
+Note that C<0x100 - 33 = 0xDF>, and C<U+00DF = ß>.  So I<beta> is substituted by
+I<eszet>.
+
+=head2 Several similar F<MSKLC> created keyboards may confuse the system
 
 Apparently, the system may get majorly confused when the C<description>
 of the project gets changed without changing the DLL (=project) name.
@@ -2848,7 +3030,7 @@ Is it related to C<***\Local Settings\MuiCache\***> hive???
 Possible workaround: manually remove the entry in C<HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Keyboard Layouts>
 (the last 4 digits match the codepage in the F<.klc> file).
    
-=item Too long description (or funny characters in description?)
+=head2 Too long description (or funny characters in description?)
 
 If the name in the C<DESCRIPTIONS> section is too long, the name shown in 
 the list C<2> above may be empty.
@@ -2863,7 +3045,7 @@ not the length but some particular character (C<+>?) which was confusing
 the system.  (I saw a report on F<MSKLC> bug when description had apostroph
 character C<'>.)
    
-=item F<MSKLC> ruins names of dead key when reading a F<.klc>
+=head2 F<MSKLC> ruins names of dead key when reading a F<.klc>
 
 When reading a F<.klc> file, MS Keyboard Layout Creator may ruin the names
 of dead keys.  Symptom: open the dialogue for a dead key mapping
@@ -2897,7 +3079,7 @@ BTW: It might be that this is cosmetic only.  I do not know any bad
 effect - but I did not try to use any tool with visual feedback on
 the currently active sub-layout of keyboard.
 
-=item Double bug in F<KBDUTOOL> with dead characters above 0x0fff
+=head2 Double bug in F<KBDUTOOL> with dead characters above 0x0fff
 
 This line in F<.klc> file is treated correctly by F<MSKLC>'s builtin keyboard tester:
 
@@ -2935,7 +3117,7 @@ instead of deadkeys.  Moreover, these ligatures are put on non-existing
 the C<Shift + Control + Menu> flags instead of "modification number" in
 the ligatures table.
 
-=item F<MSKLC> keyboards handle C<Ctrl-Shift-letter> differently than US keyboard
+=head2 F<MSKLC> keyboards handle C<Ctrl-Shift-letter> differently than US keyboard
 
 At least in console applications, the US keyboard produces (as the 
 “string value”) the corresponding Control-letter when 
@@ -2949,28 +3131,31 @@ explicitly include C<Ctrl-Shift> as a handled combination, and return
 C<Ctrl-letter> on such keypresses.  (This is enabled in the generated
 keyboards generated by this module - not customizable in v0.12.)
 
-=item Default keyboard of an application
+=head2 Default keyboard of an application
 
 Apparently, there is no way to choose a default keyboard for a certain
 language.  The configuration UI allows moving keyboards up and down in
 the list, but, apparently, this order is not related to which keyboard
 is selected when an application starts.
 
-=item Hex input of unicode is not enabled
+=head2 Hex input of unicode is not enabled
 
 One needs to explicitly tinker with the registry (see F<examples/enable-hex-unicode-entry.reg>)
 and then I<reboot> to enable this.
 
-=item Standard fonts have some chars exchanged
+=head2 Standard fonts have some chars exchanged
 
 At least in Consolas and Lucida Sans Unicode φ and ϕ are exchanged.
-Compare with Courier and Times.
+Compare with Courier and Times.  (This may be due to the L<difference between
+Unicode's pre-v3.0 choice of representative glyphs|http://en.wikipedia.org/wiki/Phi#Computing>, 
+or the L<difference
+between French/English Apla=Didot/Porson's approaches|http://www.greekfontsociety.gr/pages/en_typefaces19th.html>.)
 
-=item The console font configuration
+=head2 The console font configuration
 
 It is controlled by Registry hive
 
-  HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Console\TrueTypeFont
+  HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Console\TrueTypeFont
 
 The key C<0> usually gives C<Lucida Console>, and the key C<00>
 gives C<Consolas>.  Adding random numbers does not work; however,
@@ -2984,16 +3169,13 @@ You need to export this hive (e.g., use
 then edit the resulting file.
 
 So if the maximal key with 0s is C<00>, add one extra row with an extra 0
-at end, and the name of your font.  To find the name, look into the hive
-
-  HKLM\Software\Microsoft\WindowsNT\CurrentVersion\Fonts
-
-For example, after installing C<DejaVuSansMono.ttf>, I see
-C<DejaVu Sans Mono (TrueType)> as a key in this hive.  So I add a line
+at end, and the family name of your font.  The "family name" is what the Font
+list in C<Control Panel> shows for I<font families> (a "stacked" icon is shown);
+for individual fonts the weight (Regular, Book, Bold etc) is appended.  So I add a line
 
   "000"="DejaVu Sans Mono"
 
-so that the result is now (omitting Far Eastern fonts)
+the result is (omitting Far Eastern fonts)
 
   Windows Registry Editor Version 5.00
 
@@ -3007,7 +3189,7 @@ so that the result is now (omitting Far Eastern fonts)
   "000"="DejaVu Sans Mono"
 
 The full file is in F<examples/console-fonts00-added.reg>.  After importing this
-file via F<reg> (or give it as parameter to F<regedit>; requires administrative priviledges)
+file via F<reg> (or give it as parameter to F<regedit>; both require administrative priviledges)
 the font is immediately available in menu.  (However, it does not work in "existing"
 console windows, only in newly created windows.)
 
@@ -3021,6 +3203,23 @@ in different weight, it is a Russian Rullette which one of them will be taken
 the "normal" flavor of the font, then do as above (so the system has no way of picking
 the wrong flavor!), and only after this install the remaining
 flavors.
+
+B<CAVEAT:> the string to put into C<Console\TrueTypeFont> is the I<Family Name> of the font.
+On Windows, it is tricky to find the family name using the default Windows' tools, without
+inspecting the font in a font editor.  One workaround is to select the font in C<Character Map>
+application, then inspect C<HKEY_CURRENT_USER\Software\Microsoft\CharMap\Font> via:
+
+  reg export HKCU\Software\Microsoft\CharMap character-map-font.reg
+
+Note: what is visible in the C<Properties> dialogue of the font, and in C<CurrentVersion\Fonts> is the
+I<Full Font Name>.  Fortunately, quite often the full name and the family name coincide —
+this is what happened with C<DejaVu>.  To find the "Full name" of the font, look into the hive
+
+  HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts
+  reg export "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" fonts.reg
+
+For example, after installing C<DejaVuSansMono.ttf>, I see
+C<DejaVu Sans Mono (TrueType)> as a key in this hive.  
 
 B<One more remark:> for desktop icons coming from the “Public” user (“shared”
 icons) which start a console application, the default font is not directly editable.
@@ -3049,7 +3248,91 @@ the desktop.  Verify that the “old” icon works as expected.
 
 =back
 
-=item C<AltGr>-keypresses going nowhere
+=head2 There is no way to show Unicode contents on Windows
+
+Until Firefox C<v13>, one could use FireFox to show arbitrary
+Unicode text (limited only by which fonts are installed on your
+system).  If you upgraded to a newer version, there is no (AFAIK)
+Windows program (for general public consumption) which would visualize
+Unicode text.  The applications are limited either (in the worst case) by
+the characters supported by the currently selected font, or (in the best
+case) they can show additionally characters, but only those considered by the
+system as "important enough" (coming from a few of default fonts?).
+
+There is a workaround for this major problem in FireFox (present at least
+up to C<v20>).  It is caused
+by L<this “improvement”|https://bugzilla.mozilla.org/show_bug.cgi?id=705594>
+which blatantly saves a few seconds of load time for a tiny minority of
+users, the price being an unability to show Unicode I<for everybody>
+(compare with comments L<33|https://bugzilla.mozilla.org/show_bug.cgi?id=705594#c33> 
+and L<75|https://bugzilla.mozilla.org/show_bug.cgi?id=705594#c75> on the bug report above).
+
+It is not documented, but this action is controlled by C<about:config>
+setting C<gfx.font_rendering.fallback.always_use_cmaps>.  To enable Unicode,
+make this setting into C<true> (if you have it in the list as C<false>, double-clicking it would
+do this — do search to determine this; otherwise you need to create a new
+C<Binary> entry).
+
+There is an alternative/additional way to enable extra fonts; it makes
+sense if you know a few character-rich fonts present on your system.  The (undocumented)
+settings C<font.name-list.*.x-unicode> (apparently) control fallback fonts for situations
+when a suitable font cannot be found via more specific settings.  For example, when
+you installed (free) L<Deja vu|http://dejavu-fonts.org/>, 
+L<junicode|http://junicode.sourceforge.net/>, L<Symbola|http://users.teilar.gr/~g1951d/> fonts on your system, you may set (these
+variables are not present by default; you need to create new C<String> variables):
+
+  font.name-list.sans-serif.x-unicode	DejaVu Sans,Symbola,DejaVu Serif,DejaVu Sans Mono,Junicode
+  font.name-list.serif.x-unicode	DejaVu Serif,Symbola,Junicode,DejaVu Sans,Symbola,DejaVu Sans Mono
+  font.name-list.cursive.x-unicode	Junicode,Symbola,DejaVu Sans,DejaVu Serif,DejaVu Sans Mono
+  font.name-list.monospace.x-unicode	DejaVu Sans Mono,DejaVu Sans,Symbola,DejaVu Serif,Junicode
+
+And maybe also L<Fantasy|http://shallowsky.com/blog/tech/web/firefox-cursive-fantasy.html>
+  
+  font.name-list.fantasy.x-unicode	Symbola,DejaVu Serif,Junicode,DejaVu Sans Mono,DejaVu Sans
+
+If you set both C<font.*> variables with rich enough fonts, 
+and C<gfx.font_rendering.fallback.always_use_cmaps>,
+then you may have the best of both worlds: the situation when a character cannot
+be shown via C<font.*> settings will be extremely rare, so the possiblity of delay
+due to C<gfx.font_rendering.fallback.always_use_cmaps> is irrelevant.
+
+=head2 Firefox misinterprets keypresses
+
+=over 4
+
+=item *
+
+Multiple prefix keys are not supported.
+
+=item *
+
+C<AltGr-0> and C<Shift-AltGr-0> are recognized as a character-generating
+keypress (good!), but the character they produce bears little relationship
+to what keyboard produces.  (In our examples, the character may be available
+only via multiple prefix keys!)
+
+=item *
+
+After a prefix key, C<Control-(Shift-)letter> is not recognized as a
+character-generating key.
+
+=item *
+
+C<Kana-Enter> is not recognized as a character-generating key.
+
+=item *
+
+C<Alt-+-HEXDIGITS> is not recognized as a character-generating key sequence (recall
+that C<Alt> should be pressed all the time, and other keys C<+ HEXDIGITS> should be
+pressed+released sequentially).
+
+=back
+
+Of these problems, C<Chrome> has only C<Control-(Shift-)letter> one, but a very cursory inspection shows
+other problems: C<Kana-arrows> are not recognized as character-generating keys.  (And IE9 just
+crashes in most of these situations…)
+
+=head2 C<AltGr>-keypresses going nowhere
 
 Some C<AltGr>-keypresses do not result in the corresponding letter on
 keyboard being inserted.  It looks like they are stolen by some system-wide
@@ -3132,23 +3415,52 @@ show a dialogue for every shortcut with a hotkey it finds.  (But, as I said,
 it did not fix I<my> problem: C<AltGr-s> works in F<MSKLC> test window,
 and nowhere else I tried...)
 
-=item "There was a problem loading the file" from C<MSKLC>
+=head2 C<Control-Shift>-keypresses starting bloatware applications
+
+(Seen on IdeaPad.)  Some pre-installed programs may steal C<Control-Shift>-keypresses;
+it may be hard to understand what is the name of the application even when
+the stealing results in user-visible changes.
+
+One way to deal with it is to start C<Task Manager> in C<Processes> (or
+C<Details>) panel, and click on CPU column until one gets decreasing-order
+of CPU percentage.  Then one can try to detect which process is becoming
+active by watching top rows when the action happens (or when one manages to
+get back to the desktop from the full-screen bloatware); one may need to
+repeat triggering this action several times in a row.  After you know
+the name of executable, you can google to find out how to disable it, and/or
+whether it is safe to kill this process.
+
+B<Example:> On IdeaPad, it was F<TouchZone.exe> (safe to kill).  It was stealing 
+C<Control-Shift-R> and C<Control-Shift-T>. 
+
+=head2 "There was a problem loading the file" from F<MSKLC>
 
 Make line endings in F<.klc> DOSish.
 
-=item C<AltGr-keys> do not work
+=head2 C<AltGr-keys> do not work
 
 Make line endings in F<.klc> DOSish (when given as input to F<kbdutool> -
 it gives no error messages, and deadkeys work [?!]).
 
-=item Error 2011 (ooo-us, line 33): There are not enough columns in the layout list.
+=head2 Error 2011 (ooo-us, line 33): There are not enough columns in the layout list.
 
 The maximal line end of F<kbdutool> is exceeded (a line or two ahead).  Try remoing
 inline comments.  If helps, change he workflow to cut off long lines (250 bytes is OK).
 
-=item Only the first 8 with-modifiers columns are processed by F<kbdutool>
+=head2 Only the first 8 with-modifiers columns are processed by F<kbdutool>
 
 Time to switch to direct generation of F<.c> file?
+
+=head2 C<Error 2012 (ooo-us-shorten.klc, line 115):>
+
+    <ScanCode e065 - too many scancodes here to parse.>
+
+from F<MSKLC>.  This means that the internal table of virtual keys
+mapped to non-C<e0> (sic!) scancodes is overloaded.
+
+Time to switch to direct generation of F<.c> file?  Or you need to
+triage the “added” virtual keys, and decide which are less important
+so you can delete them from the F<.klc> file.
 
 =back
 
@@ -3240,13 +3552,18 @@ sub process_key_chunk ($$$$$) {
   (my $k = shift) =~ s/\p{Blank}(?=\p{NonspacingMark})//g;	# Allow combining marks to be on top of SPACE
   my $sep2 = shift;
   $k = $self->stringHEX2string($k);
-  my @k = split //, $k;			# Allow separation by $sep2, but only if too long
-  @k = split /$sep2/, $k if defined $sep2 and 3 <= @k and $k =~ /$sep2/;
+  my @k = split //, $k;
+  if (defined $sep2 and 3 <= @k and $k =~ /$sep2/) {		# Allow separation by $sep2, but only if too long
+    @k = split /$sep2/, $k;
+    shift @k if not length $k[0] and @k == 2;
+    warn "Zero length expansion in the key slot <$k>\n" if not @k or grep !length, @k;
+  }
   undef $k[0] if ($k[0] || '') eq "\0" and $skip_first;
   push @k, ucfirst $k[0] if @k == 1 and defined $k[0] and 1==length $k[0] and $k[0] ne ucfirst $k[0];
   $name = "VisLr=$name" if $name;
 #  warn "Multi-char key in <<@k>>" if grep $_ && 1<length, @k;
   warn "More that 2 Shift-states in <<@k>>" if @k > 2;
+#warn "Sep2 in $name, $skip_first, <$k> ==> <@k>\n" if defined $sep2 and $k =~ /$sep2/;
   map {defined() ? [$_, undef, undef, $name] : $_} @k;
 #  @k
 }	# -> list of chars
@@ -3313,6 +3630,50 @@ sub decode_kbd_layers ($@) {
   \%out, \@counts, $opt->{keyline_offsets};
 }
 
+sub decode_rect_layers ($@) {
+  my ($self, $cnt, %extra, $opt, @out) = (shift, 0, qw(empty N/A));
+  my %needed = qw(unparsed_data x rect_rows_cols [4;4] rect_horizontal_counts [2;2] layer_names ???);
+  for my $k (keys %needed, keys %extra) {
+     my ($from) = grep exists $_->{$k}, @_, (ref $self ? $self : ());
+     die "option `$k' not specified" unless $from or exists $extra{$k};
+     $opt->{$k} = $from->{$k};
+  }
+  $cnt += $_ for @{ $opt->{rect_horizontal_counts} };
+  die "total of option `rect_horizontal_counts' differs from count of `layer_names': $cnt vs. ", 
+      scalar @{$opt->{layer_names}} unless $cnt == @{$opt->{layer_names}};
+  $cnt = @{ $opt->{rect_horizontal_counts} };
+  (my $D = $opt->{unparsed_data}) =~ s/^(#.*\n)+//;
+  $D =~ s/^(#.*(\n|\z))+\z//m;
+  my @lines = split /\s*\n/, $D;
+  my ($C, $lc, $pref) = map $opt->{$_}, qw(visual_rowcount visual_per_row_counts visual_prefixes);
+  die "Number of uncommented rows (" . scalar @lines . ") in a visual rect template not matching rows(rect_rows_cols) x cnt(rect_horizontal_counts) = $opt->{rect_rows_cols}[0] x $cnt: `$opt->{unparsed_data}'"
+    if @lines != $cnt * $opt->{rect_rows_cols}[0];
+  my $c = 0;
+  while (@lines) {
+    die "Too many rect vertically: expect only ", scalar @{ $opt->{rect_horizontal_counts} }, " in `" . join("\n",'',@lines,'') . "'"
+      if $c >= @{ $opt->{rect_horizontal_counts} };
+    my @L = splice @lines, 0, $opt->{rect_rows_cols}[0];
+    my $l = length $L[0];
+    $l == length or die "Lengths of lines encoding rect do not match: expect $l, got `" . join("\n",'',@L,'') . "'" for @L[1..$#L];
+    $l == $opt->{rect_rows_cols}[1] * $opt->{rect_horizontal_counts}[$c] 
+      or die "Wrong line length in rect: expect $opt->{rect_rows_cols}[1] * $opt->{rect_horizontal_counts}[$c], got $l in `" 
+      	. join("\n",'',@L,'') . "'" for @L[1..$#L];
+    while (length $L[0]) {
+      my @c;
+      push @c, split //, substr $_, 0, $opt->{rect_rows_cols}[1], '' for @L;
+      $_ eq $opt->{empty} and $_ = undef for @c;
+      push @out, [map [$_], @c];
+    }
+    $c++;
+  }
+  die "Too few vertical rect: got $c, expect ", scalar @{ $opt->{rect_horizontal_counts} }, " in `" . join("\n",'',@lines,'') . "'"
+    if $c != @{ $opt->{rect_horizontal_counts} };
+  my(%seen, %out);
+  $seen{$_}++ and die "Duplicate layer name `$_'" for @{$opt->{layer_names}};
+  @out{ @{$opt->{layer_names}} } = @out;
+  \%out, [($opt->{rect_rows_cols}[1]) x $opt->{rect_rows_cols}[0]];
+}
+
 sub get_deep ($$@) {
   my($self, $h) = (shift, shift);
   return $h unless @_;
@@ -3341,14 +3702,15 @@ sub get_deep_via_parents ($$$@) {	# quadratic algorithm
 
 sub fill_kbd_layers ($$) {			# We do not do deep processing here...
   my($self, $h, %o, %c, %O) = (shift, shift);
-  my @K = grep m(^\[unparsed]/KBD\b), @{$h->{'[keys]'}};
+  my @K = grep m(^\[unparsed]/(KBD|RECT)\b), @{$h->{'[keys]'}};
 #  my $H = $h->{'[unparsed]'};
   for my $k (@K) {
     my (@parts, @h) = split m(/), $k;
     ref $self and push @h, $self->get_deep($self, @parts[1..$_]) || {} for 0..$#parts;
     push @h, $self->get_deep($h, @parts[1..$_]) || {} for 0..$#parts;		# Drop [unparsed]/ prefix...
     push @h, $self->get_deep($h,    @parts[0..$_]) || {} for -1..$#parts;
-    my ($in, $counts, $offsets) = $self->decode_kbd_layers( reverse @h );
+    my ($in, $counts, $offsets) = ($k =~ m(^\[unparsed]/KBD\b) ? $self->decode_kbd_layers( reverse @h )
+    							       : $self->decode_rect_layers( reverse @h ) );
     exists $o{$_} and die "Visual spec `$k' overwrites exiting layer `$k'" for keys %$in;
     my $cnt = (@o{keys %$in} = values %$in);
     @c{keys %$in} = ($counts)  x $cnt;
@@ -3624,7 +3986,7 @@ sub massage_faces ($) {
       $self->{layers}{$l} = $self->{layers}{$ll->[0]} unless $self->{layers}{$l};		# Could autovivify in between???
     }
     for my $key ( qw( Flip_AltGr_Key Diacritic_if_undef DeadChar_DefaultTranslation DeadChar_32bitTranslation extra_report_DeadChar
-    		      PrefixChains ctrl_after_modcol create_alpha_ctrl keep_missing_ctrl extra_layers layers_modifiers) ) {
+    		      PrefixChains ctrl_after_modcol create_alpha_ctrl keep_missing_ctrl output_layers layers_modifiers) ) {
       $self->{faces}{$f}{"[$key]"} = $self->get_deep_via_parents($self, undef, 'faces', (split m(/), $f), $key);
     }
     $self->{faces}{$f}{'[char2key_prefer_first]'}{$_}++ 		# Make a hash
@@ -3915,7 +4277,7 @@ sub print_coverage ($$) {
 
 my %html_esc = qw( & &amp; < &lt; > &gt; );
 my %ctrl_special = qw( \r Enter \n Control-Enter \b BackSpace \x7f Control-Backspace \t Tab 
-  		    \x1b Control-[ \x1d Control-] \x1c Control-\ ^C Control-Break );
+  		    \x1b Esc; Control-[ \x1d Control-] \x1c Control-\ ^C Control-Break );
 my %alt_symb;
 { no warnings 'qw';
 # 		ZWS	ZWNJ ZWJ	 LRM RLM WJ=ZWNBSP Func	  Times Sep Plus
@@ -3928,12 +4290,14 @@ my %alt_symb;
 }
 
 # Make: span for control, soft-hyphen, white-space; include in <span class=l> with popup; include in span with special highlight
-sub char_2_html_span ($$$$$;@) {
-   my ($self, $C, $c, $F, $opts, @types, $expl, $title, $vbell) = @_;
+sub char_2_html_span ($$$$$$;@) {
+   my ($self, $base_c, $C, $c, $F, $opts, @types, $expl, $title, $vbell) = @_;
+   my $aInv = $self->charhex2key($self->{faces}{$F}{'[Flip_AltGr_Key]'});
    $expl = $C->[3] if 'ARRAY' eq ref $C and $C->[3];
    $expl =~ s/(?=\p{NonspacingMark})/ /g if $expl;
    my $prefix = (ref $C and $C->[2]);
    my $cc = $c;
+   $aInv = ($base_c || 'N/A') eq $aInv;
    my $docs = ($prefix and $self->{faces}{$F}{'[prefixDocs]'}{$self->key2hex($cc)});	# or $pre and warn "No docs: face=`$F', c=`$cc'\n";
    $docs =~ s/([''&])/sprintf '&#x%02x;', ord $1/ge if defined $docs;
 # warn "... is_D2: ", $self->array2string([$c, $baseK[$L][$shift]]);
@@ -3970,6 +4334,7 @@ sub char_2_html_span ($$$$$;@) {
              $title .= " {via $expl}";
            }
            $title .= ' (visual bell indicates unassigned keypress)' if $title and !$expl and $vbell;
+           $title = 'This prefix key accesses this column with AltGr-invertion' if $aInv;
            $title =~ s/([''&])/sprintf '&#x%02x;', ord $1/ge if $title;
            $title = qq( title='$title') if $title;
    }
@@ -3978,7 +4343,7 @@ sub char_2_html_span ($$$$$;@) {
      push @types,'ZW';
    } elsif (not defined $C) {
      push @types,'vbell';
-   } elsif ($title =~ /(\b(N-ARY|BIG|GREEK\s+PROSGEGRAMMENI|KORONIS|SOF\s+PASUQ|PUNCTUATION\s+(?:GERESH|GERSHAYIM)|PALOCHKA|CYRILLIC\s.*\s(DZE|JE|QA|WE|A\s+IE)|ANO\s+TELEIA|GREEK\s+QUESTION\s+MARK)|"\w+\s+(?:BIG|LARGE))\b.*\s+\[/) {	# "0134	BIG GUY#"
+   } elsif ($title =~ /(\b(N-ARY|BIG(?!\s+YUS\b)|GREEK\s+PROSGEGRAMMENI|KORONIS|SOF\s+PASUQ|PUNCTUATION\s+(?:GERESH|GERSHAYIM)|PALOCHKA|CYRILLIC\s.*\s(DZE|JE|QA|WE|A\s+IE)|ANO\s+TELEIA|GREEK\s+QUESTION\s+MARK)|"\w+\s+(?:BIG|LARGE))\b.*\s+\[/) {	# "0134	BIG GUY#"
      push @types,'nAry';
    } elsif ($title =~ /\b(OPERATOR|SIGN|SYMBOL|PROOF|EXISTS|FOR\s+ALL|(DIVISION|LOGICAL)\b.*)\s+\[/) {
      push @types,'operator';
@@ -3995,10 +4360,12 @@ sub char_2_html_span ($$$$$;@) {
      push @types,'doubleaccent';
    }
    push @types, ($1 ? 'withSubst' : 'isSubst') if ($expl || '') =~ /\sSubst\{(\S*\}\s+\S)?/;
+   push @types, 'altGrInv' if $aInv;
    my $q = (@types > 1 ? "'" : '');
 #   ($prefill, $fill) = ("<span class=l$title>$prefill", "$fill</span>");
    @types = " class=$q@types$q" if @types;
    my($T,$OPT) = ($opts && $opts->{ltr} ? ('bdo', ' dir=ltr') : ('span', ''));	# Just `span´ does not work in FF15
+   $c = '†' if $aInv and $cc ne ($base_c || 'N/A');	# &nbsp;
    "<$T$OPT@types$title>$prefill$c$fill</$T>"
 }
 
@@ -4020,6 +4387,7 @@ sub print_table_coverage ($$;$) {
   table.coverage	{ font-size: 10pt; font-family: DejaVu Sans; }
   .dead			{ font-size: 50%; color: red; }
   .dead_i		{ font-size: 50%; background-color: red; color: white; }
+  .altGrInv		{ font-size: 70%; background-color: red; }
   .vbell		{ color: SandyBrown; }
   .withSubst		{ outline: 1px dotted blue;  outline-offset: -1px; }
   .isSubst		{ outline: 1px solid blue;  outline-offset: -1px; }
@@ -4143,7 +4511,7 @@ EOP
     if $html;
   my $vbell = '♪';
   for my $n ( 0 .. $#{ $LL[0] } ) {
-    my $out = '';
+    my ($out, @KKK, $base_c) = '';
     my @baseK;
     next if $n >= $first_ctrl and $n < $post_ctrl;
     for my $dn (0..@Dface) {		# 0 is no-dead
@@ -4159,6 +4527,8 @@ EOP
           $o .= ' ', next unless defined $c;
           $pre = $dead    if not $dn and 'ARRAY' eq ref $c and $c->[2];
           $c = $c->[0]    if 'ARRAY' eq ref $c;
+          $KKK[$L][$shift] = $c unless $dn;
+          $base_c = $KKK[$L][$shift];
 #	warn "int_struct -> dead; face `$F', KeyPos=$n, Mods=$L, shift=$shift, ch=$c\n" if $pre;
           if ($dn) {
             $C = $c = $maps[$dn]{$self->key2hex($c)};
@@ -4176,7 +4546,7 @@ EOP
 	  $pre ||= $dead if $dn and $is_D2->{$baseK[$L][$shift]};
 
 	  if ($html) {
-	    $c = $self->char_2_html_span($C, $c, $F, {ltr => 1}, 'l');
+	    $c = $self->char_2_html_span($base_c, $C, $c, $F, {ltr => 1}, 'l');
 	  } else {
             $c =~ s/(?=$rxCombining)/\x{25cc}/go;	# dotted circle ◌ 25CC
             $c =~ s{([\x00-\x1F\x7F])}{ $self->control2prt("$1") }ge;
@@ -4201,7 +4571,7 @@ or <span class=ipa>IPA</span>.
 Or name having <span class=relation>RELATION, PERPENDICULAR,
 PARALLEL, DIVIDES, FRACTION SLASH</span>; or <span class=nAry>BIG, LARGE, N-ARY, CYRILLIC PALOCHKA/DZE/JE/QA/WE/A-IE, 
 ANO TELEIA, KORONIS, PROSGEGRAMMENI, GREEK QUESTION MARK, SOF PASUQ, PUNCTUATION GERESH/GERSHAYIM</span>; or <span class=operator>OPERATOR, SIGN, 
-SYMBOL, PROOF, EXISTS, FOR ALL, DIVISION, LOGICAL</span>;
+SYMBOL, PROOF, EXISTS, FOR ALL, DIVISION, LOGICAL</span>; or <span class=altGrInv>AltGr-inverter prefix</span>;
 or via a rule <span class=withSubst>involving</span>/<span class=isSubst>exposing</span> a “BlueKey” substitution rule.
 (Some browsers fail to show highlights for whitespace/zero-width.)
 <p>Vertical lines separate: the column of the base face, paired 
@@ -4382,7 +4752,7 @@ sub new_from_configfile_string ($$) {
     for my $F (keys %{ $data->{faces} }) {	# Finally, collect the stats
       next if 'HASH' ne ref $data->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
       next if $F =~ /#\@?#\@?(Inv)?#\@?/;		# Face-on-a-deadkey
-      my($seen_prefix, %seen0, %seen1, %seen1only) = $data->{faces}{$F}{'[coverage0_prefix]'};
+      my($seen_prefix, %seen0, %seen00, %seen1, %seen1only) = $data->{faces}{$F}{'[coverage0_prefix]'};
       # warn("Face `$F' has no [deadkeyFace]"), 
       next unless $data->{faces}{$F}{'[deadkeyFace]'};
 #      next;
@@ -4393,6 +4763,7 @@ sub new_from_configfile_string ($$) {
       for my $deadKEY ( sort keys %{ $data->{faces}{$F}{'[deadkeyFace]'}} ) {
         unless (%seen0) {				# Do not calculate if $F has no deadkeys...
           $seen0{$_}++ for @{ $data->{faces}{$F}{'[coverage0]'} };
+          %seen00 = %seen0;
         }
         ### XXXXX Directly linked faces may have some chars unreachable via the switch-prefixKey
         my ($deadKey, $not_in_0) = $data->charhex2key($deadKEY);
@@ -4401,7 +4772,7 @@ sub new_from_configfile_string ($$) {
         my ($FFF, @dd2) = $data->{faces}{$F}{'[deadkeyFace]'}{$deadKEY};
         my $cov2 = $data->{faces}{$FFF}{'[coverage0]'} 
           or warn("Deadkey `$deadKey' on face `$F' -> unmassaged face"), next;
-        $seen0{$_}++ or ($seen1{$_}++, $not_in_0 || $seen1only{$_}++)
+        ($seen0{$_}++ or $seen1{$_}++), $not_in_0 || $seen00{$_} || $seen1only{$_}++
           for map {ref() ? $_->[0] : $_} grep !(ref and $_->[2]), @$cov2;	# Skip 2nd level deadkeys
         if (my $d2 = $data->{faces}{$F}{'[dead2]'}{$deadKey}) {
           my $map = $data->linked_faces_2_hex_map($F, $FFF);
@@ -4593,7 +4964,7 @@ my %scan_codes = (reverse qw(
   50	DOWN
   51	NEXT
   52	INSERT
-  53	DELETE
+  e053	DELETE
   54	SNAPSHOT
   56	OEM_102
   57	F11
@@ -4731,6 +5102,18 @@ my %do_control = map /^(.)(.+)/, values %oem_control;
 $do_control{' '} = '0020';
 delete $do_control{0};
 
+my %default_bind = ( (map {( "NUMPAD$_" => [[$_]] )} 0..9 ),
+		     TAB	=> [["\t", "\t"]],
+		     ADD	=> [["+", "+"]],
+		     SUBTRACT	=> [["-", "-"]],
+		     MULTIPLY	=> [["*", "*"]],
+		     DIVIDE	=> [["/", "/"]],
+		     RETURN	=> [["\r", "\r"], ["\n"]],
+		     BACK	=> [["\b", "\b"], ["\x7f"]],
+		     ESCAPE	=> [["\e", "\e"], ["\e"]],
+		     CANCEL	=> [["\cC", "\cC"], ["\cC"]],
+		   );
+
 sub get_VK ($$) {
   my ($self, $f) = (shift, shift);
   $self->get_deep_via_parents($self, undef, 'faces', (split m(/), $f), 'VK') || {}
@@ -4806,7 +5189,7 @@ sub format_key ($$$$) {
   return -1 unless defined $k;
   my $mod = ($dead ? '@' : '') and $used->{$k}++;
   return "$k$mod" if $k =~ /^[A-Z0-9]$/i;
-  return '%%' if 1 < length $k;
+  return '%%' if 1 != length $k or ord $k > 0xFFFF;
   $self->key2hex($k) . $mod;
 }
 
@@ -4820,15 +5203,16 @@ sub auto_capslock($$) {
 my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
 		      '7E ABNT_C2' => '7D OEM_8',	# ABNT vs JIS keyboard
 		      '7B NONCONVERT' => '79 CONVERT');	# JIS keyboard: left of SPACE, right of SPACE
-{ my(%seen, %seen_scan, %seen_VK, @add_scan_VK, @ligatures);
-  sub reset_units ($) { @ligatures = @add_scan_VK = %seen_scan = %seen_VK = %seen = () }
+{ my(%seen, %seen_scan, %seen_VK, @add_scan_VK, @ligatures, @decimal);
+  sub reset_units ($) { @decimal = @ligatures = @add_scan_VK = %seen_scan = %seen_VK = %seen = () }
 
-  sub output_unit00 ($$$$$$$;$) {
-    my ($self, $face, $k, $u, $N, $deadkeys, $Used, $known_scancode) = (shift, shift, shift, shift, shift, shift, shift, shift);
+  sub output_unit00 ($$$$$$$;$$) {
+    my ($self, $face, $k, $u, $N, $deadkeys, $Used, $known_scancode, $skippable) = (shift, shift, shift, shift, shift, shift, shift, shift, shift);
     my $sc = ($known_scancode or $scan_codes{$k}) or warn("Can't find the scancode for the key `$k'"), return;
-    my @cntrl;						# Set Control-KEY if is [ or ] or \
+    my(@cntrl, %s, $cnt);						# Set Control-KEY if is [ or ] or \
     $u = [map { defined() ? [map {($_ and ref $_) ? $_->[0] : $_} @$_] : $_ } @$u];	# deep copy with $_->[0] on a key-array
-    @cntrl = chr hex $do_control{$u->[0][0]}		if $do_control{$u->[0][0]};	# \ ---> ^\
+    @cntrl = chr hex $do_control{$u->[0][0]}		if $do_control{$u->[0][0] || 'N/A'};	# \ ---> ^\
+    @cntrl = @{ $default_bind{$k}[1] } if !@cntrl and $default_bind{$k}[1];
     my $create_a_c = $self->{faces}{$face}{'[create_alpha_ctrl]'};
     $create_a_c = $create_alpha_ctrl unless defined $create_a_c;
     @cntrl = (chr(0x1F & ord $k)) x $create_a_c if $k =~ /^[A-Z]$/ and $create_a_c;
@@ -4836,19 +5220,41 @@ my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
     my @KK = map [$_->[2], $_->[0], ($known_scancode ? $_->[3][$_->[1]]  :  $_->[3]{defined $_->[2] ? $_->[2] : 'n/a'})],
 	       map [@$_[0,1], $u->[$_->[0]][$_->[1]], $deadkeys->[$_->[0]]], 
 	         map +([$_, 0], [$_, 1]), 0..$#$u;
-    if (my $extra = $self->{faces}{$face}{'[extra_layers]'} and defined $N) {	# $N not supported on VK...
+    defined and $s{$_}++ for map $_->[0], @KK;
+    $cnt = keys %s || @cntrl;
+    if (my $extra = $self->{faces}{$face}{'[output_layers]'} and defined $N) {	# $N not supported on VK...
       my $b = @{ $self->{faces}{$face}{layers} };
-      for my $f (0..$#$extra) {
-        warn "Extra layer number $f, base=$b requested while the character N=$N has " . (scalar @$u) . " layers" if $f+$b <= $#$u;
-        (my $lll = $extra->[$f]) =~ s/^prefix=// or die "Extra layer: expected `prefix=PREFIX', see: `$extra->[$f]'";
+      for my $f ($b..$#$extra) {
+#        warn "Extra layer number $f, base=$b requested while the character N=$N has " . (scalar @$u) . " layers" if $f+$b <= $#$u;
+        (my $lll = $extra->[$f]) =~ s/^prefix(NOTSAME(case)?)?=// or die "Extra layer: expected `prefix=PREFIX', see: `$extra->[$f]'";
+        my($notsame, $case) = ($1,$2);
         my $c = $self->key2hex($self->charhex2key($lll));
-        my $L = $self->{faces}{$face}{'[deadkeyLayers]'}{$c}[0] or die "Unknown prefix character `$c´ in extra layers";
-        $L = $self->{layers}{$L}[$N];
-        my @C = map {defined() ? (ref() ? $_->[0] : $_) : $_} @$L;
-        my @p = map {defined() ? (ref() ? $_->[2] : 0 ) : 0 } @$L;
+        my $L = $self->{faces}{$face}{'[deadkeyLayers]'}{$c} or die "Unknown prefix character `$c´ in extra layers";
+        my @L = map $self->{layers}{$_}[$N], @$L;
+        my(@CC, @pp, @OK);
+        for my $l (@L[0 .. ($notsame ? $b-1 : 0)]) {
+          my(%s1, @was);
+          for my $sh (0..$#$l) {
+            my @C = map {defined() ? (ref() ? $self->dead_with_inversion(!'hex', $_, $face, $self->{faces}{$face}) : $_) : $_} $l->[$sh];
+            my @p = map {defined() ? (ref() ? $_->[2] : 0 ) : 0 } $l->[$sh];
+            ($CC[$sh], $pp[$sh]) = ($C[0], $p[0]) if not defined $CC[$sh] and defined $C[0];
+            ($CC[$sh], $pp[$sh], $OK[$sh], $s1{$C[0]}) = ($C[0], $p[0], 1,1) if !$OK[$sh] and defined $C[0] and not $s{$C[0]};
+            ($CC[$sh], $pp[$sh], $OK[$sh], $s1{$was[0]}) = (@was, 1,1)		# use unshifted if needed
+              if $sh and !$OK[$sh] and defined $C[0] and defined $was[0] and not $s{$was[0]} and not $s1{$was[0]};
+            @was = ($C[0], $p[0]) unless $sh;		# may omit `unless´
+            $cnt++ if defined $CC[$sh];
+          }
+        }
         # Avoid read-only values (can get via $#KK) which cannot be autovivified
-        push @KK, ([]) x (2*($b + $f) - @KK) if @KK < 2*($b + $f);		# splice can't do with a gap after the end of array
-        splice @KK, 2*($b + $f), 0, map [$C[$_], $f, $p[$_]], 0..$#$L;
+        push @KK, ([]) x (2*$f - @KK) if @KK < 2*$f;		# splice can't do with a gap after the end of array
+        splice @KK, 2*$f, 0, map [$CC[$_], $f-$b, $pp[$_]], 0..$#CC;
+      }
+    }
+    return if $skippable and not $cnt;
+    if ($skippable and not defined $KK[0][0] and not defined $KK[1][0]) {
+      for my $shft (0,1) {
+        $KK[$shft] = [$default_bind{$k}[0][$shft], 0] if defined $default_bind{$k}[0][$shft];
+###        $KK[$shft] = [$decimal[$shft], 0] if $k eq 'DECIMAL' and @decimal;
       }
     }
     my $pre_ctrl = $self->{faces}{$face}{'[ctrl_after_modcol]'};
@@ -4856,7 +5262,20 @@ my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
     $#cntrl = $create_a_c - 1 if $pre_ctrl < 2*@$u or $self->{faces}{$face}{'[keep_missing_ctrl]'};
     warn "cac=$create_a_c  #cntrl=$#cntrl pre=$pre_ctrl \@u=", scalar @$u if $#cntrl < 2*$ctrl_after - 1;
     splice @KK, $pre_ctrl, 0, map [$_, 0], @cntrl;
+    
+    if ($k eq 'DECIMAL') {	# may be described both via visual maps and NUMPAD
+      my @d = @{ $decimal[1] || [] };
+      !defined $KK[$_][0] and $KK[$_] = $d[$_] for 0..$#d;	# fill on the second round
+      @decimal = ([$self->output_unit_KK($k, $u, $sc, $Used, @KK)], [@KK]); 
+      return;
+    }
+    $self->output_unit_KK($k, $u, $sc, $Used, @KK);
+  }
+  
+  sub output_unit_KK($$@) {
+    my ($self, $k, $u, $sc, $Used, @KK) = @_;
     my @K = map $self->format_key($_->[0], $_->[2], $Used->[$_->[1] || 0]), @KK;
+#warn "keys with ligatures: <@K>" if grep $K[$_] eq '%%', 0..$#K;
     push @ligatures, map [$k, $_, $KK[$_][0]], grep $K[$_] eq '%%', 0..$#K;
     my $keys = join "\t", @K;
     my @kk = map $_->[0], @KK;
@@ -4871,8 +5290,8 @@ $capslock\t$keys\t// $expl$expl1
 EOP
   }
 
-  sub output_unit0 ($$$$$$$;$) {
-    my @i = &output_unit00;
+  sub output_unit0 ($$$$$$$;$$) {
+    my @i = &output_unit00 or return;
     my $add = $double_scan_VK{uc "$i[0] $i[1]"};
 #warn "<<<<< Secondary key <$add> for <$i[0] $i[1]>" if $add;
     push @add_scan_VK, [split(/ /, $add), @i[2,3]] if $add;
@@ -4880,18 +5299,31 @@ EOP
   }
   
   sub output_added_units ($) {
-    my @o;
+    my (@i, @o);
     for my $i (@add_scan_VK) {
       next if $seen_scan{$i->[0]} or $seen_VK{$i->[1]};	# Cannot duplicate either one...
+      push @i, $i;
+    }
+    for my $i (@i, (@decimal ? $decimal[0] : ()) ) {
       push @o, "$i->[0]\t$i->[1]$i->[2]\t$i->[3]";
     }
     @o
   }
   
+  my $enc_UTF16LE;
   sub output_ligatures ($) {
     my ($self, @o) = shift;
     for my $l (@ligatures) {
-      my @k = ((map $self->key2hex($_), split //, $l->[2]), ('') x 4);
+      my $k = $l->[2];
+      unless ($k =~ /^[\x00-\x{FFFF}]*$/) {
+        (require Encode), $enc_UTF16LE = Encode::find_encoding('UTF-16LE') unless $enc_UTF16LE;
+        die "Can't arrange encoding to UTF-16LE" unless $enc_UTF16LE;
+        $k = $enc_UTF16LE->encode($k);
+#        warn join '> <', ($k =~ /(..)/sg);	# Can't use decode() on surrogates...
+#        warn join '> <', map {unpack 'v', $_} ($k =~ /(..)/sg);	# Can't use decode() on surrogates...
+        $k = join '', map chr(unpack 'v', $_), ($k =~ /(..)/sg);	# Can't use decode() on surrogates...
+      }
+      my @k = ((map $self->key2hex($_), split //, $k), ('') x 4);
       my @expl = exists $self->{UNames} ? "// " . join " + ", map $self->UName($_), split //, $l->[2] : ();
       my $add = ((8 <= length $l->[0]) ? '' : "\t");
       push @o, (join "\t", "$l->[0]$add", $l->[1], @k[0..3], @expl) . "\n";
@@ -4899,16 +5331,24 @@ EOP
     @o
   }
 
-  sub output_unit ($$$$$$$) {
-    my ($self, $face, $layers, $basesub, $u, $deadkeys, $Used) = (shift, shift, shift, shift, shift, shift, shift);  
-    my $c = $self->{layers}{$basesub}[$u][0];
-    $c = $c->[0] if 'ARRAY' eq ref $c;
-    my $k = uc $c;
-    $c .= '#' if $seen{$c}++;
-    $k = $oem_keys{$c} or warn("Can't find a key with character `$k'"), return
-      unless $k =~ /^[A-Z0-9]$/;
+  sub output_unit ($$$$$$$$) {
+    my ($self, $face, $layers, $basesub, $u, $deadkeys, $Used, $lim, $c, $k) = (shift, shift, shift, shift, shift, shift, shift, shift);
     my $U = [map $self->{layers}{$_}[$u], @$layers];
-    $self->output_unit0($face, $k, $U, $u, $deadkeys, $Used);
+    if ($u < $lim) {
+      $c = $self->{layers}{$basesub}[$u][0];
+      $c = $c->[0] if 'ARRAY' eq ref $c;
+      $k = uc $c;
+      $c .= '#' if $seen{$c}++;
+      $k = $oem_keys{$c} or warn("Can't find a key with VKEY `$c', unit=$u, lim=$lim"), return
+        unless $k =~ /^[A-Z0-9]$/;
+    } else {
+      my $keys = grep defined, map $self->flatten_arrays($_->[$u]), @$U;
+      for my $v (values %start_SEC) {
+        $k = $v->[2]($self, $u, $v), last if $v->[0] <= $u and $v->[0] + $v->[1] > $u;
+      }
+      ($keys and warn("Can't find the range of keys to which unit `$u' belongs")), return unless defined $k;
+    }
+    $self->output_unit0($face, $k, $U, $u, $deadkeys, $Used, undef, $u >= $lim);
   }
 }
 
@@ -4918,7 +5358,10 @@ sub output_layout_win ($$$$$$$) {
   $self->reset_units;
   die "Count of non-VK entries mismatched: $cnt vs ", scalar @{$self->{layers}{$layers->[0]}}
     unless $cnt <= scalar @{$self->{layers}{$layers->[0]}};
-  map $self->output_unit($face, $layers, $basesub, $_, $deadkeys, $Used), 0..$cnt-1;
+  my $ocnt = $cnt;
+####### Temporarily disable
+  $cnt < $_->[0] + $_->[1] and $cnt = $_->[0] + $_->[1] for values %start_SEC;
+  map $self->output_unit($face, $layers, $basesub, $_, $deadkeys, $Used, $ocnt), 0..$cnt-1;
 }
 
 sub output_VK_win ($$$) {
@@ -5145,6 +5588,19 @@ sub control2prt ($$) {
   $control{$c} or sprintf '\\x%02x', ord $c;
 }
 
+sub dead_with_inversion ($$$$$) {
+  my($self, $hex, $to, $nameF, $H) = (shift, shift, shift, shift, shift);
+  my $invert_dead = (3 == ($to->[2] || 0));
+  $to = $to->[0];
+  if ($invert_dead) {
+    $to = $self->key2hex($to) unless $hex;
+    defined ($to = $H->{'[deadkeyInvAltGrKey]'}{$to}) or die "Cannot invert prefix key `$to' in face `$nameF'";
+    # warn "invert $to in face=$nameF, inv=$invertAlt0 --> $inv\n";
+    $to = $self->key2hex($to) if $hex;
+  }
+  $to;
+}
+
 sub print_deadkey_win ($$$$$$) {
   my ($self, $nameF, $d, $Dead2, $flip_AltGr_hex, $prefix_flippedMap_hex) = (shift, shift, shift, shift, shift, shift);
 #warn "emit `$nameF' d=`$d'";
@@ -5201,23 +5657,20 @@ sub print_deadkey_win ($$$$$$) {
              grep(				                    $_ eq '0020',  @keys));	# make SPACE last
     for my $n (@keys) {	# Not OK for 6-byte keys (impossible on Win)
 #      warn "doing $n\n";
-      my ($to, $import_dead, $EXPL, $invert_dead) = $map->{$n};
+      my ($to, $import_dead, $EXPL) = $map->{$n};
       warn "0000" if $to and $to eq '0000';
       if ($to and 'ARRAY' eq ref $to) {
         $EXPL = $to->[3]; 
         $EXPL =~ s/(?=\p{NonspacingMark})/ /g if $EXPL;
         $import_dead = (1 <= ($to->[2] || 0));					# was: exportable; now: any dead
-        $invert_dead = (3 == ($to->[2] || 0));
-        $to = $to->[0];
-        if ($invert_dead) {
-          defined (my $inv = $H->{'[deadkeyInvAltGrKey]'}{$to}) or die "Cannot invert prefix key `$to' in face `$nameF'";
-          # warn "invert $to in face=$nameF, inv=$invertAlt0 --> $inv\n";
-          $to = $self->key2hex($inv);
-        }
+        $to = $self->dead_with_inversion('hex', $to, $nameF, $H);
       }
-      $H->{'[32-bit]'}{chr hex $map->{$n}}++, next if hex $n > 0xFFFF and $map->{$n};	# Cannot be put in a map...
+      my $map_n = $map->{$n};
+      $map_n = $map_n->[0] if $map_n and ref $map_n;
+      $H->{'[32-bit]'}{chr hex $map_n}++, next if hex $n > 0xFFFF and $map_n;	# Cannot be put in a map...
       if ($to and hex $to > 0xFFFF) {		# Value cannot be put in a map...
-        $H->{'[32-bit]'}{chr hex $map->{$n}}++;
+#        warn "32-bit: n=$n map{n}=$map_n to=$to";
+        $H->{'[32-bit]'}{chr hex $map_n}++;
         next unless defined ($to = $H->{'[DeadChar_32bitTranslation]'});
         $to =~ s/^\s+//;	$to =~ s/\s+$//;
         $to = $self->key2hex($to);
@@ -5407,7 +5860,7 @@ sub dia2list ($$) {
 # warn "Split dia to `@dia'";
     return @dia;
   }
-  return $dia if $dia =~ /^\\/;		# Penalization lists
+  return $dia if $dia =~ /^!?\\/;		# (De)Penalization lists
   $dia = $self->charhex2key($dia);
   unless ($dia =~ /^-?(\p{NonspacingMark}|<(?:font=)?[-\w!]+>|[ul]c(first)?|dectrl)$/) {
     die "`  $dia  ' not a known diacritic" unless my $name = $self->{'[map2diac]'}{$dia};
@@ -5547,6 +6000,13 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
   }
   if ($name =~ /^FlipShift$/) {
     return sub ($) { my $c = shift; defined $c or return $c; map [@$_[1,0]], @$c }, '', 'all_layers';
+  }
+  if ($name =~ /^AssignTo\[(\w+),(\d+)\]$/) {
+    my ($sec, $cnt) = ($1, $2);
+    $cnt = 0, warn "Unrecognized section `$sec' in AssignTo" unless my $S = $start_SEC{$sec};
+    warn("Too many keys ($cnt) put into section `$sec', max=$S->[1]"), $cnt = $S->[1] if $cnt > $S->[1];
+    my $toTarget = sub { my $slot = shift; return unless $slot < $cnt; $slot + $S->[0] };
+    return sub ($) { @{shift()} }, '', ['all_layers', $toTarget];
   }
   if ($name =~ /^FromTo(FlipShift)?\[(.+)\]$/) {
     my $flip = $1;
@@ -5700,7 +6160,7 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
       my ($sorted2, $sorted3, @idx_sorted3);
       $sorted2 = $self->sort_compositions(\@groups2, $K, $Sub, $dupsOK, $w32OK) if @groups2;
       $sorted3 = $self->sort_compositions(\@groups3, $K, $Sub, $dupsOK, $w32OK) if @groups3;
-      @idx_sorted3 = @$sorted + (@groups2 ? @$sorted2 : 0) if @groups3;
+      @idx_sorted3 = @$sorted + (@groups2 ? @$sorted2 : 0) if @groups3;		# used for warnings only
       $self->{faces}{$face}{'[in_dia_chains]'}{$_}++
         for grep defined, ($hack ? () : map {($_ and ref) ? $_->[0] : $_}
         			# index as $res->[group][penalty_N][double_occ][layer][NN][shift]
@@ -5720,18 +6180,14 @@ Dumpvalue->new()->dumpValue(["Key $base", $sorted]) if printSORTEDLISTS;
 print 'From Layers  <', join('> <', map {defined() ? $_ : 'undef'} @$ll), ">\n" if printSORTEDLISTS;
 	  $LLL .= ' | ' . join(' ', map {defined() ? $_ : 'undef'} @$ll) if warnSORTEDLISTS;
         }
-print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, $slots[0]), ">\n" if printSORTEDLISTS;
-print 'TMP Extracted <', join('> <', map {defined() ? $_ : 'undef'} map @$_, @slots[1..$#slots]), "> deadKey=$deadkey\n" if printSORTEDLISTS;
+print 'TMP Extracted ', $self->array2string($slots[0]), "\n" if printSORTEDLISTS;
+print 'TMP Extracted ', $self->array2string([@slots[1..$#slots]]), " deadKey=$deadkey\n" if printSORTEDLISTS;
         my $appended = $self->append_keys($sorted3 || $sorted2, \@slots, \@LL, !$sorted3 && 'prepend');
 Dumpvalue->new()->dumpValue(["Key $base; II", $sorted2]) if printSORTEDLISTS;
 	if (warnSORTEDLISTS) {
           $LLL =~ s/^[ |]+//;
-          my @KK;
-          for my $slot (@slots) {
-            push @KK, '<' . join('> <', map {defined() ? $_ : 'undef'} map @$_, $slot) . '>';
-          }
-          $_++ for @idx_sorted3;
-          warn "TMP Extracted: ", join(' | ', @KK), " from layers $LLL\n";	# 1 is for what is prepended by append_keys()
+          $_++ for @idx_sorted3;	# empty or 1 elt
+          warn "TMP Extracted: ", $self->array2string(\@slots), " from layers $LLL\n";	# 1 is for what is prepended by append_keys()
           warn $self->report_sorted_l($base, [@$sorted, @$sorted2, @{$sorted3 || []}],		# Where to put bold/dotted-bold separators:
           			      [scalar @$sorted, !!$appended + $skip + scalar @$sorted, @idx_sorted3], ($appended ? [1 + scalar @$sorted] : ()));
 	}
@@ -5840,22 +6296,27 @@ sub make_translator_for_layers ($$$$$) {		# translator may take some values from
   # The translator should return exactly one value (possibly undef) so that map TRANSLATOR, list works intuitively.
   my ($self, $name, $deadkey, $face, $NN) = (shift, shift, shift || 0, shift, shift);	# $deadkey used eg for diagnostics
   my ($Tr, $used, $for_layers) = $self->make_translator( $name, $deadkey, $face, $NN->[0] );
-  return $Tr, [map "$used![$_]", @$NN] if $for_layers;
+  ($for_layers, my $cvt) = (ref $for_layers ? @$for_layers : $for_layers);
+  return $Tr, [map "$used![$_]", @$NN], $cvt if $for_layers;
   my @Tr = map [$self->make_translator($name, $deadkey, $face, $_)], @$NN;
-  $self->depth2_translator([map $_->[0], @Tr]), [map $_->[1], @Tr];
+  $self->depth2_translator([map $_->[0], @Tr]), [map $_->[1], @Tr], $cvt;
 }
 
 sub make_translated_layers_tr ($$$$$$$) {		# Apply translation map
   my ($self, $layers, $tr, $append, $deadkey, $face, $NN) = (shift, shift, shift, shift, shift, shift, shift);
-  my ($Tr, $used) = $self->make_translator_for_layers($tr, $deadkey, $face, $NN);
+  my ($Tr, $used, $cvt) = $self->make_translator_for_layers($tr, $deadkey, $face, $NN);
 #warn "  tr=<$tr>, key=<$deadkey>, used=<$used>";
   my @new_names = map "$tr$used->[$_]($layers->[$_])$append" . ($append and $NN->[$_]), 0..$#$NN;
   return @new_names unless grep {not exists $self->{layers}{$_}} @new_names;
 # warn "Translating via `$tr' from layer [$layer]: <", join('> <', map "@$_", @{$self->{layers}{$layer}}), '>';
   my (@L, @LL) = map $self->{layers}{$_}, @$layers;
-  for my $n (0..$#{$L[0]}) {
-    my @C = $Tr->( [ map $L[$_][$n], 0..$#L ], $n );
-    push @{$LL[$_]}, $C[$_] for 0..$#L;
+  for my $n (0..$#{$L[0]}) {				# key number
+    my @C = $Tr->( [ map $L[$_][$n], 0..$#L ], $n );	# rearrange one key into $X[$Layer][$shift]
+    if ($cvt) {
+      defined $cvt->($n) and $LL[$_][$cvt->($n)] = $C[$_] for 0..$#L;
+    } else {
+      push @{$LL[$_]}, $C[$_] for 0..$#L;
+    }
   }
   $self->{layers}{$new_names[$_]} = $LL[$_] for 0..$#L;
   @new_names
@@ -5898,7 +6359,10 @@ sub make_translated_layers_stack ($$@) {		# Stacking
       # warn "... Layer$lN: `$layers[$lI]'..." if debug_stacking;
       for my $k (0..$#$l) {
         for my $kk (0..$#{$l->[$k]}) {
-	  #warn "...... On $k/$kk: I see `$l->[$k][$kk]'" if debug_stacking and defined $l->[$k][$kk];
+          if (debug_STACKING and defined( my $cc = $l->[$k][$kk] )) {
+            $cc = $cc->[0] if ref $cc;
+	    warn "...... On $k/$kk (${lI}th lN=$lN): I see `$cc': ", !defined $keys[$k][$kk], "\n" ;
+	  }
           $keys[$k][$kk] = $l->[$k][$kk] if defined $l->[$k][$kk] and not defined $keys[$k][$kk];	# Shallow copy
         }
         $keys[$k] ||= [];
@@ -6000,8 +6464,9 @@ sub layers_by_face_recipe ($$$) {
 
 sub export_layers ($$$) {
   my ($self, $face, $base) = (shift, shift, shift);
-  $self->{faces}{$face}{'[ini_layers_prefix]'} || $self->{faces}{$face}{'[ini_layers]'} || $self->{faces}{$face}{layers} 
-    || $self->layers_by_face_recipe($face, $base)
+  $self->{faces}{$face}{'[ini_layers_prefix]'} || $self->{faces}{$face}{'[ini_layers]'} || 
+    $self->{faces}{$face}{layers} 
+      || $self->layers_by_face_recipe($face, $base)
 }
 
 sub pseudo_layer ($$$$) {
@@ -6389,6 +6854,7 @@ sub fill_win_template ($$$) {
 # warn "Translate: ", %h;
   my $F = $self->get_deep($self, @$k);		# Presumably a face hash, as in $k = [qw(faces US)]
   my $b = $F->{BaseLayer};
+  $b = $self->pseudo_layer($b, $k->[-1], 0) if defined $b and not $self->{layers}{$b};
   $F->{'[dead-used]'} = [map {}, @{$F->{layers}}];		# Which of deadkeys are reachable on the keyboard
   my $cnt = $F->{'[non_VK]'};
   $h{LAYOUT_KEYS}  = join '', $self->output_layout_win($k->[-1], $F->{layers}, $b, $F->{'[dead]'}, $F->{'[dead-used]'}, $cnt);
@@ -6734,7 +7200,7 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
 		  		     ( ⦇  ) ⦈  [ ⨽  ] ⨼
 		  		     ⊤ ⫟  ⊥ ⫠  ⟂ ⫛  □ ∎  ▽ ∀  ‖ ∥  ≟ ≞  ≟ ≜  ~ ‿  ~ ⁀  ■ ▬ )],	# ( ⟬  ) ⟭ < ≱  > ≰ ≤ ≯  ≥ ≮  * ⋆
 		  amplify    => [qw( < ≪  > ≫  ≪ ⋘  ≫ ⋙  ∩ ⋒  ∪ ⋓  ⊂ ⋐  ⊃ ⋑  ( ⟪  ) ⟫  ∼ ∿  = ≝  ∣ ∥  . ⋮  
-		  		     ∈ ∊  ∋ ∍  - −  / ∕  \ ∖  √ ∛  ∛ ∜  ∫ ∬  ∬ ∭  ∭ ⨌  ∮ ∯  ∯ ∰  : ⦂
+		  		     ∈ ∊  ∋ ∍  - −  / ∕  \ ∖  √ ∛  ∛ ∜  ∫ ∬  ∬ ∭  ∭ ⨌  ∮ ∯  ∯ ∰  : ⦂  ` ⎖
 		  		     : ∶  ≈ ≋  ≏ ≎  ≡ ≣  × ⨯  + ∑  Π ∏  Σ ∑  ρ ∐  ∐ ⨿  ⊥ ⟘  ⊤ ⟙  ⟂ ⫡  ; ⨾  □ ⧈  ◇ ◈
 		  		     ⊲ ⨞  ⊢ ⊦  △ ⟁  ∥ ⫴  ⫴ ⫼  / ⫽  ⫽ ⫻  • ●  ⊔ ⩏  ⊓ ⩎  ∧ ⩕  ∨ ⩖  ▷ ⊳  ◁ ⊲
 		  		     ⋉ ⧔  ⋊ ⧕  ⋈ ⧓  ⪡ ⫷  ⪢ ⫸  ≟ ≛  ≐ ≎  ⊳ ⫐  ⊲ ⫏  { ❴  } ❵  × ⨶  )],	#   ⋆ ☆  ⋆ ★ ;  ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden; ∥ ⫴; × ⋈ not needed; ∰ ⨌ - ???; ≃ ≌ not useful
@@ -7256,7 +7722,7 @@ sub compound_composition_many ($$$$) {		# As above, but takes an array of [char,
 # we do $composition->[0][1], which means we ignore additional compositions!  And we ignore HOW, instead of putting it into penalty
 
 sub sort_compositions ($$$$$;$) {
-  my ($self, $m, $C, $Sub, $dupsOK, $w32OK, @res, %seen, %Penalize, %penalize, @C) = (shift, shift, shift, shift, shift, shift);
+  my ($self, $m, $C, $Sub, $dupsOK, $w32OK, @res, %seen, %Penalize, %penalize, %OK, %ok, @C) = (shift, shift, shift, shift, shift, shift);
 warn "compounding ", $self->array2string($C) if warnSORTCOMPOSE;
   for my $c (@$C) {
     push @C, [map {($_ and 'ARRAY' eq ref $_) ? $_->[0] : $_} @$c]
@@ -7265,8 +7731,8 @@ warn "compounding ", $self->array2string($C) if warnSORTCOMPOSE;
   for my $MM (@$m) {			# |-groups
     my(%byPenalty, @byLayers);
     for my $M (@$MM) {			# diacritic in a group; may flatten each layer, but do not flatten separately each shift state: need to pair uc/lc
-      if ((my $P = $M) =~ s/^\\(\\)?//) {
-        my $kill = $1;
+      if ((my $P = $M) =~ s/^(!)?\\(\\)?//) {
+        my($neg, $strong) = ($1, $2);
 # warn "Penalize: <$P>";	# Actually, it is not enough to penalize; one should better put it in a different group...
 	if ($P =~ s/\[(.*)\]$//) {
 	  #$P = $self->stringHEX2string($P);
@@ -7275,7 +7741,11 @@ warn "compounding ", $self->array2string($C) if warnSORTCOMPOSE;
 	  next unless $match;
 	}  
 	#$P = $self->stringHEX2string($P);
-        $kill ? $Penalize{$_}++ : $penalize{$_}++ for split //, $P;		# XXXX Temporarily, we ignore them completely
+	if ($neg) {
+          $strong ? $OK{$_}++ : $ok{$_}++ for split //, $P;
+        } else {
+          $strong ? $Penalize{$_}++ : $penalize{$_}++ for split //, $P;
+        }
         next
       }
       for my $L (0..$#C) {		# Layer number; indexes a shift-pair
@@ -7313,11 +7783,13 @@ warn "compound+ `$M' of [@working_with] -> ", $self->array2string(\@Res3) if war
           my($penalty, $p) = [('zzz') x @res2];	# above any "5.1", "undef" ("unassigned"???)
           # Take into account the "compatibility", but give it lower precedence than the layer:
           # for no-compatibility: do not store the level;
-          defined $res2[$_] and $penalty->[$_] gt ( $p = ($self->{Age}{$res2[$_]} || 'undef') . "#$extra_penalty[$_]#" . ($self->{UBlock}{$res2[$_]} || '') )
+          defined $res2[$_] and $penalty->[$_] gt ( $p = ($OK{$res2[$_]} ? '+' : '-') . ($self->{Age}{$res2[$_]} || 'undef') .
+          			($ok{$res2[$_]} ? '+' : '-') . "#$extra_penalty[$_]#" . ($self->{UBlock}{$res2[$_]} || '') )
             and $penalty->[$_] = $p for 0..$#res2;
           my $have1 = not (defined $res2[0] and defined $res2[1]);		# Prefer those with both entries
           # Break a non-lc/uc paired translations into separate groups
           my $double_occupancy = ($cnt == 2 and $res2[0] ne $res2[1] and lc $res2[0] eq lc $res2[1]);	# Case fold
+warn "   seeing random-double, penalties <$penalty->[0]>, <$penalty->[1]>\n" if warnSORTCOMPOSE;
           next if $double_occupancy and grep {defined and $Penalize{$_}} @res2;
           if ($double_occupancy and grep {defined and $penalize{$_}} @res2) {
             defined $res2[$_] and $penalty->[$_] = "zzz$penalty->[$_]" for 0..$#res2;
@@ -7327,11 +7799,12 @@ warn "compound+ `$M' of [@working_with] -> ", $self->array2string(\@Res3) if war
           }
           next unless $cnt;
           if (not $double_occupancy and $cnt == 2 and (1 or $penalty->[0] ne $penalty->[1])) {	# Break (penalty here is not a good idea???)
-            push @{ $byPenalty{"$penalty->[0]1"}[0][$L] }, [[$res2[0],undef,undef,$_from_[0]]];
+warn "   breaking random-double, penalties <$penalty->[0]>, <$penalty->[1]>\n" if warnSORTCOMPOSE;
+            push @{ $byPenalty{"$penalty->[0]1"}[0][$L] }, [       [$res2[0],undef,undef,$_from_[0]]];
             push @{ $byPenalty{"$penalty->[1]1"}[0][$L] }, [undef, [$res2[1],undef,undef,$_from_[1]]];
             next;		# Now: $double_occupancy or $cnt == 1 or $penalty->[0] eq $penalty->[1]
           }
-          $p = $penalty->[0];
+          $p = (defined $res2[0] ? $penalty->[0] : 'zzz');	# may have been undef()ed due to Penalty...
           $p = $penalty->[1] if @$penalty > 1 and defined $res2[1] and $p gt $penalty->[1];
           push @{ $byPenalty{"$p$have1"}[$double_occupancy][$L] }, 
 #            [map {defined $res2[$_] ? $res2[$_] : undef} 0..$#res2];
@@ -7500,7 +7973,7 @@ sub shift_pop_compositions ($$$;$$$$) {	# Limit is how many groups to process
 
 my ($rebuild_fake, $rebuild_style) = ("\n\t\t\t/* To be auto-generated */\n", <<'EOR');
 
-.klayout span {
+.klayout span, .klayout-wrapper .over-shift {
  font-size:   29pt ;
  font-weight: bolder; 
  text-wrap:   none;
@@ -7515,25 +7988,35 @@ my ($rebuild_fake, $rebuild_style) = ("\n\t\t\t/* To be auto-generated */\n", <<
 kbd span.lc, kbd span.uc	{ display: inline; }
 
 /* Hide lc only if in .uc or hovering over -uc and not inside; similarly for uc */
-.klayout.lc kbd span.uc, .klayout.uc kbd span.lc, .klayout-uc:hover .klayout:not(.lc):not(:hover) kbd span.lc	{ display: none; }
-.klayout-wrapper:hover .klayout-uc:not(:hover) .klayout:not(.uc) kbd span.uc	{ display: none; }
-
-/* Without uclc, the un-Shift/Shift characters are put next to each other (buggy with do-alt).
-   With uclc, they are decreased in size, and put on different height.
-   With uc or lc, only one of them is shown. 
-   do-altgr outline-highlights the AltGr button.  */
+/* States:	.klayout-wrapper:not(:hover)	|	.klayout.uclc:hover		NORMAL = UCLC
+		.klayout-uc:hover .klayout:not(:hover)					UC
+		.klayout-wrapper:hover .klayout-uc:not(:hover)				LC	*/
+.klayout.lc kbd span.uc, .klayout.uc kbd span.lc, 
+	.klayout-uc:hover:not(:active)		.klayout:not(.lc):not(:hover) kbd span.lc,
+	.klayout-uc:hover:active		.klayout:not(.uc):not(:hover) kbd span.uc,
+	.klayout-wrapper:hover:not(:active)	.klayout-uc:not(:hover) .klayout:not(.uc) kbd span.uc,
+	.klayout-wrapper:hover:active		.klayout-uc:not(:hover) .klayout:not(.lc) kbd span.lc	{ display: none; }
 
 /* These should be active unless hovering over wrapper, and not internal .klayout	*/
 .klayout.uclc:hover kbd span.uc, .klayout.uclc:hover kbd span.lc,
 	.klayout.uclc.force kbd span.uc, .klayout.uclc.force kbd span.lc,
-	.klayout.uclc.do-alt kbd span.uc, .klayout.uclc.do-alt kbd span.lc,
-	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc kbd span.uc,
-	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc kbd span.lc {
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc:not(.do-alt) kbd span.uc,
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc:not(.do-alt) kbd span.lc {
+    font-size: 70%;
+}
+.klayout.uclc:hover kbd span.uc, .klayout.uclc:hover kbd span.lc,
+ .klayout.uclc:not(.in-wrapper) kbd span.uc, .klayout.uclc:not(.in-wrapper) kbd span.lc,
+	.klayout.uclc.force kbd span.uc, .klayout.uclc.force kbd span.lc,
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc.do-alt kbd span.uc, 
+	.klayout.uclc.do-alt:hover kbd span.uc,
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc.do-alt kbd span.lc, 
+	.klayout.uclc.do-alt:hover kbd span.lc,
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc:not(.do-alt) kbd span.uc,
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc:not(.do-alt) kbd span.lc {
     position: absolute;
     z-index: 10;
-    font-size: 70%;
     border: 1px dotted green;
-    line-height: 0.8em;		/* should be changed with padding-bottom */
+    line-height: 0.8em;		/* decreasing this moves up; should be changed with padding-bottom */
 }
 .klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc kbd span.uc,
 	.klayout-wrapper .klayout-uc .klayout.uclc:hover kbd span.uc,
@@ -7551,35 +8034,36 @@ kbd span.lc, kbd span.uc	{ display: inline; }
 	/* Same for left/right placement */
 .klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc kbd span.uc.on-left,
 	.klayout-wrapper .klayout-uc .klayout.uclc:hover kbd span.uc.on-left,
-	.klayout.uclc kbd span.uc.on-left {
+	.klayout.uclc:not(.in-wrapper) kbd span.uc.uc.on-left {	/* repeat is needed to protect against :not(.base) about 25lines below */
     left: 0.35em;
     right: auto;
 }
 .klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc kbd span.lc.on-left,
 	.klayout-wrapper .klayout-uc .klayout.uclc:hover kbd span.lc.on-left,
-	.klayout.uclc kbd span.lc.on-left {
+	.klayout.uclc:not(.in-wrapper) kbd span.lc.lc.on-left {
     left: 0.0em;
 }
 .klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc kbd span.uc.on-right,
 	.klayout-wrapper .klayout-uc .klayout.uclc:hover kbd span.uc.on-right,
-	.klayout.uclc kbd span.uc.on-right {
+	.klayout.uclc:not(.in-wrapper) kbd span.uc.uc.on-right {
     right: 0.0em;
 }
 .klayout-wrapper:not(:hover) .klayout-uc .klayout.uclc kbd span.lc.on-right,
 	.klayout-wrapper .klayout-uc .klayout.uclc:hover kbd span.lc.on-right,
-	.klayout.uclc kbd span.lc.on-right {
+	.klayout.uclc:not(.in-wrapper) kbd span.lc.lc.on-right {
     left: auto;
     right: 0.35em;
 }
-.klayout.uclc kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc).on-right
+.klayout kbd span:not(.base):not(.base-uc):not(.base-lc).on-right
     { left: auto;  right: 0.0em; position: absolute; }
-.klayout.uclc kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc).on-left
+.klayout kbd span:not(.base):not(.base-uc):not(.base-lc).on-left
     { left: 0.0em;  right: auto; position: absolute; }
 .klayout kbd .on-right:not(.prefix), .on-right-ex		{ color: firebrick; }
 .klayout kbd .on-right:not(.prefix).vbell			{ color: Coral; }
 .klayout kbd .on-left { z-index: 10; }
+.klayout kbd .on-right { z-index: 9; }
 
-.klayout-wrapper:hover .klayout:not(:hover) kbd.shift {outline: 6px dotted green;}
+.klayout-wrapper:hover .klayout.uclc:not(:hover) kbd.shift {outline: 6px dotted green;}
 
 kbd span, kbd div { vertical-align: bottom; }	/* no effect ???!!! */
 
@@ -7588,7 +8072,8 @@ kbd {
 /*    line-height: 1.6em;  */
     width: 1.4em;		/* +0.24em border +0.08em margin; total 1.72em */
 
-    min-height: 0.83em;		/* Should be changed together to get uc letters centered... */
+    /* +0.3em border;  */
+    min-height: 0.83em;		/* These two should be changed together to get uc letters centered... */
     line-height: 0.75em;	/* Increasing by the same amount works fine??? */
 		/* One also needs to change the vertical offsets of arrows from_*, and System-key icon */
 
@@ -7630,7 +8115,7 @@ kbd {
         0.05em 0.1em 0.06em 0.0em #aaa ;
 }
 
-kbd:hover {
+kbd:hover, .klayout-wrapper:hover .klayout:not(:hover) kbd.shift {
     color: #222;
     background-image: -moz-linear-gradient(left,  rgba(128,128,128,0.2), rgba(192,192,192,0.2),  rgba(192,192,192,0.2),  rgba(255,255,255,0.2));
     background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(128,128,128,0.2)), color-stop(33%,rgba(192,192,192,0.2)), color-stop(66%,rgba(192,192,192,0.2)), color-stop(100%,rgba(255,255,255,0.2)));
@@ -7640,7 +8125,7 @@ kbd:hover {
     background-image: linear-gradient(0deg,  rgba(128,128,128,0.2) 0%, rgba(192,192,192,0.2) 33%, rgba(192,192,192,0.2) 66%, rgba(255,255,255,0.2) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#ffffff',GradientType=1 );
 }
-kbd:active, kbd.selected, .klayout-uc:hover .klayout:not(:hover) kbd.shift {
+kbd:active, kbd.selected, .klayout-uc:hover:not(:active) .klayout:not(:hover) kbd.shift, .klayout-wrapper:active .klayout-uc:not(:hover) kbd.shift {
     margin-top: 0.14em;			/* This variant is with "solid" buttons, the commented one is with "rubber" ones */
     border-top: solid 0.10em #CCC;
     border-right: solid 0.12em #9a9a9a;	/* Make right/bottom a tiny way darker */
@@ -7693,8 +8178,45 @@ kbd .base, kbd .base-lc, kbd .base-uc {
 /* Special rules for do-alt-display.  Without alt2, places the base on left and right;
 	with alt2, places base on the left (unless base-right is present) */
 
-.klayout.do-alt.uclc kbd span.lc, .klayout.do-alt.uclc kbd span.uc {
+/* .klayout.do-alt.uclc kbd span.lc, .klayout.do-alt.uclc kbd span.uc { */
+.klayout.do-alt.uclc:not(.in-wrapper) kbd span.uc, .klayout.do-alt.uclc:not(.in-wrapper) kbd span.lc,
+.klayout.do-alt.uclc:hover kbd span.uc, .klayout.do-alt.uclc:hover kbd span.lc,
+	.klayout.do-alt.uclc.force kbd span.uc, .klayout.do-alt.uclc.force kbd span.lc,
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.do-alt.uclc kbd span.uc,
+	.klayout-wrapper:not(:hover) .klayout-uc .klayout.do-alt.uclc kbd span.lc {
    font-size: 85%;
+}
+
+.klayout.do-alt.sz125 kbd span.uc, .klayout.do-alt.sz125 kbd span.lc,	/* exclude below: too specific otherwise */
+	.klayout.do-alt.sz125 kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc):not(.shrink):not(.small):not(.vsmall) {
+   font-size: 125%;
+   line-height: 0.98em;		/* decreasing this moves up; should be changed with padding-bottom */
+   /* padding-bottom: 0.1em; */	/* Less makes _ not fit inside border... */
+}
+.klayout.do-alt.sz120 kbd span.uc, .klayout.do-alt.sz120 kbd span.lc,	/* exclude below: too specific otherwise */
+	.klayout.do-alt.sz120 kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc):not(.shrink):not(.small):not(.vsmall) {
+   font-size: 120%;
+   line-height: 1.02em;		/* decreasing this moves up; should be changed with padding-bottom */
+   /* padding-bottom: 0.1em; */	/* Less makes _ not fit inside border... */
+}
+.klayout.do-alt kbd span.uc, .klayout.do-alt kbd span.lc,	/* exclude below: too specific otherwise */
+	.klayout.do-alt.sz115 kbd span.uc, .klayout.do-alt.sz115 kbd span.lc,
+	.klayout.do-alt kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc):not(.shrink):not(.small):not(.vsmall),
+  .klayout.do-alt.sz115 kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc):not(.shrink):not(.small):not(.vsmall) {
+   font-size: 115%;
+   line-height: 1.05em;		/* decreasing this moves up; should be changed with padding-bottom */
+   /* padding-bottom: 0.1em; */	/* Less makes _ not fit inside border... */
+}
+.klayout.do-alt.sz110 kbd span.uc, .klayout.do-alt.sz110 kbd span.lc,	/* exclude below: too specific otherwise */
+	.klayout.do-alt.sz110 kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc):not(.shrink):not(.small):not(.vsmall) {
+   font-size: 110%;
+   line-height: 1.12em;		/* decreasing this moves up; should be changed with padding-bottom */
+   /* padding-bottom: 0.1em; */	/* Less makes _ not fit inside border... */
+}
+.klayout.do-alt.sz100 kbd span.uc, .klayout.do-alt.sz100 kbd span.lc,	/* exclude below: too specific otherwise */
+	.klayout.do-alt.sz100 kbd span:not(.lc):not(.uc):not(.base):not(.base-uc):not(.base-lc):not(.shrink):not(.small):not(.vsmall) {
+   line-height: 1.2em;		/* decreasing this moves up; should be changed with padding-bottom */
+   /* padding-bottom: 0.1em; */	/* Less makes _ not fit inside border... */
 }
 
 .klayout.do-alt kbd span.base-lc, .klayout.do-alt kbd span.base-uc {
@@ -7772,7 +8294,7 @@ kbd .base, kbd .base-lc, kbd .base-uc {
 }
 .klayout.do-alt kbd {
     min-height: 1.2em;		/* Should be changed together to get uc letters centered... */
-    line-height: 1.15em;	/* Increasing by the same amount works fine??? */
+    line-height: 1.2em;	/* Increasing by the same amount works fine??? */
 }
 .klayout.do-altgr span.altgr {outline: 9px dotted green;} 
 
@@ -7940,6 +8462,19 @@ span.l-NONONO		{ margin: 0ex 0.06ex; }
 span.yyy		{ padding: 0px !important; }
 
 div.rtl-hover:hover div:not(:hover) kbd span:not(.no-mirror-rtl):not(.base):not(.base-uc):not(.base-lc) { direction: rtl; }
+
+div.zero { position: relative;}
+div.zero div.over-shift { position: absolute; height: 1.13em; z-order: 999;}
+/* div.zero div.over-shift { outline: 3px dotted yellow;} */
+.do-alt + div.zero div.over-shift { height: 1.5em; }
+div.zero.l div.over-shift { left: 0.04pt; width: 4.24em;}
+div.zero.r div.over-shift { left: 21.12em; width: 3.56em;}	/* (1.72em - 0.04em) × 10 + 4.24em + 0.08 */
+div.zero.tp div.over-shift { top: 7.8em;}
+.over-shift-outline div.zero.btm div.over-shift { outline: 3px dotted blue;}
+div.zero.btm div.over-shift { bottom: 1.13em;}
+.do-alt + div.zero.btm div.over-shift { bottom: 1.5em;}
+/* div.zero:hover { outline: 6px dotted yellow;} */
+
 EOR
 
 sub apply_filter_div ($$;$) {
@@ -8066,7 +8601,7 @@ sub a_pair ($$$$$$$$$$;@) {
     my $q = (@$extra > 1 ? '"' : '');
     @$extra = sort @$extra;
     my $cl = @$extra ? " class=$q@$extra$q" : '';
-    $base ? "<span$cl>" . h($uc) . "</span>" : $self->char_2_html_span($UC, $uc, $F, {}, @$extra)
+    $base ? "<span$cl>" . h($uc) . "</span>" : $self->char_2_html_span(undef, $UC, $uc, $F, {}, @$extra)
 #    "<span$cl>" . $out . "</span>";
   } else {
     my (@e_lc, @e_uc);
@@ -8083,7 +8618,7 @@ sub a_pair ($$$$$$$$$$;@) {
        my $q = ($e || @{$_->[1]}) ? '"' : '';
        my $ee = [sort @$extra, @{$_->[1]}];
        my $o = ($base	? "<span class=$q@$ee$q>" . h($_->[0]) . "</span>" 
-       			: $self->char_2_html_span($_->[3], $_->[0], $F, {}, @$ee));
+       			: $self->char_2_html_span(undef, $_->[3], $_->[0], $F, {}, @$ee));
 #       "<span class=$q@$e$j$_->[2]$q>$o</span>";
       } @do;
   }

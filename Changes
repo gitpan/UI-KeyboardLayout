@@ -16,9 +16,10 @@
 
 Currently achieved (ranges as of Unicode v6.2):
 *) Two gotcha (with Shift-SPACE and ApplicationMenu keys) comparing to US and Russian Phonetic keyboards;
-*) Support of all keys (ISO/ABNT/ABNT2/JIS) on all contemporary hardware layouts;
-*) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1 (except for arrows);
-*) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys);
+*) Support of all keys (ISO/ABNT/JIS) on all contemporary hardware layouts;
+*) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1;
+*) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys;
+     Greek sub/superscript, MATHEMATICAL, APL, DOUBLE-STRUCK letters and digraphs not supported);
 *) Full coverage of Cyrillic ranges (with ԡꙣꙥꚁ [temporarily?] put on free slots in Business map);
      from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double prefix keys);
 *) Full coverage of Hebrew/Yiddish/Ladino characters, points, cantillation, punctuation
@@ -26,20 +27,19 @@ Currently achieved (ranges as of Unicode v6.2):
 *) Full coverage of currency symbols;
 *) Full coverage of vulgar fractions;
 *) Full coverage of Coptic alphabet (via double prefix keys — except from Greek personality);
-*) Full coverage of characters covered by EurKey/Bépo keyboards (except arrows and combining 0302, 030a);
+*) Full coverage of characters covered by EurKey/Bépo keyboards (except 0323);
 *) 50% coverage of math symbols in BMP (the most useful implemented first);
 *) Full coverage of double-accented letters of MES-3b;
 *) Full coverage of non-modifiers/combiners of IPA and UPA;
 *) Full coverage of obsolete-IPA and case-extended IPA;
 *) Latin and Cyrillic personalities (pre-release of Greek and Hebrew personality);
-*) Visual bell to report unrecognized/unsupported combinations;
+*) Visual bell to report unrecognized/unsupported combinations (except for those using Application-Menu modifier);
 *) Documentation of the allocation rules scattered over different files/sections.
 
 Not yet implemented, or lost by upgrades to other goals:
 *) Clear documentation of the allocation rules (needed for "goal 1" above).
 *) Finish implementing usable Greek and Hebrew personality;
 *) The "compose" prefix key + access by human-guessable sequence of Latin chars;
-*) Full coverage of Cyrillic;
 *) Full coverage of IPA (both visually, and by structure properties of the described sounds) and UPA;
 *) Full coverage of spacing modifiers and combining characters for Latin scripts, and for symbols 
    (had it before Green keys were implemented);
@@ -49,7 +49,7 @@ Not yet implemented, or lost by upgrades to other goals:
 *) reasonable coverage of arrows;
 *) reasonable coverage of ASCII/Unicode drawing characters;
 *) Full coverage of non-Eastern characters covered by Neo keyboard, and X11+Neo composition tables;
-*) Full coverage of MES-2 (currently 7 arrows + ⌠⌡ + 48 box drawing symbols missing);
+*) Full coverage of MES-2 (currently ↨ + ⌠⌡ + 48 box drawing symbols missing; about 840 missing from MES-3b);
 *) Easy-to-describe quick access to Vietnamese characters (seems to be present - needs documentation).
 
 Possible roadmaps:
@@ -953,11 +953,11 @@ Perl bug with 2Self auto-docs (not debugged yet).  Already "my $c =" leads to a 
 	Make ctrl_after_modcol create_alpha_ctrl keep_missing_ctrl into configuration variables (inheritable).
 	Support LRO/RLO at start (and then PDF at ends) of visual layout lines.
 	Implement extra layers per face.  (Via extra_layers, layers_modifiers configuration variables)
-
 			(Visual bell is not working for the added keys...)
 		Needs a patch to the generated .C and .H files.
 		kbdutool overfulls with too long lines unless one manually removes comments.
 		kbdutool ignores all the added layers but one (looks like it is limited by: up to 8 chars per key).
+	BIG was not highlighted in generated tables.
 		
 
 	izKeys.kbdd:	Update version to 0.06.
@@ -998,3 +998,46 @@ Perl bug with 2Self auto-docs (not debugged yet).  Already "my $c =" leads to a 
 	examples/izkeys-visual-maps-base.html	Rename from examples/izkeys-visual-base.html
 					Major improvements.
 
+0.14	BIG YUS was highlighted as BIG in generated tables.
+	Support out-of-BMP in LIGATURES (untested).
+	Characters available via single prefix were not counted as such in coverage tables if earlier seen as double-prefix.
+	[[[Face(NAME) accesses the “bare” layers of the face, not with added control chars, VK and linked chars...]]]
+		Disabling this leads to disappearence of control chars on Hebrew, Cyrillic???
+			Inverting the order “fixes” this:	Face(Hebrew)	Face(SpecialKey_Images)
+	New debugging flag debug_STACKING (0x2000 now).
+	In CSS: make on-right on-left compatible with all of lc/uc/uclc (and with shift-changing wrapper - but not react yet).
+	Document debugging output for mutators.
+	Document primary/secondary mutators.
+	Debugging output for “TMP Extracted” was not updated for characters-as-an-array.
+	When one of a mogrified shift/unshift pair was penalized away (but had good priority), 
+		the priority of the remaining one was boosted.
+	Allow depenalization (weakier or stronger than Unicode version) of characters via !\, !\\.
+	Add dummy entries in front of extra_layers, rename to output_layers.
+	Inverted prefix keys lost inversion in extra layers.
+	Implement prefixNOTSAME=DDDD and prefixNOTSAMEcase=DDDD in output_layers.
+	Implement [visual -> RECT/name] sections.
+	Mark AltGr-inverter prefix in the generated table.
+	New mutator AssignTo(RANGENAME, LIM).
+	Allow mutators exchange key slots.
+	Allow BaseLayer to be a recipe.
+	Allow output of Kana+Fkeys (earlier was disabled in output_layout_win(), since kbdutool does not support Fkeys and arrow keys).
+	Document newly found errors of MSKLC and Firefox.
+	Allow in_key_separator2 to start a lonely entry in a slot.
+	«amplify» backtick to ⎖.
+	LIGATURES produced for non-BMP were byte-split, not 16-bit split.
+	Allow Shift to be clickable on the HTML visual layouts.
+	
+	izKeys.kbdd:	Update version to 0.07.
+			Make AltGr-. AltGr-</> produce ⊆/⊇.
+			Greek and Hebrew personality had wrong Metadata-index.
+			Add visual tables of Drawing Characters and arrows.
+			Assign Kana-Fkeys, Kana-Arrows, Kana-Numpad (dashes/spaces, single/double arrows, single-line box drawing)
+				(currently all Fkeys/Numpad/Clear are disabled later — except F2 — since too many overload kbdutool)
+			(Temporarily:)	Make AppMenu-(Shift-)F2 produce em-dash surrounded by HAIR(THIN) space (and AppMenu-,/M).
+			(Temporarily:)	Make AppMenu-< and AppMenu-> produce Clefs: ALTO and (doubled) BASS (to investigate apps).
+
+	build_here.cmd:	Incorporate massaging of #ERROR# to enable F-keys and arrow-keys.
+			Incorporate removing of CLEAR, F-keys (except F2), and NUMPAD-keys to not overload kbdutool.
+
+	izKeys.patch:	Take into account that X35 is not inserted now by kbdutool.
+	examples/izKeys-visual-maps-base.html:	Make Shift flippable on the base map and combined-Cyrillic one.

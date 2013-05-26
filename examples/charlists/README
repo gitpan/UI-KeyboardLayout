@@ -12,3 +12,12 @@ one produced by an older version.  Since this is incremental, errors may creep
 in; it makes sense to redo this time to time.
 
   [The Adobe list does not include symbols which expand to a pair of Unicode chars.]
+
+  
+  
+  
+  
+  
+for %f in (*) do ( env -u PERL5OPT D:\Programs\cygwin.zip\cygwin\bin\perl.exe -I %xHOME%/ru-pho-keyboard/UI-KeyboardLayout/lib  -wC31 %xHOME%/ru-pho-keyboard/UI-KeyboardLayout/examples/print_nameslist.pl %f  >o\%f-charnamelist )
+cd o
+for %f in (*) do ( sort %f ../../../../ooo-us ../../../../ooo-us | uniq -u > ..\c\diff-%f )
