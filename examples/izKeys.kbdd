@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2013
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.07
+VERSION=0.50
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -35,7 +35,7 @@ visual_prefixes=  * ?
 in_key_separator=/
 in_key_separator2=‼
 prefix_repeat=3
-#					Greek-AltGr has only one element: Ω
+#					Greek-AltGr-Junk has only one element: 2009—2009
 @layer_names=Green,Green-AltGr,Greek,Greek-AltGr-Junk
 @layer_names=Blue,Blue-AltGr,Cyrillic-Extra,Cyrillic-ExtraExtra
 @layer_names=US-Base,USLatin-AltGr,Ripe,Ripe-AltGr
@@ -67,7 +67,7 @@ prefix_repeat=3
 ‭???	א ָ/ ַ ֲ סשׂ/ ׂ ֒ ד ֶ/ ְ ֧ פף/פּףּ	ג״/׳ ֞ הח/ ֢ ֜ ח ֻ/ ﬞ ֝ כך/ ֦ ֫ ל ֹ/ ׇ ֳ --/ ֛ ֔	--/׳״ ‬
 #???	א׃/ ַ	ס ׂ/ ָ ׇ ד/ ְ	פף/ ֲ	ג/ ֳ	ה/ ֽ	ח/ ֻ	כך/ ִ	ל ֹ/ ֵ	--/ ֶ		--/ ֱ
 #"
-	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	‼200a—200a/--1d11e ·/--‼1d121.1d121	⁄/⋰
+	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	‼200a—200a/--1d11e ·/--‼1d121.1d121	⁄/⋰//‼2009—2009
 	--	--	--//ꙡ	--//ԃ	--	--//ӈ	--//ꙧ	≲//ԇ/ԅ		≳//ꙝ/ꙙ		…≟//ꙓ/ҍ
 ***	z/à	x/é	c/ç	v/ì	b/ù	n/ñ	m/ò	,</¸≤		.>/°≥/…		/?/0338¿/÷�
 	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ꙋ/ѹ	н/њ/ң/ҥ	м/ӎ/ꙟ/ԣ	,</«/⁘⁙/ԋ	.>/»/·։/჻⁖	/?/ј/ԛ/ꙏ
@@ -115,10 +115,12 @@ Greek_vowels_AltGr=	MutateDupsOK[0345|0308](Layers(Empty+Greek_vowels))	ByPairs[
 BusinessA_0=	Imported[business,00a4](US-Base)
 BusinessA_1=	Imported[business,00a3](US-Base)
 BusinessAdd_0=		ByPairs[qĸ Q⌨ ZƏ zə oơ OƠ uư UƯ '′ "″ ;‵ :‶ -∓ [〈 ]〉 {◄ }► /℅ jƺ](US-Base)	DefinedTo[¤](SelectRX[[^\da-zA-Z]](US-Base))
-+BusinessAdd_1=		ByPairs[ZƎ zǝ Oɶ o℅ '‴ "⁗ ;‷ :‱ [◃ {◂ ]▹ }▸ Aᴁ 2ƻ f♀ F⚢ m♂ M⚣ a⚤ ?ʢ e℮ wﬁ Wﬂ h⌂ jʓ](US-Base)		
++BusinessAdd_1=		ByPairs[ZƎ zǝ Oɶ o℅ '‴ "⁗ ;‷ :‱ [◃ {◂ ]▹ }▸ Aᴁ 2ƻ f♀ F⚢ m♂ M⚣ a⚤ ?ʢ e℮ wﬁ Wﬂ h⌂ jʓ Q⌠ q⌡](US-Base)		
 +BusinessAdd_1=			DefinedTo[¤](SelectRX[[^\da-zA-Z]](US-Base))
 #"
 cp437_Start=		FromTo[Digits,cp437-Start](FlipShift(Face(Latin)))	ByPairs[_☼](Face(Latin))	ByPairs[-♪ _♫](FlipLayers(Latin))
+#
+Add_AltGr=	 AssignTo[NUMPAD,16](Id(BoxDraw11))	AssignTo[FKEYS,12](Id(DashesEtc) FlipShift(FractionEmSpacesEtc))
 #
 [face_recipes]
 #					∦ obscures ⦀
@@ -171,16 +173,18 @@ Greek_Vowels=	Layers(Greek_vowels+Greek_vowels_AltGr)
 Greek_Vowels0_with_Vrachi=	ByRows[ Empty /// Empty ///  MutateDupsOK[0306] /// Empty ](Face(Greek_Vowels))
 Greek_Vowels0_with_Macron=	ByRows[ Empty /// Empty ///  MutateDupsOK[0304] /// Empty ](Face(Greek_Vowels))
 # 000d↲ PageUp ⎗ PageDn ⎘
-SpecialKey_Images=	ByPairs[ 000a␤ 000d⏎ 0009↹ 001b⇤ 001d⇥ 001c␀ 0008⌫ 007f⌦ 0003␥ 001a␦]
+SpecialKey_Images=	ByPairs[ 000a␤ 000d⏎ 0009↹ 001b⇤ 001d⇥ 001c␀ 0008⌫ 007f⌦ 0003␥ 001a␦ 001f↨]
 SpecialKey_Symbols=	ShiftFromTo[0001,2401](SelectRX[[\x00-\x20]])	ByPairs[␡]
 SpecialKey_Images2=	ByPairs[000d↲ 000a⤶ 0008⎌ 001b⎗ 001d⎘ 007f⌧ 0003⎚]
 #
 +Add_Green1=	Mutate[\ªº,<super>+lc+dectrl]	ByPairs[0020␣ 0192⍽]
-+Add_Green1=			AssignTo[FKEYS,12](Id(DashesEtc) FlipShift(FractionEmSpacesEtc))
-+Add_Green1=			AssignTo[ARROWS,16](Id(Arrows) FlipShift(Arrows2))
-+Add_Green1=			AssignTo[NUMPAD,16](Id(Frame11))
-Add_Ripe1=	Mutate[<sub>+lc+dectrl|<sub>+dectrl]	ByPairs[0020.00a0 0138.202f]
+##+Add_Green1=			AssignTo[FKEYS,12](Id(DashesEtc) FlipShift(FractionEmSpacesEtc))
+##+Add_Green1=			AssignTo[ARROWS,16](Id(Arrows) FlipShift(Arrows2))
+##+Add_Green1=			AssignTo[NUMPAD,16](Id(BoxDraw11))
++Add_Ripe1=	Mutate[<sub>+lc+dectrl|<sub>+dectrl]	ByPairs[0020.00a0 0138.202f]
++Add_Ripe1=			AssignTo[ARROWS,16](Id(Arrows) FlipShift(Arrows2))	AssignTo[NUMPAD,16](Id(BoxDrawBB))
 Add_Ripe3=	ByPairs[0020.2009 0138.200a]	Face(SpecialKey_Images2)
+Add_2Ripe=	AssignTo[NUMPAD,16](Id(BoxDraw1B))
 #
 [faces]
 # Create DeadKey maps basing on (massaged!) visual descriptions:
@@ -220,10 +224,36 @@ Add_Ripe3=	ByPairs[0020.2009 0138.200a]	Face(SpecialKey_Images2)
 +DeadKey_Map00a3=		ByPairs[££]	Face(Business)	
 #
 +DeadKey_Map012e=	PrefixDocs[Hebrew {AND: iconic control-key symbols}]
-+DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]
++DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]	Face(Add_2Ripe)
 #
 +DeadKey_Map019c=	PrefixDocs[MathBlue]	ByPairs[0020␢](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))
 +DeadKey_Map019c=		Face(MathBlue)	ByPairs[0020␠ 0192␢]
+#
+# It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
++DeadKey_Map0eff=	PrefixDocs[delivers Fraktur to an extra layer]		
++DeadKey_Map0eff=		Mutate32OK[<font=fraktur>](Face(Latin))			AssignTo[NUMPAD,16](Id(BoxDraw21))
+#
++DeadKey_Map0efe=	PrefixDocs[delivers Double-Struck to an extra layer]
++DeadKey_Map0efe=		Mutate32OK[<font=double-struck>](Face(Latin))		AssignTo[NUMPAD,16](Id(BoxDraw22))
+#
++DeadKey_Map0efd=	PrefixDocs[delivers Script to an extra layer]			AssignTo[NUMPAD,16](Id(BoxDraw12))
++DeadKey_Map0efd=		Mutate32OK[<font=script>|<any-script>](Face(Latin))
++DeadKey_Map0efd=		FromTo[US-Base,Greek-AltGr-Junk](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map0efd=		FromTo[US-Base,Green](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map0efd=		FromTo[US-Base,Green-AltGr](SelectRX[[,/<>:]](Face(Latin)))
+#							ByPairs[:03a6](Face(Latin))
+#		These are non-essential, added for testing of applications only (B1, Frames??? eventually should be on rCtrl! ???)
++DeadKey_Map0efc=	PrefixDocs[delivers SansSerif BoldItalic Greek, Bold Digits to an extra layer]
++DeadKey_Map0efc=	  Mutate32OK[<font=sans-serif-bold-italic>](Id(Greek))	Mutate32OK[<font=bold>](Face(Latin))
++DeadKey_Map0efc=	  AssignTo[NUMPAD,16](Id(BoxDrawB1))	AssignTo[ARROWS,16](Id(WhiteFrame) FlipShift(BlackFrame))
+#
+DeadKey_Map0efb=	PrefixDocs[delivers SansSerif Bold to an extra layer]	Mutate32OK[<font=sans-serif-bold>](Face(Latin))
+DeadKey_Map0efa=	PrefixDocs[delivers BoldItalic to an extra layer]	Mutate32OK[<font=bold-italic>](Face(Latin))
+DeadKey_Map0ef9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<font=monospace>](Face(Latin))
++DeadKey_Map0ef8=	PrefixDocs[delivers Italic to an extra layer]		Mutate32OK[<font=italic>](Face(Latin))
++DeadKey_Map0ef8=		FromTo[US-Base,Greek-AltGr-Junk](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map0ef8=		FromTo[US-Base,Green](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map0ef8=		FromTo[US-Base,Green-AltGr](SelectRX[[,/<>:]](Face(Latin)))
 #
 geometry_via_layer=US-Base
 #
@@ -231,8 +261,15 @@ geometry_via_layer=US-Base
 Auto_Diacritic_Start=0f00
 #
 Flip_AltGr_Key=00a0
-@layers_modifiers=,CA,K,KC,KCA
-@output_layers=0,1,prefixNOTSAME=0138,prefix=0192,prefix=012e
+#
+# Apparently, binding-column 15 (0-based) of aVkToWch18 is as if with WCH_NONE.  When there are 2 Ctrl-columns, this corresponds to
+#    Shift of (0-based) elt 6 below ((7+1)*2=16).	Better put something fake into elt 6!
+#
+#		      Gr,Ru,Heb,Frk,ssbiGrk,Scr, Dbl,ms, i, bi,ssb
+# Actual keys:    ,Agr,CA,M,CrM,CMAgr,ACr,CrAgr,MAgr,AM,CM,CAM,AMCr
+@layers_modifiers=,CAX,CA,K,CKY,CKAXY,CAY,CAXY,KCAX,AK,CK,CAK,CAKY
+@output_layers=0,1,prefixNOTSAME=0138,prefixNOTSAME=0192,prefixNOTSAME=012e,prefixNOTSAME=0eff,prefixNOTSAME=0efc
+@output_layers=prefixNOTSAME=0efd,prefixNOTSAME=0efe,prefixNOTSAME=0ef9,prefixNOTSAME=0ef8,prefixNOTSAME=0efa,prefixNOTSAME=0efb
 #
 Diacritic_if_undef=			SpaceSelf2Id
 DeadChar_DefaultTranslation=		♪
@@ -251,7 +288,7 @@ DeadChar_32bitTranslation=		♫
 # Non-breakable translations (non-ideal 2007), 202F
 #
 [faces/Latin]
-@layers=US-Base,USLatin-AltGr
+@layers=US-Base,	Id(USLatin-AltGr)	Id(Add_AltGr)
 LinkFace=CyrillicPhonetic
 #@extra_layers=0138
 #@extra_layers_mods=K
@@ -556,7 +593,7 @@ MetaData_Index=3
 #
 +DeadKey_Map012e=	PrefixDocs[Cyrillic, “Ripe Keys”, Subscript digits/symbols, dashes]
 +DeadKey_Map012e=	InheritPrefixKeys[Face(CyrillicPhonetic)](Face(CyrillicRipeMax))	Face(SpecialKey_Images)
-+DeadKey_Map012e=	HTML_classes[C=cyr,may-guess,всыхѣєә,C0,need-learn,ючяшщэьжёъЁЪ]
++DeadKey_Map012e=	HTML_classes[C=cyr,may-guess,всыхѣєә,C0,need-learn,ючяшщэьжёъЁЪ]	Face(Add_2Ripe)
 #
 +DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), Superscript digits/symbols, “Green Keys”]
 +DeadKey_Map0192=	Face(CGreekGreenMax)	Face(Add_Ripe1)
@@ -663,7 +700,7 @@ DEADKEY	00A3
 [visual -> RECT/keypad]
 @rect_rows_cols=4,4 
 @rect_horizontal_counts=11,10,11
-@layer_names=Base-Keypad,Frame11,Frame22,Frame12,Frame21,FrameBB,Frame1B,FrameB1,BFrameOnH,BFrameOnV,BFrameOnHV
+@layer_names=Base-Keypad,BoxDraw11,BoxDraw22,BoxDraw12,BoxDraw21,BoxDrawBB,BoxDraw1B,BoxDrawB1,BBoxDrawOnH,BBoxDrawOnV,BBoxDrawOnHV
 @layer_names=BlackTriang,WhiteTriang,PartBlackCircles,WhiteFrame,BlackFrame,RoundDirections,RoundDirectionsPlus,Arcs,PartCircles,RectArr
 @layer_names=Arrows,Arrows2,ArrowsMapsTo,ArrowsWhite,ArrowsBlack,Arrows3,ArrowsDtip,ArrowsDoubled,ArrowsDashedCurved,ArrowDStroked,ArrowsPlay
 empty=!
@@ -677,7 +714,7 @@ ROWgap=0
 ◤▲◥!⌌△⌍!◕◓◔!▗▄▖!▛▀▜!◜∩◝⊘⌈⋂⌉!╭◠╮!◴◚◷!⌜⊓⌝⍁
 ◀■▶!◁□▷!◐○◑!▐█▌!▌ ▐!⊂⥀⊃⊗⊆⥁⊇⨂◖⚪◗!!!➲!⊏□⊐⊠
 ◣▼◢!⌎▽⌏!!◒!!▝▀▘!▙▄▟!◟∪◞⊖⌊⋃⌋!╰◡╯!◵◛◶!⌞⊔⌟⊟
-!!!!!!!!!!!!!!!!!!!!!!!⊕!!!⨁!!!!!!!!!!!⊞
+!!!!!!!!!!!!!!↵!░▒▓!!!!⊕!!!⨁!!!!!!!!!!!⊞
 ↖↑↗÷⇖⇑⇗∕↰↥↱!⬁⇧⬀!⬉⬆⬈!⬑⤊⬏!⇱↟!!↫⇈↬!↻⇡↺!↸⇞!!⏮⏫⏭!
 ←⎯→×⇐⏐⇒⨯↤!↦!⇦○⇨!⬅●➡!⇚◯⇛!↞!↠!⇇!⇉!⇠◌⇢!⇺❍⇻!⏪!⏩!
 ↙↓↘‒⇙⇓⇘−↲↧↳!⬃⇩⬂!⬋⬇⬊!⬐⤋⬎!!↡⇲!↩⇊↪!↶⇣↷!↵⇟↴!!⏬!!
@@ -699,8 +736,8 @@ in_key_separator2=‼
 #
 # Note that we no longer use the tables for super/subscript, and generate them operatically
 @layer_names=Zodiak,Numerators2,Numerators1,Digits,OverDigits,Denominators1,Denominators2
-@layer_names=Super,SuperExtraLetters,Sub,SubExtraLetters,CyrPowersOfTen,cp437-Start,DashesEtc0,FractionEmSpacesEtc0
-@layer_names=DashesEtc,FractionEmSpacesEtc
+@layer_names=Super,SuperExtraLetters,Sub,SubExtraLetters,CyrPowersOfTen,cp437-Start,DashesEtc,FractionEmSpacesEtc
+@layer_names=DashesEtc0,FractionEmSpacesEtc0
 # ↉ 0/3  ⅐ 1/7 ⅑ 1/9
 	♈	♉	♊	♋	♌	♍	♎	♏	♐	♑	♒	♓	--	--	--	--	--	--	--
 <<<	½	⅖	⅗	--	⅝	--	--	--	--	--	--	--	--	--	--	--	--	--	--
@@ -714,10 +751,10 @@ in_key_separator2=‼
 	--	--	--	--	--	--	--	--	--	--	-	=	+	(	)	ə	--	--	--
 +++	--	--	҂	 ⃝	 ҈	 ҉	꙰	꙱	꙲	--	--	--	--	--	--	--	--	--	--
 	☺	☻	♥	♦	♣	♠	•	◘	○	◙	--	--	--	--	--	--	--	--	--
-	‐ 	–	—	― 	⸏	⸓	⸎	⁃	‑	‒	‑	‾	--	--	--	--	--	--	--
-	2003	2002	2004	2005	2009	2006	205f	200a	2001	200b	2008	2007	--	--	--	--	--	--	--
+	‐ 	–	—	― 	⸏	⸓	⸎	⁃	‑	­	‒	‾	--	--	--	--	--	--	--
+	2003	2002	2004	2005	2009	2006	2001	200a	205f	200b	2007	2008	--	--	--	--	--	--	--
 	‐ 	200a—200a‼	—	― 	⸏	⸓	⸎	⁃	‑	‒	‑	‾	--	--	--	--	--	--	--
-	2003	‼2009—2009 2004	2005	2009	2006	205f	200a	2001	200b	2008	2007	--	--	--	--	--	--	--
+	2003	‼2009—2009 2004	2005	2009	2006	2001	200a	205f	200b	2007	2008	--	--	--	--	--	--	--
 #	‐ 	‼2009—2009 —	― 	⸏	⸓	⸎	⁃	‑	‒	‑	‾	--	--	--	--	--	--	--
 #	2003	‼200a—200a 2004	2005	2009	2006	205f	200a	2001	200b	2008	2007	--	--	--	--	--	--	--
 #	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--

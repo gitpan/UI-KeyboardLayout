@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION ="0.14";
+$VERSION = $VERSION ="0.50";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -1278,6 +1278,11 @@ currently hardwired.  Some pictures and tables are available on
 
 .... skew-orthogonal complement
 
+Summary views into CLDR
+
+  http://www.unicode.org/cldr/charts//by_type/patterns.characters.html
+  http://www.unicode.org/cldr/charts//by_type/misc.exemplarCharacters.html
+
 Drachma: http://unicode.org/mail-arch/unicode-ml/y2012-m05/0167.html
 
   http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3866.pdf
@@ -1783,6 +1788,15 @@ Tibetian (history of encoding, relative difficulty of handling comparing to cous
   http://unicode.org/mail-arch/unicode-ml/y2013-m04/0036.html
   http://unicode.org/mail-arch/unicode-ml/y2013-m04/0040.html
 
+Translation of 8859 to 10646 for Latvian was MECHANICAL
+
+  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0057.html
+
+The presentation of the existing COMBINING CEDILLA which has three major forms [ȘșȚț and Latvian Ģģ]
+
+  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0045.html
+  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0066.html
+  
 =head1 SEE ALSO
 
 The keyboard(s) generated with this module: L<UI::KeyboardLayout::izKeys>, L<http://k.ilyaz.org/>
@@ -1946,14 +1960,24 @@ VK_OEM_8 Kana modifier - Using instead of AltGr
 Limitations of using KANA toggle
   http://www.kbdedit.com/manual/ex12_trilang_ser_cyr_lat_gre.html
   
-FE (Far Eastern) keyboard source code example:
+FE (Far Eastern) keyboard source code example (NEC AT is 106 with SPECIAL MULTIVK flags changed on some scancodes, OEM_7/8 producing 0x1e 0x1f, and no OEM_102):
   http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/ntos/w32/ntuser/kbd/fe_kbds/jpn/ibm02/kbdibm02.c__.htm
+  http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/ntos/w32/ntuser/kbd/fe_kbds/jpn/kbdnecat/kbdnecat.c__.htm
+  http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/ntos/w32/ntuser/kbd/fe_kbds/jpn/106/kbd106.c__.htm
 
 	Investigation on relation between VK_ asignments, KBDEXT, KBDNUMPAD etc:
   http://code.google.com/p/ergo-dvorak-for-developers/source/browse/trunk/kbddvp.c
 
     PowerShell vs ISE
   http://blogs.msdn.com/b/powershell/archive/2009/04/17/differences-between-the-ise-and-powershell-console.aspx
+
+  Google for "Get modification number for Shift key" for code to query the kbd DLL directly ("keylogger")
+    http://web.archive.org/web/20120106074849/http://debtnews.net/index.php/article/debtor/2008-09-08/1088.html
+    http://code.google.com/p/keymagic/source/browse/KeyMagicDll/kbdext.cpp?name=0419d8d626&r=d85498403fd59bca9efc04b4e5bb4406d39439a0
+
+  How to read Unicode in an ANSI Window:
+    http://social.msdn.microsoft.com/Forums/en-US/windowsgeneraldevelopmentissues/thread/d455e846-d18b-4086-98de-822658bcebf0/
+    http://blog.tavultesoft.com/2011/06/accepting-unicode-input-in-your-windows-application.html
 
 HTML consolidated entity names and discussion, MES charsets:
 
@@ -2944,39 +2968,52 @@ and is not shown on the Win-Space list.    See also:
 
   http://www.errordetails.com/125726/activate-custom-keyboard-layout-created-with-msklc-windows
 
-(I know no workaround right now.)
+I know no workaround right now.  However, according to
+
+  http://blogs.msdn.com/b/michkap/archive/2012/03/12/10281199.aspx
+
+it may be enough to reboot.
 
 =head2 It is hard to understand what a keyboard really does
 
 To inspect the output of the keyboard in the console mode (may be 8-bit,
 depending on how Perl is compiled), one can run
 
+  perl -MWin32::Console -wle 0 || cpan install Win32::Console
   perl -we "sub mode2s($){my $in = shift; my @o; $in & (1<<$_) and push @o, (qw(rAlt lAlt rCtrl lCtrl Shft NumL ScrL CapL Enh ? ??))[$_] for 0..10; qq(@o)} use Win32::Console; my $c = Win32::Console->new( STD_INPUT_HANDLE); my @k = qw(T down rep vkey vscan ch ctrl); for (1..20) {my @in = $c->Input; print qq($k[$_]=), ($in[$_] < 0 ? $in[$_] + 256 : $in[$_]), q(; ) for 0..$#in; print(@in ? mode2s $in[-1] : q(empty)); print qq(\n)}"
 
-This reports 20 following console events (press and keep C<Alt> key
+This installs Win32::Console module (if needed; included with ActiveState Perl)
+then reports 20 following console events (press and keep C<Alt> key
 to exit by generating a “harmless” chain of events).  B<Limitations:> the reported
 input character is not processed (via ToUnicode(); hence chained keys and
 multiple chars per key are reported only as low-level), and is reported as
 a signed 8-bit integer (so the report for above-8bit characters is
 completely meaningless).
 
-  T=1; down=1; rep=1; vkey=65; vscan=30; ch=-26; ctrl=9; rAlt lCtrl
-  T=1; down=0; rep=1; vkey=65; vscan=30; ch=-26; ctrl=9; rAlt lCtrl
+  T=1; down=1; rep=1; vkey=65; vscan=30; ch=240; ctrl=9; rAlt lCtrl
+  T=1; down=0; rep=1; vkey=65; vscan=30; ch=240; ctrl=9; rAlt lCtrl
 
 This reports single (T=1) events for keypress/keyrelease (down=1/0) of
 C<AltGr-a>.  One can see that C<AltGr> generates C<rAlt lCtrl> modifiers
 (this is just a transcription of C<ctrl=9>,
 that C<a> is on virtual key 65 (this is C<VK_A>) with virtual scancode
-30, and that the generated character (it was C<æ>) is C<-26 mod 0x100>.
+30, and that the generated character (it was C<æ>) is C<240>.
 
 The character is approximated to the current codepage.  For example, this is
 C<Kana-b> entering C<β = U+03b2> in codepage C<cp1252>:
 
-  T=1; down=1; rep=1; vkey=66; vscan=48; ch=-33; ctrl=0;
-  T=1; down=0; rep=1; vkey=66; vscan=48; ch=-33; ctrl=0;
+  T=1; down=1; rep=1; vkey=66; vscan=48; ch=223; ctrl=0;
+  T=1; down=0; rep=1; vkey=66; vscan=48; ch=223; ctrl=0;
 
-Note that C<0x100 - 33 = 0xDF>, and C<U+00DF = ß>.  So I<beta> is substituted by
+Note that C<223 = 0xDF>, and C<U+00DF = ß>.  So I<beta> is substituted by
 I<eszet>.
+
+There is also a script F<examples/raw_keys_via_api.pl> in this distribution
+which does a little
+bit more than this.  One can also give this script the argument C<U> (or C<Un>,
+where C<n> is the 0-based number among the listed keyboard layouts) to report
+ToUnicode() results, or argument C<cooked> to report what is produced by reading raw
+charactes (as opposed to events) from the console.
 
 =head2 Several similar F<MSKLC> created keyboards may confuse the system
 
@@ -3117,7 +3154,7 @@ instead of deadkeys.  Moreover, these ligatures are put on non-existing
 the C<Shift + Control + Menu> flags instead of "modification number" in
 the ligatures table.
 
-=head2 F<MSKLC> keyboards handle C<Ctrl-Shift-letter> differently than US keyboard
+=head2 F<MSKLC> keyboards handle C<Ctrl-Shift-letter>, C<Ctrl-^ (x1e)> and C<Ctrl-_ (x1f)> differently than US keyboard
 
 At least in console applications, the US keyboard produces (as the 
 “string value”) the corresponding Control-letter when 
@@ -3131,12 +3168,39 @@ explicitly include C<Ctrl-Shift> as a handled combination, and return
 C<Ctrl-letter> on such keypresses.  (This is enabled in the generated
 keyboards generated by this module - not customizable in v0.12.)
 
+=head2 Windows ignores column=15 of the keybinding definition table
+
+(At least in Win7SP1.)  It does not matter what is the contents of this column,
+or to what modifier bitmap this column is bound.
+
+Workaround: put junk into this column, and use different columns for useful modifier
+combinations.  The mapping from modifiers to columns should not be necessarily 1-to-1.
+
+=head2 Windows combines modifier bitmaps for C<lCtrl>, C<Alt> and C<rAlt> on C<AltGr>
+
+(At least when C<AltGr> is special in the keyboard,) the modifier bitmap bound to this
+key is actually bit-or of bitmaps above.  Essentially, this prohibits assigning
+interesting flag combinations to C<lCtrl>.
+
+=head2 Windows ignores C<lAlt> if its modifier bitmaps is not standard
+
+Adding C<KBDROYA> to C<lAlt> disables console sending non-modified char on keydown.
+Together with the previous problem, this essentially prohibits putting interesting
+bitmaps on the left modifier keys
+
+=head2 When C<AltGr> produces C<ROYA>, problems in Notepad
+
+Going to the Save As dialogue in Notepad loses "speciality of AltGr" (it highlights Menu);
+one need to switch layouts via LAlt+LShift to restore.
+
+I do not know any workaround.
+
 =head2 Default keyboard of an application
 
 Apparently, there is no way to choose a default keyboard for a certain
 language.  The configuration UI allows moving keyboards up and down in
 the list, but, apparently, this order is not related to which keyboard
-is selected when an application starts.
+is selected when an application starts.  (This may be fixed on Windows 8?)
 
 =head2 Hex input of unicode is not enabled
 
@@ -3151,9 +3215,15 @@ Unicode's pre-v3.0 choice of representative glyphs|http://en.wikipedia.org/wiki/
 or the L<difference
 between French/English Apla=Didot/Porson's approaches|http://www.greekfontsociety.gr/pages/en_typefaces19th.html>.)
 
+=head2 Behaviour of C<Alt-Modifiers-Key> vs C<Modifiers-Key>
+
+When both combinations produce characters (say, X and Y), it is not clear
+how an application shouild decide whether it got C<Alt-Y> event (for menu
+entry starting with Y), or an C<X> event.
+
 =head2 The console font configuration
 
-It is controlled by Registry hive
+According to L<MicroSoft|http://support.microsoft.com/default.aspx?scid=kb;EN-US;Q247815>, it is controlled by Registry hive
 
   HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Console\TrueTypeFont
 
@@ -3205,15 +3275,19 @@ the wrong flavor!), and only after this install the remaining
 flavors.
 
 B<CAVEAT:> the string to put into C<Console\TrueTypeFont> is the I<Family Name> of the font.
+The family name is what is shown in the C<Fonts> list of the C<Control Panel> — but only
+for families with more than one font; otherwise the “metric name” of the font is appended.
+
 On Windows, it is tricky to find the family name using the default Windows' tools, without
 inspecting the font in a font editor.  One workaround is to select the font in C<Character Map>
 application, then inspect C<HKEY_CURRENT_USER\Software\Microsoft\CharMap\Font> via:
 
   reg export HKCU\Software\Microsoft\CharMap character-map-font.reg
 
-Note: what is visible in the C<Properties> dialogue of the font, and in C<CurrentVersion\Fonts> is the
+Note: the mentioned above MicroSoft KB article lists the wrong way to find the family name.
+What is visible in the C<Properties> dialogue of the font, and in C<CurrentVersion\Fonts> is the
 I<Full Font Name>.  Fortunately, quite often the full name and the family name coincide —
-this is what happened with C<DejaVu>.  To find the "Full name" of the font, look into the hive
+this is what happened with C<DejaVu>.  To find the "Full name" of the font, one can look into the hive
 
   HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts
   reg export "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" fonts.reg
@@ -3325,6 +3399,63 @@ C<Kana-Enter> is not recognized as a character-generating key.
 C<Alt-+-HEXDIGITS> is not recognized as a character-generating key sequence (recall
 that C<Alt> should be pressed all the time, and other keys C<+ HEXDIGITS> should be
 pressed+released sequentially).
+
+=item *
+
+When keyboard has an “extra” modifier key in addition to C<Shift/Alt/Ctrl> (an
+analogue of C<Kana> key), combining it with C<Ctrl> or with C<Alt> is interpreted
+by Firefox as if only C<Ctrl> or C<Alt> were pressed.
+
+=item *
+
+When keyboard generates different characters on C<AltGr> than on C<Control-Alt>
+(possible with assigning extra modifier bits to C<AltGr>), FireFox interprets any
+C<AltGr-Key> as if it were C<Control-Alt-Key>.
+
+C<Exception:> when C<AltGr-Fkey> produces a character, this character is understood
+correctly by FF.  Same for C<AltGr-arrowKey> (but again, while this works on numeric
+keypad, it is still buggy if C<NumLock> is on, or if the key is C<Numpad-Enter>.)
+
+=item *
+
+The keyboard may have C<rCtrl> which produces the same characters as C<lCtrl>, but
+which behaves differently when combined with other keys.  FireFox ignores these
+differences.
+
+This is combinable with other remarks above: e.g., C<rCtrl-Kana> is interpreted
+by FireFox as C<lCtrl>.
+
+=item *
+
+If C<lCtrl-lAlt-comma> produces C< — > (this is C<U+200A U+2014 U+200A>), and
+C<AltGr-comma> produces the “cedilla deadkey”, then pressing C<AltGr-comma c>
+acts as both: first C<U+200A U+2014 U+200A> are inserted, then C<ç>. 
+
+=item *
+
+A subtle variation of the previous failure mode: If C<lCtrl-lAlt-`> produces
+deadkey X, and C<AltGr-`> produces the deadkey Y, then combining C<AltGr-`>
+with C<a> gives the expected Y*a combination.  However, if combining with
+something more complicated (C<Control-Alt-a> or C<Kana-f>), with what
+deadkey Y is not combinable, B<THEN> the bugs strike:
+
+=over 4
+
+=item 1
+
+in the first case the deadkey behaves as X: it produces a pair of characters
+C<Xα>; here C<Control-Alt-a> produces C<α>.  (Keep in mind that inserting two
+characters is the expected behaviour outside of Firefox, but Firefox usually
+“eats” an undefined deadkey combination; and note that it is X, not the
+expected Y!).
+
+=item 2
+
+in the second case it produces only the character C<ф> generated by C<Kana-f>.  Here
+the behaviour is neither as outside Firefox (where it would produce C<Yф>) nor as
+usual in Firefox (where it would eat the undefined sequence).
+
+=back
 
 =back
 
@@ -3880,7 +4011,11 @@ sub face_make_backlinks($$$$;$$) {		# It is crucial to proceed layers in
       my $L = $LL->[$Lc];
   #    $self->layer_make_backlinks($_, $prefer_first) for @$L;
       my $a = $self->{layers}{$L};
-      die "Layer `$L' has lastchar $#$a, expected $last" unless $#$a == $last;
+      unless ($#$a == $last) {				# Detect typos if we can (i.e., if no overflow into special ranges)
+        my $fst = 1e100;				# infinity
+        $fst > $_->[0] and $fst = $_->[0] for values %start_SEC;
+        die "Layer `$L' has lastchar $#$a, expected $last" unless $last >= $fst or $#$a >= $fst;
+      }
 ##########
       for my $shift (0..$#{$a->[$k]}) {
         next unless defined (my $c = $a->[$k][$shift]);
@@ -4051,6 +4186,14 @@ sub massage_faces ($) {
         }
       }
     }  
+  }
+  for my $f (keys %{$self->{faces}}) {	# Linking uses the number of slots in layer 0 as the limit
+    next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
+    my $L = $self->{faces}{$f}{layers};
+    my @last = map $#{$self->{layers}{$_}}, @$L;
+    my $last = $last[0];
+    $last < $_ and $last = $_ for @last;
+    push @{$self->{layers}{$L->[0]}}, [] for 1..($last-$last[0]);
   }
   for my $f (keys %{$self->{faces}}) {	# Needed for face_make_backlinks: must know which keys in faces will be finally present
     next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
@@ -4277,7 +4420,7 @@ sub print_coverage ($$) {
 
 my %html_esc = qw( & &amp; < &lt; > &gt; );
 my %ctrl_special = qw( \r Enter \n Control-Enter \b BackSpace \x7f Control-Backspace \t Tab 
-  		    \x1b Esc; Control-[ \x1d Control-] \x1c Control-\ ^C Control-Break );
+  		    \x1b Esc; Control-[ \x1d Control-] \x1c Control-\ ^C Control-Break \x1e Control-^ \x1f Control-_ );
 my %alt_symb;
 { no warnings 'qw';
 # 		ZWS	ZWNJ ZWJ	 LRM RLM WJ=ZWNBSP Func	  Times Sep Plus
@@ -4384,7 +4527,7 @@ sub print_table_coverage ($$;$) {
 <!-- Generated with UI::KeyboardLayout v$UI::KeyboardLayout::VERSION for $f, face=$F -->
 <style type="text/css"><!--
   /* <!-- Font size 10pt OK with Landscape Letter PaperSize, 0.1in margins, no footer, %96 for Latin, %150 for Cyrillic of izKeys --> */
-  table.coverage	{ font-size: 10pt; font-family: DejaVu Sans; }
+  table.coverage	{ font-size: 10pt; font-family: sans-serif, DejaVu Sans, serif, junicode, Symbola; }
   .dead			{ font-size: 50%; color: red; }
   .dead_i		{ font-size: 50%; background-color: red; color: white; }
   .altGrInv		{ font-size: 70%; background-color: red; }
@@ -5126,7 +5269,8 @@ sub massage_VK ($$) {
   $self->{faces}{$f}{'[non_VK]'} = @{ $self->{layers}{$l0} };
   my $create_a_c = $self->{faces}{$f}{'[create_alpha_ctrl]'};
   $create_a_c = $create_alpha_ctrl unless defined $create_a_c;
-  my $EXTR = [["\r","\n"],["\b","\x7F"],["\t","\cC"],["\x1b","\x1d"],["\x1c", ($create_a_c ? "\cZ" : ())]]; # Enter/C-Enter/Bsp/C-Bsp/Tab/Cancel/Esc=C-[/C-]/C-\ C-z
+  my $EXTR = [	["\r","\n"], ["\b","\x7F"], ["\t","\cC"], ["\x1b","\x1d"], # Enter/C-Enter/Bsp/C-Bsp/Tab/Cancel/Esc=C-[/C-]
+  		["\x1c", ($create_a_c ? "\cZ" : ())], ($create_a_c>1 ? ["\x1e", "\x1f"] : ())];	# C-\ C-z, C-^ C-_
   if ($create_a_c) {
     my %s;
     push @ctrl, scalar @$EXTR;
@@ -5203,6 +5347,8 @@ sub auto_capslock($$) {
 my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
 		      '7E ABNT_C2' => '7D OEM_8',	# ABNT vs JIS keyboard
 		      '7B NONCONVERT' => '79 CONVERT');	# JIS keyboard: left of SPACE, right of SPACE
+my %shift_control_extra = (6 => "\x1e", OEM_MINUS => "\x1f");
+
 { my(%seen, %seen_scan, %seen_VK, @add_scan_VK, @ligatures, @decimal);
   sub reset_units ($) { @decimal = @ligatures = @add_scan_VK = %seen_scan = %seen_VK = %seen = () }
 
@@ -5216,6 +5362,7 @@ my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
     my $create_a_c = $self->{faces}{$face}{'[create_alpha_ctrl]'};
     $create_a_c = $create_alpha_ctrl unless defined $create_a_c;
     @cntrl = (chr(0x1F & ord $k)) x $create_a_c if $k =~ /^[A-Z]$/ and $create_a_c;
+    @cntrl = (undef, $shift_control_extra{$k})  if $create_a_c > 1 and $shift_control_extra{$k};
     $deadkeys ||= [];	# known_scancode is true when we start from VK, and $deadkeys is (arr of arrays) vs (hash per layer)
     my @KK = map [$_->[2], $_->[0], ($known_scancode ? $_->[3][$_->[1]]  :  $_->[3]{defined $_->[2] ? $_->[2] : 'n/a'})],
 	       map [@$_[0,1], $u->[$_->[0]][$_->[1]], $deadkeys->[$_->[0]]], 
@@ -5312,8 +5459,9 @@ EOP
   
   my $enc_UTF16LE;
   sub output_ligatures ($) {
-    my ($self, @o) = shift;
+    my ($self, @o, %s) = shift;
     for my $l (@ligatures) {
+      warn("Repeated LIGATURE $l->[0] $l->[1]"), next if $s{"$l->[0] $l->[1]"}++;
       my $k = $l->[2];
       unless ($k =~ /^[\x00-\x{FFFF}]*$/) {
         (require Encode), $enc_UTF16LE = Encode::find_encoding('UTF-16LE') unless $enc_UTF16LE;
@@ -5389,7 +5537,7 @@ sub read_deadkeys_win ($$) {
    $t =~ s/(^(?=DEADKEY)(?:(?:(?:DEADKEY|\s*[0-9a-f]{4,})\s+[0-9a-f]{4,})?(?:\n|\E))*)(?=(.*))/DEADKEYS\n\n/mi
      and ($dead, $next) = ($1, $2);
    warn "Unknown keyword follows deadkey descriptions in MSKLC map file: `$next'; dead=<$dead>"
-     if length $next and not $next =~ /^(KEYNAME|KEYNAME_EXT|KEYNAME_DEAD|DESCRIPTIONS|LANGUAGENAMES|ENDKBD)$/i;
+     if length $next and not $next =~ /^(KEYNAME|LIGATURE|COPYRIGHT|COMPANY|LOCALENAME|LOCALEID|VERSION|SHIFTSTATE|LAYOUT|ATTRIBUTES|KEYNAME_EXT|KEYNAME_DEAD|DESCRIPTIONS|LANGUAGENAMES|ENDKBD)$/i;
 #   $dead =~ /\S/ or warn "EMPTY DEADKEY section";
 #warn "got `$dead' from `$t'";
 
@@ -5408,7 +5556,7 @@ sub read_deadkeys_win ($$) {
    if ($t =~ s/^KEYNAME_DEAD\n((?:(?:\s*[0-9a-f]{4,}\s+".*")?(?:\n|\E))*)(?=(.*))/KEYNAMES_DEAD\n\n/mi) {
      ($dead, $next) = ($1,$2);
      warn "Unknown keyword follows deadkey names descriptions in MSKLC map file: `$next'"
-       if length $next and not $next =~ /^(DEADKEY|KEYNAME|KEYNAME_EXT|KEYNAME_DEAD|DESCRIPTIONS|LANGUAGENAMES|ENDKBD)$/i;
+       if length $next and not $next =~ /^(DEADKEY|KEYNAME|LIGATURE|COPYRIGHT|COMPANY|LOCALENAME|LOCALEID|VERSION|SHIFTSTATE|LAYOUT|ATTRIBUTES|KEYNAME_EXT|KEYNAME_DEAD|DESCRIPTIONS|LANGUAGENAMES|ENDKBD)$/i;
      $dead =~ /\S/ or warn "EMPTY KEYNAME_DEAD section";
      %d = map /^([0-9a-f]+)\s+"(.*)"\s*$/i, split /\n\s*/, $dead;
      $d{lc $_} = $d{$_} for keys %d;
@@ -6840,7 +6988,7 @@ sub patch_face ($$$$$$$;$) {	# flip layers paying attention to linked AltGr-inve
 
 # use Dumpvalue;
 sub fmt_bitmap_mods ($$;$) {
-  my ($self, $b, $short, @b) = (shift, shift, shift, qw(Shift Ctrl Alt Kana Hyper));
+  my ($self, $b, $short, @b) = (shift, shift, shift, qw(Shift Ctrl Alt Kana X Y));
   my ($j, $empty, @ind) = ($short ? ('', '-', 1..$#b, 0) : ("\t", '', 0..$#b));	# better have Shift at end (Ctrl-Alt-Shift)...
   join $j, map {($b & (1<<$_)) ? ($short ? substr $b[$_], 0, 1 : $b[$_]) : $empty} @ind;
 }
@@ -6897,7 +7045,7 @@ EOPREF
 #warn "Translate: ", %h;
   $h{DEADKEYS} = $OUT;
   $h{KEYNAMES_DEAD} = $OUT_NAMES;
-  my %mods = qw( S 1 C 2 A 4 K 8 H 16 );
+  my %mods = qw( S 1 C 2 A 4 K 8 X 16 Y 32);
   $_ += 0 for values %mods;			# Convert to numbers, so | works as expected
   my @cols;
   for my $mod ( @{ $self->get_deep($self, @$k, '[layers_modifiers]') || ['', 'CA'] } ) {	# Plain, and Control-Alt
@@ -6912,8 +7060,8 @@ EOPREF
   my $create_a_c = $self->get_deep($self, @$k, '[create_alpha_ctrl]');
   $create_a_c = $create_alpha_ctrl unless defined $create_a_c;
   splice @cols, $pre_ctrl, 0, $mods{C}, ($create_a_c>1 ? $mods{C}|$mods{S} : ());	# Control (and maybe Control-Shift)
-  $h{COL_HEADERS} = join "\t", @cols;
-  $h{COL_EXPL} = join "\t", map '-' . $self->fmt_bitmap_mods($_, 'short') . '-', @cols;
+  $h{COL_HEADERS} = join "\t", map "$cols[$_] [$_]", 0..$#cols;
+  $h{COL_EXPL} = join "\t", map '-' . $self->fmt_bitmap_mods($_, 'short'), @cols;
   $h{BITS_TEMPLATE} = join "\n", map { "$cols[$_]\t// Column " . (4+$_) . " :\t" . $self->fmt_bitmap_mods($cols[$_]) } 0..$#cols;
   $self->massage_template($template_win, \%h);
 }

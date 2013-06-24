@@ -33,6 +33,14 @@ perl -i~ -wlpe "BEGIN { @ARGV = <*.[CH]>; $c=1; @K = (%ARROWSK%); @KK = (map(qq(
 @rem the "old" short rows contain -1 instead of WCH_NONE
 perl -i~~ -wlpe "BEGIN { @ARGV = <*.C>; $k = {qw( ADD '+' SUBTRACT '-' MULTIPLY '*' DIVIDE '/' RETURN '\r' )}; $rx = join q(|), keys %%$k; }; s/^(\s+\{VK_($rx)\s*,\s*0\s*,\s*)'\S*\s+\S+\s+\S+\s*$//"
 
+copy iz-la-ru.C iz-la-ru.C~~~
+copy iz-ru-la.C iz-ru-la.C~~~
+
+@rem Fix the limitations of to-C converter kbdutool: convert LAYOUT manually (with main/secondary keys having 20/21 bindings)
+@rem N/A any more: 21st is fake (empty) - just to distinguish.
+perl %ex%\test-klc-tr.pl ../ooo-us iz-la-ru.C~~~ 28 24 >iz-la-ru.C
+perl %ex%\test-klc-tr.pl ../ooo-ru iz-ru-la.C~~~ 28 24 >iz-ru-la.C
+
 patch -p0 -b <%ex%\izKeys.patch
 
 %ex%\compile_link_kbd.cmd iz-la-ru 2>&1 | tee 00cl
@@ -40,7 +48,7 @@ patch -p0 -b <%ex%\izKeys.patch
 
 zip -ru iz-la-ru iz-la-ru
 zip -ru iz-ru-la iz-ru-la
-zip -ju src %src%/ooo-us %src%/ooo-ru %ex%\izKeys.kbdd %ex%\build-iz.pl %ex%\compile_link_kbd.cmd %ex%\izKeys.patch %~f0 *.C *.H *.RC *.DEF
+zip -ju src %src%/ooo-us %src%/ooo-ru %ex%\izKeys.kbdd %ex%\build-iz.pl %ex%\compile_link_kbd.cmd %ex%\izKeys.patch %ex%\test-klc-tr.pl %~f0 *.C *.H *.RC *.DEF
 zip -ju html %src%/izKeys-visual-maps-out.html %src%/coverage-1prefix-Cyrillic.html %src%/coverage-1prefix-Latin.html
 
 for %%d in (iz-la-ru iz-ru-la) do ls -l %%d\i386\%%d.dll %%d\ia64\%%d.dll %%d\amd64\%%d.dll %%d\wow64\%%d.dll

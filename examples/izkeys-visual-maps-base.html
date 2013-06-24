@@ -25,8 +25,8 @@ How to access the other keys?  The info may be extracted from the
 table summaries of layout of the <a href=coverage-1prefix-Latin.html>Latin</a> and <a href=coverage-1prefix-Cyrillic.html>Cyrillic</a>
 personalities (but these tables do not explicitly list the heuristics…).  For more information, see <a href=http://k.ilyaz.org/iz/windows>this</a> (you may also want to inspect 
 the documentation of the toolset used to generate this layout:
-<a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout-0.13/lib/UI/KeyboardLayout.pm>here</a>,
-and <a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout-0.13/lib/UI/KeyboardLayout/izKeys.pod>here</a>, but they
+<a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout-0.50/lib/UI/KeyboardLayout.pm>here</a>,
+and <a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout-0.50/lib/UI/KeyboardLayout/izKeys.pod>here</a>, but they
 are currently in a complete disarray).</p>
 
 <p>Here, we completely ignore the questions how to enter math/IPA/UPA symbols (about a thousand is possible!), and exotic Latin
@@ -78,7 +78,7 @@ severely interacts with a choice of better fonts).  Some fonts have some glyphs 
 wrong directions of arrows, wrong choice of OXIA vs VARIA, or DASIA vs PSILI — especially on ρ).
 Sometimes one should better zoom in (<code>Control-MouseWheel</code>, <code>Control-+</code>, or from menu; <code>Control-0</code> to return back) in browser to see details/differences of diacritic marks. </p>
 
-<h1>The most basic Layout</h1>
+<h1>The most basic Layout</h1><a name=basic-latin></a>
 
 <div>
 <div class="klayout-wrapper over-shift-outline">
@@ -117,7 +117,7 @@ as indicated; we do not put “important” characters at this position.  Likewi
 yet another key on alphanumeric rows: on ABNT it is next to the right <code>Shift</code>, on JIS next to <code>Backspace</code>.
 (Our diagrams do not show this key at all; for this layout, we do not plan to use it other than as <code>Compose</code> key.)</p>
 
-<h1>Base Latin layout when <code>AltGr</code> is pressed </h1>
+<h1>Base Latin layout when <code>AltGr</code> is pressed </h1><a name=altgr-latin></a>
 
 <p>All accented letters in this diagram
 are also available on easier-to-remember multi-key sequences (starting with <span class=prefix>prefix</span> keys);
@@ -175,6 +175,7 @@ one must memorize them.</p>
 <i>extremely <a href=http://unicode.org/mail-arch/unicode-ml/y2007-m05/0148.html>long</a></i> thread!).
 Why <code>ê</code> is blue?  It is the only set-in-stone accented vowel...</p>
 
+<a name=prefix-keys></a>
 <p><b>A remark on prefix key.</b> The color on the diagram indicates that pressing <code>AltGr-$</code> produces a prefix key.
 It also shows that this prefix key is <i>denoted</i> as <code>£</code>; but keep in mind that <i>using the symbol £ here is just 
 a notational convention</i>!</p>
@@ -194,7 +195,7 @@ corresponding combining character.  (Moreover, one can produce more standalone v
 by <code>Shift</code> or <code>AltGr</code>; one can get more combining variants by prefix + <code>'</code> — and one can
 use <code>Shift</code>/<code>AltGr</code> on <code>Shift</code> or <code>'</code>.)</p>
 
-<h1>Base Cyrillic layout</h1>
+<h1>Base Cyrillic layout</h1><a name=base-cyrillic></a>
 
 <p>The base layout of Cyrillic personality follows the only phonetic layout which has a remote chance to be called 
 “standard” — one from X11.
@@ -218,7 +219,7 @@ symbols; colors as in the previous diagram).  </p>
 			/* To be auto-generated */
 </div>  <!-- Cannot match the width of the bottom row exactly — probably due to rounding to 1px??? -->
 
-<h1><code>AltGr</code> Cyrillic layout</h1>
+<h1><code>AltGr</code> Cyrillic layout</h1><a name=altgr-cyrillic></a>
 
 <p>In <code>izKeys</code> layout, the cyrillic letters are <i>prioritized</i> into classes; the higher the priority, the easier is the
 letter to key in.  In the top priority class are modern Russian letters; one can enter them using only the <code>Shift</code>
@@ -262,7 +263,7 @@ Cyrillic-specific prefix keys are: <code>AltGr-'</code> introduces “extra” C
 (and fractions), and <code>AltGr-^</code> introduces titlo-forms and “exotic” Cyrillic characters.  
 As usual, pressing the prefix twice produces the corresponding combining character: the stress mark and titlo.
 
-<h1>The “prefixed” Cyrillic layouts</h1>
+<h1>The “prefixed” Cyrillic layouts</h1><a name=extra-cyrillic></a>
 
 The “extras” Cyrillic layout (the prefix is <code>AltGr-'</code> in Cyrillic personality; double-<code>AltGr-SPACE</code>
 in Latin):</p>
@@ -282,15 +283,21 @@ and stroked variants.  (Of two letters competing for the same position, the more
 one becomes red.)
 </p>
 
-<p>The rules to enter fractions are very simple: <code>AltGr-' DIGIT</code> enters a fraction with
+<a name=fractions></a>
+<p>The rules <b>to enter fractions</b> are very simple: <code>AltGr-' DIGIT</code> enters a fraction with
 the digit in denominator; <code>AltGr-' Shift-DIGIT</code> does the same for numerator.  If another
 precomposed fraction with the same denominator/numerator is available in Unicode, add <code>AltGr</code>
 modifier to access the other fraction.  <b>Example:</b> there are four fractions with denominator 8: ⅛, ⅜, ⅝, ⅞
 (in order of numerators).  Now <code>AltGr-' 8</code> accesses the first one, ⅛; pressing <code>AltGr-' AltGr-8</code>
 accesses the second one, ⅜.  All precomposed fractions can be entered this way (<b>Example:</b> ⅝, ⅞ may be entered via
-digit-in-numerator <code>AltGr-' AltGr-%</code> and <code>AltGr-' &amp;</code>).  <b>Trivia:</b> there is another way to enter Unicode fractions: use superscript digits for the
+digit-in-numerator <code>AltGr-' AltGr-%</code> and <code>AltGr-' &amp;</code>).</p>
+
+<p>The rule above is for Cyrillic personality.  From Latin personality, either prepend switch-to-Cyrillic prefix <code>AltGr-SPACE</code>, or
+replace <code>AltGr-'</code> with <code>lCtrl-lAlt-:</code> or <code>rCtrl-AltGr-:</code> or <code>lCtrl-Mnu-/</code>.
+<b>Trivia:</b> there is another way to enter Unicode fractions: use superscript digits for the
 numerator, subscript digits for the denominator, and separate them by FRACTION SLASH available via GreenKey <code>Shift-SPACE /</code> 
-(as well as on <code>AltGr-/ SPACE</code>) to get something like ¹²⁄₃₅ (the very narrow “bounding box” of FRACTION SLASH ensures the nice look).</p>
+(as well as on <code>AltGr-/ SPACE</code>) to get something like ¹²⁄₃₅ (the very narrow “bounding box” of FRACTION SLASH ensures the nice look);
+superscript/subscript digits are on <code>Green/Ripe</code>, hence may be also entered with <code>lCtrl-lAlt/ApplicationMenu</code>.</p>
 
 <p>Titlo-forms, power-of-10 multipliers, and “exotics” (the prefix is <code>AltGr-^</code> in Cyrillic personality; triple-<code>AltGr-SPACE</code>
 in Latin):</p>
@@ -311,6 +318,7 @@ Ocular О's ꙨꙪꙬꙮ are on digits 1...3 according to their multiplicity (wi
 means “many” ;-). In addition to these exceptions, yellow outlines are
 on heuristically good ZEMLYA/DZELO Ꙁ/Ꙃ on 0, Ҹ which “slided left”, and Komi letters NJE/ZJE/DZJE on comma ;-) (here — and on the “extra” layer). </p>
 
+<a name=balkan-cyrillic></a>
 <p><b>Trivia:</b> Many paleo-Slavonic “exotics” were championed into Unicode by Balkan scholars; it is not surprising 
 that the approach of these scholars was different from what was traditional for East and North Slavic studies.  Nowadays there is
 a hope to get a consensus on how to transcribe North Slavic manuscripts into Unicode; see
@@ -318,7 +326,8 @@ a hope to get a consensus on how to transcribe North Slavic manuscripts into Uni
 <a href=http://www.synaxis.info/azbuka/ponomar/charset/charset_2.htm>part II</a>, and <a href=http://www.ponomar.net/cu_support.html>this
 page</a>.  (There is widespread misunderstanding of how to use еЕ/єЄ for paleo-Slavonic: these are for ”есть узкий/широкий”.)</p>
 
-<h1>Base Greek layout + monotonic + polytonic + Coptic</h1>
+<h1>Base Greek layout + monotonic + polytonic + Coptic</h1><a name=greek></a>
+
 
 <p><a name=greenEx></a>Base Greek layout as visible from Latin Personality (on GREEN=<code>Shift-SPACE</code> prefix, so 
 <a href=#GreenRipe>GreenKeys</a> replace symbols):</p>
@@ -334,6 +343,7 @@ layouts).  Two green-outline letters pre-combined with diaeresis must also be me
 monotonic Greek; <code>;</code> and <code>?</code> give the Greek flavors (<b>Trivia:</b> the latter is deprecated — use the Latin <code>;</code>
 instead). </p>
 
+<a name=polytonic></a>
 <p>Polytonic Greek is produced with 3 prefix keys <code>\</code>, <code>[</code> and <code>]</code>.
 Pay attention to vowels (blue outline) above, one on every color-tinted diagonal; compare with this <code>GREEK [</code> layout
 (with <code>AltGr</code>-bindings added in red):</p>
@@ -375,17 +385,20 @@ other ways to get combinations like DIALYTIKA AND VARIA: for example, by adding 
 <code>AltGr-` AltGr-;</code>.  <b>Trivia:</b> Note also that there is no standalone DIALYTIKA symbol; use the standalone ¨ DIAERESIS via
 <code>AltGr-; SPACE</code> instead.)</p>
 
+<a name=greek-numeric></a>
 <p><b>Numeral signs</b> are accessible on keys <code>3</code> and <code>#</code>.  On the prefix <code>/</code>
 they are “as expected”: <code>3</code> gives the lower one, and <code>#</code> the “normal” one (duplicated on the prefix <code>]</code>).  
 (On the prefix <code>[</code> this pair is inverted, to fight with ъЪёЁ-confusion in access from the Cyrillic personality.)
 To join them, <i>standalone monotonic</i> diacritics ΄,΅ are available on <code>AltGr-3</code> and <code>AltGr-#</code>.</p>
 
+<a name=greek-macron-breve></a>
 <p><b>Macron and breve:</b> Observe that by the rules above, <code>GREEK \ LTR</code> with <code>LTR</code> from
 the middle letter row would produce an unaccented vowel.  To avoid waste, they instead produce either a vowel with breve (VRACHY)
 or with macron (vowels α/υ/ι may take them — the other vowels already have separate forms for shorter/longer variants),
 or LUNATE variant symbol ϵ for ε (on <code>d</code>).  To get breve, proceed as if
 you want to get unaccented vowel; to get macron, do the same on the next key to the right or left (so a/j/k 
 produce ᾰ/ῠ/ῐ, s/h/l produce ᾱ/ῡ/ῑ, and d makes ϵ).  To clarify, here is the diagram of <code>GREEK \</code>
+<a name=zodiak></a>
 (observe also Zodiak symbols on <code>Shift-NUMBERS</code> row):</p>
 
 <div class="klayout uclc do-alt alt2 base-center large-base diag no-doubleaccent" kbd_rebuild="/opt=polyBase +base=l,,0 on-right+=l,0342,1 on-left+=l,0342,0">
@@ -398,6 +411,7 @@ the Zodiak sign number <code>N-3</code> or <code>N+9</code>.  We put 10th,11th,1
 and <code>= +</code>; to get 13 for the price of 12, the sign ⛎ (for the <a href=http://en.wikipedia.org/wiki/Ophiuchus#Ophiuchus_and_the_zodiac>not-Zodiacal</a> but ecliptical constallation
 Ophiuchus) is put on <code>~</code>.</p>
 
+<a name=altgr-greek></a>
 <p>Monotonic and “special” Greek letters can be accessed on the base face by combining with <code>AltGr</code>.  On vowels, this adds
 tonos ΄ (acute accent).  On consonants, it produces special forms (final, scientific etc) and archaic letters. 
 Here is the Greek face with <code>AltGr</code>-bindings added in red:
@@ -411,6 +425,7 @@ Here is the Greek face with <code>AltGr</code>-bindings added in red:
 are guessable by simple heuristics (“one of the sounds” for stigma Ϛ, visual for the rest).  (Moreover, digamma Ϝ is “on top of”
 Ψ which “is a di-Y”, and we use ϔ as “the shifted variant” of ΰ.)</p>
 
+<a name=coptic></a>
 <p>The prefix key <code>`</code> allows one to enter Coptic (and multitude of others Greek-related symbols).</p>
 
 <ol>
@@ -438,6 +453,7 @@ on g; san Ϻ/ϻ on m, ϒ on U, lunate sigmas ϲ/Ϲ on v, reversed lunate sigmas 
 on e, kai's Ϗ/ϗ on q, (reversed) dotted lunate sigmas ͽ/Ͽ ͼ/Ͼ on r and y,  and archaic sampi Ͳ/ͳ on n.
 (inverted) Ohm Ω/℧ on W/w.</p>
 
+<a name=coptic-names></a>
 <p><b>Trivia:</b> Latin variants
 of names of Coptic letters are not standartized; so we use 3 names: Unicode name in capital, and two lowercase names
 from Wikipedia pages: of 2012/08 and of 2012/01.  Since important for finding the positions, the remaining ones are:
@@ -445,7 +461,8 @@ SHEI/shy/šai ϣ, HORI/hoori/hori ϩ.  (To simplify memorization, SAMPI/<b>none<
 on <code>AltGr-p</code>.)</p>
 
 
-<h1>“Business/Currencies/Hooks/Added Vertical Line/Not+mogrify” layout</h1>
+<h1>“Business/Currencies/Hooks/Added Vertical Line/Not+mogrify” layout</h1><a name=business></a>
+
 <p>“Business/Currencies/Hooks/Added Vertical Line/Not+mogrify” layout (as visible from Latin personality after <code>AltGr-$</code>):</p>
 
 <div class="klayout uclc do-alt large-base" kbd_rebuild="/opt=0 +base=l,,0 +=l,£,0">
@@ -461,6 +478,7 @@ the remaining 2 signs for YEN are on <code>AltGr-y/Y</code>, and both signs for 
 The remaining exceptions are the common currency symbols recognized by the shape, such as <code>$</code>
 and <code>£</code>.</p>
 
+<a name=business-altgr></a>
 <p>Here is the same layout with <code>AltGr</code>-bindings added in red (with letters outlined in green,
 and business symbols in blue):
 
@@ -475,13 +493,13 @@ letters</i> between themselves (Azeri əƏ vs. African ǝƎ), or with similarly-
 rules, and their surrounding may be typeset differently by a smart enough typesetter.  Similarity (or even identity) of glyphs has
 very little relationship to “sameness” of Unicode characters.</p>
 
-<h1>The standalone version of the Greek for-Polytonic personality</h1>
+<h1>The standalone version of the Greek for-Polytonic personality</h1><a name=greek-standalone></a>
 
 <div class="klayout uclc do-alt alt2 base-center large-base" kbd_rebuild="/opt=Pers +base=l,,0 on-left+=g,,0 on-right+=g,,1">
 			/* To be auto-generated */
 </div>  <!-- Cannot match the width of the bottom row exactly — probably due to rounding to 1px??? -->
 
-<h1>The standalone version of the Hebrew personality</h1>
+<h1>The standalone version of the Hebrew personality</h1><a name=hebrew></a>
 
 <div class="klayout rtl-hover uclc do-alt" kbd_rebuild="/opt=heb0,rtl-hover-Trivia +base=l,,0 +=h,,0">
 			/* To be auto-generated */
@@ -490,6 +508,7 @@ very little relationship to “sameness” of Unicode characters.</p>
 <p>(As usual, yellow outline means guessable-with-a-few-tries characters, brown outline means that the position must be
 learned.)</p>  
 
+<a name=hebrew-consonants></a>
 <p><b>CONSONANTS</b> are at the corresponding phonetic <code>QWERTY</code> lower-case positions, except for 
 HET ח on <code>H</code> (or slided right to <code>j</code>)
 and visually placed SHIN ש on <code>w</code> and TET ט on <code>u/T</code>.
@@ -500,11 +519,13 @@ and visually placed SHIN ש on <code>w</code> and TET ט on <code>u/T</code>.
 <code>AltGr</code>-position).  DAGESH/MAPIQ/SHURUQ must be memorized on <code>Y</code>.
 (Additionally, HOLAM FOR VAV is on <code>AltGr-v</code>.)</p>
 
+<a name=hebrew-digraphs></a>
 <p><b>The Yiddish digraphs</b> are on <code>AltGr-Shift</code> of the suitable key.  <b>Trivia:</b> Only one of them, ײַ, cannot
 be entered using Hebrew letters; it is put on more accessible <code>AltGr-y</code>.  The only other non-Hebrew sign,
 JUDEO-SPANISH VARIKA is on <code>AltGr-j</code>.  Dotted versions of <bdo dir=ltr>BET בּ, KAF כּ/ךּ, PE פּ/ףּ</bdo> may be entered 
 with <code>AltGr</code> (on the left-hand key, if the base letter is on two keys).</p>
 
+<a name=hebrew-vowels></a>
 <p><b>VOWELS (<a href=http://en.wikipedia.org/wiki/Niqqud>niqqud</a>)</b> are positioned phonetically (and according to their — vestigal — <a 
 href=http://en.wikipedia.org/wiki/Hebrew_alphabet#Comparison_table>duration</a>) on keys with the blue outlines.  
 <b>Trivia:</b> there are up to 5 durations per sound, ordered in decreasing order: one may consider SHEVA ◌ְ as the 4th form 
@@ -532,6 +553,7 @@ according to
 the <a href=http://std.dkuug.dk/jtc1/sc2/wg2/docs/n2844.pdf>stats here</a>, HATAF QAMATS is the rarest of all niqqud.)
 </p>
 
+<a name=altgr-hebrew></a>
 <p>The diagram below illustrates the <code>AltGr</code>-layout.  The recipe above positions dotted/niqqud/Yiddish on the letter keys 
 (outlined in yellow).  Additionally, on symbol keys the yellow outline is for characters positioned according to their <i>role</i>: 
 <code>-, +, comma, dot</code>.
@@ -541,6 +563,7 @@ the <a href=http://std.dkuug.dk/jtc1/sc2/wg2/docs/n2844.pdf>stats here</a>, HATA
 			/* To be auto-generated */
 </div>  <!-- Cannot match the width of the bottom row exactly — probably due to rounding to 1px??? -->
 
+<a name=cantillation></a>
 <p><b><a href=http://en.wikipedia.org/wiki/Cantillation>CANTILLATION MARKS</a></b> are positioned visually (green outline on 
 symbol keys), or according to the first letter of Unicode name (blue outline) or the 1st-letter-of-the-2nd-word (green outline 
 on letter keys; also on SHALSHELET — which is put based on the 1st Hebrew letter, SHIN).  If there is no more space for the mark,
@@ -548,12 +571,14 @@ the mark migrates along an arrow to the neighbor key (and gets a brown outline; 
 <code>&lt;,~</code>).  <b>Trivia:</b> the <i>Unicode</i> names are 
 <a href=http://www.mechon-mamre.org/c/hr/unicode.htm>mis-transliterated</a>.</p>
 
+<a name=dial-niqqud></a>
 <p><b>DIAL-NIQQUD-BY-NUMBER:</b> On <code>AltGr</code>-digits, the niqqud is put “visually”, according to its “number of dots”.  
 Here we count in binary: <code>T</code> of ◌ָ is counted as if it were
 ˙ ⁚ ˙; we count — of ◌ַ as merged 8 dots.  (And ⋱ is counted as a diagonal in a 3×3 square, giving 9. ;-)  Now note that 10
 points of —: land it on 0, and that shva of SHEVA is counted both as a <code>Shift</code>-variant of 2 dots, and — visually — as
 <code>=</code>.  (And <code>T</code> of ◌ׇ counted as 7 is just an exception.)</p>
 
+<a name=annotation></a>
 <p><b>Annotation marks</b> ◌ׅ, ◌֯, ◌ׄ also have brown outlines (on <code>?cC</code>).  <b>Punctuation</b> is not specially 
 highlighted (since <i>the rest</i> is drawn with ◌).  All Hebrew cantillation marks, punctuation and annotation marks are 
 present; those without outlines are duplicates — at more or less random positions.  The reorder-control invisible characters are on
@@ -566,6 +591,7 @@ I know <a href=http://www.unicode.org/mail-arch/unicode-ml/y2003-m05/0392.html>n
 <a href=http://www.qsm.co.il/Hebrew/Hebrew%20Issues.htm>this summary of 2003</a>, and 
 <a href=http://en.wikisource.org/wiki/User:Amire80/Havrakha>these experiments of 2012</a>. </p>
 
+<a name=hebrew-combined></a>
 <p>Below is a combined diagram of this layout with <code>AltGr</code>-bindings added in red.</p>
 
 <div class="rtl-hover klayout uclc do-alt alt2 base-center large-base" kbd_rebuild="/opt=rtl-hover-Trivia +base=l,,0 on-left+=h,,0 on-right+=h,,1">
@@ -580,6 +606,7 @@ context, the <code>CLOSE</code> characters mutates their shape to <code>([{</cod
 A similar effect happens with <code>&lt; &gt;</code>, but at least this reflect the names <code>LESS/GREATER THAN</code>
 of these characters.</p>
 
+<a name=logical-rtl></a>
 <p><i>This</i> layout follows the “logical” approach, not the “visual” approach: pressing <code>Shift-9</code>
 enters the <code>OPENING PARENTHESIS</code>, not the “character which looks like <code>(</code> in Hebrew text”; likewise
 for other mirroring characters.  So to type “(WORD)” one types <code>Shift-9 W O R D Shift-0</code> no matter whether 
@@ -588,22 +615,27 @@ and not the character which looks like <code>&lt;</code> in right-to-left contex
 
 <h1><code>Green/Ripe</code> access and <code>BlueKeys</code></h1>
 
+<a name=bridges></a>
 <p>In additition to its <i>satellite</i> faces (such as diacritic faces of Latin personality, or “extras” and “bizzare”
 Cyrillic faces, or polytonic/Coptic for Greek), each personality has bridges to the other 3 scripts.  These bridges 
 are intended for a quick entering of individual characters from another script; to enter a stretch of text in another
 script, it makes much more sense to switch to the personality of this script (how such switching happens is OS-specific).
-(For very short stretches, one may also consider the convenience access via the <code>Application-Menu</code> modifier; 
-see below.)</p>
+(For very short stretches, one may also consider the convenience access via keeping down appropriate 
+modifier keys [<code>Application-Menu</code> etc]; see below.)</p>
 
 <p>The prefix keys enabling the bridging are codenamed <code>Green</code> and <code>Ripe</code>: they are <code>Shift-SPACE</code>
 and <code>AltGr-SPACE</code> (also mneumonic as Left/Right).  Pressing these prefixes repeatedly accesses also the “convenience 
 faces” (MathBlue, Business, negation etc).  The personalities are ordered as Latin, Greek, Cyrillic, Hebrew, and the prefixes
 <code>Green</code>, <code>Ripe</code> and <code>Ripe×2</code> accesses 3 other personalities in this order.</p>
 
+<a name=repeated-green-ripe></a>
 <p>Repeated <code>Green</code> accesses: (×2) MathBlue, (×3) Business, (×4) Coptic.  ×3-Repeated <code>Ripe</code>
-accesses the “extras” <code>Cyrillic'</code>-face.  As an added convenience, the base layer of the <code>Green</code> face is also 
-accessible via combining keyspresses with <code>Application-Menu</code> modifier key (this enters base Latin or base Greek).
-(Unfortunately, only the Base- and <code>AltGr</code>-layers are controlled by the <code>CapsLock</code>.)</p>
+accesses the “extras” <code>Cyrillic'</code>-face.  As an added convenience, the base layer of the <code>Green/Ripe</code> face is
+also accessible via combining keyspresses with <code>lCtrl-lAlt/Application-Menu</code> modifier key(s) (recall that <code>Green</code> is 
+base Greek/Latin from Latin/Cyrillic, and <code>Ripe</code> is Cyrillic/Greek from Latin/Cyrillic).  These accessors
+<code>lCtrl-lAlt</code> and <code>Application-Menu</code> match the mneumonic of Left/Right.
+(Unfortunately, only the Base-layer and layers entered with  <code>AltGr</code> or <code>Control-Alt</code> are controlled 
+by the <code>CapsLock</code>; this excludes  <code>Ripe</code>.)</p>
 
 <p>On symbol positions, the <code>Green</code> and <code>Ripe</code> faces differ from the scripts personality's faces: the
 keys identical to the current script's keys (automatically non-alphabetical!) are replaced by special <code>GreenKeys</code> and 
@@ -630,6 +662,7 @@ Below is the <code>MathBlue</code> face (which combines <code>BlueKeys</code> an
 			/* To be auto-generated */
 </div>  <!-- Cannot match the width of the bottom row exactly — probably due to rounding to 1px??? -->
 
+<a name=hebrew-math></a>
 <p><b>Trivia:</b> Note the difference between Hebrew-letter mathematical symbols (ℵ], (ℶ], (ℷ], (ℸ] and the Hebrew letters 
 (א], (ב], (ג], (ד].  As a minimum, 
 they are typeset in different directions (in this file, they are entered in the order (aleph]/(beth]/(gimel]/(dalet] and are
@@ -641,25 +674,85 @@ most probably the application will take them from different fonts — and even i
 different shapes/sizes since symbols are made look good when surrounded by Latin characters.  Another comparison: ℵ₀, ℵ₁ vs.
 א₀, א₁.  (Both examples are entered as: ALEPH₀, ALEPH₁.)</p>
 
-<h1>Extras of <code>Application-Menu</code> modifier</h1>
+<h1>Extras: use <code>Application-Menu</code> (and other) modifiers</h1><a name=modifiers-maps></a>
 
-<p>First of all, the base layer of the <code>Green</code> face is also 
-accessible via combining keyspresses with <code>Application-Menu</code> modifier key (this enters base Latin or base Greek).
-(Unfortunately, <code>CapsLock</code> is ignored for these keys.)  Second, arrows may be entered by combining this modifier
+<p>First of all, the base layer of the <code>Green/Ripe</code> faces is also 
+accessible via combining keyspresses with <code>lCtrl-lAlt</code> or <code>Application-Menu</code> modifier key (this enters base Greek/Cyrillic 
+in Latin mode, or Latin/Greek in Cyrillic).
+(Unfortunately, <code>CapsLock</code> is ignored with <code>Application-Menu</code>.)</p>
+
+<a name=arrows></a>
+<p>Second, arrows may be entered by combining this modifier
 with 8 “direction keys” (arrows etc) on the numeric keypad.  <code>Shift</code> makes double-arrows; the wide key and
 the high key (<code>0 Ins</code> and <code>Enter</code>) make double-sided arrows; the key in between (<code>. Del</code>)
 makes a long right arrow.  One can use also “islands” synonims of these keys.</p>
 
+<a name=numpad-mathop></a>
 <p>Third, the arithmetic operation keys on the numeric keypad are modified to become “elementary school” variants (÷×), or
 with <code>Shift</code>, “operator” variants (<code>+</code> has no operator variant, so it becomes ∑).  Since
 <code>−</code> and <code>+</code> have no “elementary school” variants, these keys produce digit-wide dash, and
 Hebrew “elementary school” plus ﬩.</p>
 
+<a name=box-drawing></a>
+<p>Fourth, the numeric keypad with <code>NumLock</code> enabled and <code>AltGr</code> modifier produces box-drawing symbols 
+on digits 1–9, with horizontal line on the “wide” key <code>0 Ins</code>, and vertical line on its neighbor <code>. Del</code>.  Combine with
+<code>Application-Menu</code> to get double-lines, or/and with <code>rCtrl</code> to flip doubling of vertical lines (heuristic:
+the <em>right</em> Control-key controls doubling-of-the-symbol to-the-right).  <b>Example:</b> with <code>AltGr-rCtrl</code> 
+the top row 789 produces ╓ ╥ ╖.  (Easter eggish: removing <code>AltGr</code> replaces double lines by bold lines: ┎ ┰ ┒!  Currently.
+single <code>rCtrl</code> requires addition of <code>lAlt-rCtrl</code>.  Also: removing <code>NumLock</code> produces
+wide-frame drawings, white/black frame without/with <code>Shift</code>: ▗ ▄ ▖/▛ ▀ ▜ — but <code>Shift</code> does not work due to column=15 bug)
+
+<a name=f-keys></a>
+<p>Fifth, the <code>F</code>-keys with <code>AltGr</code> modifier produce dashes (or whitespace when <code>Shift</code> is added).
+The dashes are ordered according to length, so 01234 produce soft hyphen, hyphen, n-dash, m-dash, long-dash ― (HORIZONTAL BAR
+U+2015); the sequence is continued by paragraphos, which goes into other
+<a href=http://en.wikipedia.org/wiki/Obelism>obelism marks</a> ⸏⸓⸎ (here <code>F0</code> is another name for <code>F10</code>).  Near the right end are also
+NON-BREAKING HYPHEN, HYPHEN-BULLET, FIGURE DASH and OVERLINE.  The whitespace comes
+in decreasing width: the <code>F</code>-key <code>Fk</code> produces
+the whitespace of width about <code>em/k</code>; the exception is <code>F9</code>, which produces the “mathematical” ²⁄₉-em
+space (<b>Trivia:</b> it is usually described as ⁴⁄₁₈-em), and <code>F0=F10</code>, which produces the 0-width space (<b>Trivia:</b>
+this is typically has a meaning of “word separator” used to make the line breakable at this place).  The “unused” positions
+<code>F7</code>, <code>F11</code>, <code>F12</code> keep EM-QUAD, FIGURE SPACE (heuristic: it is near digits), and
+PUNCTUATION SPACE.</p>
+
+<a name=mod-hebrew></a>
+<p>Moreover, one can enter Hebrew with modifiers <code>ApplicationMenu-rCtrl</code>.</p>
+
+<a name=multi-char></a>
 <p>Lastly, several multi-character strings may be inserted (the current key assignment is random, and selected
 to simplify debugging of keyboard input in applications).  Two variants of m-dash surrounded by tiny whitespace
-are provided: one with narrowest whitespace is on <code>F2</code> and <code>comma</code>, and one with
-slightly wider whitespace is on <code>Shift-F2</code>.  One-character long Plane1 string is on <code>&lt;</code>,
-and two-character long Plane1 string is on <code>&gt;</code>; they enter 𝄞 and 𝄡𝄡.</p>
+are provided: one with narrowest whitespace is on <code>lCtrl-lAlt-comma</code>, one with
+slightly wider whitespace was on <code>rCtrl-AltGr-slash</code>).  One-character long Plane1 string is on <code>lCtrl-lAlt-&lt;</code>,
+and two-character long Plane1 string is on <code>lCtrl-lAlt-&gt;</code>; they enter     𝄞 and     𝄡𝄡.
+One can also replace any of these <code>rCtrl-AltGr-</code> by <code>rCtrl-AltGr-</code> or by <code>lCtrl-Mnu-</code>
+(conflicts for <code>lCtrl-Mnu-/</code> for fractions!).</p>
+
+<h1>Extras: mathematical letters</h1>
+
+<a name=math-letters></a>
+<p><b>Trivia:</b> On windows, one cannot enter mathematical letters (with very few exceptions — all available on
+<code>Green×2</code> — they are not in BMP) using prefix keys.  To compensate, we provide alternative ways to enter them using
+multiple modifier keys: <code>AltGr-ApplicationMenu</code> enters Double-Struck (𝕢𝕨𝕖𝕣𝕥𝕪/ℚ𝕎𝔼ℝ𝕋𝕐/𝟙𝟚𝟛𝟜), 
+<code>AltGr-rCtrl</code> enters Script (𝓆𝓌ℯ𝓇𝓉𝓎/𝒬𝒲ℰℛ𝒯𝒴), and combining all these modifiers enters Fraktur (𝔮𝔴𝔢𝔯𝔱𝔶/𝔔𝔚𝔈ℜ𝔗𝔜).
+(Heuristic: Fractur is the most bizarre of them.)</p>
+
+<a name=math-letters-more></a>
+<p>Unicode defines also multiple ranges of <b>Latin</b> mathematical letters, with just minor typographical variations.
+The utility of users entering them directly is questionable (except maybe for letters A,a,I which may appear both in plain English,
+and as math symbols; so they may win from explicit disambiguation; or, following the sensible practice advocated by ISO,
+use something distinguishable for letters d,e,i when they mean not variables, but constants or operators; monospace math?).
+However, to debug the 
+problems with different applications (not) working with the keyboard, it makes sense to define as many combinations of modifiers
+as possible.  Moreover, defining extra combinations should have no negative impact on applications and users, and should not have 
+measurable impact on the system memory footprint.</p>
+
+<a name=math-letters-more-mapping></a>
+<p>To follow on these lines we define the following mappings: <code>lCtrl-Mnu</code> for math italic (𝑞𝑤𝑒𝑟𝑡𝑦/𝑄𝑊𝐸𝑅𝑇𝑌), <code>lCtrl-lAlt-Mnu</code> 
+for math bold italic (𝒒𝒘𝒆𝒓𝒕𝒚/𝑸𝑾𝑬𝑹𝑻𝒀),  <code>lAlt-Mnu-rCtrl</code> for math sans serif bold (𝗾𝘄𝗲𝗿𝘁𝘆/𝗤𝗪𝗘𝗥𝗧𝗬/𝟭𝟮𝟯𝟰),
+<code>lAlt-rCtrl</code> for math sans serif bold italic greek (and for bold digits: 𝞱𝟂𝞮𝞺𝞽𝟁/𝟏𝟐𝟑𝟒; upper-case is not working
+due to a Windows bug with column number 15 in the keyboard description table),  <code>lAlt-Mnu</code> for math monospace
+(𝚚𝚠𝚎𝚛𝚝𝚢/𝚀𝚆𝙴𝚁𝚃𝚈/𝟷𝟸𝟹𝟺; apparently, it is not working with the applications I checked).  (Here <code>Mnu</code>
+is a shortcut for <code>ApplicationMenu</code>.)
 
 </body>
 </html>

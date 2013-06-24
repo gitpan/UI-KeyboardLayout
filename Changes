@@ -17,18 +17,20 @@
 Currently achieved (ranges as of Unicode v6.2):
 *) Two gotcha (with Shift-SPACE and ApplicationMenu keys) comparing to US and Russian Phonetic keyboards;
 *) Support of all keys (ISO/ABNT/JIS) on all contemporary hardware layouts;
-*) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859, and MES-1;
+*) Full coverage of Latin-based scripts (according to Wikipedia), Latin-n repertoirs of ISO 8859,
+     WGL, MES-1, MES-2, and non-CJK part of UGL;
 *) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys;
      Greek sub/superscript, MATHEMATICAL, APL, DOUBLE-STRUCK letters and digraphs not supported);
 *) Full coverage of Cyrillic ranges (with ԡꙣꙥꚁ [temporarily?] put on free slots in Business map);
-     from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double prefix keys);
+     from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double-or-"special" prefix keys);
 *) Full coverage of Hebrew/Yiddish/Ladino characters, points, cantillation, punctuation
      (except alternative/wide forms and precomposed chars)
 *) Full coverage of currency symbols;
 *) Full coverage of vulgar fractions;
-*) Full coverage of Coptic alphabet (via double prefix keys — except from Greek personality);
+*) Full coverage of Coptic alphabet (via double-or-"special" prefix keys — except from Greek personality);
 *) Full coverage of characters covered by EurKey/Bépo keyboards (except 0323);
 *) 50% coverage of math symbols in BMP (the most useful implemented first);
+*) Full coverage of Math Fractur, Math Double-Strike and Math Script Latin letters;
 *) Full coverage of double-accented letters of MES-3b;
 *) Full coverage of non-modifiers/combiners of IPA and UPA;
 *) Full coverage of obsolete-IPA and case-extended IPA;
@@ -45,12 +47,12 @@ Not yet implemented, or lost by upgrades to other goals:
    (had it before Green keys were implemented);
 *) Full coverage of Unicode's paleo-Latin characters;
 *) Full (is it compatible with other goals???) coverage of math symbol ranges in BMP;
-*) Full coverage of Math Fractur, uc Math Double-Strike and Math Script Latin letters (would need to abandon kbdutool...);
 *) reasonable coverage of arrows;
-*) reasonable coverage of ASCII/Unicode drawing characters;
+*) reasonable coverage of ASCII/Unicode box drawing characters;
 *) Full coverage of non-Eastern characters covered by Neo keyboard, and X11+Neo composition tables;
-*) Full coverage of MES-2 (currently ↨ + ⌠⌡ + 48 box drawing symbols missing; about 840 missing from MES-3b);
 *) Easy-to-describe quick access to Vietnamese characters (seems to be present - needs documentation).
+
+MOREOVER: To assist debugging applications, ALL POSSIBLE combinations of modifiers produce (non necessarily very useful) results.
 
 Possible roadmaps:
 *) What about other scripts with "small repertoir" of characters (such as arabic with 62 access points on the M$ keyboard;
@@ -1041,3 +1043,68 @@ Perl bug with 2Self auto-docs (not debugged yet).  Already "my $c =" leads to a 
 
 	izKeys.patch:	Take into account that X35 is not inserted now by kbdutool.
 	examples/izKeys-visual-maps-base.html:	Make Shift flippable on the base map and combined-Cyrillic one.
+
+0.50	Make a more universal font-family in generated coverage HTML tables.
+	Make C-^ and C-_ produce \x1e and \x1f, as the US keyboard does.
+	Rename extra modifiers: now KANA, X, Y
+	Allow layer 1 to be longer than layer 0 due to F-keys etc.
+	
+	test-klc-tr.pl:		new file
+	build_here.cmd: 	use test-klc-tr.pl to (finally!) build a keyboard with all the defined additional layers.
+
+	izKeys.kbdd:	Update version to 0.50.
+			Change prefix= to prefixNOTSAME= in descriptor of additional layers.
+			Fight against sublayer 15 (0-based) being ignored by Windows.
+			Make new scheme of accessors: CA- is Green, Mnu is Ripe, CMnu is 2xRipe; the rest with Mnu is Bbb/Scr/Frak.
+			Assign ↨ as "image" on C-_, and ⌠⌡ on AltGr-Business on Qq (needed for MES-2!).
+			For testing purposes: assign ssbiGreek(+bold dgt) to rC-A, i to A-Mnu, bi to C-Mnu, ssb to A-C-Mnu,
+				monospace to A-M-rC.
+			Add Gray boxes to BlackFrame, and ↵ to WhiteFrame (for UGL/MES2)
+			Add Black/White Frames, WireFrames (with 1,2,B) to NUMPAD.
+				(temporarily, 1B is not on rCtrl, but on Alt+rCtrl???).
+			Duplicate multi-char mappings to AltGr-rCtrl.
+
+	izKeys.patch:	Make Green+: and Ripe+; be Ripe AltGr-' and Ripe+: be Ripe AltGr-^ on Latin;
+				now from Latin one can access (non-AltGr) fractions and "other" Cyrillic layers even on FF.
+			Fix RightCtrl to produce expected chars.
+			Assign ROYA and LOYA to AltGr and RightCtrl.
+			More prefixes 0x0306 at random places.
+
+	izKeys-visual-maps-base.html:	Introduce anchors.
+
+	examples/raw_keys_via_api.pl:	new files to test I/O on Windows
+	examples/Keyboard_API.pm
+				???XXX See problems (when given argument "cooked"):
+					SetConsoleMode always fails; input of surrogates (and " — "???) is broken:
+					When reading by 10 chars: The first character is delivered OK (separately), 
+					the second and third are delivered together, and former as 4 bytes (with buffer overrun):
+					the correct char is followed by 0x0065 = 'e' (so one gets $c2 'e' instead of $c2 $c3).
+					   (instead of 0xRR 0xSS 0xTT 0xUU one gets 0xRR 0xSS 0x65 0x00 0xTT 0xUU).
+				   When reading 𝄞 (0x1d11e): on reading the second (low) surrogate, one gets only one extra byte 0x65
+					   (instead of 0xRR 0xSS one gets 0xRR 0xSS 0x65).
+				   When reading 𝄡𝄡 (0x1d11e): the first SMP character is delivered with the same bug as above;
+				   	   the second SMP character is
+				   	   	a) read as 2 shorts in one call;
+				   	   	b) the first one is as expected, the high surrogate;
+				   	   	c) the second one is 'e';
+				   	   	d) the low surrogate disappears;
+				   	   	e) the buffer is overrun by one byte 0x21 (the low byte of low surrogate).
+					   (instead of 0xRR 0xSS one gets 0xRR 0xSS 0x65).
+got <0x34 0xd8 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20> 1 of 10 read at raw_keys_via_api.pl line 98.
+got <0x1e 0xdd 0x65 0x20 0x20 0x20> 1 of 1 read at raw_keys_via_api.pl line 98.
+1: I see «𝄞»
+got <0x34 0xd8 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20> 1 of 10 read at raw_keys_via_api.pl line 98.
+got <0x21 0xdd 0x65 0x20 0x20 0x20> 1 of 1 read at raw_keys_via_api.pl line 98.
+2: I see «𝄡»
+got <0x34 0xd8 0x65 00 0x21 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20> 2 of 10 read at raw_keys_via_api.pl line 98.
+3: I see «�e»
+					Pasting 01234567890123456789012345678901234 results in similar overruns and patterns:
+got <0x30 00 0x31 00 0x32 00 0x33 00 0x34 00 0x35 00 0x36 00 0x37 00 0x38 00 0x39 00 0x20 0x20 0x20 0x20> 10 of 10 read at raw_keys_via_api.pl line 100.
+1: I see «0123456789»
+got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 00 0x35 00 0x36 00 0x37 00 0x38 00 0x39 0x20 0x20 0x20> 10 of 10 read at raw_keys_via_api.pl line 100.
+2: I see «0e12345678»
+got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 00 0x35 00 0x36 00 0x37 00 0x38 00 0x39 0x20 0x20 0x20> 10 of 10 read at raw_keys_via_api.pl line 100.
+3: I see «0e12345678»
+got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20> 5 of 10 read at raw_keys_via_api.pl line 100.
+4: I see «0e123»
+			NOW: better warnings, overruns reported, pad by _=0x5f instead of 0x20 (which conficts with `—´ ;-).

@@ -54,4 +54,9 @@ examples/izkeys-visual-maps-base.html
 examples/cvt_apple.pl
 examples/hebrew-ZC-visual
 examples/izKeys.patch
+examples/test-klc-tr.pl
+examples/raw_keys_via_api.pl
+examples/Keyboard_API.pm
+examples/qwerty					tests of entering chars (Note: it helps that Ctrl-QWERTY are ignored in Notepad)
+
 META.yml                                 Module meta-data (added by MakeMaker)
