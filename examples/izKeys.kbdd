@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2013
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.50
+VERSION=0.60
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -23,9 +23,9 @@ VERSION=0.50
 #
 [DEADKEYS]
 #
-# Can be omitted now
+# Can be omitted now (actually, it should better be omitted since we use PrefixDocs now)
 #
-0020=SPACE
+####0020=SPACE
 #
 [visual -> KBD/B/C/D]
 #
@@ -226,41 +226,42 @@ Add_2Ripe=	AssignTo[NUMPAD,16](Id(BoxDraw1B))
 +DeadKey_Map012e=	PrefixDocs[Hebrew {AND: iconic control-key symbols}]
 +DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]	Face(Add_2Ripe)
 #
-+DeadKey_Map019c=	PrefixDocs[MathBlue]	ByPairs[0020␢](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))
-+DeadKey_Map019c=		Face(MathBlue)	ByPairs[0020␠ 0192␢]
++DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]
++DeadKey_Map019c=	  ByPairs[0020␢](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)	ByPairs[0020␠ 0192␢]
 #
 # It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
-+DeadKey_Map0eff=	PrefixDocs[delivers Fraktur to an extra layer]		
-+DeadKey_Map0eff=		Mutate32OK[<font=fraktur>](Face(Latin))			AssignTo[NUMPAD,16](Id(BoxDraw21))
++DeadKey_Map06ff=	PrefixDocs[delivers Fraktur to an extra layer]		
++DeadKey_Map06ff=		Mutate32OK[<font=fraktur>](Face(Latin))			AssignTo[NUMPAD,16](Id(BoxDraw21))
 #
-+DeadKey_Map0efe=	PrefixDocs[delivers Double-Struck to an extra layer]
-+DeadKey_Map0efe=		Mutate32OK[<font=double-struck>](Face(Latin))		AssignTo[NUMPAD,16](Id(BoxDraw22))
++DeadKey_Map06fe=	PrefixDocs[delivers Double-Struck to an extra layer]
++DeadKey_Map06fe=		Mutate32OK[<font=double-struck>](Face(Latin))		AssignTo[NUMPAD,16](Id(BoxDraw22))
 #
-+DeadKey_Map0efd=	PrefixDocs[delivers Script to an extra layer]			AssignTo[NUMPAD,16](Id(BoxDraw12))
-+DeadKey_Map0efd=		Mutate32OK[<font=script>|<any-script>](Face(Latin))
-+DeadKey_Map0efd=		FromTo[US-Base,Greek-AltGr-Junk](SelectRX[[,/<>:]](Face(Latin)))
-+DeadKey_Map0efd=		FromTo[US-Base,Green](SelectRX[[,/<>:]](Face(Latin)))
-+DeadKey_Map0efd=		FromTo[US-Base,Green-AltGr](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map06fd=	PrefixDocs[delivers Script to an extra layer]			AssignTo[NUMPAD,16](Id(BoxDraw12))
++DeadKey_Map06fd=		Mutate32OK[<font=script>|<any-script>](Face(Latin))
++DeadKey_Map06fd=		FromTo[US-Base,Greek-AltGr-Junk](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map06fd=		FromTo[US-Base,Green](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map06fd=		FromTo[US-Base,Green-AltGr](SelectRX[[,/<>:]](Face(Latin)))
 #							ByPairs[:03a6](Face(Latin))
 #		These are non-essential, added for testing of applications only (B1, Frames??? eventually should be on rCtrl! ???)
-+DeadKey_Map0efc=	PrefixDocs[delivers SansSerif BoldItalic Greek, Bold Digits to an extra layer]
-+DeadKey_Map0efc=	  Mutate32OK[<font=sans-serif-bold-italic>](Id(Greek))	Mutate32OK[<font=bold>](Face(Latin))
-+DeadKey_Map0efc=	  AssignTo[NUMPAD,16](Id(BoxDrawB1))	AssignTo[ARROWS,16](Id(WhiteFrame) FlipShift(BlackFrame))
++DeadKey_Map06fc=	PrefixDocs[delivers SansSerif BoldItalic Greek, Bold Digits to an extra layer]
++DeadKey_Map06fc=	  Mutate32OK[<font=sans-serif-bold-italic>](Id(Greek))	Mutate32OK[<font=bold>](Face(Latin))
++DeadKey_Map06fc=	  AssignTo[NUMPAD,16](Id(BoxDrawB1))	AssignTo[ARROWS,16](Id(WhiteFrame) FlipShift(BlackFrame))
 #
-DeadKey_Map0efb=	PrefixDocs[delivers SansSerif Bold to an extra layer]	Mutate32OK[<font=sans-serif-bold>](Face(Latin))
-DeadKey_Map0efa=	PrefixDocs[delivers BoldItalic to an extra layer]	Mutate32OK[<font=bold-italic>](Face(Latin))
-DeadKey_Map0ef9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<font=monospace>](Face(Latin))
-+DeadKey_Map0ef8=	PrefixDocs[delivers Italic to an extra layer]		Mutate32OK[<font=italic>](Face(Latin))
-+DeadKey_Map0ef8=		FromTo[US-Base,Greek-AltGr-Junk](SelectRX[[,/<>:]](Face(Latin)))
-+DeadKey_Map0ef8=		FromTo[US-Base,Green](SelectRX[[,/<>:]](Face(Latin)))
-+DeadKey_Map0ef8=		FromTo[US-Base,Green-AltGr](SelectRX[[,/<>:]](Face(Latin)))
+DeadKey_Map06fb=	PrefixDocs[delivers SansSerif Bold to an extra layer]	Mutate32OK[<font=sans-serif-bold>](Face(Latin))
+DeadKey_Map06fa=	PrefixDocs[delivers BoldItalic to an extra layer]	Mutate32OK[<font=bold-italic>](Face(Latin))
+DeadKey_Map06f9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<font=monospace>](Face(Latin))
++DeadKey_Map06f8=	PrefixDocs[delivers Italic to an extra layer]		Mutate32OK[<font=italic>](Face(Latin))
++DeadKey_Map06f8=		FromTo[US-Base,Greek-AltGr-Junk](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map06f8=		FromTo[US-Base,Green](SelectRX[[,/<>:]](Face(Latin)))
++DeadKey_Map06f8=		FromTo[US-Base,Green-AltGr](SelectRX[[,/<>:]](Face(Latin)))
 #
 geometry_via_layer=US-Base
 #
-# Tibetan range: take only tibetan diacritics, so our code adding diacritics won't be confused by prefices... ???
-Auto_Diacritic_Start=0f00
+# Tibetan range 0f**: take only tibetan diacritics, so our code adding diacritics won't be confused by prefices... ???
+Auto_Diacritic_Start=0700
 #
 Flip_AltGr_Key=00a0
+ComposeKey=06f0
 #
 # Apparently, binding-column 15 (0-based) of aVkToWch18 is as if with WCH_NONE.  When there are 2 Ctrl-columns, this corresponds to
 #    Shift of (0-based) elt 6 below ((7+1)*2=16).	Better put something fake into elt 6!
@@ -268,8 +269,8 @@ Flip_AltGr_Key=00a0
 #		      Gr,Ru,Heb,Frk,ssbiGrk,Scr, Dbl,ms, i, bi,ssb
 # Actual keys:    ,Agr,CA,M,CrM,CMAgr,ACr,CrAgr,MAgr,AM,CM,CAM,AMCr
 @layers_modifiers=,CAX,CA,K,CKY,CKAXY,CAY,CAXY,KCAX,AK,CK,CAK,CAKY
-@output_layers=0,1,prefixNOTSAME=0138,prefixNOTSAME=0192,prefixNOTSAME=012e,prefixNOTSAME=0eff,prefixNOTSAME=0efc
-@output_layers=prefixNOTSAME=0efd,prefixNOTSAME=0efe,prefixNOTSAME=0ef9,prefixNOTSAME=0ef8,prefixNOTSAME=0efa,prefixNOTSAME=0efb
+@output_layers=0,1,prefixNOTSAME=0138,prefixNOTSAME=0192,prefixNOTSAME=012e,prefixNOTSAME=06ff,prefixNOTSAME=06fc
+@output_layers=prefixNOTSAME=06fd,prefixNOTSAME=06fe,prefixNOTSAME=06f9,prefixNOTSAME=06f8,prefixNOTSAME=06fa,prefixNOTSAME=06fb
 #
 Diacritic_if_undef=			SpaceSelf2Id
 DeadChar_DefaultTranslation=		♪
@@ -279,7 +280,7 @@ DeadChar_32bitTranslation=		♫
 #					# Had 03a6 on the "ripe key"; then 0138, now 0192
 @SPACE=,0020,0138@,0192@,00a0@
 # Temporary: when ¦ is Compose, change to this...
-@ABNT_C2=,‖,00a0@,00a3@,0301
+@ABNT_C2=,06f0@,00a0@,00a3@,0301
 #@TAB=,0009,0009,0483@,0484@
 #
 # Dotted circle, black circle, white circle
@@ -457,7 +458,7 @@ Named_DIA_Recipe__hat=	\\ı≈˜〚〛₡⍩⍚ʕ,\⍊⍑⟘¡⩞▫◈⧈⟞ᴎ
 #
 [faces/CyrillicPhonetic]
 #
-@layers=Russian-Base,Cyrillic-AltGr
+@layers=Russian-Base,	Id(Cyrillic-AltGr)	Id(Add_AltGr)
 BaseLayer=US-Base
 LinkFace=Latin
 #
@@ -530,7 +531,7 @@ ExportDeadKeys=	́	҃
 #
 [faces/GreekPoly]
 #
-@layers=Id(Greek_and_More_0)	ByPairsPrefix[\0342 [0314 ]0313 `03e2](Id(US-Base))	Id(US-Base),	Id(Greek_and_More_1)    ByPairs[Vϔ 6͵ ^ʹ 002c« .»](Id(US-Base))
+@layers=Id(Greek_and_More_0)	ByPairsPrefix[\0342 [0314 ]0313 `03e2](Id(US-Base))	Id(US-Base),	Id(Greek_and_More_1)    ByPairs[Vϔ 6͵ ^ʹ 002c« .»](Id(US-Base))		Id(Add_AltGr)
 #	Id(USLatin-AltGr)
 BaseLayer=US-Base
 LinkFace=Latin
@@ -564,7 +565,7 @@ ExportDeadKeys=	0342 0314 0313 03e2
 #
 [faces/Hebrew]
 #
-@layers=	Id(Hebrew-Base)	Id(US-Base),Hebrew-AltGr
+@layers=	Id(Hebrew-Base)	Id(US-Base),	Id(Hebrew-AltGr)	Id(Add_AltGr)
 BaseLayer=US-Base
 LinkFace=Latin
 #
@@ -606,11 +607,11 @@ MetaData_Index=3
 #####
 [visual -> DEADKEYS/la_ru]
 #
-# Can be omitted now:
+# Can be omitted now: (actually, it should better be omitted since we use PrefixDocs now)
 #
 KEYNAME_DEAD
 
-03a9	"GREEK CAPITAL LETTER OMEGA"
+#03a9	"GREEK CAPITAL LETTER OMEGA"
 
 [visual -> DEADKEYS/business]
 

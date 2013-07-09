@@ -21,14 +21,14 @@ perl -wlpe "s/^(.{250}[\x80-\xBF]*).*/$1/s" %src%/ooo-ru >ooo-ru-shorten
 
 set ARROWSK=qw(HOME UP PRIOR DIVIDE LEFT F13 RIGHT MULTIPLY END DOWN NEXT SUBTRACT INSERT F15 F14 ADD)
 
-@rem Remove Fkeys (except F2), NUMPADn, CLEAR from oo-LANG-shorten
-perl -i~ -wlpe "BEGIN {@K = %ARROWSK%; $k = join q(|), @K[1..$#K]; $rx = qr/\b(F[13-9]\d?|NUMPAD\d|CLEAR)\b/} $_ = q() if /^[0-9A-F]{2,4}\s+$rx/" ooo-us-shorten ooo-ru-shorten
+@rem Remove Fkeys, NUMPADn, CLEAR from oo-LANG-shorten
+perl -i~ -wlpe "BEGIN {@K = %ARROWSK%; $k = join q(|), @K[1..$#K]; $rx = qr/\b(F\d\d?|NUMPAD\d|CLEAR)\b/} $_ = q() if /^[0-9A-F]{2,4}\s+$rx/" ooo-us-shorten ooo-ru-shorten
 
 %Keyboard_Layout_Creator%\bin\i386\kbdutool.exe -v -w -s ooo-us-shorten
 %Keyboard_Layout_Creator%\bin\i386\kbdutool.exe -v -w -s ooo-ru-shorten
 
 @rem INSERT is handled OK by kbdutool ...  Replace #ERROR# by F2 and elts of ARROWSK (except Fn and INSERT) in order
-perl -i~ -wlpe "BEGIN { @ARGV = <*.[CH]>; $c=1; @K = (%ARROWSK%); @KK = (map(qq(F$_), 0,2), grep(!/^F\d+$/ && !/^INSERT$/, @K), qw(F2 F2 ?)); }; $vk = ($ARGV =~ /C$/i && q(VK_)); s/#ERROR#/${vk}$KK[$c]/ and $c++; $c=1 if eof"
+perl -i~ -wlpe "BEGIN { @ARGV = <*.[CH]>; $c=1; @K = (%ARROWSK%); @KK = (map(qq(F$_), 0), grep(!/^F\d+$/ && !/^INSERT$/, @K), qw(F2 F2 ?)); }; $vk = ($ARGV =~ /C$/i && q(VK_)); s/#ERROR#/${vk}$KK[$c]/ and $c++; $c=1 if eof"
 
 @rem the "old" short rows contain -1 instead of WCH_NONE
 perl -i~~ -wlpe "BEGIN { @ARGV = <*.C>; $k = {qw( ADD '+' SUBTRACT '-' MULTIPLY '*' DIVIDE '/' RETURN '\r' )}; $rx = join q(|), keys %%$k; }; s/^(\s+\{VK_($rx)\s*,\s*0\s*,\s*)'\S*\s+\S+\s+\S+\s*$//"

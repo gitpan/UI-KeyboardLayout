@@ -74,10 +74,11 @@ sub ToUnicode ($;$$$) {
   $f ||= Win32::API->new(q(user32), 
      qq[int ToUnicode(unsigned int wVirtKey, unsigned int wScanCode, char *lpKeyState, char* pwszBuff, int cchBuff, unsigned int wFlags)]) or die "Import failed: $!"; 
   my($vk, $sc, $kst, $menu) = (shift, shift, shift, shift);
-  not defined $kst or 256 == length $kst or die "keystate buffer of unexpected length)";
+  $kst = "\0" x 256 unless defined $kst;
+  256 == length $kst or die "keystate buffer of unexpected length)";
   $sc = 0 unless defined $sc;
   my $buf = '_' x (2*5);		# 4 shorts and (not delivered) 0 trailing short
-  my $rc = $f->Call($vk, $sc, $kst, $buf, length($buf)/2, !!$menu);	# or die "ToUnicode() failed: $^E";
+  my $rc = $f->Call($vk, $sc, $kst, $buf, length($buf)/2, $menu||0);	# or die "ToUnicode() failed: $^E";
   warn "\t\tToUnicode() ==> $rc\n";
   return unless $rc;		# Not a in-char-sequence event
   return undef if $rc < 0 or $rc >= 0x80000000;	# dead key (bug with forced `unsigned´ in Win32::API???
@@ -93,11 +94,12 @@ sub ToUnicodeEx ($;$$$$) {
   $f ||= Win32::API->new(q(user32), 
      qq[int ToUnicodeEx(unsigned int wVirtKey, unsigned int wScanCode, char *lpKeyState, char* pwszBuff, int cchBuff, unsigned int wFlags, $HANDLE_t kbd)]) or die "Import failed: $!"; 
   my($vk, $sc, $kst, $kbd, $menu) = (shift, shift, shift, shift, shift);
-  not defined $kst or 256 == length $kst or die "keystate buffer of unexpected length)";
+  $kst = "\0" x 256 unless defined $kst;
+  256 == length $kst or die "keystate buffer of unexpected length)";
   $sc = 0 unless defined $sc;
   $kbd = GetKeyboardLayout unless defined $kbd;
-  my $buf = '_' x (2*5);		# 4 shorts and (not delivered) 0 trailing short
-  my $rc = $f->Call($vk, $sc, $kst, $buf, length($buf)/2, !!$menu, $kbd);	# or die "ToUnicode() failed: $^E";
+  my $buf = '_' x (2*5);		# 4 shorts and (not actually delivered) 0 trailing short
+  my $rc = $f->Call($vk, $sc, $kst, $buf, length($buf)/2, $menu || 0, $kbd);	# or die "ToUnicode() failed: $^E";
   warn sprintf "\t\tToUnicodeEx() ==> %d;\tkbd = %#x\n", $rc, $kbd;
   return unless $rc;		# Not a in-char-sequence event
   return undef if $rc < 0 or $rc >= 0x80000000;	# dead key (bug with forced `unsigned´ in Win32::API???

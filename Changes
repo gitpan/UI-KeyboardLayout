@@ -22,37 +22,39 @@ Currently achieved (ranges as of Unicode v6.2):
 *) Full coverage of Greek Unicode ranges and Greekish stuff of MES-3B (polytonic and esoteric characters need double prefix keys;
      Greek sub/superscript, MATHEMATICAL, APL, DOUBLE-STRUCK letters and digraphs not supported);
 *) Full coverage of Cyrillic ranges (with ԡꙣꙥꚁ [temporarily?] put on free slots in Business map);
-     from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double-or-"special" prefix keys);
+     from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double-or-"special" prefix keys;
 *) Full coverage of Hebrew/Yiddish/Ladino characters, points, cantillation, punctuation
-     (except alternative/wide forms and precomposed chars)
+     (except alternative/wide forms and precomposed chars);
+*) The "Compose" prefix key based on std X11 Compose tables, MathML entity names (up to length 5), and rfc1345 codes;
 *) Full coverage of currency symbols;
 *) Full coverage of vulgar fractions;
-*) Full coverage of Coptic alphabet (via double-or-"special" prefix keys — except from Greek personality);
+*) Full coverage of Coptic alphabet (except from Greek personality, requires double-or-"special" prefix keys);
 *) Full coverage of characters covered by EurKey/Bépo keyboards (except 0323);
 *) 50% coverage of math symbols in BMP (the most useful implemented first);
-*) Full coverage of Math Fractur, Math Double-Strike and Math Script Latin letters;
+*) Full coverage of Math Fraktur, Math Double-Strike and Math Script Latin letters;
 *) Full coverage of double-accented letters of MES-3b;
 *) Full coverage of non-modifiers/combiners of IPA and UPA;
 *) Full coverage of obsolete-IPA and case-extended IPA;
+*) Simple/double arrows and most of box-drawing characters (via numeric keypad);
 *) Latin and Cyrillic personalities (pre-release of Greek and Hebrew personality);
-*) Visual bell to report unrecognized/unsupported combinations (except for those using Application-Menu modifier);
+*) Visual bell to report unrecognized/unsupported combinations (except for those using Application-Menu modifier and Compose);
+*) Many pathways to access “advanced” characters to make it possible to work around bugs in applications;
 *) Documentation of the allocation rules scattered over different files/sections.
 
 Not yet implemented, or lost by upgrades to other goals:
 *) Clear documentation of the allocation rules (needed for "goal 1" above).
 *) Finish implementing usable Greek and Hebrew personality;
-*) The "compose" prefix key + access by human-guessable sequence of Latin chars;
 *) Full coverage of IPA (both visually, and by structure properties of the described sounds) and UPA;
 *) Full coverage of spacing modifiers and combining characters for Latin scripts, and for symbols 
    (had it before Green keys were implemented);
 *) Full coverage of Unicode's paleo-Latin characters;
 *) Full (is it compatible with other goals???) coverage of math symbol ranges in BMP;
 *) reasonable coverage of arrows;
-*) reasonable coverage of ASCII/Unicode box drawing characters;
+*) reasonable coverage of ASCII/Unicode box drawing characters (almost finished);
 *) Full coverage of non-Eastern characters covered by Neo keyboard, and X11+Neo composition tables;
 *) Easy-to-describe quick access to Vietnamese characters (seems to be present - needs documentation).
 
-MOREOVER: To assist debugging applications, ALL POSSIBLE combinations of modifiers produce (non necessarily very useful) results.
+MOREOVER: To assist debugging applications, ALL POSSIBLE combinations of modifiers produce (non necessarily generally useful) results.
 
 Possible roadmaps:
 *) What about other scripts with "small repertoir" of characters (such as arabic with 62 access points on the M$ keyboard;
@@ -1108,3 +1110,32 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 00 0x35 00 0x36 00 0x37 00 0x3
 got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20 0x20> 5 of 10 read at raw_keys_via_api.pl line 100.
 4: I see «0e123»
 			NOW: better warnings, overruns reported, pad by _=0x5f instead of 0x20 (which conficts with `—´ ;-).
+
+0.60	When layers were defined to have different length, we put stuff in VK sections into wrong places, and had messy
+		printouts of layouts.
+	Remove special sections (F-keys etc) from the printouts.
+	In printout, better document behaviour of control-letters.
+	Consistently use DeadkeyFaceHexMap instead of recalculating it.
+	process_dotcompose(), dotcomposefile_2_hash(), get__value(), set__value(): new subroutines.
+	Load Compose files, generate corresponding prefix maps.  
+		(Only rules starting with Compose processed, and with keysymbols in Latin-1/Cyrillic/Greek/Hebrew/Unnnn.)
+		(Plus those Latin characters and technical symbols which appear in std Compose.)
+		Currently makes a lot of sense only in Latin personality.
+	Load MathML entity files, generate corresponding prefix maps (on ComposeKey×2).
+		(If a binding and a longer one exist, finish shorter one with SPACE.)
+		(We avoid over-long synonims: those more than 2x longer than the shortest one.)
+	Load rfc1345 files, generate corresponding prefix maps (on ComposeKey×3).
+		(If a binding and a longer one exist, finish shorter one with SPACE.)
+	New key ComposeKey in .kbdd.
+	Logic for wrapping autodead.
+	Generate deadkey names basing on PrefixDocs.
+	Autogenerate PrefixDocs for flip_AltGr key.
+	AltGr-inverted deadkeys were not in the KEYNAME_DEAD section.
+	Suppress generation of deadkey names for Compose Compose Etc (overflow some Windows' buffer??? - installs but not activatable).
+
+	build_here.cmd:		In absense of F2 bound would produce wrong mapping to scancodes (and RU had no FKEYS).
+
+	izKeys.kbdd:	Update version to 0.60.
+			Make / (of /¥ key) a ComposeKey.
+
+	izKeys.patch:	Make Mnu-F12 into a ComposeKey.
