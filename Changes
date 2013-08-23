@@ -3,7 +3,7 @@
   0) No gotchas for people who cannot remember anything.
   1) Doing 3-4 experiments, one must be able to find most (80-90% achievable?) of covered characters
      knowing only a handful of general rules for "position allocation" [*].
-  2) Gradual degradation: the fewer rules one can keep in mind, the narrower repertoir of characters is
+  2) Gradual degradation: the fewer general rules one can keep in mind, the narrower repertoir of characters is
      *easily* accessible; but "more cumbersome" ways to access characters should be available if they
      are easier to keep in mind.  So people who can remember have access to easier typing experience,
      but the covered repertoir should not change much.
@@ -25,7 +25,7 @@ Currently achieved (ranges as of Unicode v6.2):
      from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double-or-"special" prefix keys;
 *) Full coverage of Hebrew/Yiddish/Ladino characters, points, cantillation, punctuation
      (except alternative/wide forms and precomposed chars);
-*) The "Compose" prefix key based on std X11 Compose tables, MathML entity names (up to length 5), and rfc1345 codes;
+*) The "Compose" prefix key based on std X11 Compose tables, MathML entity names, and rfc1345 codes;
 *) Full coverage of currency symbols;
 *) Full coverage of vulgar fractions;
 *) Full coverage of Coptic alphabet (except from Greek personality, requires double-or-"special" prefix keys);
@@ -376,7 +376,7 @@ Possible roadmaps:
 	Decompositions to MINUS SIGN are duplicated to HYPHEN-MINUS.
 
 	EurKey++:
-	  All combining characters (except for invisible CGJ, musical [BALINESE and high plane], half-diacretics,
+	  All combining characters (except for invisible CGJ, musical [BALINESE and high plane], half-diacritics,
 	    combining raised letters, NKO, PHAISTOS, ETHIOPIC, TAI, COPTIC, BAMUM, DEVANAGARI) are available
 	    on AltGr- /?\|-_ `~ (shift-)digits =+ [{ ]} ,< .> after
 	    the corresponding prefix key (one with the visually most similar "principal action").
@@ -1128,7 +1128,7 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 		(If a binding and a longer one exist, finish shorter one with SPACE.)
 	New key ComposeKey in .kbdd.
 	Logic for wrapping autodead.
-	Generate deadkey names basing on PrefixDocs.
+ basing on PrefixDocs.
 	Autogenerate PrefixDocs for flip_AltGr key.
 	AltGr-inverted deadkeys were not in the KEYNAME_DEAD section.
 	Suppress generation of deadkey names for Compose Compose Etc (overflow some Windows' buffer??? - installs but not activatable).
@@ -1139,3 +1139,32 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 			Make / (of /¥ key) a ComposeKey.
 
 	izKeys.patch:	Make Mnu-F12 into a ComposeKey.
+
+0.61	Add parser for Unicode names MODIFIER LETTER (LOW).
+	Support prefix-keys-as-arrays in the main keymap section.
+	New keys COLgap ROWgap in RECT visual sections (are counts; ROWgaps must start with #, COLgaps contain whitespace).
+	Start adding superize/subize manual mogrification rules.
+	Allow C-^/_ access modifier letters too (at end of other controls).
+		(Now all modifiers accessible from eurkey++ are accessible from izKeys too!)
+	Avoid auto-creating deadkey IDs below 0x80 (may lead to embarassing results if won't combine with the following char…).
+	Double processing of VK_DECIMAL could lead to broken LIGATURES for this key.
+	Make C-@ produce U+0000, as US keyboard, and append it to the end of access-modifiers list.
+	Document how to produce 0-length string after a prefix key(s).
+	Start categorizing tidbits from Unicode lists.
+
+	izKeys.kbdd:	Update version to 0.61.
+			DECIMAL on arrows: may also have semantic of mirror-reflect (⇄⇆).
+			Fix/add arrow blocks in visual tables.
+			Ins/Del on boxdraw: on heterogeneous boxes, makes H/V half-lines in simple/bold style 
+				(also add to BBoxDrawOnHV as “diagonal” blocks)
+				(Now only ╌┄┈ ╍┅┉ ╎┆┊ ╏┇┋ are missing from visual tables.)
+			Remove obsolete commented Hebrew rows from the visual map.
+			Add ⎖, 〃 to '," on MathBlue.
+			Add Super(&Phonetic)/Sub+SmallCaps(&legs,curl,tail)/Turn(&hooks, preferably right) on AltGr-↑/↓/→ .
+			Same for hooks, preferably left on AltGr-← (temporary; later combining variants should be put there).
+			Use COLgap=1 ROWgap=1 (with Tab in COLgap).
+			Continue orthogonalization of arrows (all types with at least 4 directions are in visual layouts).
+				(Harpoons and dingbats not processed.)
+			Optimize whitespace in the table of diacritics for print.
+
+	izKeys-visual-maps-base.html:	Suppress fallback fonts in :after/:before monospace (otherwise arrows too small???).

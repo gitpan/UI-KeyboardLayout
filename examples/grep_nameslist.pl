@@ -7,10 +7,12 @@ my $rx = shift;
 $rx = qr/$rx/;
 
 #open my $f, '<', 
-my $d = "$ENV{HOME}/Downloads";
-my $f = "$ENV{HOME}/Downloads/NamesList-6.1.0d8.txt";		# or die;
--e "$d/NamesList-6.1.0d8.txt" or $d = '/cygdrive/c/Users/ilya/Downloads';
-my $k = UI::KeyboardLayout::->new()->load_unidata("$d/NamesList-6.1.0d8.txt", "$d/DerivedAge-6.1.0d13.txt");
+my $home = $ENV{HOME} || '';
+$home = "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" if $ENV{HOMEDRIVE} and $ENV{HOMEPATH};
+my $d = "$home/Downloads";
+my $f = "$home/Downloads/NamesList.txt";		# or die;
+-e "$d/NamesList.txt" or $d = '/cygdrive/c/Users/ilya/Downloads';
+my $k = UI::KeyboardLayout::->new()->load_unidata("$d/NamesList.txt", "$d/DerivedAge.txt");
 
 my @leaders;
 while (<>) {

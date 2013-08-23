@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2013
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.60
+VERSION=0.61
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -20,6 +20,7 @@ VERSION=0.60
 @Macron=øō
 @Zuang_tones=2ƨ,3з,4ч,5ƽ,6ƅ,@Ƨ,#З,$Ч,%Ƽ,^Ƅ
 @Cardinal=a.2135,b.2136,g.2137,d.2138
+@extra_phonetic=lɬ,Lɮ
 #
 [DEADKEYS]
 #
@@ -51,28 +52,24 @@ prefix_repeat=3
 ***	`~/ˋ˜	1!/¬¡	2@/ºª	3#/·№	4$/¢£	5%/€¥	6^/ˇˆ		7&/√§		8*/„‚		9(/“‘	0)/”’		-_/¯—/--―	=+/≈±
 	ю//ѫ/ѭ	1!/-- ҄	2@/ ҆ ҇	3ё	4Ё	5ъ/--€	6Ъ/-- ҃//-- ҄	7&/// ꙽ꙿ	8*//-- ҅	9(///ҁ	0)/// ꙼꙾	-_//ҽ/ҿ		ч//ҷ/ӵ
 ‭???	--/ ֙ ֘	--/ ִ ֮	--/ ֵ ְ	--/ ֶ–	--/ ָ	--/ ֱ€	--/ ֳ‌		--/ ׇ‍		--/ ַ ͏		--/ ֻ‎	--/ ֲ‏		--/־—		--/ ְ﬩ ‬
-#	`~/ ֮	1!/ ֩	2@/ ֙	3#/ ֒	4$/ ֯€	5%/ֺ‍	6^/ ֹ‌		7\x26/ ֿ ͏	8*/ ׂ‎		9(/ ׁ‏	0)/ ֝◌		–—/ ֠		=+/ ּ
 #
 	--//θ	--//ω	--//ε	--//ρ		--//τ	--//ψ	--//υ	--//ι	--//ο	--//π		--	--	--/◊⧫
 	--	--//ꚍ	--//ӗ	--//ԕ		--//ꚋ	--//ꙑ	--//ꙕ	--//ӊ	--	--//ꚏ		--//ꚅ	--//ꚗ	--//ӭ
 ***	q/ä	w/á	e/ê	r/å		t/þ	y/ÿ	u/ü	i/ĳ	o/œ	p/ø		[{/«‹	]}/»›	\|/¦†
 	я/ѣ/ѧ/ѩ	в/ѵ/ꙍ/ԝ	е/ё/ө/ӫ	р/ԗ/ѽ/ҏ		т/ћ/ҭ/ԏ	ы/і/ү/ұ	у/ў/ӯ/ӱ	и/ѷ/ӣ/ӥ	о/ѡ/ѻ/ѿ	п/ѱ/ԥԤ/ҧ	ш//ԧԦ/ѐ	щ//ꚇ/ѝ	э//ѥ/ӧ
 ‭???	ק ֲ/ ֨ ֬ ששׁ/ ׁ ֓ ע ֵ/ ֶ ֱ ר ֱ/ ֿ ֗	תט/ ֩ ֠	י ּ/ײַײ	טוּ/ ֻױ	י ִ/יִ ֬	ווֹ/ ֹ ָ	פף/ ֡ ֟		--/׆ ֩	--/ ֘ ֠	--/ ֖׀ ‬
-#???	ק־/ ׄ ֿ	ש ׁ/ ֬	ע/ ֫	ר/ ֟		ת◦/ ֓•	י₪/ ֞	ו ּ/ ֜ױ	י ַ/ ֡ײ ו/ ֕װ	פף/ ֔		--/ ֗	--/ ֘	--/ ֨
 #
 	--//α	--//σ	--//δ	--//φ	--//γ	--//η	--//ϊ	--//κ	--//λ	--		∂∇/′″
 	--//ԙ	--//ꚃ	--//ӡ	--	--//ӿ	--//ҩ	--///ꙇ	--//ӄ	--//ԉ	--//ԟ/ҝ		--//ꚓ/ꚕ
 ***	a/æ	s/ßẞ	d/ð	f/è	g/ý	h/ú	j/í	k/ó	l/ö	;:/¨÷		'"/´˵/′″
 	а/ә/ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	;://ӹ/ӳ		'"/ ́´/ ̀ ̀/ ́ ́
 ‭???	א ָ/ ַ ֲ סשׂ/ ׂ ֒ ד ֶ/ ְ ֧ פף/פּףּ	ג״/׳ ֞ הח/ ֢ ֜ ח ֻ/ ﬞ ֝ כך/ ֦ ֫ ל ֹ/ ׇ ֳ --/ ֛ ֔	--/׳״ ‬
-#???	א׃/ ַ	ס ׂ/ ָ ׇ ד/ ְ	פף/ ֲ	ג/ ֳ	ה/ ֽ	ח/ ֻ	כך/ ִ	ל ֹ/ ֵ	--/ ֶ		--/ ֱ
 #"
 	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	‼200a—200a/--1d11e ·/--‼1d121.1d121	⁄/⋰//‼2009—2009
 	--	--	--//ꙡ	--//ԃ	--	--//ӈ	--//ꙧ	≲//ԇ/ԅ		≳//ꙝ/ꙙ		…≟//ꙓ/ҍ
 ***	z/à	x/é	c/ç	v/ì	b/ù	n/ñ	m/ò	,</¸≤		.>/°≥/…		/?/0338¿/÷�
 	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ꙋ/ѹ	н/њ/ң/ҥ	м/ӎ/ꙟ/ԣ	,</«/⁘⁙/ԋ	.>/»/·։/჻⁖	/?/ј/ԛ/ꙏ
 ‭???	ז ַ/ ֮ ֕ כך/כּךּ	צץ/ ֯ ׄ ו ְ/ ֺװ ב₪/בּ ֪	נן/׆ ֦	מם/ ֽ ֣	--/ ֑ ֤		--/׃ ֚		--/ ֥ ׅ ‬
-#???	ז׀/ ׅ	כך/ ֤	צץ/ ֪	ט/ ֦	ב/ ֥	נן/ ֧׆	מם/ ֛	--/ ֑ ֢		--/ ֖		--/ ֣ ֚
 	--		--
 	--		--
 ***	\|/¶❧		./,
@@ -120,7 +117,8 @@ BusinessAdd_0=		ByPairs[qĸ Q⌨ ZƏ zə oơ OƠ uư UƯ '′ "″ ;‵ :‶ -�
 #"
 cp437_Start=		FromTo[Digits,cp437-Start](FlipShift(Face(Latin)))	ByPairs[_☼](Face(Latin))	ByPairs[-♪ _♫](FlipLayers(Latin))
 #
-Add_AltGr=	 AssignTo[NUMPAD,16](Id(BoxDraw11))	AssignTo[FKEYS,12](Id(DashesEtc) FlipShift(FractionEmSpacesEtc))
++Add_AltGr=	 AssignTo[NUMPAD,16](Id(BoxDraw11))	AssignTo[FKEYS,12](Id(DashesEtc) FlipShift(FractionEmSpacesEtc))
++Add_AltGr=	 ByPairsPrefix[↑06f7 ↓06f6 →06f5 ←06f4](AssignTo[ARROWS,16](Id(Arrows)))
 #
 [face_recipes]
 #					∦ obscures ⦀
@@ -185,6 +183,12 @@ SpecialKey_Images2=	ByPairs[000d↲ 000a⤶ 0008⎌ 001b⎗ 001d⎘ 007f⌧ 0003
 +Add_Ripe1=			AssignTo[ARROWS,16](Id(Arrows) FlipShift(Arrows2))	AssignTo[NUMPAD,16](Id(BoxDrawBB))
 Add_Ripe3=	ByPairs[0020.2009 0138.200a]	Face(SpecialKey_Images2)
 Add_2Ripe=	AssignTo[NUMPAD,16](Id(BoxDraw1B))
+#				Some of subize/superize duplicate the AltGr version of pseudo-fake; should be put in front
+SupersPhonetic=		Mutate[\ªº,<super>,<super>+<pseudo-calculated-sign>|<any-superize>,<pseudo-fake-super>|<any-phonetize0>,<any-phonetized>,<any-stretched>|<any-phonetize2>|<any-phonetize3>|<subst-extra_phonetic>](Face(Latin))
+SubsSmallCapsLegs=	Mutate[<sub>,<sub>+<pseudo-calculated-sign>|<any-subize>,<pseudo-fake-sub>|<any-subize2>|<pseudo-smallcaps>|<any-smallcaps>|<any-tail>,<any-curl>,<any-leg>](Face(Latin))
+#SmallCaps=	Mutate[<pseudo-smallcaps>|<any-smallcaps>](Face(Latin))
+RotatedsHooks=	Mutate[<any-manual-turnaround>|<any-inverted-!breve>,<any-sideways>,<any-inverted>+<any-phonetized>,<any-dot>+<any-reversed>,<any-reversed>,<any-turned>|<any-retroflex-hook>,<any-right-hook>|<any-hook-!palatal-!left>|<any-palatal-hook>|<any-left-hook>|<any-inverted-breve>](Face(Latin))
+LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
 #
 [faces]
 # Create DeadKey maps basing on (massaged!) visual descriptions:
@@ -226,9 +230,9 @@ Add_2Ripe=	AssignTo[NUMPAD,16](Id(BoxDraw1B))
 +DeadKey_Map012e=	PrefixDocs[Hebrew {AND: iconic control-key symbols}]
 +DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]	Face(Add_2Ripe)
 #
-+DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]
-+DeadKey_Map019c=	  ByPairs[0020␢](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)	ByPairs[0020␠ 0192␢]
-#
++DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]	ByPairs[0020␠ 0192␢ '⎖ "〃]
++DeadKey_Map019c=	  ByPairs[0020␢](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)
+# '
 # It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
 +DeadKey_Map06ff=	PrefixDocs[delivers Fraktur to an extra layer]		
 +DeadKey_Map06ff=		Mutate32OK[<font=fraktur>](Face(Latin))			AssignTo[NUMPAD,16](Id(BoxDraw21))
@@ -254,6 +258,11 @@ DeadKey_Map06f9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<fo
 +DeadKey_Map06f8=		FromTo[US-Base,Greek-AltGr-Junk](SelectRX[[,/<>:]](Face(Latin)))
 +DeadKey_Map06f8=		FromTo[US-Base,Green](SelectRX[[,/<>:]](Face(Latin)))
 +DeadKey_Map06f8=		FromTo[US-Base,Green-AltGr](SelectRX[[,/<>:]](Face(Latin)))
+#
+DeadKey_Map06f7=	PrefixDocs[Superscript (and MODIFIER LETTERS), Phonetic]	Face(SupersPhonetic)
+DeadKey_Map06f6=	PrefixDocs[Subscript (and MODIFIER LETTERS LOW), Small Caps, Legs]	Face(SubsSmallCapsLegs)
+DeadKey_Map06f5=	PrefixDocs[Turnaround, inverted, reversed, turned, hooks (to the right)](Face(Latin))		Face(RotatedsHooks)
+DeadKey_Map06f4=	PrefixDocs[Hooks to the left (and palatal)](Face(Latin))		Face(LeftHooks)
 #
 geometry_via_layer=US-Base
 #
@@ -700,27 +709,37 @@ DEADKEY	00A3
 
 [visual -> RECT/keypad]
 @rect_rows_cols=4,4 
-@rect_horizontal_counts=11,10,11
+@rect_horizontal_counts=11,10,11,9
 @layer_names=Base-Keypad,BoxDraw11,BoxDraw22,BoxDraw12,BoxDraw21,BoxDrawBB,BoxDraw1B,BoxDrawB1,BBoxDrawOnH,BBoxDrawOnV,BBoxDrawOnHV
 @layer_names=BlackTriang,WhiteTriang,PartBlackCircles,WhiteFrame,BlackFrame,RoundDirections,RoundDirectionsPlus,Arcs,PartCircles,RectArr
 @layer_names=Arrows,Arrows2,ArrowsMapsTo,ArrowsWhite,ArrowsBlack,Arrows3,ArrowsDtip,ArrowsDoubled,ArrowsDashedCurved,ArrowDStroked,ArrowsPlay
+@layer_names=HookArrows,ArrowsZigZag,CrossedArrows,ArrowAngles,ArrowsShortArcs,ArrowsArcs,ArrowsToBar,Arrows4andCircles,ArrowsVStroke
 empty=!
-COLgap=0
-ROWgap=0
-# Arrows: Mid: Hor/Ver Extension, bottom row: LeftRight, LongLeftRight-or-LongRight, UpDown
-789/┌┬┐!╔╦╗!╓╥╖!╒╤╕!┏┳┓!┎┰┒!┍┯┑!┲!┱!┢╈┪!╆!╅!
-456*├┼┤!╠╬╣!╟╫╢!╞╪╡!┣╋┫!┠╂┨!┝┿┥!╊!╉!!!!!!!!!
-123-└┴┘!╚╩╝!╙╨╜!╘╧╛!┗┻┛!┖┸┚!┕┷┙!┺!┹!┡╇┩!╄!╇!
-0.↲+─│!!═║!!!!!!!!!!━┃!!!!!!!!!!!!!!!!!!!!!!
-◤▲◥!⌌△⌍!◕◓◔!▗▄▖!▛▀▜!◜∩◝⊘⌈⋂⌉!╭◠╮!◴◚◷!⌜⊓⌝⍁
-◀■▶!◁□▷!◐○◑!▐█▌!▌ ▐!⊂⥀⊃⊗⊆⥁⊇⨂◖⚪◗!!!➲!⊏□⊐⊠
-◣▼◢!⌎▽⌏!!◒!!▝▀▘!▙▄▟!◟∪◞⊖⌊⋃⌋!╰◡╯!◵◛◶!⌞⊔⌟⊟
-!!!!!!!!!!!!!!↵!░▒▓!!!!⊕!!!⨁!!!!!!!!!!!⊞
-↖↑↗÷⇖⇑⇗∕↰↥↱!⬁⇧⬀!⬉⬆⬈!⬑⤊⬏!⇱↟!!↫⇈↬!↻⇡↺!↸⇞!!⏮⏫⏭!
-←⎯→×⇐⏐⇒⨯↤!↦!⇦○⇨!⬅●➡!⇚◯⇛!↞!↠!⇇!⇉!⇠◌⇢!⇺❍⇻!⏪!⏩!
-↙↓↘‒⇙⇓⇘−↲↧↳!⬃⇩⬂!⬋⬇⬊!⬐⤋⬎!!↡⇲!↩⇊↪!↶⇣↷!↵⇟↴!!⏬!!
-↔⟷↕﬩⇔⟺⇕∑↹⟼↨!⬄⟾⇳!⬌!⬍!!!!!!!!!⇆!⇅!!!!!!!!﬩⏯!!!
-# Elementary-school minus is FIGURE DASH
+COLgap=1
+ROWgap=1
+# Arrows: Mid: Hor/Ver Extension, bottom row: LeftRight, LongLeftRight-or-LongRight (or Mirrored LR), UpDown
+789/	┌┬┐!	╔╦╗!	╓╥╖!	╒╤╕!	┏┳┓!	┎┰┒!	┍┯┑!	┲!┱!	┢╈┪!	╆╽╅!
+456*	├┼┤!	╠╬╣!	╟╫╢!	╞╪╡!	┣╋┫!	┠╂┨!	┝┿┥!	╊!╉!	!!!!	╼!╾!
+123-	└┴┘!	╚╩╝!	╙╨╜!	╘╧╛!	┗┻┛!	┖┸┚!	┕┷┙!	┺!┹!	┡╇┩!	╄╿╃!
+0.↲+	─│!!	═║!!	╶╴!!	╷╵!!	━┃!!	╻╹!!	╺╸!!	╼╾!!	╽╿!!	!!!!
+#
+◤▲◥!	⌌△⌍!	◕◓◔!	▗▄▖!	▛▀▜!	◜∩◝⊘	⌈⋂⌉!	╭◠╮!	◴◚◷!	⌜⊓⌝⍁
+◀■▶!	◁□▷!	◐○◑!	▐█▌!	▌ ▐!	⊂⥀⊃⊗	⊆⥁⊇⨂	◖⚪◗!	!!➲!	⊏□⊐⊠
+◣▼◢!	⌎▽⌏!	!◒!!	▝▀▘!	▙▄▟!	◟∪◞⊖	⌊⋃⌋!	╰◡╯!	◵◛◶!	⌞⊔⌟⊟
+!!!!	!!!!	!!!!	▞▚↵!	░▒▓!	!!!⊕	!!!⨁	!!!!	!!!!	!!!⊞
+#
+↖↑↗÷	⇖⇑⇗∕	↰↥↱!	⬁⇧⬀!	⬉⬆⬈➗	⬑⤊⬏!	⇱↟!!	↫⇈↬!	⤎⇡⤏⋰	↸⇞!!	⏮⏫⏭!
+←⎯→×	⇐⏐⇒⨯	↤!↦!	⇦○⇨!	⬅●➡✖	⇚◯⇛!	↞!↠!	⇇!⇉!	⇠◌⇢⋱	⇺❍⇻!	⏪⦿⏩!
+↙↓↘‒	⇙⇓⇘−	↲↧↳!	⬃⇩⬂!	⬋⬇⬊➖	⬐⤋⬎!	!↡⇲!	↩⇊↪!	⤌⇣⤍⋯	↵⇟↴⧺	⇽⏬⇾!
+↔⟷↕﬩	⇔⟺⇕∑	↹⟼↨!	⬄⟾⇳!	⬌!⬍➕	!!!⧻	!!⥉!	⇄⇆⇅⧺	⤑⬸⋮⁜	⇼!!⧻	⇿!⏯!
+#
+⤣!⤤!	↜!↝╱	⤲⤧⤱!	⦭⦬⦨!	⤵⤸⤴!	↻!↺!	!⤒!!	⥀⟰⥁⨸	⤆⤉⤇!
+↩!↪!	⇜╳⇝╲	⤪⤫⤨!	⦩⦽⦪!	⤺!⤻!	↜!↝!	⇤!⇥!	⭅⦾⭆⊛	⇷!⇸!
+⤦!⤥!	╱↯╲⌁	⤮⤩⤭!	⦫⦯⦮!	⤶⤹⤷⤼	↶!↷⧿	!⤓!!	↻⟱↺⊖	⤂⤈⤃!
+⥻⥹⨗!	⟿⬳⦚⍼	⤰⤬⤯!	!!!!	⤳⤿⤾⤽	↭⤳!⧾	↹!!!	➲⥰⊜⊕	⇹⤄!!
+# Elementary-school minus is FIGURE DASH; for arrow-angles, clockwise are H/V, ccw are diag.
+# Usurp diagonals: dashed, Double/Triple arrows, Arrows with double-bar, Zigzag
+# * is sometimes opposite of /, i.e., \.  We abuse .Del often…   ※ near ⁜???
 [visual -> KBD/Digits]
 #
 # For fractions, we look for fractions with minimal denominator/numerator which contain the given digit in numerator/denominator.  We take the first one and the second one from the list.
@@ -773,18 +792,18 @@ in_key_separator2=‼
 # Surrogate + 8bit + Modifiers, Modifiers below-or-opposite, Vertical (or Comma-like or Doubled or Dotlike or Rotated or letter-like) Modifiers, 
 # Prime-like or Centered modifiers, Combining, Combining below-or-opposite, Vertical/plus-like/arrows and dotlike Combining, Combining for symbols
 # ⎖ in prime-like apostrophe??? - is currently obscured…
-/APOSTROPHE=		'´ʼʾˀˊ΄/ˏˌ/ˈˌˡ/ʹˑ/ ́ ̉ ̛ ̷ ̸ ́ ͗  ᷎  ᷄  ᷇  ᷁/ ̗ ̩  ̦  ̹  ͅ / ̍ ̓  ̓ ̕ ̩  /  ⃬  ⃐ ⃫  ⃬
-/QUOTATION_MARK=	"¨˝˸ː΅/˶˵/ˮ/ʺ/ ̈ ̋ ̏ ̈́  ᷉  ᷈  ゙    / ̤  ͈ / ̎  ͛   ͈ /  ⃛   ⃜  ⃨
-/GRAVE_ACCENT=		`ˋʿˁˤ/ˎ/ʻʽ/˴˵/ ̀ ̀  ͑  ᷆  ᷅  ᷀ / ̖  ̜   ᷂ / ̒ ̔ /  ⃑ ⃭   ⃠ ⃥
-#  Stopgap measure to preserve many flavors of grave:
-/DBL_GRAVE_ACCENT=	`ˋʿˁˤ˵/ˎ/ʻʽ/˴/ ̀ ̀  ͑  ᷆  ᷅  ᷀ / ̖  ̜   ᷂ / ̒ ̔ /  ⃑ ⃭   ⃠ ⃥
-/CIRCUMFLEX_ACCENT=	^ˆ˄˟/˰/˪˫ꜛʳʴʵʶˣ// ̂ ̑  ͒  ͡    ̽  ͆  ᷍ / ̭ ̯   ᷼     ͓  ̪  ̼  ͎  ᷊ /  ̘  ̙   ͉  ̘  ͉ /   ⃟  ⃤  ⃧ ⃩ ⃰  ⃟ 
-/BREVE=			˘ˇ˅/ˬ˯˽˾/˱˲˿ˠʸꜜ/˂˃/ ̆ ̌ ̐ ͝   ᷓ  ᷾   ͐  ᷌  ᷋   ᷃/ ̮ ̬ ͜    ̺  ̫   ͔  ͕  ͖  ᷿  /  ͍   ͢  /   ⃞  ⃢  ⃣ 
-/DEGREE_SIGN=		°˚˙/˳/˙ˠʰʱʲˢʷᵊᶣ/˓˒/ ̊     ᷒  ゚ / ̣ ̥ ̤  ̻   ͙   ͚ / ̇ ͘  ̣ ̤ ͘ /   ⃝ ⃘
-/TILDE=			~ ˜/˷/ⸯꙿ/˞/ ̃ ̴ ͂ ͊ ͋ ͌   ͠  ᷑  / ̰  ̧  ̨  ̡  ̢  ᷏  ᷐  ᷽  ᷽ / ̾ ̾ /   ⃗  ⃖ ⃯ ⃮ ⃕ ⃔ ⃙ ⃚ ⃡
-/CEDILLA=		¸˛ͺ/˷/ⸯꙿ/˞/  ̧  ̨  ̡  ̢  ̰  ᷏  ᷐  ᷽  ᷽ /  ᷎  ̃  ̴ ͂ ͊ ͋ ͌   ͠  ᷑  / ̾ ̾ /   ⃗  ⃖ ⃯ ⃮ ⃕ ⃔ ⃙ ⃚ ⃡
-/MACRON=		¯ˉ˹˺/ˍ˻˼‗/˭/˔˕˖˗/ ̄ ̅ ̵ ̶ ̿ ͞   ̚  / ̱  ̲  ̳ ͇ ͟   ̠  /  ͍   ̝  ̞  ̟  ̠  ̘  ̙   ͉ /  ⃒ ⃓ ⃦  ⃪ ⃡  ⃡  ⃗  ⃖ ⃯ ⃮
-/SLASH=			⁄÷∕ / ˈˌ / / /  ̸  ̷  ̶  ̵ / /  ⃒   ⃓ / ̸  ̷  ⃒   ⃓  ̶  ̵
+/APOSTROPHE=		'´ʼʾˀˊ΄/ˏˌ/ˈˌˡ/ʹˑ/ ́ ̉ ̛ ̷ ̸ ́ ͗  ᷎  ᷄ ᷇ ᷁/ ̗ ̩  ̦  ̹  ͅ / ̍ ̓  ̓ ̕ ̩  /  ⃬  ⃐  ⃫  ⃬
+/QUOTATION_MARK=	"¨˝˸ː΅/˶˵/ˮ/ʺ/ ̈ ̋ ̏ ̈́ ᷉ ᷈  ゙  /  ̤  ͈ / ̎  ͛   ͈ /  ⃛  ⃜  ⃨
+/GRAVE_ACCENT=		`ˋʿˁˤ/ˎ/ʻʽ/˴˵/ ̀ ̀  ͑  ᷆  ᷅  ᷀ / ̖  ̜   ᷂ / ̒ ̔ /  ⃑  ⃭  ⃠  ⃥
+#  Stopgap measure to preserve many flavors of grave (we moved ˵):
+/DBL_GRAVE_ACCENT=	`ˋʿˁˤ˵/ˎ/ʻʽ/˴/ ̀ ̀  ͑  ᷆  ᷅  ᷀ / ̖  ̜   ᷂ / ̒ ̔ /  ⃑  ⃭  ⃠  ⃥
+/CIRCUMFLEX_ACCENT=	^ˆ˄˟/˰/˪˫ꜛʳʴʵʶˣ// ̂ ̑  ͒  ͡   ̽  ͆  ᷍ / ̭ ̯   ᷼  ͓  ̪  ̼  ͎  ᷊ /  ̘  ̙   ͉  ̘  ͉ /  ⃟   ⃤  ⃧  ⃩ ⃰  ⃟ 
+/BREVE=			˘ˇ˅/ˬ˯˽˾/˱˲˿ˠʸꜜ/˂˃/ ̆ ̌ ̐ ͝  ᷓ  ᷾   ͐  ᷌  ᷋  ᷃ / ̮ ̬ ͜    ̺  ̫ ͔  ͕ ͖ ᷿   /  ͍  ͢  /   ⃞   ⃢   ⃣ 
+/DEGREE_SIGN=		°˚˙/˳/˙ˠʰʱʲˢʷᵊᶣ/˓˒/ ̊  ᷒  ゚ / ̣ ̥ ̤  ̻   ͙   ͚ / ̇ ͘  ̣ ̤ ͘ /   ⃝  ⃘
+/TILDE=			~ ˜/˷/ⸯꙿ/˞/ ̃  ̴ ͂ ͊ ͋ ͌ ͠   ᷑  / ̰  ̧  ̨  ̡  ̢  ᷏  ᷐  ᷽  ᷽ / ̾ ̾ /  ⃗  ⃖  ⃯  ⃮  ⃕  ⃔ ⃙ ⃚ ⃡
+/CEDILLA=		¸˛ͺ/˷/ⸯꙿ/˞/  ̧  ̨  ̡  ̢  ̰  ᷏  ᷐  ᷽  ᷽ /  ᷎  ̃  ̴ ͂ ͊ ͋ ͌ ͠   ᷑  / ̾ ̾ /   ⃗  ⃖ ⃯  ⃮  ⃕ ⃔ ⃙ ⃚ ⃡
+/MACRON=		¯ˉ˹˺/ˍ˻˼‗/˭/˔˕˖˗/ ̄ ̅ ̵ ̶ ̿ ͞   ̚  / ̱  ̲  ̳ ͇ ͟   ̠  /  ͍   ̝  ̞  ̟  ̠  ̘  ̙   ͉ /  ⃒ ⃓ ⃦  ⃪  ⃡  ⃡  ⃗  ⃖  ⃯  ⃮
+/SLASH=			⁄÷∕ / ˈˌ / / /  ̸  ̷  ̶  ̵ / /  ⃒  ⃓ /  ̸  ̷  ⃒   ⃓ ̶   ̵
 #
 # These are from "main blocks" of the modifiers and combining; plus Greek standalone diacritics: ͺ΄΅
 # One of ˠ is obscured by vertical line with middle dot...  The Macron-\ 29F7 obscures ˭.
@@ -793,7 +812,8 @@ in_key_separator2=‼
 # ʰʱʲˡˢʷ - from IPA.  The rest (and ʳʴʵʶʸ) are v1.1 letter modifiers.  (ˠ is in front to unobscure the rest.)
 #
 # Combining for symbols: arrows and round arrows -> ~; rectangular around: to ˘ .
-#`´¨˜ˆˇ°¯
+#`´¨˜ˆˇ°¯	Harpoons are ordered as →, ←
+# perl -C31 -wlne "next if /^#/; s(^/\w+=\s+)() or die; @t = split m((?<=.)/); print q(<tr><td>), join(q(</td><td>), @t), q(</td></tr>)" a1 > a1.html
 [face_shortcuts]
 l=Latin
 c=CyrillicPhonetic

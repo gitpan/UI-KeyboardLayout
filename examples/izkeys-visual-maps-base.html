@@ -11,6 +11,7 @@
 <title>izKeys layouts: visual diagrams</title>
 <style>
 .klayout kbd { font-family: monospace, sans-serif, serif, DejaVu Sans Mono, junicode, Symbola; }
+.klayout kbd:after, .klayout kbd:before { font-family: monospace; }	/* Otherwise arrows too small??? */
 		/* START auto-generated style */
 			/* To be auto-generated */
 /* END auto-generated style */
@@ -18,7 +19,7 @@
 </head>
 <body>
 
-<h2>Shortcuts for an impatient reader (you know who you mean!)</h2>
+<h2>Shortcuts for an impatient reader (you know who I mean!)</h2>
 
 <p><a href=#goals-progress>Goals (and current progress report)</a>, <a href=#what-is-what>reading layout diagrams</a>, 
 <a href=#extra-keys>“extra” keys</a>.  Do <a href=#extra-fonts>characters in layouts show all right?</a>
@@ -58,7 +59,7 @@ X11-supported: Kazakh/Tatar/Ossetian/Chuvash/Udmurt/Komi/Yakut/Kalmyk/Bashkirian
 <b><code>Compose</code> key:</b> <a href=#compose-key>basics</a>, <a href=#compose-flavors>3 implemented flavors</a>.
 </p>
 
-<h1>izKeys layouts: visual diagrams</h1><a name=what-is-what></a>
+<a name=what-is-what></a><h1>izKeys layouts: visual diagrams</h1>
 
 <p>The diagrams below illustrate the most basic ways to use the <b>izKeys</b> (<i>ee-zee-keys</i>) keyboard layout.
 How to access the other keys?  The info may be extracted from the
@@ -126,7 +127,7 @@ which support these characters (put mouse on top of a character, and an explanat
 <a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout/lib/UI/KeyboardLayout.pm#There_is_no_way_to_show_Unicode_contents_on_Windows>instructions
 how to fix this</a> — at least in Firefox.</p>
 
-<h1>The most basic Layout</h1><a name=basic-latin></a>
+<a name=basic-latin></a><h1>The most basic Layout</h1>
 
 <div>
 <div class="klayout-wrapper over-shift-outline">
@@ -167,7 +168,7 @@ yet another key on alphanumeric rows: on ABNT it is next to the right <code>Shif
 (Our diagrams do not show this key at all; for this layout, we do not plan to use it other than as a
 <a href=#compose-key><code>Compose</code> key</a>.)</p>
 
-<h1>Base Latin layout when <code>AltGr</code> is pressed </h1><a name=altgr-latin></a>
+<a name=altgr-latin></a><h1>Base Latin layout when <code>AltGr</code> is pressed </h1>
 
 <p>All accented letters in this diagram
 are also available on easier-to-remember multi-key sequences (starting with <span class=prefix>prefix</span> keys);
@@ -245,7 +246,7 @@ corresponding combining character.  (Moreover, one can produce more standalone v
 by <code>Shift</code> or <code>AltGr</code>; one can get more combining variants by prefix + <code>'</code> — and one can
 use <code>Shift</code>/<code>AltGr</code> on <code>Shift</code> or <code>'</code>.)  (See <a href=#prefix-mogr>this summary</a>.)</p>
 
-<h1>Base Cyrillic layout</h1><a name=base-cyrillic></a>
+<a name=base-cyrillic></a><h1>Base Cyrillic layout</h1>
 
 <p>The base layout of Cyrillic personality follows the only phonetic layout which has a remote chance to be called 
 “standard” — one from X11.
@@ -269,7 +270,7 @@ symbols; colors as in the previous diagram).  </p>
 			/* To be auto-generated */
 </div>  <!-- Cannot match the width of the bottom row exactly — probably due to rounding to 1px??? -->
 
-<h1><code>AltGr</code> Cyrillic layout</h1><a name=altgr-cyrillic></a>
+<a name=altgr-cyrillic></a><h1><code>AltGr</code> Cyrillic layout</h1>
 
 <p>In <code>izKeys</code> layout, the cyrillic letters are <i>prioritized</i> into classes; the higher the priority, the easier is the
 letter to key in.  In the top priority class are modern Russian letters; one can enter them using only the <code>Shift</code>
@@ -313,7 +314,7 @@ Cyrillic-specific prefix keys are: <code>AltGr-'</code> introduces “extra” C
 (and fractions), and <code>AltGr-^</code> introduces titlo-forms and “exotic” Cyrillic characters.  
 As usual, pressing the prefix twice produces the corresponding combining character: the stress mark and titlo.
 
-<h1>The “prefixed” Cyrillic layouts</h1><a name=extra-cyrillic></a>
+<a name=extra-cyrillic></a><h1>The “prefixed” Cyrillic layouts</h1>
 
 The “extras” Cyrillic layout (the prefix is <code>AltGr-'</code> in Cyrillic personality; double-<code>AltGr-SPACE</code>
 in Latin):</p>
@@ -377,7 +378,7 @@ a hope to get a consensus on how to transcribe North Slavic manuscripts into Uni
 <a href=http://www.synaxis.info/azbuka/ponomar/charset/charset_2.htm>part II</a>, and <a href=http://www.ponomar.net/cu_support.html>this
 page</a>.  (There is widespread misunderstanding of how to use еЕ/єЄ for paleo-Slavonic: these are for ”есть узкий/широкий”.)</p>
 
-<h1>Base Greek layout + monotonic + polytonic + Coptic</h1><a name=greek></a>
+<a name=greek></a><h1>Base Greek layout + monotonic + polytonic + Coptic</h1>
 
 
 <p><a name=greenEx></a>Base Greek layout as visible from Latin Personality (on GREEN=<code>Shift-SPACE</code> prefix, so 
@@ -512,7 +513,7 @@ SHEI/shy/šai ϣ, HORI/hoori/hori ϩ.  (To simplify memorization, SAMPI/<b>none<
 on <code>AltGr-p</code>.)</p>
 
 
-<h1>“Business/Currencies/Hooks/Added Vertical Line/Not+mogrify” layout</h1><a name=business></a>
+<a name=business></a><h1>“Business/Currencies/Hooks/Added Vertical Line/Not+mogrify” layout</h1>
 
 <p>“Business/Currencies/Hooks/Added Vertical Line/Not+mogrify” layout (as visible from Latin personality after <code>AltGr-$</code>):</p>
 
@@ -544,13 +545,13 @@ letters</i> between themselves (Azeri əƏ vs. African ǝƎ), or with similarly-
 rules, and their surrounding may be typeset differently by a smart enough typesetter.  Similarity (or even identity) of glyphs has
 very little relationship to “sameness” of Unicode characters.</p>
 
-<h1>The standalone version of the Greek for-Polytonic personality</h1><a name=greek-standalone></a>
+<a name=greek-standalone></a><h1>The standalone version of the Greek for-Polytonic personality</h1>
 
 <div class="klayout uclc do-alt alt2 base-center large-base" kbd_rebuild="/opt=Pers +base=l,,0 on-left+=g,,0 on-right+=g,,1">
 			/* To be auto-generated */
 </div>  <!-- Cannot match the width of the bottom row exactly — probably due to rounding to 1px??? -->
 
-<h1>The standalone version of the Hebrew personality</h1><a name=hebrew></a>
+<a name=hebrew></a><h1>The standalone version of the Hebrew personality</h1>
 
 <div class="klayout rtl-hover uclc do-alt" kbd_rebuild="/opt=heb0,rtl-hover-Trivia +base=l,,0 +=h,,0">
 			/* To be auto-generated */
@@ -731,7 +732,7 @@ most probably the application will take them from different fonts — and even i
 different shapes/sizes since symbols are made look good when surrounded by Latin characters.  Another comparison: ℵ₀, ℵ₁ vs.
 א₀, א₁.  (Both examples are entered as: ALEPH₀, ALEPH₁.)</p>
 
-<h1>Extras: use <code>Application-Menu</code> (and other) modifiers</h1><a name=modifiers-maps></a>
+<a name=modifiers-maps></a><h1>Extras: use <code>Application-Menu</code> (and other) modifiers</h1>
 
 <p>First of all, the base layer of the <code>Green/Ripe</code> faces is also 
 accessible via combining keyspresses with <code>lCtrl-lAlt</code> or <code>Application-Menu</code> modifier key (this enters base Greek/Cyrillic 
@@ -798,7 +799,7 @@ multiple modifier keys: <code>AltGr-ApplicationMenu</code> enters Double-Struck 
 <a name=math-letters-more></a>
 <p>Unicode defines also multiple ranges of <b>Latin</b> mathematical letters, with just minor typographical variations.
 The utility of users entering them directly is questionable (except maybe for letters A,a,I which may appear both in plain English,
-and as math symbols; so they may win from explicit disambiguation; or — following the sensible practice mandated by ISO — 
+and as math symbols; so they may win from explicit disambiguation; or — following the sensible practice mandated by ISO-80000-2 — 
 use different symbols for letters d,e,i when they mean variables, and when they mean constants or operators; monospace math?).
 However, to debug the 
 problems with different applications (not) working with the keyboard, it makes sense to assign distinct characters to as many 
@@ -815,7 +816,7 @@ due to a Windows bug with column number 15 in the keyboard description table),  
 is a shortcut for <code>ApplicationMenu</code>.  Out of math flavors, we picked up those most frequently seen, and those most 
 visually different from the text flavor.)
 
-<h1>Extras: using <code>Compose</code> key</h1><a name=compose-key></a>
+<a name=compose-key></a><h1>Extras: using <code>Compose</code> key</h1>
 
 <p>The idea of <a href=http://en.wikipedia.org/wiki/Compose_key><code>Compose</code> key</a> is that to get a character, you punch this key, then enter a sequence of characters 
 which is “a natural representation” of the character (or another “natural identifier” of it).  In other 
@@ -844,23 +845,23 @@ more useful to inspect entity names via <a href=http://www.w3.org/TR/xml-entity-
 must use Latin characters in the decomposition; hence using <code>Compose</code> from, e.g., Cyrillic personality is
 tricky.)</p>
 
-<h1>General goals and progress report</h1><a name=goals-progress></a>
+<a name=goals-progress></a><h1>General goals and progress report</h1>
 
 <ol>
 <li>No gotchas for people who cannot remember anything.</li>
-<li>Doing 3-4 experiments, one must be able to find most (80-90% achievable?) of covered characters
+<li>Doing 3–4 experiments, one must be able to find most (80–90% achievable?) of covered characters
      knowing only a handful of general rules for how position are allocated to characters <a href=#gp-rem><sup>[*]</sup></a>.</li>
-<li>Gradual degradation: if one memorizes many rules, one should be able to type exotic characters quickly
+<li>Gradual degradation: if one memorizes many allocation rules, one should be able to type exotic characters quickly
 and conveniently.  But if one remembers fewer rules, it should be the convenience which goes away, not
 the bulk repertoir of available characters.  This means that a significant number of characters should be
-available via a very easy to remember access rules (no matter whether the access is ergonomic).
+available via very easy to remember access rules (no matter whether the access is ergonomic).
 Then the more one is ready to memorize, the more ergonomic the layout becomes.<span style="margin-bottom: 16em"></span>
 
 <br>This means that many characters should be accessibe in a whole scale of different heuristics.  The scale
 goes from easy to remember but not ergonomic to the opposite.
 
-<li>Have most (70%-80% achievable?) of covered characters available in easy-to-remember positions.</li>
-<li>Have whole coverage of certain ranges of Unicode.</li>
+<li>Have most (70%–80% achievable?) of covered characters available in easy-to-remember positions.</li>
+<li>Have full coverage of certain ranges of Unicode.</li>
 </ol>
 
 <p><a name=gp-rem><sup>[*]</sup></a>
@@ -880,7 +881,7 @@ Currently it is unclear if the general rules may be shared by all the “applica
      from the Latin personality: titlo-chars, 10ⁿ-combiners and most esoteric chars need double-or-"special" prefix keys;</li>
 <li>Full coverage of Hebrew/Yiddish/Ladino characters, points, cantillation, punctuation
      (except alternative/wide forms and precomposed chars);</li>
-<li>The <a href=#compose-key><code>Compose</code> prefix key</a> based on std X11 Compose tables, MathML entity names (up to length 5), and rfc1345 codes;</li>
+<li>The <a href=#compose-key><code>Compose</code> prefix key</a> based on std X11 Compose tables, MathML entity names, and rfc1345 codes;</li>
 <li>Full coverage of currency symbols;</li>
 <li>Full coverage of vulgar fractions;</li>
 <li>Full coverage of Coptic alphabet (if not accessed from Greek personality, requires double-or-"special" prefix keys);</li>
@@ -915,7 +916,7 @@ modifier and <code>Compose</code>);</li>
 
 </ul></p>
 
-<h1>Prefix keys: accessors and mogrifiers</h1><a name=prefix-mogr></a>
+<a name=prefix-mogr></a><h1>Prefix keys: accessors and mogrifiers</h1>
 
 <p>(The explanations below complement the character tables for the <a href=coverage-1prefix-Latin.html>Latin</a> and <a href=coverage-1prefix-Cyrillic.html>Cyrillic</a>
 personalities.)
@@ -955,10 +956,15 @@ access some other useful stuff</a>; we mention only:</p>
 	<code>~</code>	Tilde [+ subst-Vietnamese] — overflows to/from the column on left
 	<code≯</code>	Stroke, cut-off, “other” phonetic {AND: Um, doubled letters, ŭ, dot above, double-overbar, but-not, fences}
 	<code>-</code>	Macron, add horizontal line (or double line), phonetic, dashes (on digits etc) {AND: quill, right-hook, inv-breve, paleocontraction}
+	
 	<code>$</code>	Currencies, horn, add-vertical-line(s) {AND: double addleft/addright, “text” control-key symbols, etc}
+	<code>↑</code>	Superscript (and MODIFIER LETTERS), Phonetic
+	<code>↓</code>	Subscript (and MODIFIER LETTERS LOW), Small Caps, Legs
+	<code>→</code>	Turnaround, inverted, reversed, turned, hooks (to the right)
+	<code>←</code>	Hooks to the left (and palatal)
 </pre>
 
-<p>(The last one is also available from other personalities.)</p>
+<p>(The last group is also available from other personalities.)</p>
 
 <p>The following four are available after Greek (pre-)prefix (<a href=#GreenRipe><code>Green</code></a>)
 or with Green-modifiers (<code>Ctrl-Alt-</code>); combining them with <code>Shift</code> is equivalent to combining the

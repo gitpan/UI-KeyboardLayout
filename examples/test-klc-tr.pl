@@ -65,10 +65,10 @@ sub fix_liga ($$) {
   my $z = pop @in;
   for my $l (@in) {
     my($vk, $i) = ($l =~ /^\s*\{\s*(\S+)\s*,\s*(\d+)\s*,/) or die "Unrecognized LIGATURE: <<$l>>";
-    my $LIG = $LIGS->{$vk} or die "Can't find WCH_LGTRs for <$vk>";
-    defined ($LIG = $LIG->[$idx{$vk}++ || 0]) or die "Too many LIGATURES for <$vk>: I see $idx{$vk}; command line argument too low?";
+    my $LIGs = $LIGS->{$vk} or die "Can't find WCH_LGTRs for <$vk>";
+    defined (my $LIG = $LIGs->[$idx{$vk}++ || 0]) or die "Too many LIGATURES for <$vk>: I see $idx{$vk}; command line argument too low?";
     my $exp = substr $LIG, 0, 1;
-    $i == $LIG or $i == $exp or die "Unexpectedly broken LIGATURE for <$vk>: see $i, expect $exp or $LIG";
+    $i == $LIG or $i == $exp or die "Unexpectedly broken LIGATURE for <$vk>: see $i, expect $exp or $LIG (in [@$LIGs])";
     $l =~ s/^(\s*\{\s*\S+\s*,\s*)(\d+)\b/$1$LIG/ or die "Panic in s///???";
   }
   join '', @in, $z

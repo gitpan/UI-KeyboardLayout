@@ -21,3 +21,9 @@ in; it makes sense to redo this time to time.
 for %f in (*) do ( env -u PERL5OPT D:\Programs\cygwin.zip\cygwin\bin\perl.exe -I %xHOME%/ru-pho-keyboard/UI-KeyboardLayout/lib  -wC31 %xHOME%/ru-pho-keyboard/UI-KeyboardLayout/examples/print_nameslist.pl %f  >o\%f-charnamelist )
 cd o
 for %f in (*) do ( sort %f ../../../../ooo-us ../../../../ooo-us | uniq -u > ..\c\diff-%f )
+
+============= Check phonetics against presernt AltGr-// bindings
+	Separate the DEADKEY sections into sub_sup
+perl -C31 -wlane "next if /^000[ad]\b|^>\s+<control/; die $_ unless /^\w+\s+<\s*(.+?)>/; print $1" UPA-charnamelist IPA-obsolete-and-capital-small-charnamelist IPA-chars-charnamelist  |sort -u > ..\..\sub_sup-phon
+perl -C31 -wlane "next unless /^\w/ and not /^DEADK/; print chr hex $F[1]" sub_sup |sort -u >sub_sup-have
+cat sub_sup-have sub_sup-have sub_sup-phon | sort | uniq -u >sub_sup-phon-miss

@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION = "0.60";
+$VERSION = $VERSION = "0.61";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -80,6 +80,13 @@ UI::KeyboardLayout - Module for designing keyboard layouts
 
   # Download from http://www.unicode.org/Public/UNIDATA/
   UI::KeyboardLayout::->set_NamesList("$ENV{HOME}/Downloads/NamesList.txt"); 
+
+  UI::KeyboardLayout::->set__value('ComposeFiles',	# CygWin too
+				  ['/usr/share/X11/locale/en_US.UTF-8/Compose']);
+  UI::KeyboardLayout::->set__value('EntityFiles',
+				  ["$ENV{HOME}/Downloads/bycodes.html"]);
+  UI::KeyboardLayout::->set__value('rfc1345Files',
+				  ["$ENV{HOME}/Downloads/rfc1345.html"]);
   
   my $i = do {local $/; open $in, '<', 'MultiUni.kbdd' or die; <$in>}; 
   # Init from in-memory copy of the configfile
@@ -626,7 +633,8 @@ C<< <pseudo-fake-***> >> rules are obtained by scanning the name for
 as well as for C<UM> (as C<umify>), paleo-Latin digraphs and C<CON/VEND> 
 (as C<paleocontraction-by-last>), doubled-letters
 (as C<doubleletter>), C<MIDDLE-WELSH> doubled-letters
-as (C<doubleletter-middle-welsh>).
+(as C<doubleletter-middle-welsh>), C<MODIFIER LETTER> (possibly with C<RAISED>
+or C<LOW>; as C<sub/super>).
 
 =item *
 
@@ -1279,24 +1287,68 @@ currently hardwired.  Some pictures and tables are available on
 
 =head1 Useful tidbits from Unicode mailing list (unsorted)
 
-.... skew-orthogonal complement
-
-Summary views into CLDR
-
-  http://www.unicode.org/cldr/charts//by_type/patterns.characters.html
-  http://www.unicode.org/cldr/charts//by_type/misc.exemplarCharacters.html
-
-Drachma: http://unicode.org/mail-arch/unicode-ml/y2012-m05/0167.html
-
-  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3866.pdf
-
-Pound
-
-  http://unicode.org/mail-arch/unicode-ml/y2012-m05/0242.html
+=head2 On keyboards
 
 MS keyboard (wrong?)
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m05/0268.html
+
+Symbols for Keyboard keys:
+
+  http://unicode.org/mail-arch/unicode-ml/Archives-Old/UML009/0204.html
+     “Menu key” variations:
+  http://unicode.org/mail-arch/unicode-ml/Archives-Old/UML009/0239.html
+     Role of ISO/IEC 9995, switchable keycaps
+  http://unicode.org/mail-arch/unicode-ml/Archives-Old/UML009/0576.html
+
+On the other hand, having access to text only math symbols makes it possible to implement it in computer languages, making source code easier to read.
+
+Right now, I feel there is a lack of keyboard maps. You can develop them on your own, but that is very time consuming.
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m04/0117.html
+
+Keyboards - agreement (5 scripts at end)
+
+  ftp://ftp.cen.eu/CEN/Sectors/List/ICT/CWAs/CWA-16108-2010-MEEK.pdf
+
+Need for a keyboard, keyman examples; why "standard" keyboards are doomed
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0015.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0022.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0036.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0053.html
+
+=head2 History of Unicode
+
+Unicode in 1889
+
+  http://www.archive.org/stream/unicodeuniversa00unkngoog#page/n3/mode/2up
+
+Structure of development of Unicode
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m07/0056.html
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0099.html
+      I don't have a problem with Unicode. It is what it is; it cannot
+      possibly be all things to all people:
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0101.html
+
+Compromizes vs reality
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m02/0106.html
+  http://unicode.org/mail-arch/unicode-ml/y2010-m02/0117.html
+
+Stability of normalization
+
+  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0055.html
+
+Universality vs affordability
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0157.html
+
+Drachma: 
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m05/0167.html
+  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3866.pdf
 
 w-ring is a stowaway
 
@@ -1306,20 +1358,94 @@ History of squared pH
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m02/0123.html
 
-Why and how to introduce innovative characters
+Silly quotation marks: 201b, 201f
 
-  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0045.html
+  http://en.wikipedia.org/wiki/Quotation_mark_glyphs
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0300.html
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0317.html
+  http://en.wikipedia.org/wiki/Comma
+  http://en.wikipedia.org/wiki/%CA%BBOkina
+  http://en.wikipedia.org/wiki/Saltillo_%28linguistics%29
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0367.html
+  http://unicode.org/unicode/reports/tr8/ 
+  		under "4.6 Apostrophe Semantics Errata"
 
-Upside-down text in CSS (remove position?)
+OHM: In modern usage, for new documents, this character should not be used. 
 
-  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0037.html
+  http://unicode.org/mail-arch/unicode-ml/y2011-m08/0060.html
 
-Classification of Dings (bats etc)
+Uppercase eszett ß ẞ
 
-  std.dkuug.dk/jtc1/sc2/wg2/docs/n4115.pdf
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0007.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0008.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0142.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0045.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0147.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0170.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0196.html
 
-	Escape: 2be9 2b9b
-	ARROW SHAFT - various
+Should not use (roman numerals)
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m11/0253.html
+
+Colors in Unicode names
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m03/0100.html
+
+Xerox and interrobang
+
+  http://unicode.org/mail-arch/unicode-ml/y2005-m04/0035.html
+
+Tibetian (history of encoding, relative difficulty of handling comparing to cousins)
+
+  http://unicode.org/mail-arch/unicode-ml/y2013-m04/0036.html
+  http://unicode.org/mail-arch/unicode-ml/y2013-m04/0040.html
+
+Translation of 8859 to 10646 for Latvian was MECHANICAL
+
+  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0057.html
+
+Hyphens:
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m10/0038.html
+
+NOT and BROKEN BAR
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m12/0207.html
+  http://www.cs.tut.fi/~jkorpela/latin1/ascii-hist.html#5C
+
+Combining power of generative features - implementor's view
+
+  http://unicode.org/mail-arch/unicode-ml/y2004-m09/0145.html
+
+=head2 Greek and about
+
+OXIA vs TONOS
+
+  http://www.tlg.uci.edu/~opoudjis/unicode/unicode_gkbkgd.html#oxia
+
+Greek letters for non-Greek
+
+  http://stephanus.tlg.uci.edu/~opoudjis/unicode/unicode_interloping.html#ipa
+
+Macron and breve in Greek dictionaries
+
+  http://www.unicode.org/mail-arch/unicode-ml/y2013-m08/0011.html
+
+LAMBDA vs LAMDA
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m06/0063.html
+
+COMBINING GREEK YPOGEGRAMMENI equilibristic (depends on a vowel?)
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0299.html
+  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0308.html
+  http://www.tlg.uci.edu/~opoudjis/unicode/unicode_adscript.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0046.html
+
+=head2 Math and technical texts
+
+Missing:  .... skew-orthogonal complement
 
 Math Almost-Text encoding
 
@@ -1332,6 +1458,34 @@ Math Almost-Text encoding
     much less oriented towards semantic clarifications and
     distinctions than many people might hope for (and this includes
     me, some of the time at least).
+
+Horizontal/vertical line/arrow extensions
+
+  http://unicode.org/charts/PDF/U2300.pdf
+  http://unicode.org/mail-arch/unicode-ml/y2003-m07/0513.html
+  http://std.dkuug.dk/JTC1/SC2/WG2/docs/n2508.htm
+
+Pretty-printing text math
+
+  http://code.google.com/p/sympy/wiki/PrettyPrinting
+
+Sub/Super on a terminal
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m07/0028.html
+
+CR symbols
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m07/0163.html
+
+Math layout
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0303.html
+
+=head2 Looking at the future
+
+Why and how to introduce innovative characters
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0045.html
 
 Unicode knows the concept of a provisional property
 
@@ -1347,6 +1501,41 @@ Unicode knows the concept of a provisional property
 	     ZERO-WIDTH UNDEFINED DECOMPOSITION MARK
 	     		- to define decomposition, prepend it
 
+Exciting new letter forms for English
+
+  http://www.theonion.com/articles/alphabet-updated-with-15-exciting-new-replacement,2869/
+
+Proposing new stuff
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m01/0238.html
+
+A useful set of criteria for encoding symbols is found in
+Annex H of this document:
+
+  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3002.pdf 
+
+=head2 Unsorted
+
+Summary views into CLDR
+
+  http://www.unicode.org/cldr/charts//by_type/patterns.characters.html
+  http://www.unicode.org/cldr/charts//by_type/misc.exemplarCharacters.html
+
+Pound
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m05/0242.html
+
+Upside-down text in CSS (remove position?)
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0037.html
+
+Classification of Dings (bats etc)
+
+  std.dkuug.dk/jtc1/sc2/wg2/docs/n4115.pdf
+
+	Escape: 2be9 2b9b
+	ARROW SHAFT - various
+
 Yiddish digraphs
 
   http://unicode.org/mail-arch/unicode-ml/y2011-m10/0121.html
@@ -1357,51 +1546,14 @@ Locales
   http://blog.kyero.com/2010/12/02/lost-in-translation-locales-not-languages/
   http://unicode.org/mail-arch/unicode-ml/y2006-m06/0203.html
 
-Silly quotation marks: 201b, 201f
-
-  http://en.wikipedia.org/wiki/Quotation_mark_glyphs
-  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0300.html
-  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0317.html
-  http://en.wikipedia.org/wiki/Comma
-  http://en.wikipedia.org/wiki/%CA%BBOkina
-  http://en.wikipedia.org/wiki/Saltillo_%28linguistics%29
-  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0367.html
-  http://unicode.org/unicode/reports/tr8/ 
-  		under "4.6 Apostrophe Semantics Errata"
-
-COMBINING GREEK YPOGEGRAMMENI equilibristic (depends on a vowel?)
-
-  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0299.html
-  http://unicode.org/mail-arch/unicode-ml/y2006-m06/0308.html
-  http://www.tlg.uci.edu/~opoudjis/unicode/unicode_adscript.html
-  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0046.html
-
 General
 
   http://ebixio.com/online_docs/UnicodeDemystified.pdf
-
-Symbols for Keyboard keys:
-
-  http://unicode.org/mail-arch/unicode-ml/Archives-Old/UML009/0204.html
-     “Menu key” variations:
-  http://unicode.org/mail-arch/unicode-ml/Archives-Old/UML009/0239.html
-     Role of ISO/IEC 9995, switchable keycaps
-  http://unicode.org/mail-arch/unicode-ml/Archives-Old/UML009/0576.html
-
-Horizontal/vertical line/arrow extensions
-
-  http://unicode.org/charts/PDF/U2300.pdf
-  http://unicode.org/mail-arch/unicode-ml/y2003-m07/0513.html
-  http://std.dkuug.dk/JTC1/SC2/WG2/docs/n2508.htm
 
 Cyrillic Script, Unicode status (+combining)
 
   http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ngc339csy8
   http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ktxptbccph
-
-OHM: In modern usage, for new documents, this character should not be used. 
-
-  http://unicode.org/mail-arch/unicode-ml/y2011-m08/0060.html
 
 Substitute blank
 
@@ -1416,31 +1568,13 @@ Diacritics in fonts
   http://unicode.org/mail-arch/unicode-ml/y2011-m05/0047.html
   http://www.user.uni-hannover.de/nhtcapri/combining-marks.html#greek
 
-Unicode in 1889
-
-  http://www.archive.org/stream/unicodeuniversa00unkngoog#page/n3/mode/2up
-
-On the other hand, having access to text only math symbols makes it possible to implement it in computer languages, making source code easier to read.
-
-Right now, I feel there is a lack of keyboard maps. You can develop them on your own, but that is very time consuming.
-
-  http://unicode.org/mail-arch/unicode-ml/y2011-m04/0117.html
-
 Licences (GPL etc) in TV sets
 
   http://unicode.org/mail-arch/unicode-ml/y2009-m12/0092.html
 
-Exciting new letter forms for English
-
-  http://www.theonion.com/articles/alphabet-updated-with-15-exciting-new-replacement,2869/
-
 Similar glyphs:
 
   http://unicode.org/reports/tr39/data/confusables.txt
-
-Hyphens:
-
-  http://unicode.org/mail-arch/unicode-ml/y2009-m10/0038.html
 
 GOST 10859
 
@@ -1466,11 +1600,6 @@ Per language character repertoir:
   http://unicode.org/mail-arch/unicode-ml/y2009-m04/0253.html
   http://unicode.org/mail-arch/unicode-ml/y2009-m04/0255.html
 
-Compromizes vs reality
-
-  http://unicode.org/mail-arch/unicode-ml/y2010-m02/0106.html
-  http://unicode.org/mail-arch/unicode-ml/y2010-m02/0117.html
-
 Dates/numbers in Unicode
 
   http://unicode.org/mail-arch/unicode-ml/y2010-m02/0122.html
@@ -1487,22 +1616,11 @@ Hebrew char input
 Obsolete IPA
 
   http://unicode.org/mail-arch/unicode-ml/y2009-m01/0487.html
+  http://unicode.org/cldr/utility/list-unicodeset.jsp?a=[%3Asubhead%3D%2F%28%3Fi%29archaic%2F%3A]+&g=
 
 Teutonista (vowel guide p11, kbd p13)
 
   http://www.sprachatlas.phil.uni-erlangen.de/materialien/Teuthonista_Handbuch.pdf
-
-Greek letters for non-Greek
-
-  http://stephanus.tlg.uci.edu/~opoudjis/unicode/unicode_interloping.html#ipa
-
-Pretty-printing text math
-
-  http://code.google.com/p/sympy/wiki/PrettyPrinting
-
-Sub/Super on a terminal
-
-  http://unicode.org/mail-arch/unicode-ml/y2008-m07/0028.html
 
 Apostrophe
 
@@ -1511,16 +1629,6 @@ Apostrophe
   http://unicode.org/mail-arch/unicode-ml/y2008-m05/0066.html
   http://unicode.org/mail-arch/unicode-ml/y2007-m07/0251.html
   http://unicode.org/mail-arch/unicode-ml/y2007-m05/0309.html
-
-Uppercase eszett ß ẞ
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0007.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0008.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0142.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0045.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0147.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0170.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m05/0196.html
 
 Questionner at start of Unicode proposal
 
@@ -1560,22 +1668,9 @@ Indicating coverage of the font
   http://unicode.org/mail-arch/unicode-ml/y2008-m02/0152.html
   http://unicode.org/mail-arch/unicode-ml/y2008-m02/0167.html
 
-Proposing new stuff
-
-  http://unicode.org/mail-arch/unicode-ml/y2008-m01/0238.html
-
-NOT and BROKEN BAR
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m12/0207.html
-  http://www.cs.tut.fi/~jkorpela/latin1/ascii-hist.html#5C
-
 Accessing ligatures
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m11/0210.html
-
-Should not use (roman numerals)
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m11/0253.html
 
 Folding characters
 
@@ -1597,10 +1692,6 @@ HOWTO: (non)dummy VS in fonts
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m08/0118.html
 
-OXIA vs TONOS
-
-  http://www.tlg.uci.edu/~opoudjis/unicode/unicode_gkbkgd.html#oxia
-
 ZWSP ZWNJ WJ SHY NON-BREAKING HYPHEN
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m08/0123.html
@@ -1610,37 +1701,17 @@ ZWSP ZWNJ WJ SHY NON-BREAKING HYPHEN
   http://unicode.org/mail-arch/unicode-ml/y2007-m06/0122.html
   http://unicode.org/mail-arch/unicode-ml/y2007-m01/0297.html
 
-On which base to draw a "standalone" diacretic
+On which base to draw a "standalone" diacritics
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m07/0075.html
-
-Universality vs affordability
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0157.html
 
 The IBM 1401 Hebrew Letter Key
 
   http://www.qsm.co.il/Hebrew/HebKey.htm
 
-Structure of development of Unicode
-
-  http://unicode.org/mail-arch/unicode-ml/y2006-m07/0056.html
-  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0099.html
-      I don't have a problem with Unicode. It is what it is; it cannot
-      possibly be all things to all people:
-  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0101.html
-
-CR symbols
-
-  http://unicode.org/mail-arch/unicode-ml/y2006-m07/0163.html
-
 Chicago Manual of Style
 
   http://unicode.org/mail-arch/unicode-ml/y2006-m01/0127.html
-
-Stability of normalization
-
-  http://unicode.org/mail-arch/unicode-ml/y2005-m07/0055.html
 
 Writing systems vs written languages
 
@@ -1660,10 +1731,6 @@ Coloring parts of ligatures
   http://unicode.org/mail-arch/unicode-ml/y2005-m06/0208.html
     GPOS
   http://unicode.org/mail-arch/unicode-ml/y2005-m06/0167.html
-
-Combining power of generative features - implementor's view
-
-  http://unicode.org/mail-arch/unicode-ml/y2004-m09/0145.html
 
 "Same" character Oacute used for different "functions" in the same text
 
@@ -1694,18 +1761,9 @@ Writing digits in non-decimal
   http://unicode.org/mail-arch/unicode-ml/y2011-m03/0050.html
 	Which separator is less ambiguous?  Breve ˘ ? ␣ ?  Inverted ␣ ?
 
-Colors in Unicode names
-
-  http://unicode.org/mail-arch/unicode-ml/y2011-m03/0100.html
-
 Use to identify a letter:
 
   http://unicode.org/charts/collation/
-
-A useful set of criteria for encoding symbols is found in
-Annex H of this document:
-
-  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3002.pdf 
 
 What is a "Latin" char
 
@@ -1741,28 +1799,9 @@ Chinese typesetting
 
   http://idsgn.org/posts/the-end-of-movable-type-in-china/
 
-Keyboards - agreement (5 scripts at end)
-
-  ftp://ftp.cen.eu/CEN/Sectors/List/ICT/CWAs/CWA-16108-2010-MEEK.pdf
-
-LAMBDA vs LAMDA
-
-  http://unicode.org/mail-arch/unicode-ml/y2010-m06/0063.html
-
-U+01BE LATIN LETTER INVERTED GLOTTAL STOP WITH STROKE; oi etc
-
-  http://unicode.org/notes/tn27/
-
 Superscript == modifiers
 
   http://unicode.org/mail-arch/unicode-ml/y2010-m03/0133.html
-
-Need for a keyboard, keyman examples; why "standard" keyboards are doomed
-
-  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0015.html
-  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0022.html
-  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0036.html
-  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0053.html
 
 @fonts and non-URL URIs
 
@@ -1773,31 +1812,14 @@ How to encode Latin-in-fraktur
   http://unicode.org/mail-arch/unicode-ml/y2007-m01/0279.html
   http://unicode.org/mail-arch/unicode-ml/y2007-m01/0263.html
 
-Math layout
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0303.html
-
 Book Spine reading direction
 
   http://www.artlebedev.com/mandership/122/
-
-Xerox and interrobang
-
-  http://unicode.org/mail-arch/unicode-ml/y2005-m04/0035.html
 
 Translation of Unicode names
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0066.html
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0076.html
-
-Tibetian (history of encoding, relative difficulty of handling comparing to cousins)
-
-  http://unicode.org/mail-arch/unicode-ml/y2013-m04/0036.html
-  http://unicode.org/mail-arch/unicode-ml/y2013-m04/0040.html
-
-Translation of 8859 to 10646 for Latvian was MECHANICAL
-
-  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0057.html
 
 The presentation of the existing COMBINING CEDILLA which has three major forms [ȘșȚț and Latvian Ģģ]
 
@@ -1807,6 +1829,138 @@ The presentation of the existing COMBINING CEDILLA which has three major forms [
 Transliteration on passports (see p.IV-48)
 
   http://www.icao.int/publications/Documents/9303_p1_v1_cons_en.pdf
+
+=head1 Far Eastern keyboards on Windows
+
+The syntax of defining these keyboards is documented in F<kbd.h> of the toolkit.  The semantic is undocumented.  Here we fix this.
+
+In short, these layouts have an extra table which may define the following enhancements:
+
+  One 3-state (or 2-state) radio-button:
+      on keys with VK codes DBE_ALPHANUMERIC/DBE_HIRAGANA/DBE_KATAKANA
+         (the third state can be also toggled independently of the others).
+  Three Toggling (like CAPSLOCK) button (pairs): 
+      toggling radio-button-like VK codes DBE_SBCSCHAR/DBE_DBCSCHAR, DBE_ROMAN/DBE_NOROMAN, DBE_CODEINPUT/DBE_NOCODEINPUT
+  Make key produce different VK codes with different modifiers.
+  Make a “reverse NUMPAD” translation.
+  Manipulate a couple of bits of IME state.
+  A few random hacks for key-deficient hardware layouts.
+
+(One may use the usual maps to modification columns to make the radio-buttons and toggle-buttons above affect the layout.
+Using this, it is easy to convert each toggling buttons to 2-state radiobuttons.
+The limitation is that the number of modification columns compatible with the
+extra table is at most 8 — counting one for C<Ctrl>.)
+
+Every C<VK> may be associated to two tables of functions, the “normal” one, and the “alternative” one.  Both tables
+associate a keyboard-description-column to a filter id, and a parameter for the filter.  (Recall that columns are associated
+to the 6-bit modifier state by the table in the C<MODIFIERS> structure.  One B<must> define all the states reachable by the 
+modifier keys.  B<NOTE:> the limit on the number of states in the tables is 8; it is not clear what happens with the 
+states above this.)
+
+The filters operate on: C<VK>, C<UP>/C<DOWN> flag, the flags associated to the scancode in C<< KBDTABLES->ausVK >>
+(may be added to upsteam), the 
+parameter given in C<VK_F> structure (and an unused C<DWORD> read/write parameter).  A filter may change these parameters,  
+then pass the event forward, or it may ignore an event.  Filters by ID:
+
+  KBDNLS_NULL		Ignore key (should not be called; only for unreachable slots in the tables).
+  KBDNLS_NOEVENT	Ignore key.
+  KBDNLS_SEND_BASE_VK	Pass through VK unchanged.
+  KBDNLS_SEND_PARAM_VK	Replace VK by the number specified as the parameter.
+  KBDNLS_KANAMODE	Ignore UP; on DOWN, generate UP-or-DOWN for DBE_KATAKANA
+  KBDNLS_ALPHANUM	Ignore UP;	DBE_ALPHANUMERIC,DBE_HIRAGANA,DBE_KATAKANA → DBE_ALPHANUMERIC
+  KBDNLS_HIRAGANA	Ignore UP;	DBE_ALPHANUMERIC,DBE_HIRAGANA,DBE_KATAKANA → DBE_HIRAGANA
+  KBDNLS_KATAKANA	Ignore UP;	DBE_ALPHANUMERIC,DBE_HIRAGANA,DBE_KATAKANA → DBE_KATAKANA
+  KBDNLS_SBCSDBCS	Ignore UP;	Toggle DBE_SBCSCHAR / DBE_DBCSCHAR
+  KBDNLS_ROMAN		Ignore UP;	Toggle DBE_ROMAN / DBE_NOROMAN
+  KBDNLS_CODEINPUT	Ignore UP;	Toggle DBE_CODEINPUT / DBE_NOCODEINPUT
+  KBDNLS_HELP_OR_END	Pass-through if NUMPAD flag ON (in ausVK); send-or-toggle HELP/END (see below)
+  KBDNLS_HOME_OR_CLEAR	Pass-through if NUMPAD flag ON (in ausVK); send HOME/CLEAR (see below)
+  KBDNLS_NUMPAD		If !NUMLOCK | SHIFT, replace NUMPADn/DECIMAL by no-numpad flavors
+  KBDNLS_KANAEVENT	Replace VK by the number specified as the parameter. On DOWN, see below
+  KBDNLS_CONV_OR_NONCONV	See below
+
+The startup values are C<ALPHANUMERIC>, C<SBCSCHAR>, C<NOROMAN>, C<NOCODEINPUT>.
+
+Typical usages:
+
+  KBDNLS_KANAMODE (VK_KANA (Special case))
+  KBDNLS_ALPHANUM (VK_DBE_ALPHANUMERIC)
+  KBDNLS_HIRAGANA (VK_DBE_HIRAGANA)
+  KBDNLS_KATAKANA (VK_DBE_KATAKANA)
+  KBDNLS_SBCSDBCS (VK_DBE_SBCSCHAR/VK_DBE_DBCSCHAR)
+  KBDNLS_ROMAN (VK_DBE_ROMAN/VK_DBE_NOROMAN)
+  KBDNLS_CODEINPUT (VK_DBE_CODEINPUT/VK_DBE_NOCODEINPUT)
+  KBDNLS_HELP_OR_END (VK_HELP or VK_END)     [NEC PC-9800 Only]
+  KBDNLS_HOME_OR_CLEAR (VK_HOME or VK_CLEAR) [NEC PC-9800 Only]
+  KBDNLS_NUMPAD (VK_xxx for Numpad)          [NEC PC-9800 Only]
+  KBDNLS_KANAEVENT (VK_KANA) [Fujitsu FMV oyayubi Only]	
+  KBDNLS_CONV_OR_NONCONV (VK_CONVERT and VK_NONCONVERT) [Fujitsu FMV oyayubi Only]
+
+Toggle (= 2-state) and 3-state radio-keys are switched by sending KEYUP for the currently 
+“active” key, then KEYDOWN for the newly activated key.  When switching 3-state, additional
+action happens depending on the new state:
+
+  DBE_ALPHANUMERIC	If IME is off, and KANA toggle is on,  switch IME on  in the KATAKANA mode
+  DBE_HIRAGANA		If IME is off, and KANA toggle is off, switch IME off in the ALPHANUMERIC mode
+  DBE_KATAKANA			SAME AS HIRAGANA
+
+Additionally, C<KEYDOWN> of C<KBDNLS_KANAEVENT> switches IME to
+
+  KANA toggle on:		switch IME off in the ALPHANUMERIC mode
+  KANA toggle off:		switch IME on  in the KATAKANA mode
+
+and C<KBDNLS_CONV_OR_NONCONV> (on C<KEYUP> and C<KEYDOWN>) passes through, and does
+
+  KANA toggle on, IME off:	switch IME off in the ALPHANUMERIC mode
+  otherwise:			Do nothing
+
+(The semantic of IME being-in/switching-to OFF/ON mode is not clear (probably IME-specific).
+The switching happens by
+calling C<RequestDeviceChange(pDeviceInfo, GDIAF_IME_STATUS, TRUE)> for devices with a C<handle>
+and C<type == DEVICE_TYPE_KEYBOARD>, while putting the request at into global memory — unless
+C<IMECOMPAT_HYDRACLIENT> flag is set on the foreground keyboard.)
+
+For C<KBDNLS_HOME_OR_CLEAR>, the registry is checked at statup.  For C<KBDNLS_HELP_OR_END>, the registry is checked at statup, and:
+
+  KANA_AWARE:	flips END/HELP if KANA toggle is ON (on input, “HELP” means not-an-END)
+  otherwise:	sends END/HELP depending on what registry says.
+
+The checked values are C<helpkey>, C<KanaHelpKey>, C<clrkey> in the hive C<RTL_REGISTRY_WINDOWS_NT\WOW\keyboard>.
+
+Which of two tables is chosen is controlled by the type (C<NULL>/C<NORMAL>/C<TOGGLE>) of the key's tables, and the (per key) history bit.  
+The initial state of the bit is in C<NLSFEProcCurrent> 
+(L<StuxNet hits here|http://www.eset.com/us/resources/white-papers/Stuxnet_Under_the_Microscope.pdf>!).
+The tables of type C<NULL> are ignored (the key descriptor passes all events 
+through), the C<NORMAL> key uses only the first table.  The C<TOGGLE> key uses the first table on KEYDOWN, and 
+uses the first or the second table on KEYUP.  The choice depends on modifiers present in the preceding KEYDOWN;
+the bitmap C<NLSFEProcSwitch> is indexed by the modification column of KEYDOWN event; the second table is
+used on the following KEYUP if the indexed bit is set.  (The KEYREPEAT events are handled the same way as KEYUP.)
+
+The typical usage of C<TOGGLE> keys is to make the KEYUP event match B<what KEYDOWN did> no matter what
+is the order of releasing the modifier keys and the main key.
+Having this bit “propagates” to KEYUP the information about which modifiers were active on KEYDOWN.  This helps in ensuring
+consistency of some actions between the KEYDOWN event and the corresponding KEYUP event: remember that the state of modifiers 
+on KEYUP is often different than the state on KEYDOWN: people can release modifiers in different orders: 
+
+  press-Shift, press-Enter, release-Shift, release-Enter	--->	Shift-Enter pressed, Enter released
+  press-Shift, press-Enter, release-Enter, release-Shift	--->	Shift-Enter pressed and released
+
+If pressing C<Shift-Enter> acts as if it were the C<F38> key (and only so with C<Shift>!), to ensure consistency, one would need 
+to make releasing C<Shift-Enter> B<and> also releasing C<Enter> to act as if it were the C<F38> key.  So one can make pressing
+C<Shift-Enter> special (via the first table), sets the history bit on C<Shift-Enter>, and make I<the second table> map C<Enter> 
+and C<Shift-Enter> to be special too (send C<F38>) I<if the history bit is set>.
+
+B<Remark:> the standard key processing has its own filters too.  C<AltGr> processing adds fake C<lCtrl> up/down events;
+C<Shift-Cancels-CapsLock> processing ignores/fakes the C<KEYDOWN>/C<KEYUP> for C<Capital>; C<Shift-Multiply> becomes
+C<VK_SNAPSHOT> (same for C<Alt>; C<Ctrl-ScrollLck/Numlock> become C<VK_CANCEL>/C<VK_PAUSE>; C<Ctrl-Pause> may become C<VK_CANCEL>.
+OEM translations (NumPad→Cursor, except C<C-A-Del>; C<00> to double-press of C<0>) come first, then locale-specific (C<AltGr>,
+C<Shift-Cancels-CapsLock>), then those defined in the tables above.
+
+B<Remark:> As opposed to these translations, C<KLLF_LRM_RLM> and C<Alt-NUMPADn) is actually handled inside the 
+even loop, by ToUnicode().
+
+B<Remark:> L<http://www.toppa.com/2007/english-windows-xp-with-a-japanese-keyboard/> (and references inside!)
+explains fine points of using Japanese keyboards.  See also: L<http://www.coscom.co.jp/learnjapanese801/lesson08.html>.
 
 =head1 SEE ALSO
 
@@ -1879,6 +2033,10 @@ On keyboard layouts:
   http://goron.de/~johns/one-hand/#documentation
       On screen keyboard indicator
   http://www.autohotkey.com/docs/scripts/KeyboardOnScreen.htm
+      Keyboards of ЕС-1840/1/5
+  http://aic-crimea.narod.ru/Study/Shen/PC/1/5-4-1.htm
+     (http://www.aic-crimea.narod.ru/Study/Shen/PC/main.htm)	Руководство пользователя ПЭВМ
+  http://fdd5-25.net/fddforum/index.php?PHPSESSID=201bd45ab972f1ab4b440dcb6c7ca18f&topic=489.30
       Phonetic Hebrew layout(s) (1st has many duplicates, 2nd overweighted)
   http://bc.tech.coop/Hebrew-ZC.html
   http://help.keymanweb.com/keyboards/keyboard_galaxiehebrewkm6.php
@@ -1898,13 +2056,23 @@ On keyboard layouts:
   http://fossies.org/linux/misc/emacs-24.3.tar.gz:a/emacs-24.3/src/w32term.c
       Naive implementations:
   http://social.msdn.microsoft.com/forums/en-US/windowssdk/thread/07afec87-68c1-4a56-bf46-a38a9c2232e9/
+      Quality of a keyboard
+  http://www.tavultesoft.com/keymandev/quality/whitepaper1.1.pdf
 
-Manipulating keyboards on Windows (up to Win7)
+Manipulating keyboards on Windows and X11
 
   http://symbolcodes.tlt.psu.edu/keyboards/winkeyvista.html		(using links there: up to Win7)
   http://windows.microsoft.com/en-us/windows-8/change-keyboard-layout
+  http://www.howtoforge.com/changing-language-and-keyboard-layout-on-various-linux-distributions
+
+MSKLC parser
+
+  http://pastebin.com/UXc1ub4V
 
 By author of MSKLC Michael S. Kaplan (do not forget to follow links)
+
+      Input on Windows:
+  http://seit.unsw.adfa.edu.au/staff/sites/hrp/personal/Sanskrit-External/Unicode-KbdsonWindows.pdf
 
   http://blogs.msdn.com/b/michkap/archive/2006/03/26/560595.aspx
   http://blogs.msdn.com/b/michkap/archive/2006/04/22/581107.aspx
@@ -2011,8 +2179,12 @@ FE (Far Eastern) keyboard source code example (NEC AT is 106 with SPECIAL MULTIV
 	Investigation on relation between VK_ asignments, KBDEXT, KBDNUMPAD etc:
   http://code.google.com/p/ergo-dvorak-for-developers/source/browse/trunk/kbddvp.c
 
-    PowerShell vs ISE
+    PowerShell vs ISE (and how to find them [On Win7: WinKey Accessories]
   http://blogs.msdn.com/b/powershell/archive/2009/04/17/differences-between-the-ise-and-powershell-console.aspx
+  http://blogs.msdn.com/b/michkap/archive/2013/01/23/10387424.aspx
+  http://blogs.msdn.com/b/michkap/archive/2013/02/15/10393862.aspx
+  http://blogs.msdn.com/b/michkap/archive/2013/02/19/10395086.aspx
+  http://blogs.msdn.com/b/michkap/archive/2013/02/20/10395416.aspx
 
   Google for "Get modification number for Shift key" for code to query the kbd DLL directly ("keylogger")
     http://web.archive.org/web/20120106074849/http://debtnews.net/index.php/article/debtor/2008-09-08/1088.html
@@ -2888,68 +3060,69 @@ they are not counted in these lists.
 
 Long s and "preceded by" are not handled since the table has its own (useless) compatibility decompositions.
 
-╒╤╕
-╞╪╡
-╘╧╛
-╓╥╖
-╟╫╢
-╙╨╜
-╔╦╗
-╠╬╣
-╚╩╝
-┌┬┐
-├┼┤
-└┴┘
-┎┰┒
-┠╂┨
-┖┸┚
-┍┯┑
-┝┿┥
-┕┷┙
-┏┳┓
-┣╋┫
-┗┻┛
+ ╒╤╕
+ ╞╪╡
+ ╘╧╛
+ ╓╥╖
+ ╟╫╢
+ ╙╨╜
+ ╔╦╗
+ ╠╬╣
+ ╚╩╝
+ ┌┬┐
+ ├┼┤
+ └┴┘
+ ┎┰┒
+ ┠╂┨
+ ┖┸┚
+ ┍┯┑
+ ┝┿┥
+ ┕┷┙
+ ┏┳┓
+ ┣╋┫
+ ┗┻┛
     On top of a light-lines grid (3×2, 2×3, 2×2; H, V, V+H):
-┲┱
-╊╉
-┺┹
-┢╈┪
-┡╇┩
-╆╅
-╄╇
-╼━╾╺╸╶─╴╌┄┈ ╍┅┉
-╻
-┃
-╹
-╷
-│
-╵
+ ┲┱
+ ╊╉
+ ┺┹
+ ┢╈┪
+ ┡╇┩
+ ╆╅
+ ╄╇
+ ╼†━†╾†╺†╸†╶†─†╴†╌†┄†┈† †╍†┅†┉†
+ ╼━╾╺╸╶─╴╌┄┈ ╍┅┉
+ ╻
+ ┃
+ ╹
+ ╷
+ │
+ ╵
  
-╽
-╿
-╎┆┊╏┇┋
+ ╽
+ ╿
+ ╎┆┊╏┇┋
 
-╲ ╱
- ╳
-╭╮
-╰╯
-◤▲◥
-◀■▶
-◣▼◢
-◜△◝
-◁□▷
-◟▽◞
-◕◓◔
-◐○◑
- ◒ 
-▗▄▖
-▐█▌
-▝▀▘
-▛▀▜
-▌ ▐
-▙▄▟
+ ╲ ╱
+  ╳
+ ╭╮
+ ╰╯
+ ◤▲◥
+ ◀■▶
+ ◣▼◢
+ ◜△◝
+ ◁□▷
+ ◟▽◞
+ ◕◓◔
+ ◐○◑
+  ◒ 
+ ▗▄▖
+ ▐█▌
+ ▝▀▘
+ ▛▀▜
+ ▌ ▐
+ ▙▄▟
 
-░▒▓
+ ░▒▓
 
 
 =head1 WINDOWS GOTCHAS
@@ -3218,11 +3391,12 @@ instead of deadkeys.  Moreover, these ligatures are put on non-existing
 the C<Shift + Control + Menu> flags instead of "modification number" in
 the ligatures table.
 
-=head2 F<MSKLC> keyboards handle C<Ctrl-Shift-letter>, C<Ctrl-^ (x1e)> and C<Ctrl-_ (x1f)> differently than US keyboard
+=head2 F<MSKLC> keyboards handle C<Ctrl-Shift-letter>, C<Ctrl-@ (x00)> , C<Ctrl-^ (x1e)> and C<Ctrl-_ (x1f)> differently than US keyboard
 
-At least in console applications, the US keyboard produces (as the 
+The US keyboard produces (as the 
 “string value”) the corresponding Control-letter when 
-C<Ctrl-Shift-letter> is pressed.  F<MSKLC> does not reproduces this
+C<Ctrl-Shift-letter> is pressed.  (In console applications,  
+C<\x00> is not visible.)  F<MSKLC> does not reproduces this
 behaviour.  This may break an application if
 it was not specifically tested with “complicated” keyboards.
 
@@ -3271,12 +3445,21 @@ These entries do not stop keyboard from working.  They look like C<L"'\b'"	L"Nam
 
 Time to switch to direct generation of F<.c> file?
 
+=head2 It is not documented how to make a with-prefix-key(s) combination produce 0-length string
+
+Use C<0000@> (in F<.klc>), or DEADKEY 0 in a F<.c> file.  Explanation: what a prefix key
+is doing is making the kernel remember a word (the state of the finite automaton), and not
+producing any output character.  Having no prefix key corresponds to the state being 0.
+
+Hence makeing prefix_key=0 is the same as switching the finite automaton to the initial
+state, and not producing any character — and this exactly what is requested in the question.
+
 =head2 If data in C<KEYNAME_DEAD> takes too much space, keyboard is mis-installed, and “Language Bar” goes crazy
 
 Installation reports success, the keyboard appears in the list in the Language Bar's "Settings".
 But the keyboard is not listed in the menu of the Language Bar itself.
 
-Deinstalling (by MSKLC's installer) in such a case removes one (apparently, last) of the listed keyboards for the language;
+Deinstalling (by F<MSKLC>'s installer) in such a case removes one (apparently, last) of the listed keyboards for the language;
 at least it is removed from the menu of the Language Bar itself.  However, the list in the “Settings”
 does not change!  One can't restore the (wrongly) removed (unrelated!) layout by manipulating the latter list.
 (I did not try to check what will happen if only one keyboard for the language is available.)
@@ -3286,10 +3469,48 @@ I add one extra keyboard to the list in the “Settings”; - so the list is gro
 add useless-to-you keyboards, since there may be a chance you will never be able to install them again.
 Maybe reboot will fix it?
 
+=head2 It is not clear how to compile F<.C> files emitted by F<kbdutool.exe>
+
+This distribution includes a script F<examples/compile_link_kbd.cmd> which can do this.  It is
+inspired by
+
+  http://stackoverflow.com/questions/3360746/how-can-i-compile-programmer-dvorak
+  http://levicki.net/articles/tips/2006/09/29/HOWTO_Build_keyboard_layouts_for_Windows_x64.php
+
+It allows us to build using the cycle
+
+=over 4
+
+=item *
+
+Build skeleton F<.klc> file.
+
+=item *
+
+Convert to B<C> using F<kbdutool.c>.
+
+=item *
+
+Patch against bugs in F<kbdutool.c>.
+
+=item *
+
+Patch in features not supported by F<kbdutool.c>.
+
+=item *
+
+Compile and link DLLs.
+
+=back
+
+(This assumes that the installer was already built by F<MSKLC> using a
+simplified-to-nothing F<.klc> file).
+
 =head2 Windows ignores column=15 of the keybinding definition table
 
-(At least in Win7SP1.)  It does not matter what is the contents of this column,
-or to what modifier bitmap this column is bound.
+Note that 15 is C<SHFT_INVALID>; this column number is used to indicate that
+this particular combination of modifiers does not produce keys.  In particular,
+the generator must avoid this column number.
 
 Workaround: put junk into this column, and use different columns for useful modifier
 combinations.  The mapping from modifiers to columns should not be necessarily 1-to-1.
@@ -3299,6 +3520,10 @@ combinations.  The mapping from modifiers to columns should not be necessarily 1
 (At least when C<AltGr> is special in the keyboard,) the modifier bitmap bound to this
 key is actually bit-or of bitmaps above.  Essentially, this prohibits assigning
 interesting flag combinations to C<lCtrl>.
+
+The (very limited) workaround is to ensure that the flags one puts on C<AltGr> contain
+all the flags assigned to the above VK codes.  (This does not change anything, but
+at least makes the assignments less confusing for human inspection.)
 
 =head2 Windows ignores C<lAlt> if its modifier bitmaps is not standard
 
@@ -3942,7 +4167,7 @@ sub decode_kbd_layers ($@) {
 
 sub decode_rect_layers ($@) {
   my ($self, $cnt, %extra, $opt, @out) = (shift, 0, qw(empty N/A));
-  my %needed = qw(unparsed_data x rect_rows_cols [4;4] rect_horizontal_counts [2;2] layer_names ???);
+  my %needed = qw(unparsed_data x rect_rows_cols [4;4] rect_horizontal_counts [2;2] layer_names ??? COLgap 0 ROWgap 0);
   for my $k (keys %needed, keys %extra) {
      my ($from) = grep exists $_->{$k}, @_, (ref $self ? $self : ());
      die "option `$k' not specified" unless $from or exists $extra{$k};
@@ -3955,24 +4180,34 @@ sub decode_rect_layers ($@) {
   (my $D = $opt->{unparsed_data}) =~ s/^(#.*\n)+//;
   $D =~ s/^(#.*(\n|\z))+\z//m;
   my @lines = split /\s*\n/, $D;
-  my ($C, $lc, $pref) = map $opt->{$_}, qw(visual_rowcount visual_per_row_counts visual_prefixes);
+  my ($C, $lc, $pref, $c0, $r0) = map $opt->{$_}, qw(visual_rowcount visual_per_row_counts visual_prefixes COLgap ROWgap);
   die "Number of uncommented rows (" . scalar @lines . ") in a visual rect template not matching rows(rect_rows_cols) x cnt(rect_horizontal_counts) = $opt->{rect_rows_cols}[0] x $cnt: `$opt->{unparsed_data}'"
-    if @lines != $cnt * $opt->{rect_rows_cols}[0];
+    if @lines != $cnt * $opt->{rect_rows_cols}[0] + ($cnt-1)*$r0;
   my $c = 0;
   while (@lines) {
     die "Too many rect vertically: expect only ", scalar @{ $opt->{rect_horizontal_counts} }, " in `" . join("\n",'',@lines,'') . "'"
       if $c >= @{ $opt->{rect_horizontal_counts} };
     my @L = splice @lines, 0, $opt->{rect_rows_cols}[0];
+    my ($cR, $L) = 0;
+    while (++$cR <= $r0) {		# Inter-row gap
+      last unless @lines;
+      ($L = shift @lines) =~ /^#/ or die "Line expected to be inter-row comment line No. $cR: <<<$L>>>"
+    }
     my $l = length $L[0];
     $l == length or die "Lengths of lines encoding rect do not match: expect $l, got `" . join("\n",'',@L,'') . "'" for @L[1..$#L];
-    $l == $opt->{rect_rows_cols}[1] * $opt->{rect_horizontal_counts}[$c] 
-      or die "Wrong line length in rect: expect $opt->{rect_rows_cols}[1] * $opt->{rect_horizontal_counts}[$c], got $l in `" 
+    $l == $opt->{rect_rows_cols}[1] * $opt->{rect_horizontal_counts}[$c] + ($opt->{rect_horizontal_counts}[$c] - 1)*$c0
+      or die "Wrong line length in rect: expect $opt->{rect_rows_cols}[1] * $opt->{rect_horizontal_counts}[$c] gaps=$c0, got $l in `" 
       	. join("\n",'',@L,'') . "'" for @L[1..$#L];
     while (length $L[0]) {
       my @c;
       push @c, split //, substr $_, 0, $opt->{rect_rows_cols}[1], '' for @L;
       $_ eq $opt->{empty} and $_ = undef for @c;
       push @out, [map [$_], @c];
+      next unless $c0 and length $L[0];	# Inter-col gap
+      for my $i (0..$#L) {
+        next unless (my $gap = substr $L[$i], 0, $c0, '') =~ /\S/;
+        die "Inter-column gap not whitespace: line No. $i (0-based), gap No. $#out: <<<$gap>>>"
+      }
     }
     $c++;
   }
@@ -4600,7 +4835,7 @@ sub print_coverage ($$) {
 
 my %html_esc = qw( & &amp; < &lt; > &gt; );
 my %ctrl_special = qw( \r Enter \n Control-Enter \b BackSpace \x7f Control-Backspace \t Tab 
-  		    \x1b Esc; Control-[ \x1d Control-] \x1c Control-\ ^C Control-Break \x1e Control-^ \x1f Control-_ );
+  		    \x1b Esc; Control-[ \x1d Control-] \x1c Control-\ ^C Control-Break \x1e Control-^ \x1f Control-_ \x00 Control-@);
 my %alt_symb;
 { no warnings 'qw';
 # 		ZWS	ZWNJ ZWJ	 LRM RLM WJ=ZWNBSP Func	  Times Sep Plus
@@ -5494,7 +5729,7 @@ sub massage_VK ($$) {
   my $create_a_c = $self->{faces}{$f}{'[create_alpha_ctrl]'};
   $create_a_c = $create_alpha_ctrl unless defined $create_a_c;
   my $EXTR = [	["\r","\n"], ["\b","\x7F"], ["\t","\cC"], ["\x1b","\x1d"], # Enter/C-Enter/Bsp/C-Bsp/Tab/Cancel/Esc=C-[/C-]
-  		["\x1c", ($create_a_c ? "\cZ" : ())], ($create_a_c>1 ? ["\x1e", "\x1f"] : ())];	# C-\ C-z, C-^ C-_
+  		["\x1c", ($create_a_c ? "\cZ" : ())], ($create_a_c>1 ? (["\x1e", "\x1f"], ["\x00"]) : ())];	# C-\ C-z, C-^ C-_
   if ($create_a_c) {
     my %s;
     push @ctrl, scalar @$EXTR;
@@ -5575,16 +5810,16 @@ sub auto_capslock($$) {
 my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
 		      '7E ABNT_C2' => '7D OEM_8',	# ABNT vs JIS keyboard
 		      '7B NONCONVERT' => '79 CONVERT');	# JIS keyboard: left of SPACE, right of SPACE
-my %shift_control_extra = (6 => "\x1e", OEM_MINUS => "\x1f");
+my %shift_control_extra = (2 => "\x00", 6 => "\x1e", OEM_MINUS => "\x1f");
 
 { my(%seen, %seen_scan, %seen_VK, @add_scan_VK, @ligatures, @decimal);
   sub reset_units ($) { @decimal = @ligatures = @add_scan_VK = %seen_scan = %seen_VK = %seen = () }
 
   sub output_unit00 ($$$$$$$;$$) {
-    my ($self, $face, $k, $u, $N, $deadkeys, $Used, $known_scancode, $skippable) = (shift, shift, shift, shift, shift, shift, shift, shift, shift);
+    my ($self, $face, $k, $U, $N, $deadkeys, $Used, $known_scancode, $skippable) = (shift, shift, shift, shift, shift, shift, shift, shift, shift);
     my $sc = ($known_scancode or $scan_codes{$k}) or warn("Can't find the scancode for the key `$k'"), return;
     my(@cntrl, %s, $cnt);						# Set Control-KEY if is [ or ] or \
-    $u = [map { defined() ? [map {($_ and ref $_) ? $_->[0] : $_} @$_] : $_ } @$u];	# deep copy with $_->[0] on a key-array
+    my $u = [map { defined() ? [map {($_ and ref $_) ? $_->[0] : $_} @$_] : $_ } @$U];	# deep copy with $_->[0] on a key-array
     @cntrl = chr hex $do_control{$u->[0][0]}		if $do_control{$u->[0][0] || 'N/A'};	# \ ---> ^\
     @cntrl = @{ $default_bind{$k}[1] } if !@cntrl and $default_bind{$k}[1];
     my $create_a_c = $self->{faces}{$face}{'[create_alpha_ctrl]'};
@@ -5592,8 +5827,9 @@ my %shift_control_extra = (6 => "\x1e", OEM_MINUS => "\x1f");
     @cntrl = (chr(0x1F & ord $k)) x $create_a_c if $k =~ /^[A-Z]$/ and $create_a_c;
     @cntrl = (undef, $shift_control_extra{$k})  if $create_a_c > 1 and $shift_control_extra{$k};
     $deadkeys ||= [];	# known_scancode is true when we start from VK, and $deadkeys is (arr of arrays) vs (hash per layer)
-    my @KK = map [$_->[2], $_->[0], ($known_scancode ? $_->[3][$_->[1]]  :  $_->[3]{defined $_->[2] ? $_->[2] : 'n/a'})],
-	       map [@$_[0,1], $u->[$_->[0]][$_->[1]], $deadkeys->[$_->[0]]], 
+    my @KK = map [$_->[2], $_->[0], 
+    		  (ref $_->[4] ? $_->[4][2] : ($known_scancode ? $_->[3][$_->[1]]  :  $_->[3]{defined $_->[2] ? $_->[2] : 'n/a'}))],
+	       map [@$_[0,1], $u->[$_->[0]][$_->[1]], $deadkeys->[$_->[0]], $U->[$_->[0]][$_->[1]]], 
 	         map +([$_, 0], [$_, 1]), 0..$#$u;
     defined and $s{$_}++ for map $_->[0], @KK;
     $cnt = keys %s || @cntrl;
@@ -5640,8 +5876,8 @@ my %shift_control_extra = (6 => "\x1e", OEM_MINUS => "\x1f");
     
     if ($k eq 'DECIMAL') {	# may be described both via visual maps and NUMPAD
       my @d = @{ $decimal[1] || [] };
-      !defined $KK[$_][0] and $KK[$_] = $d[$_] for 0..$#d;	# fill on the second round
-      @decimal = ([$self->output_unit_KK($k, $u, $sc, $Used, @KK)], [@KK]); 
+      defined $KK[$_][0] or $KK[$_] = $d[$_] for 0..$#d;	# fill on the second round
+      @decimal = ([$k, $u, $sc, $Used], [@KK]); 
       return;
     }
     $self->output_unit_KK($k, $u, $sc, $Used, @KK);
@@ -5674,12 +5910,17 @@ EOP
   }
   
   sub output_added_units ($) {
-    my (@i, @o);
+    my ($self, @i, @o, @dec) = shift;
     for my $i (@add_scan_VK) {
       next if $seen_scan{$i->[0]} or $seen_VK{$i->[1]};	# Cannot duplicate either one...
       push @i, $i;
     }
-    for my $i (@i, (@decimal ? $decimal[0] : ()) ) {
+    if ($decimal[0]) {
+#      @decimal = ([$self->output_unit_KK($k, $u, $sc, $Used, @KK)], [@KK]);
+      my ($k, $u, $sc, $Used) = @{$decimal[0]};
+      push @dec, [$self->output_unit_KK($k, $u, $sc, $Used, @{$decimal[1]})];
+    }
+    for my $i (@i, @dec) {
       push @o, "$i->[0]\t$i->[1]$i->[2]\t$i->[3]";
     }
     @o
@@ -6138,7 +6379,7 @@ sub diacritic2self ($$$$$$$$) {
   if ($space->{$c}) {	# SPACE is handled above (we assume it is on index 0)...
     # ~ and ^ have only 3 spacing variants; one of them must be on ' ' - and we omit the first 2 of non-principal block...
     return $self->extract_diacritic($dia, $space->{$c}, 'spacing variant', $limits->[0], 'skip2', @$v[0..3]);
-  } elsif (0 <= (my $off = index "\r\t\n\x1b\x1d\x1c\b\x7f", $c)) {	# Enter, Tab, C-Enter, C-[, C-], C-\, Bspc, C-Bspc
+  } elsif (0 <= (my $off = index "\r\t\n\x1b\x1d\x1c\b\x7f\x1e\x1f\x00", $c)) {	# Enter, Tab, C-Enter, C-[, C-], C-\, Bspc, C-Bspc, C-^, C-_, C-@
     # ~ and ^ have only 3 spacing variants; one of them must be on ' '
     return $self->extract_diacritic($dia, $spaces + $off, 'spacing variant', $limits->[0], 'skip2', @$v[0..3]);
   } elsif (!$spaces and $c =~ /^\p{Blank}$/) {	# NBSP and, (eg) Thin space 2007	-> second/third modifier
@@ -7002,13 +7243,13 @@ sub next_auto_dead ($$) {
   my ($self, $H, $o) = (shift, shift);
   unless ($H->{'[autodead_wrapped]'}) {
     1 while $H->{'[auto_dead]'}{ $o = $H->{'[first_auto_dead]'}++ }++ and ($o < 0x1000 or not $H->{'[ad_can_wrap]'});	# Bug in kbdutool
-    $H->{'[autodead_wrapped]'}++, $H->{'[first_auto_dead]'} = 1 if $o >= 0x1000 and $H->{'[ad_can_wrap]'};
+    $H->{'[first_auto_dead]'} = 0xa0 if $o >= 0x1000 and $H->{'[ad_can_wrap]'} and not $H->{'[autodead_wrapped]'}++;
   }
   if ($H->{'[autodead_wrapped]'}) {	# This does not deal with manual assignment of inverted prefixes???  Inv_AltGr???
     1 while $H->{'[auto_dead]'}{ $o = $H->{'[first_auto_dead]'}++ }++ or $H->{'[deadkeyFaceHexMap]'}{$self->key2hex(chr $o)};
-    if ($o == 0x00a3) {
-      warn "$o: Keys HexMap: ", join ', ', sort keys %{$H->{'[deadkeyFaceHexMap]'}};
-    }
+#    if ($o == 0x00a3) {
+#      warn "$o: Keys HexMap: ", join ', ', sort keys %{$H->{'[deadkeyFaceHexMap]'}};
+#    }
   }
   chr $o;
 }
@@ -7515,14 +7756,16 @@ Duplicate: 1F12C <== [ 0052 <circle> ] ==> <1 24C7> (prefered)
 Duplicate: 1F14B <== [ 004D <square> 0056 ] ==> <1 33B9> (prefered)
 	<🅋>	SQUARED MV
 	<㎹>	SQUARE MV MEGA at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 5263, <$f> line 38876.
-
+Duplicate: A789 <== [ 003A <pseudo-fake-super> ] ==> <1 02F8> (prefered)
+        <꞉>     MODIFIER LETTER COLON
+        <˸>     MODIFIER LETTER RAISED COLON at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 8032, <$f> line 39278.
 EOR
 
 my (%known_dups) = map +($_,1), qw(0296 0384 1D43 1D52 1D9F 1E7A 1E7B 1FBF 2007
   202F 2113 24B8 24C7 2E1E 33B9 FC03 FC68 FD55 FD56 FD57 FD5D FD87 FD8C
   FD92 FDB5 FE34
   0273 1DAF 2040 207F 224B 2256 2257 225E 2263 2277 2279 2982 2993 2994 2995 2996 29BC
-  2A17 2A34 2A35 2A36 2A50 2ACF 2AFB 2AFD 2AFF 3018 3019 A760 A761 1D4C1 1F12B 1F12C 1F14B);		# As of Unicode 6.1 (questionable: 2982 2ACF)
+  2A17 2A34 2A35 2A36 2A50 2ACF 2AFB 2AFD 2AFF 3018 3019 A760 A761 1D4C1 1F12B 1F12C 1F14B A789);		# As of Unicode 6.1 (questionable: 2982 2ACF)
 
 sub decompose_r($$$$);		# recursive
 sub decompose_r($$$$) {		# returns array ref, elts are [$compat, @expand]
@@ -7555,6 +7798,7 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
 				     g ʛ  m ɰ  h ɧ  d ᶑ  C ʗ)],	# z ɮ	(C ʗ is "extras")
 		  phonetize2 => [qw( e ɘ  E ɞ  i ɻ  I ɺ)],	# Use some capitalized sources (no uc variants)...
 		  phonetize3 => [qw( a ɒ  A Ɒ  e ɜ  E ɝ)],	# Use some capitalized sources (no uc variants)...
+		  phonetize0 => [qw( e ə)],
 		  paleo	     => [qw( & ⁊  W Ƿ  w ƿ  h ƕ  H Ƕ  G Ȝ  g ȝ )],
                     # cut&paste from http://en.wikipedia.org/wiki/Coptic_alphabet
                     # perl -C31 -wne "chomp; ($uc,$lc,undef,undef,$gr) = split /\t/;($ug,$lg)=split /,\s+/, $gr; print qq( $lg $lc $ug $uc)" coptic2 >coptic-tr
@@ -7598,6 +7842,9 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
 		  turnaround => [qw( ∧ ∨  ∩ ∪  ∕ ∖  ⋏ ⋎  ∼ ≀  ⋯ ⋮  … ⋮  ⋰ ⋱  
 		  		     8 ∞  ∆ ∇  Α ∀  Ε ∃  ∴ ∵  ≃ ≂
 		  		     ∈ ∋  ∉ ∌  ∊ ∍  ∏ ∐  ± ∓  ⊓ ⊔  ≶ ≷  ≸ ≹  ⋀ ⋁  ⋂ ⋃  ⋉ ⋊  ⋋ ⋌  ⋚ ⋛  ≤ ⋜  ≥ ⋝  ≼ ⋞  ≽ ⋟  )],			# XXXX Can't do both directions
+		  superize   => [qw( h ʱ  ' ʹ  < ˂  > ˃  ^ ˑ       ( ˓  ) ˒  ⊢ ˫  0 ᵊ  )],	# Additions to <super>!
+		  subize     => [qw( < ˱  > ˲  _ ˍ  ' ˏ  " ˶  ˵ ˵  . ˳  ° ˳  ˘ ˯  ˘ ˬ  ( ˓  ) ˒  0 ₔ)],			# "
+		  subize2    => [qw( < ˂  > ˃    )],		# these are in older Unicode, so would override if in subize
 		  round      => [qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸  □ ▢  ∥ ≬  ‖ ≬  • ⦁
 		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  ⊤ ⫙  ⊥ ⟒  ( ⦖  ) ⦕  ( ⦓  ) ⦔  ( ⦅  ) ⦆  ⊳ ⪧  ⊲ ⪦  ≟ ≘  ≐ ≖  . ∘
 		  		     [ ⟬  ] ⟭  { ⧼  } ⧽  % ⦼  % ‰  × ⦻  ⨯ ⨷  ∧ ∩ ∨ ∪ )]);	#   = ≈
@@ -7648,6 +7895,9 @@ sub parse_NameList ($$) {
         }
         if (($t = $name) =~ s/\bBLACK\b/WHITE/) {
           push @{$candidates{$k}}, [$t, "fake-black"];
+        }
+        if (($t = $name) =~ s/^(?:RAISED|MODIFIER\s+LETTER(?:\s+RAISED)?(\s+LOW)?)\s+//) {
+          push @{$candidates{$k}}, [$t, $1 ? "fake-sub" : "fake-super"];
         }
         if (($t = $name) =~ s/\bBUT\s+NOT\b/OR/) {
           push @{$candidates{$k}}, [$t, "fake-but-not"];
