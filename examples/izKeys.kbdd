@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2013
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.61
+VERSION=0.62
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -137,7 +137,7 @@ CyrillicRipe=		NotSameKey(Face(Latin)		Face(CyrillicPhonetic)	Layers(Subs_Dashes
 CyrillicRipeMax=	ByPairs[˵〃](Face(Latin))	Face(CyrillicRipe)	Face(CyrillicPhonetic)
 #
 Hebrew=		Layers(Hebrew-Base+Hebrew-AltGr)
-MathBlue=	Mutate[\ℯℹ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin)) Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301] Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty))
+MathBlue=	Mutate[\ℯℹℎ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin)) Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301] Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty))
 #
 +LGreekGreen=	NotSameKey(Face(Latin)	Face(Greek__Letters)	Layers(Green+Green-AltGr))	
 +LGreekGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
@@ -229,9 +229,10 @@ LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
 #
 +DeadKey_Map012e=	PrefixDocs[Hebrew {AND: iconic control-key symbols}]
 +DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]	Face(Add_2Ripe)
-#
-+DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]	ByPairs[0020␠ 0192␢ '⎖ "〃]
-+DeadKey_Map019c=	  ByPairs[0020␢](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)
+#								Having AÅ KK contradicts Unicode recommendations	
++DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]
++DeadKey_Map019c=		ByPairs[0020␠ 0192␢ '⎖ "〃 :⫶ \∖ -− _―]
++DeadKey_Map019c=	  ByPairs[0020␢ \⧵ pℎ c℃ f℉](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)
 # '
 # It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
 +DeadKey_Map06ff=	PrefixDocs[delivers Fraktur to an extra layer]		
@@ -414,7 +415,11 @@ DeadKey_Map=		Mutate	Mutate2Self
 +DeadKey_Map0338=		ByPairs[ !‼ 0020∕ {⌈ }⌉ [⌊ ]⌋ ](Face(Latin))	ByPairs[ [⧘ ]⧙ {⧚ }⧛ |⦙ \⦚](FlipLayers(Latin))	
 +DeadKey_Map0338=		Mutate2Self
 #   =============================================================
-Named_DIA_Recipe__ring_dot=	\\⋵ꞃ,\\⧔⧕[5],\Ẏọ,00b0|0323+<subst-Vietnamese>|||\⊛,!\⊆⊇,0307,0323|0328+<subst-Macron>|<any-round>,<any-ring-!above>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,<any-circled>,<any-circled>+<reveal-substkey>,<any-adddot>,-<any-amplify>,<any-black>--<any-amplify>|<any-insular>,<any-equal>+<any-amplify>
++Named_DIA_Recipe__ring_dot=	\\⋵ꞃ,\\⧔⧕[5],\Ẏọ,00b0|0323+<subst-Vietnamese>|||
++Named_DIA_Recipe__ring_dot=		\⊛,!\⊆⊇,0307,0323|0328+<subst-Macron>|
++Named_DIA_Recipe__ring_dot=		<any-round>,<any-ring-!above>,<any-dot>,<any-dots>,<any-dotless>,<any-other-circle>,
++Named_DIA_Recipe__ring_dot=			<any-circled>,<any-circled>+<reveal-substkey>,<any-adddot>,-<any-amplify>,
++Named_DIA_Recipe__ring_dot=			<any-black>--<any-amplify>|<any-insular>,<any-equal>+<any-amplify>
 # ring above 00b0: combine with dotabove 0307 dotbelow 0323 
 # (only WÊ miss dot below, AUY miss dot above: Ȧ is Livonian and phonetic; U is not precomposed; Ẉ - WHERE???) ; <any-jot> does not add anything useful now...
 # Ẏ (useful WHERE???) obscures Vietnamese Ỵ, [any-dots does not add anything...]; ⋵ obscures ⦑
@@ -430,7 +435,11 @@ Named_DIA_Recipe__ring_dot=	\\⋵ꞃ,\\⧔⧕[5],\Ẏọ,00b0|0323+<subst-Vietna
 #     <any-comma> picks up digits with comma which are above 0xffff - better make it last
 #
 #   =============================================================
-Named_DIA_Recipe__acute=	\\˝ᶂ,\\Ǘ[u],\⋄,00b4|030b--00b4,00b4+031b--0300|||<pseudo-hook>,<any-retroflex-hook>--0301,<any-hook>+<any-calculated>,<any-fishhook>+<any-calculated>,<any-hook-!above>,<any-fishhook>,<pseudo-tail>,<any-leg>,<any-tail>,<pseudo-curl>,<any-apostrophe>,<any-tick>,<any-sharpen>,<any-addright>,<any-rightwards>,<any-right-arrow>|031b,<any-african>
++Named_DIA_Recipe__acute=	\\˝ᶂ,\\Ǘ[u],\⋄,00b4|030b--00b4,00b4+031b--0300|||
++Named_DIA_Recipe__acute=		<pseudo-hook>,<any-retroflex-hook>--0301,<any-hook>+<any-calculated>,
++Named_DIA_Recipe__acute=			<any-fishhook>+<any-calculated>,<any-hook-!above>,<any-fishhook>,<pseudo-tail>,
++Named_DIA_Recipe__acute=			<any-leg>,<any-tail>,<pseudo-curl>,<any-apostrophe>,<any-tick>,<any-sharpen>,
++Named_DIA_Recipe__acute=			<any-addright>,<any-rightwards>,<any-right-arrow>|031b,<any-african>
 # combine acute 00b4 and hooks/tails/curls and horn 031b	(double acute=030b/2dd - protect against '' --> "; Ǘ is accessible otherwise, hides Ủ)
 +DeadKey_Map00b4=	PrefixDocs[Acute [+ on horn], sharpen, add on right {AND: hooks, tail/leg/curl, turned} — overflows to/from the column on right]
 +DeadKey_Map00b4=	Mutate[+<NAMED-acute>|<any-tailless>+<any-greekize>|<any-turned>]	Mutate2Self
@@ -449,7 +458,12 @@ Named_DIA_Recipe__acute=	\\˝ᶂ,\\Ǘ[u],\⋄,00b4|030b--00b4,00b4+031b--0300|||
 #
 #   =============================================================
 # ; <any-overbar>--<any-manual-turnaround> to symmetrize ∈∋.
-Named_DIA_Recipe__hat=	\\ı≈˜〚〛₡⍩⍚ʕ,\⍊⍑⟘¡⩞▫◈⧈⟞ᴎ,02c6|||<pseudo-smallcaps>,<any-amplify>,<any-whiten>,<any-fake-white>,<any-fake-black>,<any-calculated-!operator-!squared-!circled-!african-!big-!large-!n-ary>,-<any-operator>,<any-fake-black>--<any-operator>,<any-loop>,<any-upturn>,<any-descender>,<any-underbar>,<any-overbar>--<any-manual-turnaround>,<any-paleo>,<any-fishhook>|<any-inverted>+<any-phonetized>,<any-dot>+<any-reversed>,uc+<any-dot>+<any-reversed>+lc
++Named_DIA_Recipe__hat=	\\ı≈˜〚〛₡⍩⍚ʕ,\⍊⍑⟘¡⩞▫◈⧈⟞ᴎ,02c6|||
++Named_DIA_Recipe__hat=		<pseudo-smallcaps>,<any-amplify>,<any-whiten>,<any-fake-white>,<any-fake-black>,
++Named_DIA_Recipe__hat=		<any-calculated-!operator-!squared-!circled-!african-!big-!large-!n-ary>,-<any-operator>,
++Named_DIA_Recipe__hat=		<any-fake-black>--<any-operator>,<any-loop>,<any-upturn>,<any-descender>,<any-underbar>,
++Named_DIA_Recipe__hat=		<any-overbar>--<any-manual-turnaround>,<any-paleo>,<any-fishhook>|
++Named_DIA_Recipe__hat=	     <any-inverted>+<any-phonetized>,<any-dot>+<any-reversed>,uc+<any-dot>+<any-reversed>+lc
 # Hat:  (if both smallcaps and turned/etc defined in the same Unicode version, prefer smallcaps) [loop/upturn not visible]
 +DeadKey_Map02c6=	PrefixDocs[Hat, Amplify, Whiten, Paleo, “other” mogrify {AND: smallcaps, loop/upturn/descender/bar/fishhook/turnaround/inverted-phonetic/dot-reversed} — overflows to/from the column on right]
 +DeadKey_Map02c6=	ByPairs[02c6.0302]	Mutate[+<NAMED-hat>|||<any-script>]

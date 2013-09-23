@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION = "0.61";
+$VERSION = $VERSION = "0.62";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -1345,7 +1345,7 @@ Universality vs affordability
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m07/0157.html
 
-Drachma: 
+Drachma
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m05/0167.html
   http://std.dkuug.dk/jtc1/sc2/wg2/docs/n3866.pdf
@@ -1354,9 +1354,10 @@ w-ring is a stowaway
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m04/0043.html
 
-History of squared pH
+History of squared pH (and about what fits into ideographic square)
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m02/0123.html
+  http://unicode.org/mail-arch/unicode-ml/y2013-m09/0111.html
 
 Silly quotation marks: 201b, 201f
 
@@ -1505,9 +1506,10 @@ Exciting new letter forms for English
 
   http://www.theonion.com/articles/alphabet-updated-with-15-exciting-new-replacement,2869/
 
-Proposing new stuff
+Proposing new stuff, finding new stuff proposed
 
   http://unicode.org/mail-arch/unicode-ml/y2008-m01/0238.html
+  http://www.unicode.org/mail-arch/unicode-ml/y2013-m09/0056.html
 
 A useful set of criteria for encoding symbols is found in
 Annex H of this document:
@@ -1829,6 +1831,456 @@ The presentation of the existing COMBINING CEDILLA which has three major forms [
 Transliteration on passports (see p.IV-48)
 
   http://www.icao.int/publications/Documents/9303_p1_v1_cons_en.pdf
+
+=head1 Keyboard input on Windows, Part I: what is the kernel doing?
+
+This is not documented.  We try to provide a description which is
+both as simple as possible, and as complete as possible.  (We ignore
+many important parts: the handling of hot keys [or C<C-A-Del>]), IME,
+handling of focus switch [C<Alt-Tab> etc], the keyboard filters,
+widening of virtual keycodes, and LED lights.)
+
+=over
+
+=item 0
+
+The hardware keyboard drivers (PC or USB) deliver keydown/up(/repeat???) event for scan
+codes of corresponding keys.  (This is a complicated topic.)
+
+=item 1
+
+The scan codes are translated (see “Low level scancode mapping” in L<"SEE ALSO">).
+
+=item 2
+
+The keyboard layout tables map the translated scancode to a virtual keycode.
+(This may also depend on the “modification column”; see L<"Far Eastern keyboards on Windows">.)
+
+=item 3
+
+Mythology: the modification keys (C<Shift>, C<Alt>, C<Ctrl> etc) are taken into account.
+
+What actually happens: any key may act as a modification key.  The keyboard layout tables
+map keycodes to 8-bit masks.  (The customary names for lower bits of the mask are C<KBDSHIFT>,
+C<KBDCTRL>, C<KBDALT>, C<KBDKANA>; two more bits are named C<KBDROYA> and C<KBDLOYA>; two more
+bits are unnamed.)  The keycodes of the currently pressed keys are translated to masks, and
+these masks are ORed together.  (For the purpose of translation to C<WM_CHAR>/etc [done
+in ToUnicode()/ToUnicodeEx()], the bit C<KBDKANA> may be set
+also when key C<VK_KANA> was pressed odd number of times; this is
+controlled by C<KANALOK> flag in a virtual key descriptor [of the key being currently processed]
+of the keyboard layout tables.)
+
+The keyboard layout tables translate the ORed mask to a number called “modification column”.
+(Thess two numbers are completely hidden from applications.  The only glint the
+applications get is in the [useless, since there is no way to map it to anything “real”] result of
+L<VkKeyScanEx()|http://msdn.microsoft.com/en-us/library/windows/desktop/ms646332%28v=vs.85%29.aspx>.])
+
+=item 4
+
+Depending on the current “modification column”, the virtual keycode of the current key event
+may be massaged further.  (See L<"Far Eastern keyboards on Windows">.)  Numpad keycodes
+depend also on the state of C<NumLock> — provided the keyboard layout table marks them with
+C<KBDNUMPAD> flag.  A few other scancodes may also produce different virtual keycodes in
+different situations (e.g., C<Break>).
+
+When C<KLLF_ALTGR> flag is present, fake presses/releases of left C<Ctrl> are generated
+on presses/releases of right C<Alt>.  With
+keypad presses/releases in presence of C<VK_SHIFT>, fake releases/presses of C<VK_SHIFT>
+are generated.
+
+=item 5
+
+The message C<WM_(SYS)KEYDOWN/UP> is delivered to the application.  If C<VK_MENU> [usually
+called the C<Alt> key] is
+down, but C<VK_CONTROL> is not, the event is of C<SYS> flavor (this info is duplicated in
+lParam.  Additionally, for C<VK_MENU> tapping, the UP event is also made C<SYS> — although
+at this moment C<VK_MENU> is not down!).
+(The C<KBDEXT> flag [of the scancode] is also delivered to the application.)
+
+B<The following steps are applicable only if the application uses “the standard message pump”
+with TranslateMessage()/DispatchMessage() or uses some equivalent code.>
+
+=item 6
+
+Before the application dispatches C<WM_(SYS)KEYDOWN/UP> to the message handler,
+TranslateMessage() calls L<ToUnicode()|The semantic of ToUnicode()> with C<wFlags = 0> (unless a popup menu
+is active; then C<wFlags = 1> — which disables character-by-number input via
+numeric KeyPad).
+
+=item 7
+
+The obtained characters are posted via PostMessage().  All the characters but
+the last one are marked by C<FAKE_KEYSTROKE> flag in C<lParam>.  If the initial message
+was C<WM_SYSKEYDOWN>, the C<SYS> flavor is posted; if ToUnicode() returns a
+deadkey, the C<DEAD> flavor is posted.
+
+(The bit C<ALTNUMPAD_BIT> is set/used only for the console handler.)
+
+=back
+
+=head1 Keyboard input on Windows, Part II: The semantic of ToUnicode()
+
+L<The syntax of ToUnicode() is documented|http://msdn.microsoft.com/en-us/library/windows/desktop/ms646320%28v=vs.85%29.aspx>,
+the semantic is not.  Here we fix this.
+
+=over 4
+
+=item 1
+
+If the bit 0x01 in C<wFlags> is not set, the key event is checked for contributing to
+character-by-number input via numeric KeyPad.  If so, the character is
+delivered only when C<Alt> is released.  (This the only case when KEYUP
+delivers a character.)  Unless the bit 0x02 in C<wFlags> is set, the KEYUP
+events are not processed any more.
+
+=item 2
+
+The flag C<KLLF_LRM_RLM> is acted upon, and C<VK_PACKET> is processed.
+
+=item 3
+
+The keys which are currently down are mapped to the ORed bitmap (see above).
+
+=item 4
+
+If the key event does not contribute to input-by-number via numeric keypad,
+and C<KBDALT> is set, and no other bits except C<KBDSHIFT>, C<KBDKANA> are set:
+then the bit C<KBDALT> is removed from the ORed mask.
+
+=item 5
+
+If C<CapLock> is active, C<KBDSHIFT> state is flipped in the following cases: either at most
+C<KBDSHIFT> is set in the bitmap, and C<CAPLOK> is set in the descriptor,
+or both C<KBDALT> and C<KBDCTRL> are set in the bitmap, and C<CAPLOKALTGR> is set in the
+descriptor.
+
+Now the ORed bitmap is converted to the modification column (see above).
+
+=item 6
+
+The key descriptor for the current virtual keycode is consulted (the “row” of the table).
+If C<SGCAPS> flag is on, C<CapsLock> is active, and no other bits but C<KBDSHIFT> are set in the bitmap,
+the row is replaced by the next row.
+
+=item 7
+
+The entry at 
+the row/column is extracted; if defined, it is either a string (zero or more UTF-16 code units), or a
+dead key ID (one UTF-16 unit).  (I<Implementation>: the ID is taken from the next row of the table.)
+
+(If the ORed mask corresponds to a valid modification column, but the row does not
+define the behaviour at this column, and the bit C<KBDCTRL> is set, and no other bits but C<KBDSHIFT>, C<KBDKANA>
+are set, then an autogenerated character in the range 0x00..0x1f is emitted for virtual keycodes
+'A'..'Z' and widened virtual keycodes 0xFF61..0xFF91 (for latter, based on the low bits of translation-to-scancode).
+
+=item 8
+
+The resulting units are fed to the finite automaton.  When the automaton is in
+0-state, a fed character unit is passed through, and a fed deadkey ID sets the state
+of the automaton to this number.  In non-0 state, the IDs behave the
+same as numerically equal character units; the behaviour is described by the keyboard layout
+tables.  The automaton changes the state according to the input; it may also emit a character
+(= 1 code unit; then it is always reset to 0 state).  When “unrecognized input” arrives, the automaton
+emits the ID I<and> the input, and resets to 0 state.
+
+(On KEYUP event, the changes to the state of the finite-automaton are ignored.  This is only
+relevant if C<wFlags> has bit 0x02 set.)
+
+=item 9
+
+After UTF-16 units are passed through the automaton, its output is returned by ToUnicode().
+If the automaton is in non-0 state, the state ID becomes the output.
+
+=back
+
+B<NOTE:> MSKLC restricts the length of the string associated to the row/column cell to
+be at most 4 UTF-16 code units.
+
+B<NOTE:> If the string is “long” (i.e., defined via LIGATURES), when it is fed through the
+finite automaton, the transitions to non-0 state do not generate deadkey IDs in the output
+string.  (The LIGATURES may contain strings of one code unit!  This may lead to non-obvious
+behaviour!  If pressing such a key after a deadkey generates a chained deadkey, this
+would happen without delivering C<WM_DEADKEY> message.)
+
+B<NOTE:> How kernel recognizes which key sequences contribute to
+character-by-number input via numeric KeyPad?  First, the starter keydown must happen
+when the ORed mask contains C<KBDALT>, and no other bits except C<KBDSHIFT>
+and C<KBDKANA>.  (E.g., one can press C<Alt>, then tap C<f 1 2 3>, release C<Alt>
+[with 1,2,3 on the numeric keypad].
+This would deliver C<Alt-f>, then C<1> would start character-by-number input
+provided C<Alt> and C<NumPad1> together have ORed mask “in between” of C<KBDALT>
+and C<KBDALT|KBDSHIFT|KBDKANA>.)
+
+After the starter keydown (NumPad: 0..9, DOT, PLUS) is recognized as such, all the keyups
+should be followed by the corresponding keydown (keydowns-due-to-repeat are ignored);
+more precisely, between two KEYDOWN events, the KEYUP for the first of them must be present.
+(In other words, KEYDOWN/KEYUP events must come in the expected order, maybe with some intermixed “extra” KEYUP events.)
+In the decimal mode (numeric starter) only the keys with scancodes of NumPad 0..9 are allowed.
+In the hex mode (starter is NumPad's DOT or PLUS) also the keys with virtual codes
+'0'..'9' and 'A'..'F' are allowed.  The sequence is terminated by releasing C<VK_MENU>
+(=C<Alt>) key.
+
+B<NOTE:> In most cases, the resulting number is reduced mod 256.  The exceptions are: the starter key is C<KeyPadPLUS>, 
+or the translate-to codepage is multibyte (and the number is interpreted as big-endian).  In multibyte 
+codepages, (reduced) numbers above 0x80
+are considered in C<cp1252> codepage (unless the translate-to codepage is Japanese, and the number’s codepoint is Katakana).
+
+B<NOTE:> If the starter key is C<KeyPad0> or C<KeyPadDOT>, the number is a codepoint in the default codepage of the keyboard layout;
+if it is another digit, it is in the OEM codepage.
+Hex mode (C<KeyPadPLUS> or C<KeyPadDOT>) requires extra tinkering; see L<"Hex input of unicode is not enabled">.
+
+B<NOTE:> since keyboard layout normally map C<Alt> to the mask C<KBDALT>, and do not define
+a modification column for the ORed mask C<=KBDALT>, and C<KBDALT> is B<NOT> stripped for
+key events in input-by-number, these key events usually do not generate spurious C<WM_CHAR>s.
+
+=head1 Keyboard input on Windows, Part III: Customary “special” keybindings of typical keyboards
+
+Typically, keyboards define a few keypresses which deliver “control” characters
+(for benefits of console applications).  As shown above, even if the keyboard does not
+define C<Control-letter> combinations (but does define modification column for C<Ctrl>
+which is associated to C<KBDCTRL> — with maybe C<KBDSHIFT>, C<KBDKANA> intermixed), C<WM_CHAR>
+with C<^letter> I<will> be delivered to the application.  Same with happen for combinations
+with modifiers which produce only C<KBDCTRL>, C<KBDSHIFT>, C<KBDKANA>.
+
+Additionally, the typical keyboards also define the following bindings:
+
+  Ctrl-Space	 ——→ 0x20
+  Esc, Ctrl-[	 ——→ 0x1b
+  Ctrl-]	 ——→ 0x1d
+  Ctrl-\	 ——→ 0x1c
+  BackSpace	 ——→ ^H
+  Ctrl-BackSpace ——→ 0x7f
+  Ctrl-Break	 ——→ ^C
+  Tab		 ——→ ^I
+  Enter		 ——→ ^M
+  Ctrl-Enter	 ——→ ^J
+
+In addition to this, the standard US keyboard (and keyboards built by this module) define
+the following bindings with C<Ctrl-Shift> modifiers:
+
+  @	 ——→ 0x00
+  ^	 ——→ 0x1e
+  _	 ——→ 0x1f
+
+=head1 Can an application on Windows accept keyboard events?  Part I: insert only
+
+The logic described above makes the kernel deliver more or less “correct” C<WM_(SYS)CHAR> messages
+to the application.  The only bindings which may be defined in the keyboard, but will not be
+seen as C<WM_(SYS)CHAR> are those in modification columns which involve C<KBDALT>, and do not
+involve any bits except C<KBDSHIFT> and C<KBDKANA>.  (Due to the stripping of C<KBDALT> described
+above, these modification columns are never accessed — I<well, they are, but only for input-by-number>.)
+
+Try to design an application with an entry field; the application should insert B<ALL> the
+characters ”delivered for insertion” by the keyboard layout and the kernel.  The application
+should not do anything else for all the other keyboard events.  First, ignore
+the C<KBDALT> stripping.
+
+Then the only C<WM_(SYS)CHAR> which are NOT supposed to insert the contents to the editable UI fields are the
+L<Customary “special” keybindings> described above.  They are easy to recognize and ignore: just
+ignore all the C<WM_(SYS)CHAR> carrying characters in the range C<0x00..0x1f>, C<0x7f>, and ignore C<0x20>
+delivered when one of C<Ctrl> keys is down.  So the application which inserts all the I<other>
+C<WM_(SYS)CHAR>s will follow I<the intent> of the keyboard as close as possible.
+
+Now return to consideration of C<KBDALT> stripping.  If the application follows the policy above,
+pressing C<Alt-b> would enter C<b> — provided C<Alt> is mapped to C<KBDALT>, as done
+on standard keyboards.  So the application should recognize which C<WM_CHAR> carrying C<b>
+are actually due to stripping of C<KBDALT>, and should not insert the delivered characters.
+
+Here comes the major flaw of the Windows’ keyboard subsystem: the kernel translates
+SCANCODE —→ VK_CODE —→ ORED_MASK —→ MODIFICATION_COLUMN, then operates in terms of
+ORed masks and modification columns.  The application can access only the first two levels
+of this translation; one cannot query the kernel for any information about the last
+two numbers.  (Except for the API L<VkKeyScanEx()|http://msdn.microsoft.com/en-us/library/windows/desktop/ms646332%28v=vs.85%29.aspx>,
+but it is unclear how this API may help: it translates “in wrong direction” and covers only BMP.)
+Therefore, there is no bullet-proof way to recognize when C<WM_(SYS)CHAR> arrived
+due to C<KBDALT> stripping.
+
+B<NOTE:> of course, if only C<Shift/Alt/Ctrl> keys are associated to non-0 ORed mask bitmaps,
+and they are associated to the “expected” C<KBDSHIFT/KBDALT/KBDCTRL> bits, then the
+application would easily recognize this situation by checking whether C<Alt> is down,
+but C<Ctrl> is not.  (Also observe that this is exactly the situation distinguishing
+C<WM_CHAR> from C<WM_SYSCHAR> — no surprises here!)
+
+Assuming that the application uses this method, it would correctly recognize stripped
+events on the “primitive” keyboards.  However, on a keyboard with an extra modifier
+key (call it C<Super>; assume its mask to involve a non-SHIFT/ALT/CTRL/KANA bit),
+the C<Alt-Super-key> combination will not be stripped by the kernel, but the application
+would think that it was, and would not insert the character in C<WM_CHAR> message.  A bug!
+
+Moreover, if “supporing only the naive mapping” were a feasible
+restriction, there would be no reason for the kernel to go through the extra step of “the ORed mask”.
+Actually, to have a keyboard which is simultaneously backward compatible, easy for users, and
+covering a sufficiently wide range of possible characters, one B<must> use more or
+less convoluted implementations (like this one, with C<Shift> omitted:X<AssignMasksSmart>
+
+  lCtrl		Win	lAlt		rAlt		Menu		rCtrl
+  CTRL|LOYA	KANA	ALT|KANA	CTRL|ALT|X1	CTRL|ALT|X2	CTRL|ALT|ROYA
+
+with suitable backward-compatible mapping of ORed masks to modification columns.
+This assignment allows
+all the combinations not involving C<lCtrl+rAlt> or C<Win+lAlt> to be distinct,
+avoids stripping of C<KBDALT> on C<lAlt> combined with other modifiers,
+makes C<CapsLock> work with most of combinations, while completely preserving all
+application-visible properties of keyboard events.)
+
+B<CONCLUSION:> the fact that the kernel and the applications speak different
+incompatible languages makes even the primitive task discussed here impossible
+to code in a bullet-proof way.  A heuristic workaround exists, but it will not
+work with all keyboards and all combinations of modifiers.
+
+=head1 Can an application on Windows accept keyboard events?  Part II: special key events
+
+In the preceding section, we considered the most primitive application accepting
+the user inserting of characters, and nothing more.  “Real applications” must
+support also keyboard actions different from “insertion”; so those KEYDOWN events
+which are not related to insertion may trigger some “special actions”.  To model a full-featured
+keyboard input, consider the following specification:
+
+As above, the application has an entry field, and should insert B<ALL> the
+characters ”delivered for insertion” by the keyboard layout and the kernel.
+For all the keyboard events not related to insertion of characters, the application
+should write to the log file which of C<Ctrl/Alt/Shift> modifiers were down,
+and the virtual keycode of the KEYDOWN event.  Again, at first, we ignore
+the C<KBDALT> stripping.
+
+At first, the problem looks simple: with the standard message pump, when C<WM_(SYS)KEYDOWN>
+message is processed, the corresponding C<WM_(SYS)(DEAD)CHAR> messages are already
+sent to the message queue.  One can PeekMessage() for these messages; if present,
+and not “special”, they correspond to “insertion”, so nothing should be written to the log.
+Otherwise, one reports this C<WM_(SYS)KEYDOWN> to the log.
+
+Unfortunately, this solution is wrong.  Inspect again what the kernel is delivering
+during the input-by-number via numeric keyboard: the KEYDOWN for decimal/hex digits
+B<is> a part of the “insertion”, but it does not generate any C<WM_(SYS)(DEAD)CHAR>.
+Essentially, the application may see C<Alt-F> pressed during the processing of
+C<Alt-NumPadPlus+F+1+2>, but even if C<Alt-F> is supposed to format the paragraph,
+this action should not be triggered (but C<U+0F12> should be eventually inserted).
+
+B<CONCLUSION:> Input-by-number is getting in the way of using the standard message
+pump.  C<SOLUTION>: one should write a clone of TranslateMessage() which delivers
+suitable C<WM_USER*> messages for KEYDOWN/KEYUP involved in Input-by-number.  Doing
+this, one can also remove sillyness from the Windows’ handling of Input-by-number
+(such as taking C<mod 256> for numbers above 255).
+
+B<POSSIBLE IMPLEMENTATION>: myTranslateMessage() should:
+
+=over 4
+
+=item *
+
+when non handling input-by-number, call ToUnicode(), but use C<wFlag=1>, so that ToUnicode() does not handle input-by-number.
+
+=item *
+
+Recognize input-by-number starters by the scancode/virtual-keycode, the presence of C<VK_MENU> down, and
+the fact that ToUnicode() produces nothing or '0'..'9','.',',','+'.
+
+=item *
+
+After the starter, allow continuation by checking the scancode/virtual-keycode and the presence of C<VK_MENU> down.
+Do not call ToUnicode() for continuation messages.
+
+=item *
+
+After a chain of continuations following by KEYUP for C<VK_MENU>, one should PostMessage() for C<WM_CHAR> with
+accumulated input.
+
+=back
+
+Combining this with the heuristical recognition of stripped C<KBDALT>, one gets an architecture
+with a naive approximation to handling of C<Alt> (but still miles ahead of all the applications
+I saw!), and bullet-proof handling of other combinations of modifiers.
+
+B<NOTE:> this implementation of MyTranslateMessage() loses one “feature” of the original one:
+that input-by-number is disabled in the presence of (popup) menu.  However, since I never saw
+this “feature” in action (and never have heard of it described anywhere), this must be of
+negligible price.
+
+B<NOTE:> I<ALL> the applications I checked do this logic wrong.  Most of them check B<FIRST> for
+“whether the key event looks like those which should trigger special actions”, then perform
+these special actions (and ignore the character payload).
+
+As shown above, the reasonable way is to do this in the opposite order, and check for 
+special actions only I<AFTER> it is known that the key event does not carry a character payload.
+The impossibility of reversing the order of these checks is due to the same reason as one discussed
+above: the
+kernel and application speaking different languages.
+
+Indeed, since the application knows nothing
+about ORed masks, it has no way to distinguish that, for example, C<lCtrl-rCtrl-=> may be I<SUPPOSED> to be
+distinct from C<lCtrl-=> and C<rCtrl-=>, and while the last two do not carry the character
+payload, the first one does.  Checking I<FIRST> for the absense of C<WM_(SYS)(DEAD)CHAR>
+delegates such a discrimination to the kernel, which has enough information about the
+intent of the keyboard layout.  (Likewise, the keyboard may define the pair of C<DEADKEY>
+and C<Ctrl-A> to insert ᵃ.  Then C<Ctrl-A> alone will not carry any character payload,
+its combination with a deadkey may.)
+
+Why the applications are trying to grab the potential special-key messages as early 
+as possible?  I suspect that the developers are afraid that otherwise, a keyboard layout may
+“steal” important accelerators from the application.  While this is technically possible,
+nowadays keyboard accelerators are rarely the I<only> way to access features of the applications;
+and among hundreds of keyboard layout I saw, all but 2 or 3 would not “steal” I<anything> from applications.
+(Or maybe the developers just have no clue that the correct solution is so simple?)
+
+B<NOTE:> Among the applications I checked, the worst offender is Firefox.  It follows L<a particularly
+unfortunate advice by Mike Kaplan|http://blogs.msdn.com/b/michkap/archive/2005/01/19/355870.aspx>
+and tries to reconstruct the mentioned above row/columns table of the keyboard layout, then
+uses this (heuristically reconstructed) table as a substitute for the real thing.  And
+due to the mismatch of languages spoken by kernel and applications, working via such an 
+attempted reconstruction turns out to have very little relationship to the actually intended
+behaviour of the keyboard (the behaviour observed in less baroque applications).  In particular, if
+keyboards uses different modification columns for C<lCtrl-lAlt> and C<AltGr>=C<rAlt>
+modifiers, pressing C<AltGr-key> inputs wrong characters in Firefox.
+
+B<NOTE:> Among notable applications which fail spectacularly is Emacs.  The developers
+forget that for a generation, it is already XXI century, and L<use ToAscii() instead of
+ToUnicode()|http://fossies.org/linux/misc/emacs-24.3.tar.gz:a/emacs-24.3/src/w32fns.c>!
+(Even if ToUnicode() is available, its result is converted to the result of the
+corresponding ToAscii() code.)
+
+In addition to 8-bitness, Emacs also suffers from check-for-specials-first syndrome…
+
+=head1 Can an application on Windows accept keyboard events?  Part III: better detection of C<KBDALT> stripping
+
+We explained above that L<it is not possible to make a bullet-proof algorithm
+handling the case when C<KBDALT> might have been stripped by the kernel|"Can an application on Windows accept keyboard events?  Part I: insert only">.  The
+very naive heuristic algorithm described there will recognize the simplest
+cases, but will also have many false positives: for many combinations it will decide
+that C<KBDALT> was stripped while it was not.  The result will be that
+the character C<X> will be interpreted as C<Alt-X>, so will not be inserted.
+It will not handle, for example,
+the C<lAlt-Menu-key> modifier combinations with L<the assignment of mask
+from that section|"AssignMasksSmart">.
+
+Indeed, with this assignment, the only combinations of modifiers where the kernel will strip C<KBDALT>
+are C<lAlt> and C<lAlt+Win>.  So C<lAlt-Menu-key> is not stripped, hence the 
+correct C<WM_*CHAR> is delivered by the kernel.  However, since this combination is
+still visible to the application as having C<Alt>, and not having C<Ctrl>,
+it is delivered as the C<SYS> flavor.
+
+So the net result is: one designed a nice assignment of masks to the modifier 
+keys.  This assignment makes keypresses successfully navigate around the quirks 
+of the kernel calculations of the character to deliver.  However, the naive 
+algorithm used by the application will force the application to ignore this
+correctly delivered character to insert.
+
+What one needs is an extra heuristic to recognize the combinations involving 
+C<Alt> and an “unexpected modifier”, so that these combinations become
+exceptions to the rule “C<SYS> flavor means ‘do not insert’”.
+
+C<SOLUTION:> when C<WM_SYS*CHAR> message arrives, inspect the virtual keycodes
+which are reported as pressed.  Ignore the keycode for the current message.
+Ignore the keycodes for “usual modifiers” (C<Shift/Alt/Kana>) which are
+expected to keep stripping.  Ignore the keycode for the keys which may be
+kept “stuck down” by the keyboards (see L<"Far Eastern keyboards on Windows">).
+If some keycode remains, then consider it as an “extra” modifier, and ignore
+the fact that the message was of C<SYS> flavor.
+
+So all one must do is to define one user message, code two very simple routines, 
+MyTranslateMessage() and HasExtraModifiersHeuristical(), and perform two 
+PeekMessage() on KEYDOWN event, and one gets a powerful almost-robust
+algorithm for keyboard input on Windows.  (Recall that all the applications
+I saw provide close-to-abysmal support of keyboard input on Windows.)
 
 =head1 Far Eastern keyboards on Windows
 
@@ -3528,8 +3980,15 @@ at least makes the assignments less confusing for human inspection.)
 =head2 Windows ignores C<lAlt> if its modifier bitmaps is not standard
 
 Adding C<KBDROYA> to C<lAlt> disables console sending non-modified char on keydown.
-Together with the previous problem, this essentially prohibits putting interesting
-bitmaps on the left modifier keys
+Together with the previous problem, this looks like essentially prohibiting
+putting interesting bitmaps on the left modifier keys.
+
+Workaround: one can add C<KBDKANA> on C<lAlt>.  It looks like the combination
+C<KBDALT|KBDKANA> is compatible with Windows' handling of C<Alt> (both in console,
+and for accessing/highlighting the menu entries).  (However, since only C<KBDALT>
+is going to be stripped for handling of C<lAlt-key>, the modification column for
+C<KBDKANA> should duplicate the modification column for no-C<KBD>-flags.  Same with
+C<KBDSHIFT> added.)
 
 =head2 When C<AltGr> produces C<ROYA>, problems in Notepad
 
@@ -4517,7 +4976,7 @@ sub massage_faces ($) {
 #warn "Massaging face `$f'...";
     for my $key ( qw( Flip_AltGr_Key Diacritic_if_undef DeadChar_DefaultTranslation DeadChar_32bitTranslation extra_report_DeadChar
     		      PrefixChains ctrl_after_modcol create_alpha_ctrl keep_missing_ctrl output_layers layers_modifiers
-    		      ComposeKey Explicit_AltGr_Invert ) ) {
+    		      ComposeKey Explicit_AltGr_Invert Auto_Diacritic_Start ) ) {
       $self->{faces}{$f}{"[$key]"} = $self->get_deep_via_parents($self, undef, 'faces', (split m(/), $f), $key);
     }
     $self->{faces}{$f}{'[char2key_prefer_first]'}{$_}++ 		# Make a hash
@@ -5298,6 +5757,8 @@ sub new_from_configfile_string ($$) {
     $data->massage_faces;
     
     $data->massage_deadkeys_win($data);		# Process (embedded) MSKLC-style deadkey maps
+    $data->scan_for_DeadKey_Maps();		# Makes a direct-access synonym, scan for DeadKey_Maps* keys
+    $data->create_DeadKey_Maps();
     $data->create_composite_layers;		# Needs to be after simple deadkey maps are known
 
     for my $F (keys %{ $data->{faces} }) {
@@ -6736,7 +7197,8 @@ sub make_translator ($$$$$) {		# translator may take some values from "environme
 #warn "Age of <à> is <$self->{Age}{à}>";
     $Dia =~ s(<NAMED-([-\w]+)>){ (my $R = $1) =~ s/-/_/g;
     				 die "Named recipe `$1' unknown" unless exists $self->{faces}{$face}{"Named_DIA_Recipe__$R"};
-    				 (my $r = $self->{faces}{$face}{"Named_DIA_Recipe__$R"}) =~ s/^\s+//; $r }ge;
+#    				 (my $r = $self->{faces}{$face}{"Named_DIA_Recipe__$R"}) =~ s/^\s+//; 
+    				 $self->recipe2str($self->{faces}{$face}{"Named_DIA_Recipe__$R"}) }ge;
     $Dia =~ s/\|{3,4}/|/g if $isPrimary;
     my($skip, $limit, @groups, @groups2, @groups3) = (0);
     my($have4, @Dia) = (1, split /\|\|\|\|/, $Dia, -1);
@@ -7117,13 +7579,52 @@ sub pseudo_layer0 ($$$$) {
   return ($self->export_layers($face, $face))->[$N1] if $recipe eq 'FlipLayers';
 #  my $gr_debug = ($recipe =~ /Greek__/);
   if (debug_PERL_dollar1_scoping) {
-    return ($self->export_layers("$2", $face))->[$1 ? $N : $N1]
-      if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/;
+    return ($self->export_layers("$3", $face))->[$1 ? $N : $N1]
+      if $recipe =~ /^(?:((Full)?Face)|FlipLayers)\((.*)\)$/;
   } else {
     my $m1;	# Apparently, in perl5.10, if replace $m1 by $1 below, $1 loses its TRUE value between match and evaluation of $1
 #  ($gr_debug and warn "Pseudo-layer `$recipe', face=`$face', N=$N, N1=$N1\n"),
-    return ($self->export_layers("$2", $face))->[$m1 ? $N : $N1]
-      if $recipe =~ /^(?:(Face)|FlipLayers)\((.*)\)$/ and ($m1 = $1, 1);
+    return ($self->export_layers("$3", $face))->[$m1 ? $N : $N1]
+      if $recipe =~ /^(?:((Full)?Face)|FlipLayers)\((.*)\)$/ and ($m1 = $1, 1);
+  }
+  if ($recipe =~ /^prefix(NOTSAME(case)?)?=(.+)$/) {	# `case´ unsupported
+    # Analogue of NOID with the principal layers as reference, and layers of DeadKey as sources
+    my($notsame, $case) = ($1,$2);
+    my $hexPrefix = $self->key2hex($self->charhex2key($3));
+    $self->ensure_DeadKey_Map($face, $hexPrefix);
+    my $layers = $self->{faces}{$face}{'[deadkeyLayers]'}{$hexPrefix} or die "Unknown prefix character `$hexPrefix´ in layers-from-prefix-key";
+    return $layers->[$N] if $N or not $notsame;
+    my $name = "NOTSAME[$face]$layers->[$N]";
+    return $self->{layers}{$name} if $self->{layers}{$name};
+    my @LL = map $self->{layers}{$_}, @$layers;
+    my $L0 = $self->{faces}{$face}{layers};
+    my @L0 = map $self->{layers}{$_}, @$L0;
+    my @OUT;
+    for my $charN (0..$face->{'[non_VK]'}-1) {
+      my (@L, %s) = map $_->[$charN], @LL;
+      for my $layers0 (map $_->[$charN], @$L0) {
+        for my $sh (@$layers0) {
+          $s{ref($sh) ? $sh->[0] : $sh}++ if defined $sh;
+        }
+      }
+      my(@CC, @pp, @OK);
+      for my $l (@L[0 .. (($notsame && !$N) ? @{ $self->{faces}{$face}{layers} } - 1 : 0)]) {
+        my(%s1, @was, @out);
+        for my $sh (0..$#$l) {
+          my @C = map {defined() ? (ref() ? $self->dead_with_inversion(!'hex', $_, $face, $self->{faces}{$face}) : $_) : $_} $l->[$sh];
+          my @p = map {defined() ? (ref() ? $_->[2] : 0 ) : 0 } $l->[$sh];
+          ($CC[$sh], $pp[$sh]) = ($C[0], $p[0]) if not defined $CC[$sh] and defined $C[0];
+          ($CC[$sh], $pp[$sh], $OK[$sh], $s1{$C[0]}) = ($C[0], $p[0], 1,1) if !$OK[$sh] and defined $C[0] and not $s{$C[0]};
+          ($CC[$sh], $pp[$sh], $OK[$sh], $s1{$was[0]}) = (@was, 1,1)		# use unshifted if needed
+            if $sh and !$OK[$sh] and defined $C[0] and defined $was[0] and not $s{$was[0]} and not $s1{$was[0]};
+          @was = ($C[0], $p[0]) unless $sh;		# may omit `unless´
+#          $cnt++ if defined $CC[$sh];
+        }
+      }
+      push @OUT, \@CC;
+    }
+    $self->{layers}{$name} = \@OUT;
+    return $name;
   }
   die "Unrecognized Face recipe `$recipe'"
 }
@@ -7145,7 +7646,7 @@ sub make_translated_layers ($$$$;$$) {		# support Self/FlipLayers/LinkFace/FlipS
 #  my $FACE = $recipe . join '===', '', @$NN, '';
 #  return $self->{faces}{$FACE}{layers} if exists $self->{faces}{$FACE}{layers};
   return [map $self->pseudo_layer($recipe, $face, $_), @$NN]
-    if $recipe =~ /^((FlipLayers)?LinkFace|FlipLayers|Self|(Face|FlipLayers|Layers)\([^()]+\))$/;
+    if $recipe =~ /^(prefix(?:NOTSAME(?:case)?)?=.*|(FlipLayers)?LinkFace|FlipLayers|Self|((Full)?Face|FlipLayers|Layers)\([^()]+\))$/;
   $recipe =~ s/^(FlipShift)$/$1(Self)/;
   my @parts = grep /\S/, $self->join_min_paren_brackets_matched('', split /(\s+)/, $recipe)
     or die "Whitespace face recipe `$recipe'?!";
@@ -7266,18 +7767,16 @@ sub recipe2str ($$) {
    $recipe
 }
 
-#use Dumpvalue;
-sub create_composite_layers ($) {
+sub scan_for_DeadKey_Maps ($) {			# Makes a direct-access synonym, scan for DeadKey_Maps* keys
   my ($self, %h, $expl) = (shift);
 #Dumpvalue->new()->dumpValue($self);
-  my $filter = qr(^faces(?:/(.*))?/DeadKey_Map([0-9a-f]{4+})?(_\d)?$)i;
   my @F = grep m(^faces(/.*)?$), @{$self->{'[keys]'}};
   for my $FF (@F) {
     (my $F = $FF) =~ s(^faces/?)();
     my(@FF, @HH) = split m(/), $FF;
     next if @FF == 1 or $FF[-1] eq 'VK';
     my @FF1 = @FF;
-    push(@HH, $self->get_deep($self, @FF1)), pop @FF1 while @FF1;
+    push(@HH, $self->get_deep($self, @FF1)), pop @FF1 while @FF1;	# All the parents
     my $H = $HH[0];
     next if $H->{PartialFace};
     $self->{faces}{$F} = $H if $F =~ m(/) and exists $H->{layers};			# Make a direct-access copy
@@ -7285,48 +7784,86 @@ sub create_composite_layers ($) {
 #warn "Mismatch of hashes for `$FF'" unless $self->{faces}{$F} == $H;
 
     # warn "compositing: faces `$F'; -> <", (join '> <', %$H), ">";
-    my (%seen, @H, @H1, %SEEN);
     for my $HH (@HH) {
       for my $k ( keys %$HH ) {
 # warn "\t`$k' -> `$HH->{$k}'";
         next unless $k =~ m(^DeadKey_(Inv|Add)?Map([0-9a-f]{4,})?(?:_(\d+))?$)i;
 #warn "\t`$k' -> `$HH->{$k}'";
         my($inv, $key, $layers) = ($1 || '', $2, $3);
-        my $ref = ((defined $key) ? \@H : \@H1);	# Put undefined at the end
         $key = $self->key2hex($self->charhex2key($key)) if defined $key;			# get rid of uc/lc hex problem
         # XXXX The problem is that the parent may define layers in different ways (_0,_1 or no); ignore it for now...
-        $seen{$key || ''}++;
-        push @$ref, [$k, $key, $layers, $inv, $HH] unless $SEEN{($key || '') . "_$inv" . (defined $layers ? $layers : '')}++;
+        $H->{'[DeadKey__Maps]'}{$key || ''}{$inv}{(defined $layers) ? $layers : 'All'} ||= $HH->{$k};
       }
     }
-    # Treat first the specific maps (for one deadkey) then the deadkeys which were not seen via the universal map
-    for my $k1 ( @H, @H1 ) {		# [ ConfigHash key, hex deadkey, layer number ]
-      my($k, $key, $layers, $inv, $HH, $face) = (@$k1, $F);
-      $layers = ((defined $layers) ? [$layers] : [ 0 .. $#{$self->{faces}{$face}{layers}} ]);
-      my @keys = ((defined $key) ? $key : (grep {not $seen{$_}} map $self->key2hex($_), keys %{ $H->{'[DEAD]'} }));
-      @keys = '' if $inv and "$inv @keys" eq "Inv 0000";
-      my $recipe = $self->recipe2str($HH->{$k});
-      my $massage = !($recipe =~ s/\s+NoDefaultTranslation$//);
-      for my $KK (@keys) {
-#warn "Doing key `$KK' inv=`$inv' face=`$face', recipe=`$recipe'";
-        my $new = $self->make_translated_layers($recipe, $face, $layers, $KK);
-	$new = $self->massage_translated_layers($new,    $face, $layers, $KK) if $massage and not $inv;
-        for my $NN (0..$#$layers) {	# Create a layer according to the spec
-#warn "DeadKey Layer for face=$face; layer=$layer, k=$k:\n\t$HH->{$k}, key=`", ($key||''),"'\n\t\t";
-#$DEBUG = $key eq '0192';
-#print "Doing key `$KK' face=$face  layer=`$layer' recipe=`$recipe'\n" if $DEBUG;
+  }
+}
+
+#use Dumpvalue;
+sub ensure_DeadKey_Map_by_recipe ($$$$;$$) {
+  my ($self, $F, $hexPrefix, $recipe, $layers, $inv) = (shift, shift, shift, shift, shift, shift || '');
+  my $H = $self->{faces}{$F};
+  return if $H->{"[${inv}deadkeyLayersCreated]"}{$hexPrefix}{$layers and "@$layers"}++;
+#Dumpvalue->new()->dumpValue($self);
+  my $massage = !($recipe =~ s/\s+NoDefaultTranslation$//);
+  $layers ||= [ 0 .. $#{$self->{faces}{$F}{layers}} ];
+#warn "Doing key `$hexPrefix' inv=`$inv' face=`$F', recipe=`$recipe'";
+  my $new = $self->make_translated_layers($recipe, $F, $layers, $hexPrefix);
+  $new = $self->massage_translated_layers($new,    $F, $layers, $hexPrefix) if $massage and not $inv;
+  for my $NN (0..$#$layers) {	# Create a layer according to the spec
+#warn "DeadKey Layer for face=$F; layer=$layer, k=$k:\n\t$HH->{$k}, key=`", ($hexPrefix||''),"'\n\t\t";
+#$DEBUG = $hexPrefix eq '0192';
+#print "Doing key `$hexPrefix' face=$F  layer=`$layer' recipe=`$recipe'\n" if $DEBUG;
 #Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $DEBUG;
 #warn "new=<<<", join('>>> <<<', @$new),'>>>';
-          $H->{"[${inv}deadkeyLayers]"}{$KK}[$layers->[$NN]] = $new->[$NN];
-#warn "Face `$face', layer=$layer key=$KK\t=> `$new'" if $H->{layers}[$layer] =~ /00a9/i;
-#Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $self->charhex2key($key) eq chr 0x00a9;
-        }
-      }
+    $H->{"[${inv}deadkeyLayers]"}{$hexPrefix}[$layers->[$NN]] = $new->[$NN];
+#warn "Face `$F', layer=$layer key=$hexPrefix\t=> `$new'" if $H->{layers}[$layer] =~ /00a9/i;
+#Dumpvalue->new()->dumpValue($self->{layers}{$new}) if $self->charhex2key($hexPrefix) eq chr 0x00a9;
+  }
+}
+
+sub ensure_DeadKey_Map ($$$;$) {
+  my ($self, $F, $hexPrefix, $hexPrefixWas, %h, $expl) = (shift, shift, shift, shift);
+  $hexPrefixWas = $hexPrefix unless defined $hexPrefixWas;
+  my $H = $self->{faces}{$F};
+  my $v0 = $H->{'[DeadKey__Maps]'}{$hexPrefixWas};
+  for my $inv (keys %$v0) {
+    my $v1 = $v0->{$inv};
+    my $K = (($inv and "$inv $hexPrefix" eq "Inv 0000") ? '' : $hexPrefix);
+    for my $layers (keys %$v1) {
+      my $recipe = $self->recipe2str($v1->{$layers});
+      $layers = ($layers eq 'All' ? '' : [$layers]);
+      $self->ensure_DeadKey_Map_by_recipe($F, $K, $recipe, $layers, $inv);
     }
+  }
+}
+
+sub create_DeadKey_Maps ($) {
+  my ($self, %h, $expl) = (shift);
+#Dumpvalue->new()->dumpValue($self);
+  for my $F (keys %{ $self->{faces} }) {
+    next if 'HASH' ne ref $self->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
+    my $H = $self->{faces}{$F};
+    # Treat first the specific maps (for one deadkey) then the deadkeys which were not seen via the universal map
+    for my $key (keys %{$H->{'[DeadKey__Maps]'}}) {
+      my $v0 = $H->{'[DeadKey__Maps]'}{$key};
+      my @keys = (($key ne '') ? $key : (grep {not $H->{'[DeadKey__Maps]'}{$_}} map $self->key2hex($_), keys %{ $H->{'[DEAD]'} }));
+      $self->ensure_DeadKey_Map($F, $_, $key) for @keys;
+    }
+  }
+}
+
+#use Dumpvalue;
+sub create_composite_layers ($) {
+  my ($self, %h, $expl) = (shift);
+#Dumpvalue->new()->dumpValue($self);
+  for my $F (keys %{ $self->{faces} }) {
+    next if 'HASH' ne ref $self->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
+    my $H = $self->{faces}{$F};
+    next if $H->{PartialFace};
     next unless $H->{'[deadkeyLayers]'};		# Are we in a no-nonsense Face-hash with defined deadkeys?
 #warn "Face: <", join( '> <', %$H), ">";
     my $layerL = @{ $self->{layers}{ $H->{layers}[0] } };	# number of keys in the face (in the principal layer)
-    my $first_auto_dead = $self->get_deep_via_parents($self, undef, @FF, 'Auto_Diacritic_Start');
+    my $first_auto_dead = $H->{'[Auto_Diacritic_Start]'};
     $H->{'[first_auto_dead]'} = ord $self->charhex2key($first_auto_dead) if defined $first_auto_dead;
     for my $KK (sort keys %{$H->{'[deadkeyLayers]'}}) {		# Given a deadkey: join layers into a face, and link to it
       for my $layer ( 0 .. $#{ $H->{layers} } ) {
@@ -7759,13 +8296,16 @@ Duplicate: 1F14B <== [ 004D <square> 0056 ] ==> <1 33B9> (prefered)
 Duplicate: A789 <== [ 003A <pseudo-fake-super> ] ==> <1 02F8> (prefered)
         <꞉>     MODIFIER LETTER COLON
         <˸>     MODIFIER LETTER RAISED COLON at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 8032, <$f> line 39278.
+Duplicate: 02EF <== [ 0020 <pseudo-manual-subize> 0306 ] ==> <1 02EC> (prefered)
+        <˯>     02EF    MODIFIER LETTER LOW DOWN ARROWHEAD
+        <ˬ>     02EC    MODIFIER LETTER VOICING at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 8634, <$f> line 39278.
 EOR
 
 my (%known_dups) = map +($_,1), qw(0296 0384 1D43 1D52 1D9F 1E7A 1E7B 1FBF 2007
   202F 2113 24B8 24C7 2E1E 33B9 FC03 FC68 FD55 FD56 FD57 FD5D FD87 FD8C
   FD92 FDB5 FE34
   0273 1DAF 2040 207F 224B 2256 2257 225E 2263 2277 2279 2982 2993 2994 2995 2996 29BC
-  2A17 2A34 2A35 2A36 2A50 2ACF 2AFB 2AFD 2AFF 3018 3019 A760 A761 1D4C1 1F12B 1F12C 1F14B A789);		# As of Unicode 6.1 (questionable: 2982 2ACF)
+  2A17 2A34 2A35 2A36 2A50 2ACF 2AFB 2AFD 2AFF 3018 3019 A760 A761 1D4C1 1F12B 1F12C 1F14B A789 02EF);	# As of Unicode 6.2 (questionable: 2982 2ACF)
 
 sub decompose_r($$$$);		# recursive
 sub decompose_r($$$$) {		# returns array ref, elts are [$compat, @expand]
@@ -8095,7 +8635,7 @@ sub parse_NameList ($$) {
       next if $seen_compose{"$compat; @exp"}++;		# E.g., WHITE may be added in several ways...
       push @{$ordered{$c}}, [$compat, @exp > 3 ? @exp : @PRE];	# with 2 modifiers order does not matter for the algo below, but we catch U"¯ vs U¯".
       warn qq(Duplicate: $c <== [ @exp ] ==> <@{$compose{"@exp"}[0]}> (prefered)\n\t<), chr hex $c, 
-        qq(>\t$NM{chr hex $c}\n\t<), chr hex $compose{"@exp"}[0][1], qq(>\t$NM{chr hex $compose{"@exp"}[0][1]})
+        qq(>\t$c\t$NM{chr hex $c}\n\t<), chr hex $compose{"@exp"}[0][1], qq(>\t$compose{"@exp"}[0][1]\t$NM{chr hex $compose{"@exp"}[0][1]})
           if $compose{"@exp"} and "@exp" !~ /<(font|pseudo-upgrade)>/ and $c ne $compose{"@exp"}[0][1] and not $known_dups{$c};
 #warn "Compose rule: `@exp' ==> $compat, `$c'";
       push @{$compose{"@exp"}}, [$compat, $c];

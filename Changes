@@ -1168,3 +1168,23 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 			Optimize whitespace in the table of diacritics for print.
 
 	izKeys-visual-maps-base.html:	Suppress fallback fonts in :after/:before monospace (otherwise arrows too small???).
+
+0.62	Scan for DeadKey_Maps in a different pass.
+	Allow splitting Named_DIA_Recipe__* into several array elements (same as with other recipes).
+	Avoid infinite mutial recursion between DeadKey_* recipes.
+	Start implementing FullFace(NAME).
+		Not supported yet.
+	Implement prefix(NOTSAME(case)?)?=CHAR
+		(`case´ not implemented yet.)
+		The restrictions:	FullFace and prefix= should better be not used from principal layers;
+					prefix= should not create circular dependency between prefixes;
+	More clear messages about unknown duplicate composition rules.
+	Document how Windows' kernel processes keyboard events.
+	Document how Windows' applications should process keyboard events.
+
+	izKeys.kbdd:	Update version to 0.62.
+		Add triple dot operator to MathBlue :, set minus ∖ to \.
+		Manually put (move!) reverse solidus operator ⧵  to MathBlue AltGr-\.
+		Penalize Planck ℎ on MathBlue, add stroked-font.
+		Add Planck ℎ on MathBlue AltGr-p, minus operator to -, horizontal line to _, Å on A, K on K.
+			Remove last two: Having AÅ KK contradicts Unicode recommendations.
