@@ -57,6 +57,8 @@ X11-supported: Kazakh/Tatar/Ossetian/Chuvash/Udmurt/Komi/Yakut/Kalmyk/Bashkirian
 <a href=#math-letters-more>and more</a>.
 <br>
 <b><code>Compose</code> key:</b> <a href=#compose-key>basics</a>, <a href=#compose-flavors>3 implemented flavors</a>.
+<br>
+<b><a href=#examples>Examples</a></b>.
 </p>
 
 <a name=what-is-what></a><h1>izKeys layouts: visual diagrams</h1>
@@ -345,7 +347,8 @@ accesses the second one, ⅜.  All precomposed fractions can be entered this way
 digit-in-numerator <code>AltGr-' AltGr-%</code> and <code>AltGr-' &amp;</code>).</p>
 
 <p>The rule above is for Cyrillic personality.  From Latin personality, either prepend switch-to-Cyrillic prefix <code>AltGr-SPACE</code>, or
-replace <code>AltGr-'</code> with <code>lCtrl-lAlt-:</code> or <code>rCtrl-AltGr-:</code> or <code>lCtrl-Mnu-/</code>.
+replace <code>AltGr-'</code> with <code>lCtrl-lAlt-:</code> or <code>Menu-;</code> or <code>rCtrl-AltGr-:</code> or <code>lCtrl-Mnu-/</code>.
+(Likewise, for “exotic Cyrillic” from Latin, one may use <code>Menu-:</code> prefix.)
 <b>Trivia:</b> there is another way to enter Unicode fractions: use superscript digits for the
 numerator, subscript digits for the denominator, and separate them by FRACTION SLASH available via GreenKey <code>Shift-SPACE /</code> 
 (as well as on <code>AltGr-/ SPACE</code>) to get something like ¹²⁄₃₅ (the very narrow “bounding box” of FRACTION SLASH ensures the nice look);
@@ -714,8 +717,8 @@ are more “mathematical” when <code>RipeKeys</code> are more “typographical
 
 <a name=math-blue></a>
 <p>See <a href=#greenEx>example of <code>GreenKeys</code></a>, <a href=#ripeEx>of <code>RipeKeys</code></a>.
-Below is the <code>MathBlue</code> face (which combines <code>BlueKeys</code> [with blue frames], “operators”, math letters, and a few
-“random” characters) as visible from Latin personality:</p>
+Below is the <code>MathBlue</code> face (which combines <code>BlueKeys</code> [with blue frames], “<span class=special>operators</span>”, math letters, and a few
+“<span class=very-special>extra</span>” characters) as visible from Latin personality:</p>
 
 <div class="rtl-hover klayout uclc do-alt alt2 base-center large-base" kbd_rebuild="/opt=0 +base=l,,0 on-left+=l,019c,0 on-right+=l,019c,1">
 			/* To be auto-generated */
@@ -759,7 +762,7 @@ on digits 1–9, with horizontal line on the “wide” key <code>0 Ins</code>, 
 the <em>right</em> Control-key controls doubling-of-the-symbol to-the-right).  <b>Example:</b> with <code>AltGr-rCtrl</code> 
 the top row 789 produces ╓ ╥ ╖.  (Easter eggish: removing <code>AltGr</code> replaces double lines by bold lines: ┎ ┰ ┒!  Currently.
 single <code>rCtrl</code> requires addition of <code>lAlt-rCtrl</code>.  Also: removing <code>NumLock</code> produces
-wide-frame drawings, white/black frame without/with <code>Shift</code>: ▗ ▄ ▖/▛ ▀ ▜ on 789 — but <code>Shift</code> does not work due to column=15 bug)
+wide-frame drawings, white/black frame without/with <code>Shift</code>: ▗ ▄ ▖/▛ ▀ ▜ on 789.
 
 <a name=f-keys></a>
 <p>Fifth, the <code>F</code>-keys with <code>AltGr</code> modifier produce dashes (or whitespace when <code>Shift</code> is added).
@@ -785,17 +788,25 @@ to simplify debugging of keyboard input in applications).  Two variants of m-das
 are provided: one with narrowest whitespace is on <code>lCtrl-lAlt-comma</code>, one with
 slightly wider whitespace was on <code>rCtrl-AltGr-slash</code>).  One-character long Plane1 string is on <code>lCtrl-lAlt-&lt;</code>,
 and two-character long Plane1 string is on <code>lCtrl-lAlt-&gt;</code>; they enter     𝄞 and     𝄡𝄡.
-One can also replace any of these <code>rCtrl-AltGr-</code> by <code>rCtrl-AltGr-</code> or by <code>lCtrl-Mnu-</code>
-(conflicts for <code>lCtrl-Mnu-/</code> for fractions!).</p>
+One can also replace any of these <code>lCtrl-lAlt-</code> by <code>AltGr-rCtrl-</code> or by <code>lCtrl-Mnu-</code>
+(except for <code>lCtrl-Mnu-/</code> which conflicts with fractions prefix!).</p>
 
 <h1>Extras: mathematical letters</h1>
 
 <a name=math-letters></a>
 <p><b>Trivia:</b> On windows, one cannot enter mathematical letters (with very few exceptions — all available on
 <code>Green×2</code> — they are not in BMP) using prefix keys.  To compensate, we provide alternative ways to enter them using
-multiple modifier keys: <code>AltGr-ApplicationMenu</code> enters Double-Struck (𝕢𝕨𝕖𝕣𝕥𝕪/ℚ𝕎𝔼ℝ𝕋𝕐/𝟙𝟚𝟛𝟜), 
-<code>AltGr-rCtrl</code> enters Script (𝓆𝓌ℯ𝓇𝓉𝓎/𝒬𝒲ℰℛ𝒯𝒴), and combining all these modifiers enters Fraktur (𝔮𝔴𝔢𝔯𝔱𝔶/𝔔𝔚𝔈ℜ𝔗𝔜).
-(Heuristic: Fractur is the most bizarre of them.)</p>
+multiple modifier keys: <code>AltGr-rCtrl-</code> enters Double-Struck (𝕢𝕨𝕖𝕣𝕥𝕪/ℚ𝕎𝔼ℝ𝕋𝕐/𝟙𝟚𝟛𝟜), 
+<code>AltGr-ApplicationMenu-</code> enters Script (𝓆𝓌ℯ𝓇𝓉𝓎/𝒬𝒲ℰℛ𝒯𝒴), and combining all these modifiers enters Bold-Fraktur (𝖖𝖜𝖊𝖗𝖙𝖞/𝕼𝖂𝕰𝕽𝕿𝖄).
+(Heuristic: Bold-Fractur is the more bizarre than either of Double-Struck or Script.)</p>
+
+<p>Another heuristic for these assignment (and assignments below) is that <code>rCtrl</code> adds (or removes) boldness, and
+<code>ApplicationMenu</code> adds (or removes) italic-ness; call them “B/I modifiers”.  Go along these lines: in combination with these keys, <code>AltGr</code> is
+<b>MathBizarre</b>, and Bold/Italic/BoldItalic flavors of MathBizarre are Double-Struck/Script/Bold-Fraktur.</p>
+
+<p><b>Trivia:</b> Actually, Script and Fracture come in 2 flavors of boldness.  Moreover, letter-symbols used
+for “ISO-80000-2 tensors” (SansSerif-Bold-Italic) may be considered as “yet bolder” flavor of Double-Struck.  To get these extra
+flavors, replace <code>AltGr</code> by <code>lCtrl</code>.  Heuristic: <code>lCtrl</code> behaves similar to <code>rCtrl</code> </p>
 
 <a name=math-letters-more></a>
 <p>Unicode defines also multiple ranges of <b>Latin</b> mathematical letters, with just minor typographical variations.
@@ -809,13 +820,22 @@ as possible.  Moreover, defining extra combinations should have no negative impa
 measurable impact on the system memory footprint.</p>
 
 <a name=math-letters-more-mapping></a>
-<p>To follow on these lines we define the following mappings: <code>lCtrl-Mnu</code> for math italic (𝑞𝑤𝑒𝑟𝑡𝑦/𝑄𝑊𝐸𝑅𝑇𝑌), <code>lCtrl-lAlt-Mnu</code> 
-for math bold italic (𝒒𝒘𝒆𝒓𝒕𝒚/𝑸𝑾𝑬𝑹𝑻𝒀),  <code>lAlt-Mnu-rCtrl</code> for math sans serif bold (𝗾𝘄𝗲𝗿𝘁𝘆/𝗤𝗪𝗘𝗥𝗧𝗬/𝟭𝟮𝟯𝟰),
-<code>lAlt-rCtrl</code> for math sans serif bold italic greek (and for bold digits: 𝞱𝟂𝞮𝞺𝞽𝟁/𝟏𝟐𝟑𝟒; upper-case is not working
-due to a Windows bug with column number 15 in the keyboard description table),  <code>lAlt-Mnu</code> for math monospace
-(𝚚𝚠𝚎𝚛𝚝𝚢/𝚀𝚆𝙴𝚁𝚃𝚈/𝟷𝟸𝟹𝟺; apparently, it is not working with the applications I checked).  (Here <code>Mnu</code>
-is a shortcut for <code>ApplicationMenu</code>.  Out of math flavors, we picked up those most frequently seen, and those most 
-visually different from the text flavor.)  <b>Trivia:</b> International standard <a href=http://mirrors.ctan.org/macros/latex/contrib/isomath/isomath.pdf>layout rules are</a>
+<p>To follow on these lines we define the following mappings; they are made as orthogonal as possible:
+<ul><li><code>AltGr-</code> + B/I modifiers: MathBizarre (𝔸/ℬ/𝕮);
+<li><code>lCtrl-</code> + B/I modifiers: Bold-flipped flavor of MathBizarre (𝘼/𝓑/𝔔);
+<li><code>lAlt+AltGr-</code>: Math Latin monospace (𝚀𝚆𝙴𝚁𝚃𝚈);
+<li><code>lAlt+AltGr-</code> + B/I modifiers: Bold/Italic variants of Math Latin (𝑞𝑤𝑒𝑟𝑡𝑦𝑄𝑊𝐸𝑅𝑇𝑌|𝐪𝐰𝐞𝐫𝐭𝐲𝐐𝐖𝐄𝐑𝐓𝐘|𝒒𝒘𝒆𝒓𝒕𝒚𝑸𝑾𝑬𝑹𝑻𝒀);
+<li><code>lCtrl+lAlt-</code>: Greek (θωερτψ);
+<li><code>lCtrl+lAlt-</code> + B/I modifiers: Bold/Italic variants of Greek (𝜃𝜔𝜀𝜌𝜏𝜓/𝛉𝛚𝛆𝛒𝛕𝛙/𝜽𝝎𝜺𝝆𝝉𝝍);
+<li><code>lAlt-</code> + B/I modifiers: unBold/unItalic variants of tensor = SansSerif-Bold-Italic (𝗾𝘄𝗲𝗿𝘁𝘆/𝘲𝘸𝘦𝘳𝘵𝘺/𝗊𝗐𝖾𝗋𝗍𝗒).
+</ul>
+
+<p><b>Note:</b> Out of <a href=http://en.wikipedia.org/wiki/Mathematical_Alphanumeric_Symbols>18 additional Latin/Greek 
+mathematical alphabets defined by Unicode</a>, this supports all but 2 Greek Sans Serif alphabets.  However, 
+<code>lCtrl+rCtrl-</code>combinations <a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout/lib/UI/KeyboardLayout.pm#c_lctrl_rctrl__combination__multiple_problems>cause
+several problems</a>.</p>
+
+<p><b>Trivia:</b> The International standard <a href=http://mirrors.ctan.org/macros/latex/contrib/isomath/isomath.pdf>layout rules are</a>
 
 <ul><li>The overall rule is that symbols representing physical quantities (or variables)
 are italic, but symbols representing units, or labels, are roman.
@@ -1002,5 +1022,187 @@ prefixes which become “native” drop Green/Ripe pre-prefix; prefixes which re
 <p>In the character tables for the <a href=coverage-1prefix-Latin.html>Latin</a> and <a href=coverage-1prefix-Cyrillic.html>Cyrillic</a>
 personalities, one can hover a mouse over a character, and a popup will explain which of the mogrification rules above was
 applied to produce this character.</p>
+
+<a name=examples></a><h1>Examples of possible input</h1>
+
+<p>Below, <code>AltGr</code> is the right <code>Alt</code>, <code>Menu</code>
+is the application menu key (somewhere to the right of <code>AltGr</code>),
+<code>lCtrl/lAlt/rCtrl</code> are left and right variants of the keys.
+Whitespace separates prefix keys from other keys (prefix key should be released
+before the next key is pressed); dash <code>-</code> connects modifier keys
+with the base key (modifier keys should be pressed down when the base key is pressed).</p>
+
+<p>Everywhere, the modifier <code>AltGr-</code> may be replaced by prefix <code>Shift-AltGr-Space</code>.
+On right, parentheses () are used only to indicate the baseline and whitespace.</p>
+
+<p>One possible usage of these example is to get an overview what kind of stuff is
+accessible from the keyboard, and how (without regards to what is important and what
+is not).  Another usage is to use this as a base to check how well your application
+supports keyboard input on Windows (e.g., Firefox v22 supports about 38% of these examples).
+The examples cover the Latin personality of the keyboard only.</p>
+
+<pre><code>
+  AltGr-a                                --->  æ
+  Shift-AltGr-Space a                    --->  æ        (Shift-AltGr-Space is a prefix equivalent to using AltGr-)
+  AltGr-(                                --->  ‘
+  AltGr-)                                --->  ’
+  AltGr-9                                --->  “
+  AltGr-0                                --->  ”
+
+
+  lAlt-lCtrl-a                           --->  α	(Green)
+  Shift-Space a                          --->  α	(Green)	
+  Shift-Space AltGr-a                    --->  ά	(Green AltGr)	
+  Shift-Space Shift-Space c              --->  ℂ	(Green × 2 == Blue)
+  Shift-Space Shift-Space Shift-Space L  --->  £	(Green × 3 == Business)
+  AltGr-$ L                              --->  £	(Business)
+
+  Menu-q                                 --->  я	(Ripe)
+  AltGr-Space q                          --->  я        (Ripe; Or use Shift-AltGr-Space Space q)
+  AltGr-Space AltGr-Space a              --->  א        (Ripe × 2; Likewise, one can replace AltGr- as above)
+  Menu-rCtrl-a			         --->  א        (Ripe²; not in Notepad)
+  AltGr-Space AltGr-Space AltGr-Space g  --->  ӷ	(Ripe × 3 == Extra cyrillic)
+
+  AltGr-/ =                              --->  ≠
+  AltGr-^ =                              --->  ≝	(Amplified)
+  AltGr-` *                              --->  ⋉	(AddLeft)
+  AltGr-" a                              --->  ä	(Or      Shift-AltGr-Space " a)
+
+  Shift-Space Shift-Space 2              --->  ∫	(Blue)
+  AltGr-; 2                              --->  ∫	(Blue)
+  AltGr-^ 2                              --->  ∬	(Amplified Blue)
+  Shift-Space Shift-Space AltGr-2        --->  ∭	(Blue AltGr; same with AltGr-;)
+  AltGr-^ AltGr-2                        --->  ⨌	(Amplified Blue AltGr; pre-0.63 had ⨜)
+
+  Menu-Right				 --->  →	(Moves position in Notepad)
+  Menu-Shift-Right			 --->  ⇒
+  Menu-Insert				 --->  ↔
+  Menu-Delete				 --->  ⟷
+  Menu-Enter				 --->  ↕
+
+  AltGr-KeyPad6				 --->  ┤	(With NumLock)
+  AltGr-Menu-KeyPad6			 --->  ╣	(With NumLock; Menu=Double)
+  AltGr-rCtrl-KeyPad6			 --->  ╢	(With NumLock; rCtrl=[flip]DoubleToRight)
+  AltGr-Menu-rCtrl-KeyPad6		 --->  ╡	(With NumLock; Double and flip DoubleToRight)
+  Menu-KeyPad6				 --->  ┫	(With NumLock; no-AltGr means Bold)
+  Menu-rCtrl-KeyPad6			 --->  ┥	(With NumLock; [this and the next line were exchanged before 0.63])
+  lAlt-rCtrl-KeyPad6			 --->  ┨	(With NumLock; lAlt must be added to loner rCtrl)
+
+  lAlt-rCtrl-Right			 --->  (▌)	(Draw a frame by whitespace on black background)
+  lAlt-rCtrl-Right			 --->  (▐)	(Draw a frame by black on white background)
+
+  Menu-F3				 --->  —	(3rd dash == em; not in Notepad)
+  Menu-Shift-F3				 --->  ( )	(⅓em whitespace)
+
+  AltGr-Right n				 --->  ɳ	(Hook; moves position in Notepad)
+  AltGr-Left n				 --->  ɲ	(Hook; moves position in Notepad)
+  AltGr-Up i				 --->  ⁱ
+  AltGr-Down i				 --->  ᵢ
+  AltGr-Down I				 --->  ɪ	(SmallCaps)
+  AltGr-Up AltGr-e			 --->  ə	(Upgrade to phonetic)
+  AltGr-Right u				 --->  ᴝ	(rotate; moves position in Notepad)
+  AltGr-Right AltGr-u			 --->  ᴞ	(rotate; moves position in Notepad)
+
+  Shift-Space 1				 --->  (¹)	(Green)
+  Shift-Space Ctrl-(Shift-)i		 --->  (ⁱ)   	(Green Ctrl)
+  Shift-Space Shift-Space Ctrl-(Shift-)i --->  (ᴵ)	(Blue Ctrl)
+  AltGr-Space 1				 --->  (₁)   	(Ripe)
+  AltGr-Space Ctrl-(Shift-)i		 --->  (ᵢ)	(Ripe Ctrl)
+
+  Shift-Space Shift-Space Shift-Space Ctrl-@ --->  ␀
+  AltGr-Space AltGr-Space Enter		 --->  ⏎
+  AltGr-Space AltGr-Space AltGr-Space Enter --->  ↲
+
+  Shift-Space Space			 ---> ␣
+  Shift-Space AltGr-Space		 ---> ⍽
+  Shift-Space Shift-Space Space		 ---> ␠
+  Shift-Space Shift-Space AltGr-Space	 ---> ␢
+  AltGr-Space Space			 ---> ( )	(NBSP)
+  AltGr-Space Shift-Space		 ---> ( )	(U+202f NNBSP ⅙em thin)
+  AltGr-Space AltGr-Space Space		 ---> ( )	(U+2009 ⅙em thin)
+  AltGr-Space AltGr-Space Shift-Space	 ---> ( )	(U+200A ⅛em hair)
+
+  AltGr-' Space				 ---> ´		(Spacing diacritic)
+  e AltGr-' AltGr-'			 ---> (é)	(Combining-´)
+  AltGr-' Shift-Space			 ---> ʼ		(2nd Spacing diacritic)
+  AltGr-' AltGr-Space			 ---> ʾ		(3rd Spacing diacritic)
+  = AltGr-^ '				 ---> (=̑)	(2nd Combining-^)
+  = AltGr-^ "				 ---> (=͒)	(3rd Combining-^)
+  = AltGr-^ AltGr-'			 ---> (=͡)	(4th Combining-^)
+  = AltGr-^ AltGr-"			 ---> (=̽)	(5th Combining-^)
+
+  AltGr-_				 ---> —		(m-dash)
+  Shift-Space _				 ---> –		(n-dash)
+  Shift-Space Shift-Space _		 ---> ―		(horizontal dash; after 0.62)
+
+  Menu-F12 ' a				 ---> á		(Compose = as X11's .Compose)
+  Menu-F12 Menu-F12 I n t		 ---> ∬		(Compose × 2 = as HTML entities [MathML])
+  Menu-F12 Menu-F12 Menu-F12 D I	 ---> ∬		(Compose × 3 = as rfc1345 codes)
+  Menu-Space ' a			 ---> á		(Compose = as X11's .Compose)
+  Menu-Space Menu-Space I n t		 ---> ∬		(Compose × 2 = as HTML entities [MathML])
+  Menu-Space Menu-Space Menu-Space D I	 ---> ∬		(Compose × 3 = as rfc1345 codes)
+
+  AltGr-rCtrl-C				 ---> ℂ		(Double-struck)
+  AltGr-Menu-C				 ---> 𝒞		(Script)
+  AltGr-Menu-rCtrl-C			 ---> 𝕮		(Bold-Fraktur)
+  Shift-Space Shift-Space C		 ---> ℭ		(Fraktur; happens to be on Green × 2)
+
+			[Using lCtrl instead of AltGr flips “boldness”; lCtrl-rCtrl does not work with some keys]
+  lCtrl-rCtrl-Q				 ---> 𝙌		(Tensor=Math Sans Serif Bold Italic)
+  lCtrl-Menu-Q				 ---> 𝓠		(Bold Script)
+  lCtrl-Menu-rCtrl-Q			 ---> 𝔔		(Fraktur)
+
+  lAlt-rAlt-q				 ---> 𝚚		(Math Monospace)
+  lAlt-rAlt-Menu-q			 ---> 𝑞		(Math Italic)
+  lAlt-rAlt-Menu-rCtrl-q		 ---> 𝒒		(Math Bold Italic)
+  lAlt-rAlt-rCtrl-q			 ---> 𝐪		(Math Bold)
+  lCtrl-lAlt-q				 ---> θ		(Green=Greek)
+  lCtrl-lAlt-Menu-q			 ---> 𝜃		(Math Greek Italic)
+  lCtrl-lAlt-Menu-rCtrl-q		 ---> 𝜽		(Math Greek Bold Italic)
+  lCtrl-lAlt-rCtrl-q			 ---> 𝛉		(Math Greek Bold)
+  lAlt-rCtrl-q				 ---> 𝘲		(Math Sans Serif Italic)
+  lAlt-Menu-rCtrl-q			 ---> 𝗊		(Math Sans Serif)
+  lAlt-Menu-q				 ---> 𝗾		(Math Sans Serif Bold; not in Notepad)
+
+  lCtrl-lAlt-: 3			 ---> ⅓		(By denominator via extra cyrillic)
+  Menu-; 3				 ---> ⅓		(Same)
+  AltGr-Space AltGr-' 3			 ---> ⅓		(Same via Ripe=cyrillic)
+  AltGr-Space AltGr-Space AltGr-Space 3	 ---> ⅓		(Same via Ripe × 3)
+  lCtrl-lAlt-: Shift-3			 ---> ¾		(By numerator)
+  lCtrl-lAlt-: AltGr-3			 ---> ⅔		(By denominator, with larger numerator)
+  lCtrl-lAlt-: AltGr-Shift-3		 ---> ⅗		(By numerator,   with larger denominator)
+  Menu-F12 2 5				 ---> ⅖		(Compose = as X11's .Compose)
+  Menu-Space 2 5			 ---> ⅖		(Compose = as X11's .Compose)
+  lCtrl-Menu-/ 3			 ---> ⅓		(By denominator; lCtrl-Menu-/ acts the same as lCtrl-lAlt-:)
+
+  Shift-Space w				 ---> ω
+  Shift-Space \ x			 ---> ὼ		(no aspiration, diagonal of ω, bottom row=`)
+  Shift-Space \ AltGr-x			 ---> ῲ		(same with iotization)
+  Shift-Space | x			 ---> ῲ		(same with Shift-\)
+  Shift-Space [ x			 ---> ὣ		(same as ὼ with aspiration)
+  Shift-Space [ AltGr-x			 ---> ᾣ		(same with iotization)
+  Shift-Space { x			 ---> ᾣ		(same with Shift-[)
+
+  Shift-Space ` g			 ---> ⲅ		(Coptic γ)
+  Shift-Space ` AlgGr-g			 ---> ͷ		(Coptic Pamphylian digamma ϝ)
+  Shift-Space ~ g			 ---> ͷ		(same with Shift-`)
+
+  Shift-Space \ Shift-5			 ---> ♌		(5th Zodiak)
+  Shift-Space ` Shift-5			 ---> ♣		(0x05 in cp437)
+
+  AltGr-Space g AltGr-Space AltGr-^ a	 ---> гⷶ  	(Titlo-form of га)
+  Menu-g Menu-: a			 ---> гⷶ  	(Same)
+  AltGr-Space AltGr-^ 3			 ---> ҂		(Cyrillic 10³ prefix — others 10ⁿ are combining marks)
+
+  lCtrl-lAlt-,				 ---> ( — )	(Typographically sound m-dash — surrounded by hair space)
+  lCtrl-Menu-,				 ---> ( — )	(Same)
+  AltGr-rCtrl-,				 ---> ( — )	(Same)
+  AltGr-rCtrl-/				 ---> ( — )	(Typographically sound m-dash — surrounded by thin space)
+
+  lCtrl-lAlt-<				 ---> (𝄞)	(Example string with 1 SMP char)
+  lCtrl-lAlt->				 ---> (𝄡𝄡)	(Example string with 2 SMP char)
+
+</code></pre>
+
 </body>
 </html>

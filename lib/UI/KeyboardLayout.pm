@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION = "0.62";
+$VERSION = $VERSION = "0.63";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -1444,6 +1444,57 @@ COMBINING GREEK YPOGEGRAMMENI equilibristic (depends on a vowel?)
   http://www.tlg.uci.edu/~opoudjis/unicode/unicode_adscript.html
   http://unicode.org/mail-arch/unicode-ml/y2008-m05/0046.html
 
+=head2 Latin, Cyrillic, Hebrew, etc
+
+Book Spine reading direction
+
+  http://www.artlebedev.com/mandership/122/
+
+What is a "Latin" char
+
+  http://unicode.org/forum/viewtopic.php?f=23&t=102
+
+Federal vs regional aspects of Latinization (a lot of flak; cp1251)
+
+  http://peoples.org.ru/stenogramma.html
+
+Yiddish digraphs
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m10/0121.html
+
+Cyrillic Script, Unicode status (+combining)
+
+  http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ngc339csy8
+  http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ktxptbccph
+
+The IBM 1401 Hebrew Letter Key
+
+  http://www.qsm.co.il/Hebrew/HebKey.htm
+
+GOST 10859
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m09/0082.html
+  http://www.mailcom.com/besm6/ACPU-128.jpg
+
+Hebrew char input
+
+  http://rishida.net/scripts/pickers/hebrew/
+  http://rishida.net/scripts/uniview/#title
+
+Cyrillic soup
+
+  http://czyborra.com/charsets/cyrillic.html
+
+How to encode Latin-in-fraktur
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0279.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0263.html
+
+The presentation of the existing COMBINING CEDILLA which has three major forms [ȘșȚț and Latvian Ģģ]
+
+  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0045.html
+  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0066.html
+  
 =head2 Math and technical texts
 
 Missing:  .... skew-orthogonal complement
@@ -1481,6 +1532,104 @@ CR symbols
 Math layout
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m01/0303.html
+
+=head2 Unicode and linguists
+
+Linguists mailing lists
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0066.html
+
+Obsolete IPA
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m01/0487.html
+  http://unicode.org/cldr/utility/list-unicodeset.jsp?a=[%3Asubhead%3D%2F%28%3Fi%29archaic%2F%3A]+&g=
+
+Teutonista (vowel guide p11, kbd p13)
+
+  http://www.sprachatlas.phil.uni-erlangen.de/materialien/Teuthonista_Handbuch.pdf
+
+Glottals
+
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0151.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0163.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0202.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0205.html
+
+=head2 Spaces, invisible characters, VS
+
+Substitute blank
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m07/0101.html
+
+Representing invisible characters
+
+  http://unicode.org/mail-arch/unicode-ml/y2011-m07/0094.html
+
+Ignorable glyphs
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0132.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0138.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0120.html
+
+HOWTO: (non)dummy VS in fonts
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0118.html
+
+ZWSP ZWNJ WJ SHY NON-BREAKING HYPHEN
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0123.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0188.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0199.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0201.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m06/0122.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0297.html
+
+On which base to draw a "standalone" diacritics
+
+  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0075.html
+
+Variation sequences
+
+  http://unicode.org/mail-arch/unicode-ml/y2004-m07/0246.html
+
+=head2 Typesetting
+
+Upside-down text in CSS (remove position?)
+
+  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0037.html
+
+Unicode to PostScript
+
+  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0056.html
+  http://www.linuxfromscratch.org/blfs/view/svn/pst/enscript.html
+  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0062.html
+
+Spacing: English and French
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m09/0167.html
+  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0103.html
+  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0138.html
+
+Chicago Manual of Style
+
+  http://unicode.org/mail-arch/unicode-ml/y2006-m01/0127.html
+
+Coloring parts of ligatures
+    Implemenations:
+
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0195.html
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0233.html
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0208.html
+    GPOS
+  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0167.html
+
+Chinese typesetting
+
+  http://idsgn.org/posts/the-end-of-movable-type-in-china/
+
+@fonts and non-URL URIs
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0156.html
 
 =head2 Looking at the future
 
@@ -1527,20 +1676,12 @@ Pound
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m05/0242.html
 
-Upside-down text in CSS (remove position?)
-
-  http://unicode.org/mail-arch/unicode-ml/y2012-m01/0037.html
-
 Classification of Dings (bats etc)
 
   std.dkuug.dk/jtc1/sc2/wg2/docs/n4115.pdf
 
 	Escape: 2be9 2b9b
 	ARROW SHAFT - various
-
-Yiddish digraphs
-
-  http://unicode.org/mail-arch/unicode-ml/y2011-m10/0121.html
 
 Locales
 
@@ -1551,19 +1692,6 @@ Locales
 General
 
   http://ebixio.com/online_docs/UnicodeDemystified.pdf
-
-Cyrillic Script, Unicode status (+combining)
-
-  http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ngc339csy8
-  http://scriptsource.org/cms/scripts/page.php?item_id=entry_detail&uid=ktxptbccph
-
-Substitute blank
-
-  http://unicode.org/mail-arch/unicode-ml/y2011-m07/0101.html
-
-Representing invisible characters
-
-  http://unicode.org/mail-arch/unicode-ml/y2011-m07/0094.html
 
 Diacritics in fonts
 
@@ -1577,21 +1705,6 @@ Licences (GPL etc) in TV sets
 Similar glyphs:
 
   http://unicode.org/reports/tr39/data/confusables.txt
-
-GOST 10859
-
-  http://unicode.org/mail-arch/unicode-ml/y2009-m09/0082.html
-  http://www.mailcom.com/besm6/ACPU-128.jpg
-
-Unicode to PostScript
-
-  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0056.html
-  http://www.linuxfromscratch.org/blfs/view/svn/pst/enscript.html
-  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0062.html
-
-Linguists mailing lists
-
-  http://unicode.org/mail-arch/unicode-ml/y2009-m06/0066.html
 
 GeoLocation by IP
 
@@ -1610,20 +1723,6 @@ Normalization FAQ
 
   http://www.macchiato.com/unicode/nfc-faq
 
-Hebrew char input
-
-  http://rishida.net/scripts/pickers/hebrew/
-  http://rishida.net/scripts/uniview/#title
-
-Obsolete IPA
-
-  http://unicode.org/mail-arch/unicode-ml/y2009-m01/0487.html
-  http://unicode.org/cldr/utility/list-unicodeset.jsp?a=[%3Asubhead%3D%2F%28%3Fi%29archaic%2F%3A]+&g=
-
-Teutonista (vowel guide p11, kbd p13)
-
-  http://www.sprachatlas.phil.uni-erlangen.de/materialien/Teuthonista_Handbuch.pdf
-
 Apostrophe
 
   http://unicode.org/mail-arch/unicode-ml/y2008-m05/0060.html
@@ -1632,6 +1731,10 @@ Apostrophe
   http://unicode.org/mail-arch/unicode-ml/y2007-m07/0251.html
   http://unicode.org/mail-arch/unicode-ml/y2007-m05/0309.html
 
+Apostroph as soft sign
+
+  http://unicode.org/mail-arch/unicode-ml/y2010-m08/0123.html
+
 Questionner at start of Unicode proposal
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m05/0087.html
@@ -1639,17 +1742,6 @@ Questionner at start of Unicode proposal
 Rubi
 
   http://en.wikipedia.org/wiki/Ruby_character#Unicode
-
-Cyrillic soup
-
-  http://czyborra.com/charsets/cyrillic.html
-
-Glottals
-
-  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0151.html
-  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0163.html
-  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0202.html
-  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0205.html
 
 Tamil/ISCII
 
@@ -1678,43 +1770,6 @@ Folding characters
 
   http://unicode.org/reports/tr30/tr30-4.html
 
-Ignorable glyphs
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0132.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0138.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0120.html
-
-Spacing: English and French
-
-  http://unicode.org/mail-arch/unicode-ml/y2006-m09/0167.html
-  http://unicode.org/mail-arch/unicode-ml/y2008-m05/0103.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0138.html
-
-HOWTO: (non)dummy VS in fonts
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0118.html
-
-ZWSP ZWNJ WJ SHY NON-BREAKING HYPHEN
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m08/0123.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0188.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0199.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0201.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m06/0122.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0297.html
-
-On which base to draw a "standalone" diacritics
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m07/0075.html
-
-The IBM 1401 Hebrew Letter Key
-
-  http://www.qsm.co.il/Hebrew/HebKey.htm
-
-Chicago Manual of Style
-
-  http://unicode.org/mail-arch/unicode-ml/y2006-m01/0127.html
-
 Writing systems vs written languages
 
   http://unicode.org/mail-arch/unicode-ml/y2005-m07/0198.html
@@ -1724,15 +1779,6 @@ MS Visual OpenType tables
 
   http://www.microsoft.com/typography/VOLT.mspx
   http://www.microsoft.com/typography
-
-Coloring parts of ligatures
-    Implemenations:
-
-  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0195.html
-  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0233.html
-  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0208.html
-    GPOS
-  http://unicode.org/mail-arch/unicode-ml/y2005-m06/0167.html
 
 "Same" character Oacute used for different "functions" in the same text
 
@@ -1746,14 +1792,6 @@ Diacritics
   http://en.wikipedia.org/wiki/Sylfaen_%28typeface%29
     http://tiro.com/Articles/sylfaen_article.pdf
 
-Variation sequences
-
-  http://unicode.org/mail-arch/unicode-ml/y2004-m07/0246.html
-
-Federal vs regional aspects of Latinization (a lot of flak; cp1251)
-
-  http://peoples.org.ru/stenogramma.html
-
 Sign writing
 
   http://std.dkuug.dk/jtc1/sc2/wg2/docs/n4342.pdf
@@ -1766,10 +1804,6 @@ Writing digits in non-decimal
 Use to identify a letter:
 
   http://unicode.org/charts/collation/
-
-What is a "Latin" char
-
-  http://unicode.org/forum/viewtopic.php?f=23&t=102
 
 Perl has problems with unpaired surrogates (whole thread)
 
@@ -1793,46 +1827,22 @@ Middle dot is ambiguous
   http://unicode.org/mail-arch/unicode-ml/y2010-m09/0023.html
   http://unicode.org/mail-arch/unicode-ml/y2013-m03/0151.html
 
-Apostroph as soft sign
-
-  http://unicode.org/mail-arch/unicode-ml/y2010-m08/0123.html
-
-Chinese typesetting
-
-  http://idsgn.org/posts/the-end-of-movable-type-in-china/
-
 Superscript == modifiers
 
   http://unicode.org/mail-arch/unicode-ml/y2010-m03/0133.html
-
-@fonts and non-URL URIs
-
-  http://unicode.org/mail-arch/unicode-ml/y2010-m01/0156.html
-
-How to encode Latin-in-fraktur
-
-  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0279.html
-  http://unicode.org/mail-arch/unicode-ml/y2007-m01/0263.html
-
-Book Spine reading direction
-
-  http://www.artlebedev.com/mandership/122/
 
 Translation of Unicode names
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0066.html
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0076.html
 
-The presentation of the existing COMBINING CEDILLA which has three major forms [ȘșȚț and Latvian Ģģ]
-
-  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0045.html
-  http://unicode.org/mail-arch/unicode-ml/y2013-m06/0066.html
-  
 Transliteration on passports (see p.IV-48)
 
   http://www.icao.int/publications/Documents/9303_p1_v1_cons_en.pdf
 
-=head1 Keyboard input on Windows, Part I: what is the kernel doing?
+=head1 Keyboard input on Windows: interaction of applications and the kernel
+
+=head2 Keyboard input on Windows, Part I: what is the kernel doing?
 
 This is not documented.  We try to provide a description which is
 both as simple as possible, and as complete as possible.  (We ignore
@@ -1840,16 +1850,14 @@ many important parts: the handling of hot keys [or C<C-A-Del>]), IME,
 handling of focus switch [C<Alt-Tab> etc], the keyboard filters,
 widening of virtual keycodes, and LED lights.)
 
+We omit Step 0, when the hardware keyboard drivers (PS/2 or USB) deliver keydown/up(/repeat???) event for scan
+codes of corresponding keys.  (This is a complicated topic, but well-documented.)
+
 =over
-
-=item 0
-
-The hardware keyboard drivers (PC or USB) deliver keydown/up(/repeat???) event for scan
-codes of corresponding keys.  (This is a complicated topic.)
 
 =item 1
 
-The scan codes are translated (see “Low level scancode mapping” in L<"SEE ALSO">).
+The scan codes are massaged (see “Low level scancode mapping” in L<"SEE ALSO">).
 
 =item 2
 
@@ -1885,7 +1893,7 @@ different situations (e.g., C<Break>).
 
 When C<KLLF_ALTGR> flag is present, fake presses/releases of left C<Ctrl> are generated
 on presses/releases of right C<Alt>.  With
-keypad presses/releases in presence of C<VK_SHIFT>, fake releases/presses of C<VK_SHIFT>
+keypad presses/releases in presence of C<VK_SHIFT> and C<NumLock>, fake releases/presses of C<VK_SHIFT>
 are generated.
 
 =item 5
@@ -1905,11 +1913,11 @@ with TranslateMessage()/DispatchMessage() or uses some equivalent code.>
 Before the application dispatches C<WM_(SYS)KEYDOWN/UP> to the message handler,
 TranslateMessage() calls L<ToUnicode()|The semantic of ToUnicode()> with C<wFlags = 0> (unless a popup menu
 is active; then C<wFlags = 1> — which disables character-by-number input via
-numeric KeyPad).
+numeric KeyPad) and the buffer of 16 UTF-16 code units.
 
 =item 7
 
-The obtained characters are posted via PostMessage().  All the characters but
+The UTF-16 code units obtained from ToUnicode() are posted via PostMessage().  All the code units but
 the last one are marked by C<FAKE_KEYSTROKE> flag in C<lParam>.  If the initial message
 was C<WM_SYSKEYDOWN>, the C<SYS> flavor is posted; if ToUnicode() returns a
 deadkey, the C<DEAD> flavor is posted.
@@ -1918,7 +1926,7 @@ deadkey, the C<DEAD> flavor is posted.
 
 =back
 
-=head1 Keyboard input on Windows, Part II: The semantic of ToUnicode()
+=head2 Keyboard input on Windows, Part II: The semantic of ToUnicode()
 
 L<The syntax of ToUnicode() is documented|http://msdn.microsoft.com/en-us/library/windows/desktop/ms646320%28v=vs.85%29.aspx>,
 the semantic is not.  Here we fix this.
@@ -2033,7 +2041,7 @@ B<NOTE:> since keyboard layout normally map C<Alt> to the mask C<KBDALT>, and do
 a modification column for the ORed mask C<=KBDALT>, and C<KBDALT> is B<NOT> stripped for
 key events in input-by-number, these key events usually do not generate spurious C<WM_CHAR>s.
 
-=head1 Keyboard input on Windows, Part III: Customary “special” keybindings of typical keyboards
+=head2 Keyboard input on Windows, Part III: Customary “special” keybindings of typical keyboards
 
 Typically, keyboards define a few keypresses which deliver “control” characters
 (for benefits of console applications).  As shown above, even if the keyboard does not
@@ -2062,7 +2070,7 @@ the following bindings with C<Ctrl-Shift> modifiers:
   ^	 ——→ 0x1e
   _	 ——→ 0x1f
 
-=head1 Can an application on Windows accept keyboard events?  Part I: insert only
+=head2 Can an application on Windows accept keyboard events?  Part I: insert only
 
 The logic described above makes the kernel deliver more or less “correct” C<WM_(SYS)CHAR> messages
 to the application.  The only bindings which may be defined in the keyboard, but will not be
@@ -2111,24 +2119,21 @@ Moreover, if “supporing only the naive mapping” were a feasible
 restriction, there would be no reason for the kernel to go through the extra step of “the ORed mask”.
 Actually, to have a keyboard which is simultaneously backward compatible, easy for users, and
 covering a sufficiently wide range of possible characters, one B<must> use more or
-less convoluted implementations (like this one, with C<Shift> omitted:X<AssignMasksSmart>
-
-  lCtrl		Win	lAlt		rAlt		Menu		rCtrl
-  CTRL|LOYA	KANA	ALT|KANA	CTRL|ALT|X1	CTRL|ALT|X2	CTRL|ALT|ROYA
-
-with suitable backward-compatible mapping of ORed masks to modification columns.
-This assignment allows
-all the combinations not involving C<lCtrl+rAlt> or C<Win+lAlt> to be distinct,
-avoids stripping of C<KBDALT> on C<lAlt> combined with other modifiers,
-makes C<CapsLock> work with most of combinations, while completely preserving all
-application-visible properties of keyboard events.)
+less convoluted implementations (as in L<A convenient assignment of C<KBD*> bitmaps to modifier keys>).
 
 B<CONCLUSION:> the fact that the kernel and the applications speak different
 incompatible languages makes even the primitive task discussed here impossible
 to code in a bullet-proof way.  A heuristic workaround exists, but it will not
 work with all keyboards and all combinations of modifiers.
 
-=head1 Can an application on Windows accept keyboard events?  Part II: special key events
+B<CAVEAT with the above assignment:> some applications (e.g., Emacs) manage to distinguish
+C<lCtrl+lAlt> combination of modifier keys from the combination C<lCtrl+rAlt> produced by 
+a typical C<AltGr>; these applications are able to use C<lCtrl+lAlt>-modified 
+keys as a bindable accelerator keys.  Currently, it is not clear how to embrace these
+applications into the above scheme, without giving up the C<lCtrl+lAlt-key> combination
+as character-producing combinations.
+
+=head2 Can an application on Windows accept keyboard events?  Part II: special key events
 
 In the preceding section, we considered the most primitive application accepting
 the user inserting of characters, and nothing more.  “Real applications” must
@@ -2138,7 +2143,7 @@ keyboard input, consider the following specification:
 
 As above, the application has an entry field, and should insert B<ALL> the
 characters ”delivered for insertion” by the keyboard layout and the kernel.
-For all the keyboard events not related to insertion of characters, the application
+For all the keyboard events I<not related to insertion of characters>, the application
 should write to the log file which of C<Ctrl/Alt/Shift> modifiers were down,
 and the virtual keycode of the KEYDOWN event.  Again, at first, we ignore
 the C<KBDALT> stripping.
@@ -2173,7 +2178,7 @@ when non handling input-by-number, call ToUnicode(), but use C<wFlag=1>, so that
 =item *
 
 Recognize input-by-number starters by the scancode/virtual-keycode, the presence of C<VK_MENU> down, and
-the fact that ToUnicode() produces nothing or '0'..'9','.',',','+'.
+the fact that ToUnicode() produces nothing or C<'0'..'9','.',',','+'>.
 
 =item *
 
@@ -2182,7 +2187,7 @@ Do not call ToUnicode() for continuation messages.
 
 =item *
 
-After a chain of continuations following by KEYUP for C<VK_MENU>, one should PostMessage() for C<WM_CHAR> with
+After a chain of continuations followed by KEYUP for C<VK_MENU>, one should PostMessage() for C<WM_(UNI)CHAR> with
 accumulated input.
 
 =back
@@ -2240,35 +2245,37 @@ corresponding ToAscii() code.)
 
 In addition to 8-bitness, Emacs also suffers from check-for-specials-first syndrome…
 
-=head1 Can an application on Windows accept keyboard events?  Part III: better detection of C<KBDALT> stripping
+=head2 Can an application on Windows accept keyboard events?  Part III: better detection of C<KBDALT> stripping
 
 We explained above that L<it is not possible to make a bullet-proof algorithm
 handling the case when C<KBDALT> might have been stripped by the kernel|"Can an application on Windows accept keyboard events?  Part I: insert only">.  The
 very naive heuristic algorithm described there will recognize the simplest
 cases, but will also have many false positives: for many combinations it will decide
 that C<KBDALT> was stripped while it was not.  The result will be that
-the character C<X> will be interpreted as C<Alt-X>, so will not be inserted.
+when the kernel reports that the character C<X> is delivered, the 
+application would interpret it as C<Alt-X>, so C<X> would not be inserted.
 It will not handle, for example,
 the C<lAlt-Menu-key> modifier combinations with L<the assignment of mask
-from that section|"AssignMasksSmart">.
+from that section|"A convenient assignment of C<KBD*> bitmaps to modifier keys">.
 
-Indeed, with this assignment, the only combinations of modifiers where the kernel will strip C<KBDALT>
-are C<lAlt> and C<lAlt+Win>.  So C<lAlt-Menu-key> is not stripped, hence the 
+Indeed, with this assignment, the only combination of modifiers for which the kernel will strip C<KBDALT>
+is C<lAlt> (and C<lAlt+Win> if one does not assign anything any bits to C<Win>).
+So C<lAlt-Menu-key> is not stripped, hence the 
 correct C<WM_*CHAR> is delivered by the kernel.  However, since this combination is
 still visible to the application as having C<Alt>, and not having C<Ctrl>,
 it is delivered as the C<SYS> flavor.
 
 So the net result is: one designed a nice assignment of masks to the modifier 
 keys.  This assignment makes keypresses successfully navigate around the quirks 
-of the kernel calculations of the character to deliver.  However, the naive 
-algorithm used by the application will force the application to ignore this
+of I<the kernel>’s calculations of the character to deliver.  However, the naive 
+algorithm used by I<the application> will force the application to ignore this
 correctly delivered character to insert.
 
 What one needs is an extra heuristic to recognize the combinations involving 
 C<Alt> and an “unexpected modifier”, so that these combinations become
 exceptions to the rule “C<SYS> flavor means ‘do not insert’”.
 
-C<SOLUTION:> when C<WM_SYS*CHAR> message arrives, inspect the virtual keycodes
+B<SOLUTION:> when C<WM_SYS*CHAR> message arrives, inspect the virtual keycodes
 which are reported as pressed.  Ignore the keycode for the current message.
 Ignore the keycodes for “usual modifiers” (C<Shift/Alt/Kana>) which are
 expected to keep stripping.  Ignore the keycode for the keys which may be
@@ -2282,7 +2289,7 @@ PeekMessage() on KEYDOWN event, and one gets a powerful almost-robust
 algorithm for keyboard input on Windows.  (Recall that all the applications
 I saw provide close-to-abysmal support of keyboard input on Windows.)
 
-=head1 Far Eastern keyboards on Windows
+=head2 Far Eastern keyboards on Windows
 
 The syntax of defining these keyboards is documented in F<kbd.h> of the toolkit.  The semantic is undocumented.  Here we fix this.
 
@@ -2413,6 +2420,76 @@ even loop, by ToUnicode().
 
 B<Remark:> L<http://www.toppa.com/2007/english-windows-xp-with-a-japanese-keyboard/> (and references inside!)
 explains fine points of using Japanese keyboards.  See also: L<http://www.coscom.co.jp/learnjapanese801/lesson08.html>.
+
+=head2 A convenient assignment of C<KBD*> bitmaps to modifier keys
+
+In this section, we omit discussion of C<Shift> modifier; so every
+bitmap may be further combined with C<KBDSHIFT> to produce two different bindings:X<AssignMasksSmart>
+
+  lCtrl		Win	 lAlt		rAlt			Menu		rCtrl
+  CTRL|LOYA	CTRL|X1	 ALT|KANA	CTRL|ALT|LOYA|X1	CTRL|ALT|X2	CTRL|ALT|ROYA
+
+with suitable backward-compatible mapping of ORed masks to modification columns.
+This assignment allows using C<KLLF_ALTGR> flag (faking presses of C<lCtrl> when
+C<rAlt> is pressed — this greatly increases compatibility of C<rAlt> with brain-damaged
+applications), all the combinations involving at most one of C<lCtrl>, C<Win> or 
+C<rAlt> give distinct ORed masks, it
+avoids stripping of C<KBDALT> on C<lAlt> combined with other modifiers,
+makes C<CapsLock> work with all relevant combinations, while completely preserving all
+application-visible properties of keyboard events [except those with C<lCtrl-Win-lAlt->
+modifiers; this combination is equivalent to C<lAlt-rAlt->].
+
+Note that ignoring the C<CTRL> and C<ALT> bits, all combinations of 
+C<LOYA,KANA,X1,X2,ROYA> are possible, which gives at least 32 C<Shift>-pairs.
+In fact, the only combination of C<LOYA,KANA,X1,X2,ROYA> which may appear with
+different C<CTRL,ALT> bits is C<LOYA|X1>; hence there are 33 possible combinations
+of C<CTRL,ALT,LOYA,KANA,X1,X2,ROYA>.  Indeed, C<CTRL> is determined by C<LOYA|X1|X2|ROYA>. 
+If one of C<KANA,X2,ROYA> is present, then C<ALT> is set; so assume C<KANA,X2,ROYA> are not present. 
+But then, if C<ALT> B<may be> set, then both C<LOYA|X1> B<must> be present; which gives the
+only duplication.
+
+Leaving out 5 combinations of C<lCtrl>, C<Win>, C<lAlt> [8, minus the empty one, and 
+C<lCtrl+lAlt>, which is avoided by most application due to its similarity to C<AltGr=rAlt>,
+and C<lCtrl+Win+lAlt> which is undistinguishable by the mask from C<lAlt+rAlt>]
+to have bindable keypresses in applications, and having C<rCtrl> as equivalent to
+C<lCtrl>, this gives 27 C<Shift>-pairs which may produce characters.
+
+B<NOTE:> C<lCtrl+Win+lAlt> being undistinguishable by the mask from C<lAlt+rAlt>
+is not a big deal, since there is no standard keyboard shortcuts involving C<Ctrl+Win+Alt>.
+
+B<NOTE:> Combinations of C<lCtrl> with C<rCtrl> L<cause several problems|"C<lCtrl-rCtrl> combination: multiple problems">.
+
+B<NOTE:> Removing the binding for C<Win> key, only 21 useful C<Shift>-pairs remain.
+(This is what C<version 0.63> of L<izKeys keyboard layout|http://k.ilyaz.org/iz> is
+using; out of 24 distinct combinations, C<lAlt>, C<lCtrl> and C<rCtrl> should be
+excluded.)  B<Trivia:> While this may look as a complete overkill, recall that characters
+outside BMP can be inserted on Windows I<only> via one keypress, possibly with many
+modifiers. (This restriction relates only to the “classical” flavor of Windows keyboard layouts).
+Unicode L<defines 18 additional Latin/Greek alphabets for mathematical
+discourse|http://en.wikipedia.org/wiki/Mathematical_Alphanumeric_Symbols>.  If a keyboard
+layout would want to support these letters, this would quickly exhaust the possible combinations
+of modifiers.  (For 2-script layout, one could live with Latin/AltGr-Latin/Greek + 18 mathematical
+alphabets.  But for layouts supporting more scripts, it lookes like using C<Win> key is not
+avoidable.)
+
+B<NOTE:> Applications may call ToUnicode() with I<impossible combinations> of modifiers:
+for example, they may put C<Ctrl> down, but do not specify whether it is C<rCtrl> or
+C<lCtrl>.  Likewise for C<Alt>.
+
+To support that, one would need to define a mask for standalone C<VK_CONTROL> and C<VK_MENU>
+(i.e., C<Ctrl> and C<Alt>).  Since these modifiers are present when the real “left-right-handed”
+keys are down, the masks should be “contained” in the masks of handed keys.  B<Example:> one
+can make the pseudo-key C<Ctrl> to generate bit C<CTRL>, and the pseudo-key C<Alt> to generate
+the bit C<ALT>.  Then for any combination of modifiers with unhanded C<Ctrl> and/or C<Alt>,
+either the corresponding combination of bits is supported by the layout (and then the
+application will access the corresponding modification column — which is probably not
+the “expected” column corresponding to some handed flavor), or the combination is not
+yet defined.  In the latter case, one may actually decide I<how> to resolve this: one can
+map this combination of modifiers to an arbitatrary modification column!
+
+In particular, one can map such combination of modifiers to a certain choice of handedness
+of C<Ctrl> and C<Alt>.  (An example of such a problematic application is L<Firefox|"Firefox misinterprets keypresses">;
+look for “I<impossible modifier>”.)
 
 =head1 SEE ALSO
 
@@ -2825,6 +2902,7 @@ Windows shortcuts:
   http://windows.microsoft.com/en-US/windows7/Keyboard-shortcuts
   http://www.redgage.com/blogs/pankajugale/all-keyboard-shortcuts--very-useful.html
   https://skydrive.live.com/?cid=2ee8d462a8f365a0&id=2EE8D462A8F365A0%21141
+  http://windows.microsoft.com/en-us/windows-8/new-keyboard-shortcuts
 
 On meaning of Unicode math codepoints
 
@@ -3650,431 +3728,26 @@ the keyboard.
 For development cycle, one does not need to rebuild the install package
 while recompiling.
 
-=head2 MSKLC keyboards not working on Windows 8
+The following sections classify GOTCHAS into 3 categories:
+
+L<"WINDOWS GOTCHAS for keyboard users">
+
+L<"WINDOWS GOTCHAS for keyboard developers using MSKLC">
+
+L<"WINDOWS GOTCHAS for keyboard developers (problems in kernel)">
+
+=head1 WINDOWS GOTCHAS for keyboard users
+
+=head2 MSKLC keyboards not working on Windows 8 without reboot
 
 The layout is shown as active, but "preview" is grayed out,
 and is not shown on the Win-Space list.    See also:
 
   http://www.errordetails.com/125726/activate-custom-keyboard-layout-created-with-msklc-windows
 
-I know no workaround right now.  However, according to
+The workaround is to reboot.  Compare with
 
   http://blogs.msdn.com/b/michkap/archive/2012/03/12/10281199.aspx
-
-it may be enough to reboot.
-
-=head2 It is hard to understand what a keyboard really does
-
-To inspect the output of the keyboard in the console mode (may be 8-bit,
-depending on how Perl is compiled), one can run
-
-  perl -MWin32::Console -wle 0 || cpan install Win32::Console
-  perl -we "sub mode2s($){my $in = shift; my @o; $in & (1<<$_) and push @o, (qw(rAlt lAlt rCtrl lCtrl Shft NumL ScrL CapL Enh ? ??))[$_] for 0..10; qq(@o)} use Win32::Console; my $c = Win32::Console->new( STD_INPUT_HANDLE); my @k = qw(T down rep vkey vscan ch ctrl); for (1..20) {my @in = $c->Input; print qq($k[$_]=), ($in[$_] < 0 ? $in[$_] + 256 : $in[$_]), q(; ) for 0..$#in; print(@in ? mode2s $in[-1] : q(empty)); print qq(\n)}"
-
-This installs Win32::Console module (if needed; included with ActiveState Perl)
-then reports 20 following console events (press and keep C<Alt> key
-to exit by generating a “harmless” chain of events).  B<Limitations:> the reported
-input character is not processed (via ToUnicode(); hence chained keys and
-multiple chars per key are reported only as low-level), and is reported as
-a signed 8-bit integer (so the report for above-8bit characters is
-completely meaningless).
-
-  T=1; down=1; rep=1; vkey=65; vscan=30; ch=240; ctrl=9; rAlt lCtrl
-  T=1; down=0; rep=1; vkey=65; vscan=30; ch=240; ctrl=9; rAlt lCtrl
-
-This reports single (T=1) events for keypress/keyrelease (down=1/0) of
-C<AltGr-a>.  One can see that C<AltGr> generates C<rAlt lCtrl> modifiers
-(this is just a transcription of C<ctrl=9>,
-that C<a> is on virtual key 65 (this is C<VK_A>) with virtual scancode
-30, and that the generated character (it was C<æ>) is C<240>.
-
-The character is approximated to the current codepage.  For example, this is
-C<Kana-b> entering C<β = U+03b2> in codepage C<cp1252>:
-
-  T=1; down=1; rep=1; vkey=66; vscan=48; ch=223; ctrl=0;
-  T=1; down=0; rep=1; vkey=66; vscan=48; ch=223; ctrl=0;
-
-Note that C<223 = 0xDF>, and C<U+00DF = ß>.  So I<beta> is substituted by
-I<eszet>.
-
-There is also a script F<examples/raw_keys_via_api.pl> in this distribution
-which does a little
-bit more than this.  One can also give this script the argument C<U> (or C<Un>,
-where C<n> is the 0-based number among the listed keyboard layouts) to report
-ToUnicode() results, or argument C<cooked> to report what is produced by reading raw
-charactes (as opposed to events) from the console.
-
-=head2 Several similar F<MSKLC> created keyboards may confuse the system
-
-Apparently, the system may get majorly confused when the C<description>
-of the project gets changed without changing the DLL (=project) name.
-   
-(Tested only with Win7 and the name in the DESCRIPTIONS section
-coinciding with the name on the KBD line - both in F<*.klc> file.)
-   
-The symptoms: I know how one can get 4 different lists of keyboards:
-
-=over 4
-
-=item 1
-
-Click on the keyboard icon in the C<Language Bar> - usually shown
-on the toolbar; positioned to the right of the language code EN/RU 
-etc (keyboard icon is not shown if only one keyboard is associated
-to the current language).
-
-=item
-
-Go to the C<Input Language> settings (e.g., right-click on the 
-Language bar, Settings, General.
-
-=item
-
-on this C<General> page, press C<Add> button, go to the language
-in question.
-
-=item
-
-Check the F<.klc> files for recently installed Input Languages.
-
-=item
-
-In MS Keyboard Layout Creator, go to C<File/Load Existing Keyboard>
-list.
-
-=back
-        
-It looks like the first 4 get in sync if one deletes all related keyboards,
-then installs the necessary subset.  I do not know how to fix 5 - MSKLC
-continues to show the old name for this project.
-
-Another symptom: Current language indicator (like C<EN>) on the language
-bar disappears.  (Reboot time?)
-
-Is it related to C<***\Local Settings\MuiCache\***> hive???
-
-Possible workaround: manually remove the entry in C<HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Keyboard Layouts>
-(the last 4 digits match the codepage in the F<.klc> file).
-   
-=head2 Too long description (or funny characters in description?)
-
-If the name in the C<DESCRIPTIONS> section is too long, the name shown in 
-the list C<2> above may be empty.
-    
-(Checked only on Win7 and when the name in the DESCRIPTIONS section
-coincides with the name on the C<KBD> line - both in F<*.klc> file.)
-   
-(Fixed by shortening the name [but see
-L<"Several similar F<MSKLC> created keyboards may confuse the system">
-above!], so maybe it was
-not the length but some particular character (C<+>?) which was confusing
-the system.  (I saw a report on F<MSKLC> bug when description had apostroph
-character C<'>.)
-   
-=head2 F<MSKLC> ruins names of dead key when reading a F<.klc>
-
-When reading a F<.klc> file, MS Keyboard Layout Creator may ruin the names
-of dead keys.  Symptom: open the dialogue for a dead key mapping
-(click the key, check that C<Dead key view> has checkmark, click on the
-C<...> button near the C<Dead key?> checkbox); then the name (the first 
-entry field) contains some junk.  (Looks like a long ASCII string 
-
-   U+0030 U+0030 U+0061 U+0039
-
-.)
-
-B<Workaround:> if all one needs is to compile a F<.klc>, one can run
-F<KBDUTOOL> directly.
-
-B<Workaround:> correct ALL these names manually in MSKLC.  If the names are
-the Unicode name for the dead character, just click the C<Default> button 
-near the entry field.  Do this for ALL the dead keys in all the registers
-(including C<SPACE>!).  If C<CapsLock> is not made "semantically meaningful",
-there are 6 views of the keyboard (C<PLAIN, Ctrl, Ctrl+Shift, Shift,
-AltGr, AltGr+Shift>) - check them all for grayed out keys (=deadkeys).
-   
-Check for success: C<File/"Save Source File As>, use a temporary name.  
-Inspect near the end of the generated F<.klc> file.  If OK, you can
-go to the Project/Build menu.  (Likewise, this way lets you find which
-deadkey's names need to be fixed.)
-   
-!!! This is time-consuming !!!  Make sure that I<other> things are OK
-before you do this (by C<Project/Validate>, C<Project/Test>).
-   
-BTW: It might be that this is cosmetic only.  I do not know any bad
-effect - but I did not try to use any tool with visual feedback on
-the currently active sub-layout of keyboard.
-
-=head2 Double bug in F<KBDUTOOL> with dead characters above 0x0fff
-
-This line in F<.klc> file is treated correctly by F<MSKLC>'s builtin keyboard tester:
-
-  39 SPACE 0 0020 00a0@ 0020 2009@ 200a@ //  ,  ,  ,  ,   // SPACE, NO-BREAK SPACE, SPACE, THIN SPACE, HAIR SPACE
-
-However, via F<kbdutool> it produces the following two bugs:
-
-  static ALLOC_SECTION_LDATA MODIFIERS CharModifiers = {
-    &aVkToBits[0],
-    7,
-    {
-    //  Modification# //  Keys Pressed
-    //  ============= // =============
-        0,            // 
-        1,            // Shift 
-        2,            // Control 
-        SHFT_INVALID, // Shift + Control 
-        SHFT_INVALID, // Menu 
-        SHFT_INVALID, // Shift + Menu 
-        3,            // Control + Menu 
-        4             // Shift + Control + Menu 
-     }
-  };
- .....................................
-    {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_LGTR ,WCH_LGTR },
-    {0xff         ,0      ,WCH_NONE ,0x00a0   ,WCH_NONE ,WCH_NONE ,WCH_NONE },
- .....................................
-  static ALLOC_SECTION_LDATA LIGATURE2 aLigature[] = {
-    {VK_SPACE     ,6      ,0x2009   ,0x2009   },
-    {VK_SPACE     ,7      ,0x200a   ,0x200a   },
-
-Essentially, C<2009@ 200a@> produce C<LIGATURES> (= multiple 16-bit chars)
-instead of deadkeys.  Moreover, these ligatures are put on non-existing
-"modifications" 6, 7 (the maximal modification defined is 4; so the code uses
-the C<Shift + Control + Menu> flags instead of "modification number" in
-the ligatures table.
-
-=head2 F<MSKLC> keyboards handle C<Ctrl-Shift-letter>, C<Ctrl-@ (x00)> , C<Ctrl-^ (x1e)> and C<Ctrl-_ (x1f)> differently than US keyboard
-
-The US keyboard produces (as the 
-“string value”) the corresponding Control-letter when 
-C<Ctrl-Shift-letter> is pressed.  (In console applications,  
-C<\x00> is not visible.)  F<MSKLC> does not reproduces this
-behaviour.  This may break an application if
-it was not specifically tested with “complicated” keyboards.
-
-The only way to fix this from the “naive” keyboard
-layout DLL (i.e., the kind that F<MSKLC> generates) which I found is to
-explicitly include C<Ctrl-Shift> as a handled combination, and return
-C<Ctrl-letter> on such keypresses.  (This is enabled in the generated
-keyboards generated by this module - not customizable in v0.12.)
-
-=head2 "There was a problem loading the file" from F<MSKLC>
-
-Make line endings in F<.klc> DOSish.
-
-=head2 C<AltGr-keys> do not work
-
-Make line endings in F<.klc> DOSish (when given as input to F<kbdutool> -
-it gives no error messages, and deadkeys work [?!]).
-
-=head2 Error 2011 (ooo-us, line 33): There are not enough columns in the layout list.
-
-The maximal line end of F<kbdutool> is exceeded (a line or two ahead).  Try remoing
-inline comments.  If helps, change he workflow to cut off long lines (250 bytes is OK).
-
-=head2 C<Error 2012 (ooo-us-shorten.klc, line 115):>
-
-    <ScanCode e065 - too many scancodes here to parse.>
-
-from F<MSKLC>.  This means that the internal table of virtual keys
-mapped to non-C<e0> (sic!) scancodes is overloaded.
-
-Time to switch to direct generation of F<.c> file?  Or you need to
-triage the “added” virtual keys, and decide which are less important
-so you can delete them from the F<.klc> file.
-
-=head2 Only the first 8 with-modifiers columns are processed by F<kbdutool>
-
-Time to switch to direct generation of F<.c> file?
-
-=head2 Only the first digit of the which-modifier-column is output by F<kbdutool> in C<LIGATURES>
-
-Time to switch to direct generation of F<.c> file?
-
-=head2 F<kbdutool> produces C<KEYNAME_DEAD> section with meaningless entries for prefix keys C<0x08>, C<0x0A>, C<0x0D>
-
-These entries do not stop keyboard from working.  They look like C<L"'\b'"	L"Name is here…">...
-
-Time to switch to direct generation of F<.c> file?
-
-=head2 It is not documented how to make a with-prefix-key(s) combination produce 0-length string
-
-Use C<0000@> (in F<.klc>), or DEADKEY 0 in a F<.c> file.  Explanation: what a prefix key
-is doing is making the kernel remember a word (the state of the finite automaton), and not
-producing any output character.  Having no prefix key corresponds to the state being 0.
-
-Hence makeing prefix_key=0 is the same as switching the finite automaton to the initial
-state, and not producing any character — and this exactly what is requested in the question.
-
-=head2 If data in C<KEYNAME_DEAD> takes too much space, keyboard is mis-installed, and “Language Bar” goes crazy
-
-Installation reports success, the keyboard appears in the list in the Language Bar's "Settings".
-But the keyboard is not listed in the menu of the Language Bar itself.
-
-Deinstalling (by F<MSKLC>'s installer) in such a case removes one (apparently, last) of the listed keyboards for the language;
-at least it is removed from the menu of the Language Bar itself.  However, the list in the “Settings”
-does not change!  One can't restore the (wrongly) removed (unrelated!) layout by manipulating the latter list.
-(I did not try to check what will happen if only one keyboard for the language is available.)
-
-I did not find a way to restore the deleted keyboard.  Experimenting with these is kinda painful: with each failure,
-I add one extra keyboard to the list in the “Settings”; - so the list is growing and growing!  [Better
-add useless-to-you keyboards, since there may be a chance you will never be able to install them again.
-Maybe reboot will fix it?
-
-=head2 It is not clear how to compile F<.C> files emitted by F<kbdutool.exe>
-
-This distribution includes a script F<examples/compile_link_kbd.cmd> which can do this.  It is
-inspired by
-
-  http://stackoverflow.com/questions/3360746/how-can-i-compile-programmer-dvorak
-  http://levicki.net/articles/tips/2006/09/29/HOWTO_Build_keyboard_layouts_for_Windows_x64.php
-
-It allows us to build using the cycle
-
-=over 4
-
-=item *
-
-Build skeleton F<.klc> file.
-
-=item *
-
-Convert to B<C> using F<kbdutool.c>.
-
-=item *
-
-Patch against bugs in F<kbdutool.c>.
-
-=item *
-
-Patch in features not supported by F<kbdutool.c>.
-
-=item *
-
-Compile and link DLLs.
-
-=back
-
-(This assumes that the installer was already built by F<MSKLC> using a
-simplified-to-nothing F<.klc> file).
-
-=head2 Windows ignores column=15 of the keybinding definition table
-
-Note that 15 is C<SHFT_INVALID>; this column number is used to indicate that
-this particular combination of modifiers does not produce keys.  In particular,
-the generator must avoid this column number.
-
-Workaround: put junk into this column, and use different columns for useful modifier
-combinations.  The mapping from modifiers to columns should not be necessarily 1-to-1.
-
-=head2 Windows combines modifier bitmaps for C<lCtrl>, C<Alt> and C<rAlt> on C<AltGr>
-
-(At least when C<AltGr> is special in the keyboard,) the modifier bitmap bound to this
-key is actually bit-or of bitmaps above.  Essentially, this prohibits assigning
-interesting flag combinations to C<lCtrl>.
-
-The (very limited) workaround is to ensure that the flags one puts on C<AltGr> contain
-all the flags assigned to the above VK codes.  (This does not change anything, but
-at least makes the assignments less confusing for human inspection.)
-
-=head2 Windows ignores C<lAlt> if its modifier bitmaps is not standard
-
-Adding C<KBDROYA> to C<lAlt> disables console sending non-modified char on keydown.
-Together with the previous problem, this looks like essentially prohibiting
-putting interesting bitmaps on the left modifier keys.
-
-Workaround: one can add C<KBDKANA> on C<lAlt>.  It looks like the combination
-C<KBDALT|KBDKANA> is compatible with Windows' handling of C<Alt> (both in console,
-and for accessing/highlighting the menu entries).  (However, since only C<KBDALT>
-is going to be stripped for handling of C<lAlt-key>, the modification column for
-C<KBDKANA> should duplicate the modification column for no-C<KBD>-flags.  Same with
-C<KBDSHIFT> added.)
-
-=head2 When C<AltGr> produces C<ROYA>, problems in Notepad
-
-Going to the Save As dialogue in Notepad loses "speciality of AltGr" (it highlights Menu);
-one need to switch layouts via LAlt+LShift to restore.
-
-I do not know any workaround.
-
-=head2 Console applications cannot detect when a keypress may be interpreted as a “command”
-
-The typical logic of an (advanced) application is that it interprets certain keypresses
-(combinations of keys with modifiers) as “commands”.  To do this in presence of user-switchable
-keyboards, when it is not known in compile time which key sequences generate characters,
-the application must be able to find at runtime which keypresses are characters-generating,
-and which are not.  The latter keypresses are candidates to be checked whether they should trigger commands
-of the application.
-
-For final keypresses of a character-generating key-sequence, an application gets a notification
-from the ReadConsoleEvent() API call that this keypress generates a character.  However, for the 
-keypresses of the sequence which are non the last one (“dead” keys), there is no such notification.
-
-Therefore, there is no way to avoid dead keys triggering actions in an application.  What is the
-difference with non-console applications?  First of all, they get such a notification (with the
-standard TranslateMessage()/DispatchMessage() sequence of API calls, on WM_KEYDOWN, one can
-PeekMessage() for WM_SYSDEADCHAR/WM_DEADCHAR and/or WM_SYSCHAR/WM_CHAR).  Second, the windowed
-application may call ToUnicode(Ex)() to calculate this information itself.
-
-Well, why a console application cannot use the second method?  First, the active keyboard layout
-of a console application is the default one.  When user switches the keyboard layout of the console,
-the application gets no notification of this, and its keyboard layout does not change.  This makes  
-ToUnicode() useless.  Moreover, due to
-security architecture, the console application cannot query the ID of the thread serving the message
-loop of the console, so cannot query GetKeyboardLayout() of this thread.  Hence ToUnicodeEx() is
-useless too.
-
-(There may be a lousy workaround: run ToUnicodeEx() on B<all> the installed keyboard layouts, and
-check which of them are excluded by comparing with results of ReadConsoleEvent().  Interpret
-contradictions as user changing the keyboard layout.  Of course, on several keypresses following
-a change of keyboard layout one may get unexpected results.  And if two similar
-keyboards are installed, one may also never get definite answer on which of them is currently active.)
-
-(To handle this workaround, one must have a way to call ToUnicode() in a way which does not change
-the internal state of the keyboard driver.  Observe:
-
-=over 4
-
-=item *
-
-Such a way is not documented.
-
-=item *
-
-Watch the character reported by ReadConsoleEvent() on the C<KEYUP> event for deadkeys.  This is
-the character which a deadkey would produce if it is pressed twice (and is 0 if pressing it twice
-results in a deadkey again).  The only explanation for this I can fathom is that the console's
-message queue thread calls such a non-disturbing-state version of ToUnicode().
-
-Why it should be “non-disturbing”?  Otherwise it would reset the state “this deadkey was pressed”,
-and the following keypress would be interpreted as not preceded by a deadkey.  And this is not
-what happens.  (If one does it with usual ToUnicode() call, DOWN reports a deadkey, but UP reports
-“ignored”; to see this, run F<examples/raw_keys_via_api.pl> with arguments C<Un 1> 
-with a keyboard which produces ç on C<AltGr-, c>.  Here C<n> is the number of the keyboard in the list
-of available keyboards reported by C<examples/raw_keys_via_api.pl U 1>).
-
-Well, when one I<knows> that some API calls are possible, it is just a SMP to find it out
-(see F<examples/raw_keys_via_api.pl>).  It turns out that given argument C<wFlags=0x02> achieves
-the behaviour of a console during KeyUp event.  (As a side benefit, it also avoids another
-glitch in Windows' keyboard processing: it reports the character value in presence of C<Alt>
-modifier — recall that ToUnicodeEx() ignores C<Alt> unless C<Ctrl> is present too.  Well, I
-checked this so far only on KeyUp event, where console producess mysterious results.)
-
-=item *
-
-However, even without using undocumented flags, it is not hard to construct such a non-disturbing version of ToUnicode().  The only
-ingredient needed is a way to reset the state to “no deadkeys pressed” one.  Then just store
-keypresses/releases from the time the last such state was found, call ToUnicode(), reset state,
-and call ToUnicode() again for all the stored keypresses/releases; then update the stored state
-appropriately.
-
-=item *
-
-But I strongly doubt that console's message loop does anything so advanced.  My bet would be that
-it uses a non-documented call or non-documented flags.  (Especially since the approach above does
-not handle C<Alt> the same way as the console does.)
-
-=back
 
 =head2 Default keyboard of an application
 
@@ -4095,12 +3768,6 @@ Compare with Courier and Times.  (This may be due to the L<difference between
 Unicode's pre-v3.0 choice of representative glyphs|http://en.wikipedia.org/wiki/Phi#Computing>, 
 or the L<difference
 between French/English Apla=Didot/Porson's approaches|http://www.greekfontsociety.gr/pages/en_typefaces19th.html>.)
-
-=head2 Behaviour of C<Alt-Modifiers-Key> vs C<Modifiers-Key>
-
-When both combinations produce characters (say, X and Y), it is not clear
-how an application shouild decide whether it got C<Alt-Y> event (for menu
-entry starting with Y), or an C<X> event.
 
 =head2 The console font configuration
 
@@ -4308,6 +3975,21 @@ by FireFox as C<lCtrl>.
 
 =item *
 
+In addition to this, Firefox replaces C<rCtrl> and C<lCtrl> modifiers by
+an I<impossible modifier>: Firefox pretends that I<only> C<unhandedCtrl> is down.  (Here
+C<unhandedCtrl> is a fake key C<VK_CONTROL> which Window pretends is down when either one
+of C<rCtrl> or C<lCtrl> is down.)  Since the situation when C<unhandedCtrl>
+is down, but neither C<rCtrl> nor C<lCtrl> are down is not possible, this
+may access parts of the keyboard layout not visible to other applications.
+(Same for C<lAlt> and C<rAlt>.)
+
+The net effect is that key combinations involving C<Ctrl> or C<Alt> keys
+may behave wrong in Firefox.  For example, with version C<0.63> of
+L<izKeys keyboard layout|http://k.ilyaz.org/iz>, C<Ctrl> and C<Alt>
+are ignored on character-producing keys.
+
+=item *
+
 If C<lCtrl-lAlt-comma> produces C< — > (this is C<U+200A U+2014 U+200A>), and
 C<AltGr-comma> produces the “cedilla deadkey”, then pressing C<AltGr-comma c>
 acts as both: first C<U+200A U+2014 U+200A> are inserted, then C<ç>. 
@@ -4456,6 +4138,517 @@ B<Example:> On IdeaPad, it was F<TouchZone.exe> (safe to kill).  It was stealing
 C<Control-Shift-R> and C<Control-Shift-T>. 
 
 =back
+
+=head1 WINDOWS GOTCHAS for keyboard developers using MSKLC
+
+=head2 Several similar F<MSKLC> created keyboards may confuse the system
+
+Apparently, the system may get majorly confused when the C<description>
+of the project gets changed without changing the DLL (=project) name.
+   
+(Tested only with Win7 and the name in the DESCRIPTIONS section
+coinciding with the name on the KBD line - both in F<*.klc> file.)
+   
+The symptoms: I know how one can get 4 different lists of keyboards:
+
+=over 4
+
+=item 1
+
+Click on the keyboard icon in the C<Language Bar> - usually shown
+on the toolbar; positioned to the right of the language code EN/RU 
+etc (keyboard icon is not shown if only one keyboard is associated
+to the current language).
+
+=item
+
+Go to the C<Input Language> settings (e.g., right-click on the 
+Language bar, Settings, General.
+
+=item
+
+on this C<General> page, press C<Add> button, go to the language
+in question.
+
+=item
+
+Check the F<.klc> files for recently installed Input Languages.
+
+=item
+
+In MS Keyboard Layout Creator, go to C<File/Load Existing Keyboard>
+list.
+
+=back
+        
+It looks like the first 4 get in sync if one deletes all related keyboards,
+then installs the necessary subset.  I do not know how to fix 5 - MSKLC
+continues to show the old name for this project.
+
+Another symptom: Current language indicator (like C<EN>) on the language
+bar disappears.  (Reboot time?)
+
+Is it related to C<***\Local Settings\MuiCache\***> hive???
+
+Possible workaround: manually remove the entry in C<HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Keyboard Layouts>
+(the last 4 digits match the codepage in the F<.klc> file).
+   
+=head2 Too long description (or funny characters in description?)
+
+If the name in the C<DESCRIPTIONS> section is too long, the name shown in 
+the list C<2> above may be empty.
+    
+(Checked only on Win7 and when the name in the DESCRIPTIONS section
+coincides with the name on the C<KBD> line - both in F<*.klc> file.)
+   
+(Fixed by shortening the name [but see
+L<"Several similar F<MSKLC> created keyboards may confuse the system">
+above!], so maybe it was
+not the length but some particular character (C<+>?) which was confusing
+the system.  (I saw a report on F<MSKLC> bug when description had apostroph
+character C<'>.)
+   
+=head2 F<MSKLC> ruins names of dead key when reading a F<.klc>
+
+When reading a F<.klc> file, MS Keyboard Layout Creator may ruin the names
+of dead keys.  Symptom: open the dialogue for a dead key mapping
+(click the key, check that C<Dead key view> has checkmark, click on the
+C<...> button near the C<Dead key?> checkbox); then the name (the first 
+entry field) contains some junk.  (Looks like a long ASCII string 
+
+   U+0030 U+0030 U+0061 U+0039
+
+.)
+
+B<Workaround:> if all one needs is to compile a F<.klc>, one can run
+F<KBDUTOOL> directly.
+
+B<Workaround:> correct ALL these names manually in MSKLC.  If the names are
+the Unicode name for the dead character, just click the C<Default> button 
+near the entry field.  Do this for ALL the dead keys in all the registers
+(including C<SPACE>!).  If C<CapsLock> is not made "semantically meaningful",
+there are 6 views of the keyboard (C<PLAIN, Ctrl, Ctrl+Shift, Shift,
+AltGr, AltGr+Shift>) - check them all for grayed out keys (=deadkeys).
+   
+Check for success: C<File/"Save Source File As>, use a temporary name.  
+Inspect near the end of the generated F<.klc> file.  If OK, you can
+go to the Project/Build menu.  (Likewise, this way lets you find which
+deadkey's names need to be fixed.)
+   
+!!! This is time-consuming !!!  Make sure that I<other> things are OK
+before you do this (by C<Project/Validate>, C<Project/Test>).
+   
+BTW: It might be that this is cosmetic only.  I do not know any bad
+effect - but I did not try to use any tool with visual feedback on
+the currently active sub-layout of keyboard.
+
+=head2 Double bug in F<KBDUTOOL> with dead characters above 0x0fff
+
+This line in F<.klc> file is treated correctly by F<MSKLC>'s builtin keyboard tester:
+
+  39 SPACE 0 0020 00a0@ 0020 2009@ 200a@ //  ,  ,  ,  ,   // SPACE, NO-BREAK SPACE, SPACE, THIN SPACE, HAIR SPACE
+
+However, via F<kbdutool> it produces the following two bugs:
+
+  static ALLOC_SECTION_LDATA MODIFIERS CharModifiers = {
+    &aVkToBits[0],
+    7,
+    {
+    //  Modification# //  Keys Pressed
+    //  ============= // =============
+        0,            // 
+        1,            // Shift 
+        2,            // Control 
+        SHFT_INVALID, // Shift + Control 
+        SHFT_INVALID, // Menu 
+        SHFT_INVALID, // Shift + Menu 
+        3,            // Control + Menu 
+        4             // Shift + Control + Menu 
+     }
+  };
+ .....................................
+    {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_LGTR ,WCH_LGTR },
+    {0xff         ,0      ,WCH_NONE ,0x00a0   ,WCH_NONE ,WCH_NONE ,WCH_NONE },
+ .....................................
+  static ALLOC_SECTION_LDATA LIGATURE2 aLigature[] = {
+    {VK_SPACE     ,6      ,0x2009   ,0x2009   },
+    {VK_SPACE     ,7      ,0x200a   ,0x200a   },
+
+Essentially, C<2009@ 200a@> produce C<LIGATURES> (= multiple 16-bit chars)
+instead of deadkeys.  Moreover, these ligatures are put on non-existing
+"modifications" 6, 7 (the maximal modification defined is 4; so the code uses
+the C<Shift + Control + Menu> flags instead of "modification number" in
+the ligatures table.
+
+=head2 F<MSKLC> keyboards handle C<Ctrl-Shift-letter>, C<Ctrl-@ (x00)> , C<Ctrl-^ (x1e)> and C<Ctrl-_ (x1f)> differently than US keyboard
+
+The US keyboard produces (as the 
+“string value”) the corresponding Control-letter when 
+C<Ctrl-Shift-letter> is pressed.  (In console applications,  
+C<\x00> is not visible.)  F<MSKLC> does not reproduces this
+behaviour.  This may break an application if
+it was not specifically tested with “complicated” keyboards.
+
+The only way to fix this from the “naive” keyboard
+layout DLL (i.e., the kind that F<MSKLC> generates) which I found is to
+explicitly include C<Ctrl-Shift> as a handled combination, and return
+C<Ctrl-letter> on such keypresses.  (This is enabled in the generated
+keyboards generated by this module - not customizable in v0.12.)
+
+=head2 "There was a problem loading the file" from F<MSKLC>
+
+Make line endings in F<.klc> DOSish.
+
+=head2 C<AltGr-keys> do not work
+
+Make line endings in F<.klc> DOSish (when given as input to F<kbdutool> -
+it gives no error messages, and deadkeys work [?!]).
+
+=head2 Error 2011 (ooo-us, line 33): There are not enough columns in the layout list.
+
+The maximal line end of F<kbdutool> is exceeded (a line or two ahead).  Try remoing
+inline comments.  If helps, change he workflow to cut off long lines (250 bytes is OK).
+
+=head2 C<Error 2012 (ooo-us-shorten.klc, line 115):>
+
+    <ScanCode e065 - too many scancodes here to parse.>
+
+from F<MSKLC>.  This means that the internal table of virtual keys
+mapped to non-C<e0> (sic!) scancodes is overloaded.
+
+Time to switch to direct generation of F<.c> file?  Or you need to
+triage the “added” virtual keys, and decide which are less important
+so you can delete them from the F<.klc> file.
+
+=head2 Only the first 8 with-modifiers columns are processed by F<kbdutool>
+
+Time to switch to direct generation of F<.c> file?
+
+=head2 Only the first digit of the which-modifier-column is output by F<kbdutool> in C<LIGATURES>
+
+Time to switch to direct generation of F<.c> file?
+
+=head2 F<kbdutool> produces C<KEYNAME_DEAD> section with meaningless entries for prefix keys C<0x08>, C<0x0A>, C<0x0D>
+
+These entries do not stop keyboard from working.  They look like C<L"'\b'"	L"Name is here…">...
+
+Time to switch to direct generation of F<.c> file?
+
+=head2 It is not clear how to compile F<.C> files emitted by F<kbdutool.exe>
+
+This distribution includes a script F<examples/compile_link_kbd.cmd> which can do this.  It is
+inspired by
+
+  http://stackoverflow.com/questions/3360746/how-can-i-compile-programmer-dvorak
+  http://levicki.net/articles/tips/2006/09/29/HOWTO_Build_keyboard_layouts_for_Windows_x64.php
+
+It allows us to build using the cycle
+
+=over 4
+
+=item *
+
+Build skeleton F<.klc> file.
+
+=item *
+
+Convert to B<C> using F<kbdutool.c>.
+
+=item *
+
+Patch against bugs in F<kbdutool.c>.
+
+=item *
+
+Patch in features not supported by F<kbdutool.c>.
+
+=item *
+
+Compile and link DLLs.
+
+=back
+
+(This assumes that the installer was already built by F<MSKLC> using a
+“simplified-to-nothing” F<.klc> file which does not trigger the F<MSKLC> bugs).
+
+(See also L<http://accentuez.mon.nom.free.fr/Clavier-Galeron_fichiers/cr%E9ation_clavier.zip>.)
+
+=head2 F<kbdutool> cannot ignore column=15 of the keybinding definition table
+
+(Compare with L<"Windows ignores column=15 of the keybinding definition table">.)
+
+F<kbdutool> requires that all the columns are associated to a modifier-bitmap.
+But column=15 should not be associated to any.
+
+The workaround is to associate it to the bitmap which should not be bound to any
+column (like C<4=KBDALT>).  In the output C<.C> file, one would have 15 instead
+of C<SHFT_INVALID> for the bitmap 4, but C<SHFT_INVALID> is defined to be 15 anyway…
+
+=head2 F<kbdutool> ignores bits above 0x20 in the modification columns descriptor
+
+Time to switch to direct generation of F<.C> files?
+
+=head2 F<kbdutool> cannot assign more than one bitmask to a modification column
+
+Time to switch to direct generation of F<.C> files?
+
+(Quite often, one combination of modifiers should produce the same characters as
+another one.  The format of keyboard layout tables allows them to share a
+modification column.  The format of F<.klc> files does not allow sharing.)
+
+=head2 F<kbdutool> forgets to emit C<aVkToWch3>/6/8
+
+If the F<.klc> file has many modification columns, the emitted aVkToWcharTable 
+contains only C<aVkToWch1>/2.
+
+=head1 WINDOWS GOTCHAS for keyboard developers (problems in kernel)
+
+=head2 It is hard to understand what a keyboard really does
+
+To inspect the output of the keyboard in the console mode (may be 8-bit,
+depending on how Perl is compiled), one can run
+
+  perl -MWin32::Console -wle 0 || cpan install Win32::Console
+  perl -we "sub mode2s($){my $in = shift; my @o; $in & (1<<$_) and push @o, (qw(rAlt lAlt rCtrl lCtrl Shft NumL ScrL CapL Enh ? ??))[$_] for 0..10; qq(@o)} use Win32::Console; my $c = Win32::Console->new( STD_INPUT_HANDLE); my @k = qw(T down rep vkey vscan ch ctrl); for (1..20) {my @in = $c->Input; print qq($k[$_]=), ($in[$_] < 0 ? $in[$_] + 256 : $in[$_]), q(; ) for 0..$#in; print(@in ? mode2s $in[-1] : q(empty)); print qq(\n)}"
+
+This installs Win32::Console module (if needed; included with ActiveState Perl)
+then reports 20 following console events (press and keep C<Alt> key
+to exit by generating a “harmless” chain of events).  B<Limitations:> the reported
+input character is not processed (via ToUnicode(); hence chained keys and
+multiple chars per key are reported only as low-level), and is reported as
+a signed 8-bit integer (so the report for above-8bit characters is
+completely meaningless).
+
+  T=1; down=1; rep=1; vkey=65; vscan=30; ch=240; ctrl=9; rAlt lCtrl
+  T=1; down=0; rep=1; vkey=65; vscan=30; ch=240; ctrl=9; rAlt lCtrl
+
+This reports single (T=1) events for keypress/keyrelease (down=1/0) of
+C<AltGr-a>.  One can see that C<AltGr> generates C<rAlt lCtrl> modifiers
+(this is just a transcription of C<ctrl=9>,
+that C<a> is on virtual key 65 (this is C<VK_A>) with virtual scancode
+30, and that the generated character (it was C<æ>) is C<240>.
+
+The character is approximated to the current codepage.  For example, this is
+C<Kana-b> entering C<β = U+03b2> in codepage C<cp1252>:
+
+  T=1; down=1; rep=1; vkey=66; vscan=48; ch=223; ctrl=0;
+  T=1; down=0; rep=1; vkey=66; vscan=48; ch=223; ctrl=0;
+
+Note that C<223 = 0xDF>, and C<U+00DF = ß>.  So I<beta> is substituted by
+I<eszet>.
+
+There is also a script F<examples/raw_keys_via_api.pl> in this distribution
+which does a little
+bit more than this.  One can also give this script the argument C<U> (or C<Un>,
+where C<n> is the 0-based number among the listed keyboard layouts) to report
+ToUnicode() results, or argument C<cooked> to report what is produced by reading raw
+charactes (as opposed to events) from the console.
+
+=head2 It is not documented how to make a with-prefix-key(s) combination produce 0-length string
+
+Use C<0000@> (in F<.klc>), or DEADKEY 0 in a F<.c> file.  Explanation: what a prefix key
+is doing is making the kernel remember a word (the state of the finite automaton), and not
+producing any output character.  Having no prefix key corresponds to the state being 0.
+
+Hence makeing prefix_key=0 is the same as switching the finite automaton to the initial
+state, and not producing any character — and this exactly what is requested in the question.
+
+=head2 If data in C<KEYNAME_DEAD> takes too much space, keyboard is mis-installed, and “Language Bar” goes crazy
+
+Installation reports success, the keyboard appears in the list in the Language Bar's "Settings".
+But the keyboard is not listed in the menu of the Language Bar itself.
+
+Deinstalling (by F<MSKLC>'s installer) in such a case removes one (apparently, last) of the listed keyboards for the language;
+at least it is removed from the menu of the Language Bar itself.  However, the list in the “Settings”
+does not change!  One can't restore the (wrongly) removed (unrelated!) layout by manipulating the latter list.
+(I did not try to check what will happen if only one keyboard for the language is available — is it removed
+for good?.)
+
+I did not find a way to restore the deleted keyboard.  Experimenting with these is kinda painful: with each failure,
+I add one extra keyboard to the list in the “Settings”; - so the list is growing and growing!  [Better
+add useless-to-you keyboards, since there may be a chance you will never be able to install them again.
+Maybe a reboot will fix it?]
+
+B<Update:> this condition reappeared in update from v0.61 to v0.63 of B<izKeys> layouts.  Between
+these versions, there was
+a very small increment of the size: one modification column was added, and two deadkeys were added.
+Removing a bunch of (useless?) dead keys descriptions fixed this again; but now I have my doubts on
+whether it was due to I<ONLY> increasing the size of C<KEYNAME_DEAD>…  Maybe it is due to the total
+size of certain segments in the DLL.
+
+=head2 Windows ignores column=15 of the keybinding definition table
+
+Note that 15 is C<SHFT_INVALID>; this column number is used to indicate that
+this particular combination of modifiers does not produce keys.  In particular,
+the generator must avoid this column number.
+
+Workaround: put junk into this column, and use different columns for useful modifier
+combinations.  The mapping from modifiers to columns should not be necessarily 1-to-1.
+(But see L<"F<kbdutool> cannot ignore column=15 of the keybinding definition table">.)
+
+=head2 Windows combines modifier bitmaps for C<lCtrl>, C<Alt> and C<rAlt> on C<AltGr>
+
+(At least when C<AltGr> is special in the keyboard,) the modifier bitmap bound to this
+key is actually bit-or of bitmaps above.  Essentially, this prohibits assigning
+interesting flag combinations to C<lCtrl>.
+
+The (very limited) workaround is to ensure that the flags one puts on C<AltGr> contain
+all the flags assigned to the above VK codes.  (This does not change anything, but
+at least makes the assignments less confusing for human inspection.)
+
+=head2 Windows ignores C<lAlt> if its modifier bitmaps is not standard
+
+Adding C<KBDROYA> to C<lAlt> disables console sending non-modified char on keydown.
+Together with the previous problem, this looks like essentially prohibiting
+putting interesting bitmaps on the left modifier keys.
+
+Workaround: one can add C<KBDKANA> on C<lAlt>.  It looks like the combination
+C<KBDALT|KBDKANA> is compatible with Windows' handling of C<Alt> (both in console,
+and for accessing/highlighting the menu entries).  (However, since only C<KBDALT>
+is going to be stripped for handling of C<lAlt-key>, the modification column for
+C<KBDKANA> should duplicate the modification column for no-C<KBD>-flags.  Same with
+C<KBDSHIFT> added.)
+
+=head2 When C<AltGr> produces C<ROYA>, problems in Notepad
+
+Going to the Save As dialogue in Notepad loses "speciality of AltGr" (it highlights Menu);
+one need to switch layouts via LAlt+LShift to restore.
+
+I do not know any workaround.
+
+=head2 Console applications cannot detect when a keypress may be interpreted as a “command”
+
+The typical logic of an (advanced) application is that it interprets certain keypresses
+(combinations of keys with modifiers) as “commands”.  To do this in presence of user-switchable
+keyboards, when it is not known in compile time which key sequences generate characters,
+the application must be able to find at runtime which keypresses are characters-generating,
+and which are not.  The latter keypresses are candidates to be checked whether they should trigger commands
+of the application.
+
+For final keypresses of a character-generating key-sequence, an application gets a notification
+from the ReadConsoleEvent() API call that this keypress generates a character.  However, for the 
+keypresses of the sequence which are non the last one (“dead” keys), there is no such notification.
+
+Therefore, there is no way to avoid dead keys triggering actions in an application.  What is the
+difference with non-console applications?  First of all, they get such a notification (with the
+standard TranslateMessage()/DispatchMessage() sequence of API calls, on WM_KEYDOWN, one can
+PeekMessage() for WM_SYSDEADCHAR/WM_DEADCHAR and/or WM_SYSCHAR/WM_CHAR).  Second, the windowed
+application may call ToUnicode(Ex)() to calculate this information itself.
+
+Well, why a console application cannot use the second method?  First, the active keyboard layout
+of a console application is the default one.  When user switches the keyboard layout of the console,
+the application gets no notification of this, and its keyboard layout does not change.  This makes  
+ToUnicode() useless.  Moreover, due to
+security architecture, the console application cannot query the ID of the thread serving the message
+loop of the console, so cannot query GetKeyboardLayout() of this thread.  Hence ToUnicodeEx() is
+useless too.
+
+(There may be a lousy workaround: run ToUnicodeEx() on B<all> the installed keyboard layouts, and
+check which of them are excluded by comparing with results of ReadConsoleEvent().  Interpret
+contradictions as user changing the keyboard layout.  Of course, on several keypresses following
+a change of keyboard layout one may get unexpected results.  And if two similar
+keyboards are installed, one may also never get definite answer on which of them is currently active.)
+
+(To handle this workaround, one must have a way to call ToUnicode() in a way which does not change
+the internal state of the keyboard driver.  Observe:
+
+=over 4
+
+=item *
+
+Such a way is not documented.
+
+=item *
+
+Watch the character reported by ReadConsoleEvent() on the C<KEYUP> event for deadkeys.  This is
+the character which a deadkey would produce if it is pressed twice (and is 0 if pressing it twice
+results in a deadkey again).  The only explanation for this I can fathom is that the console's
+message queue thread calls such a non-disturbing-state version of ToUnicode().
+
+Why it should be “non-disturbing”?  Otherwise it would reset the state “this deadkey was pressed”,
+and the following keypress would be interpreted as not preceded by a deadkey.  And this is not
+what happens.  (If one does it with usual ToUnicode() call, DOWN reports a deadkey, but UP reports
+“ignored”; to see this, run F<examples/raw_keys_via_api.pl> with arguments C<Un 1> 
+with a keyboard which produces ç on C<AltGr-, c>.  Here C<n> is the number of the keyboard in the list
+of available keyboards reported by C<examples/raw_keys_via_api.pl U 1>).
+
+Well, when one I<knows> that some API calls are possible, it is just a SMP to find it out
+(see F<examples/raw_keys_via_api.pl>).  It turns out that given argument C<wFlags=0x02> achieves
+the behaviour of a console during KeyUp event.  (As a side benefit, it also avoids another
+glitch in Windows' keyboard processing: it reports the character value in presence of C<Alt>
+modifier — recall that ToUnicodeEx() ignores C<Alt> unless C<Ctrl> is present too.  Well, I
+checked this so far only on KeyUp event, where console producess mysterious results.)
+
+=item *
+
+However, even without using undocumented flags, it is not hard to construct such a non-disturbing version of ToUnicode().  The only
+ingredient needed is a way to reset the state to “no deadkeys pressed” one.  Then just store
+keypresses/releases from the time the last such state was found, call ToUnicode(), reset state,
+and call ToUnicode() again for all the stored keypresses/releases; then update the stored state
+appropriately.
+
+=item *
+
+But I strongly doubt that console's message loop does anything so advanced.  My bet would be that
+it uses a non-documented call or non-documented flags.  (Especially since the approach above does
+not handle C<Alt> the same way as the console does.)
+
+=back
+
+=head2 Behaviour of C<Alt-Modifiers-Key> vs C<Modifiers-Key>
+
+When both combinations produce characters (say, X and Y), it is not clear
+how an application shouild decide whether it got C<Alt-Y> event (for menu
+entry starting with Y), or an C<X> event.
+
+A partial workaround (if the semantic of the layout fits into the limited number
+of bits in the ORed mask): make all the keys which may be combined with
+C<Alt> to have the C<KBDCTRL> bit in the mask set; add some extra bit
+to C<Ctrl> keys to be able to distinguish them.  Then at least the
+kernel will produce the correct character on the ToUnicode() call (hence
+in TranslateMessage()).  [A potential that an application may be confused
+is still large.]
+
+=head2 Customization of what C<CapsLock> is doing is very limited
+
+(See the description of the semantic of C<CapsLock> in L<"Keyboard input on Windows, Part II: The semantic of ToUnicode()">.)
+
+A partial workaround (if the semantic of the layout fits into the limited number
+of bits in the ORed mask): make all the modifier combinations (except for the
+base layer) to have C<KBDCTRL> and C<KBDALT> bits set; add some extra bits to
+C<Ctrl> keys and C<Alt> keys (apparently, only C<KBDKANA> will work with C<Alt>)
+to be able to distinguish them.  Then the C<CAPLOKALTGR> flag will affect all
+these combinations too.
+
+=head2 C<lCtrl-rCtrl> combination: multiple problems
+
+First of all, sometimes C<Shift> is ignored when used with this combination.
+(Fixed by reboot.)
+
+(Does not work also with combinations with C<lAlt> and/or C<Menu>).  On the
+other hand, C<CapsLock> works as intended.  (I even got an impression that
+sometimes C<Shift> works when C<CapsLock> is active; cannot reproduce this,
+though.)
+
+I suspect this is related to the binding of C<Shift-Ctrl> to switch between
+keyboards of a language suddently jumpting to existence (without my interaction).
+Simultaneously, this option disappeared from the UI to change keyboard options
+(L<Language Bar/Settings/Advanced Key Settings> in Windows 7).  I might be that 
+press/release of C<Shift> is filtered out in presence of C<lCtrl-rCtrl>?
+
+(I also saw what looks like C<Menu> key being stuck in some situations — fixed
+by pressing it again.  Do not know how to reproduce this.  It is interesting to
+note that one of the bits in the mask of the C<Menu> key is 0x80, and there is
+a define for this bit in F<kbd.h> named C<KBDGRPSELTAP> — but it is undocumented,
+and, judging by names, one might think that C<KBDGRPSELTAP> would work in pair with the flag
+C<GRPSELTAP> of C<VK_TO_WCHARSn->Attributes>.)
+
+B<NOTES:> Apparently, C<lCtrl+rCtrl+NUMPADchar> do not work — neither with nor without C<NumLock>.
+Key up/down for C<Z/X/C/V/M/,/.> are not delivered here when used with C<lCtrl+rCtrl> modifiers
+(at least in a console).  Adding C<Shift/lAlt/Menu> does not change this.  Same for C<F1/F2/F8/F9>
+and C<Enter/Insert/Delete/Home/PgUp> (but not for keypad ones!).
+
+No workarounds are known.
 
 =cut
 
@@ -4976,6 +5169,7 @@ sub massage_faces ($) {
 #warn "Massaging face `$f'...";
     for my $key ( qw( Flip_AltGr_Key Diacritic_if_undef DeadChar_DefaultTranslation DeadChar_32bitTranslation extra_report_DeadChar
     		      PrefixChains ctrl_after_modcol create_alpha_ctrl keep_missing_ctrl output_layers layers_modifiers
+		      layers_mods_keys mods_keys_KBD
     		      ComposeKey Explicit_AltGr_Invert Auto_Diacritic_Start ) ) {
       $self->{faces}{$f}{"[$key]"} = $self->get_deep_via_parents($self, undef, 'faces', (split m(/), $f), $key);
     }
@@ -5853,7 +6047,13 @@ sub new_from_configfile_string ($$) {
         }
 #        warn "......  deadkey `$deadKey' reached0 in face `$F'" unless $not_in_0;
       }
-      my @check = grep !$coverage1_prefix{$_}, keys %check_later;
+      my @extras = ( "@{ $data->{faces}{$F}{'[output_layers]'} || [''] }" =~ /\bprefix(?:\w*)=([0-9a-fA-F]{4,6}\b|.(?=[ ,]))/g );
+      my %is_extra = map { ($data->charhex2key($_), 1) } @extras;
+      
+      my @check      = grep { !$coverage1_prefix{$_} and !$is_extra{$_} } keys %check_later;
+      my @only_extra = grep { !$coverage1_prefix{$_} and  $is_extra{$_} } keys %check_later;
+      $data->{faces}{$F}{'[only_extra]'} = { map {($_, 1)} @only_extra };
+
       my $_s = (@check > 1 ? 's' : '');
       warn("Prefix key$_s <@check> not reached (without double prefix keys?) in face `$F'; later=", keys %check_later, " ; cov1=", keys %coverage1_prefix) if @check;
       $data->{faces}{$F}{'[coverage1]'} = [sort keys %seen1];
@@ -6334,7 +6534,8 @@ my %shift_control_extra = (2 => "\x00", 6 => "\x1e", OEM_MINUS => "\x1f");
     $#cntrl = $create_a_c - 1 if $pre_ctrl < 2*@$u or $self->{faces}{$face}{'[keep_missing_ctrl]'};
     warn "cac=$create_a_c  #cntrl=$#cntrl pre=$pre_ctrl \@u=", scalar @$u if $#cntrl < 2*$ctrl_after - 1;
     splice @KK, $pre_ctrl, 0, map [$_, 0], @cntrl;
-    
+    splice @KK, 15, 0, [undef, 0] if @KK >= 16;		# col=15 is the fake one
+
     if ($k eq 'DECIMAL') {	# may be described both via visual maps and NUMPAD
       my @d = @{ $decimal[1] || [] };
       defined $KK[$_][0] or $KK[$_] = $d[$_] for 0..$#d;	# fill on the second round
@@ -8006,10 +8207,15 @@ sub patch_face ($$$$$$$;$) {	# flip layers paying attention to linked AltGr-inve
 }
 
 # use Dumpvalue;
-sub fmt_bitmap_mods ($$;$) {
-  my ($self, $b, $short, @b) = (shift, shift, shift, qw(Shift Ctrl Alt Kana X Y));
+my %subst_Shift = qw( -- -	-S S	t- t	tS T );		# There is no space for 8 MODs, so we contract tS into T
+sub fmt_bitmap_mods ($$$;$) {
+  my ($self, $b, $col, $short, @b) = (shift, shift, shift, shift, qw(Shift Ctrl Alt Kana Roya Loya Z t));
   my ($j, $empty, @ind) = ($short ? ('', '-', 1..$#b, 0) : ("\t", '', 0..$#b));	# better have Shift at end (Ctrl-Alt-Shift)...
-  join $j, map {($b & (1<<$_)) ? ($short ? substr $b[$_], 0, 1 : $b[$_]) : $empty} @ind;
+  my $O = join $j, map {($b & (1<<$_)) ? ($short ? substr $b[$_], 0, 1 : $b[$_]) : $empty} @ind;
+  $O =~ s/(..)$/$subst_Shift{$1}/ if $short;
+  $O =~ s/\t+$//;
+  $O = 'Invalid' if $col == 15;
+  $O
 }
 
 sub fill_win_template ($$$) {
@@ -8048,6 +8254,7 @@ EOPREF
   my($flip_AltGr_hex, %nn) =  $F->{'[Flip_AltGr_Key]'};
   $flip_AltGr_hex = $self->key2hex($self->charhex2key($flip_AltGr_hex)) if defined $flip_AltGr_hex;
   for my $deadKey ( sort keys %{ $F->{'[deadkeyFaceHexMap]'} } ) {
+    next if $F->{'[only_extra]'}{$self->charhex2key($deadKey)};
     my $auto_inv_AltGr = $F->{'[deadkeyInvAltGrKey]'}{$deadKey};
     $auto_inv_AltGr = $self->key2hex($auto_inv_AltGr) if defined $auto_inv_AltGr;
 #warn "flipkey=$flip_AltGr_hex, dead=$deadKey" if defined $flip_AltGr_hex;
@@ -8066,24 +8273,39 @@ EOPREF
 #warn "Translate: ", %h;
   $h{DEADKEYS} = $OUT;
   $h{KEYNAMES_DEAD} = $OUT_NAMES;
-  my %mods = qw( S 1 C 2 A 4 K 8 X 16 Y 32);
+  my %mods = qw( S 1 C 2 A 4 K 8 X 16 Y 32 Z 64 T 128 R 16 L 32);
   $_ += 0 for values %mods;			# Convert to numbers, so | works as expected
   my @cols;
-  for my $mod ( @{ $self->get_deep($self, @$k, '[layers_modifiers]') || ['', 'CA'] } ) {	# Plain, and Control-Alt
+  my %tr_mods_keys = ( @{ $F->{'[mods_keys_KBD]'} || [qw(rA CA)] } );
+  my $mods_keys = $F->{'[layers_mods_keys]'} || ['', 'rA'];
+  my $mods = $F->{'[layers_modifiers]'} || []; # || ['', 'CA'];	# Plain, and Control-Alt
+  $#$mods = $#$mods_keys if $#$mods < $#$mods_keys;
+  for my $MOD ( @$mods ) {
     my $mask = 0;
+    my $mod = ((defined $MOD) ? $MOD : '');				# Copy
+    unless ($mod =~ /\S/) {
+      my @K = grep /./, split /(?<=[A-Z])(?=[rl]?[A-Z])/, $mods_keys->[scalar @cols];
+#warn "cols=(@cols), K=(@K)\n";
+      $mod = join '', map $tr_mods_keys{$_}, @K;
+    }
     $mask |= $mods{$_} for split //, $mod;
     push @cols, $mask;
   }
   @cols = map {($_, $_ | $mods{S})} @cols;	# Add shift
 
+  my($ctrl_f,$ctrl_F) = ($mods{C}, $tr_mods_keys{lC} || $tr_mods_keys{C} || $tr_mods_keys{rC} || 'C');	# Prefer left-Ctrl
+  # $ctrl_f |= $mods{$_} for split //, $ctrl_F;		# kbdutool complains if there is no column for 'C'
+
   my $pre_ctrl = $self->get_deep($self, @$k, '[ctrl_after_modcol]');
   $pre_ctrl = 2*$ctrl_after unless defined $pre_ctrl;
   my $create_a_c = $self->get_deep($self, @$k, '[create_alpha_ctrl]');
   $create_a_c = $create_alpha_ctrl unless defined $create_a_c;
-  splice @cols, $pre_ctrl, 0, $mods{C}, ($create_a_c>1 ? $mods{C}|$mods{S} : ());	# Control (and maybe Control-Shift)
-  $h{COL_HEADERS} = join "\t", map "$cols[$_] [$_]", 0..$#cols;
-  $h{COL_EXPL} = join "\t", map '-' . $self->fmt_bitmap_mods($_, 'short'), @cols;
-  $h{BITS_TEMPLATE} = join "\n", map { "$cols[$_]\t// Column " . (4+$_) . " :\t" . $self->fmt_bitmap_mods($cols[$_]) } 0..$#cols;
+  splice @cols, $pre_ctrl, 0, $ctrl_f, ($create_a_c>1 ? $ctrl_f|$mods{S} : ());	# Control (and maybe Control-Shift)
+  splice @cols, 15, 0, $mods{A} if @cols >= 16;	# col=15 is the fake one; assigning it to Alt is the best palliative to fixing MSKLC
+  $h{COL_HEADERS} = join "\t", map sprintf('%-3d[%d]', $cols[$_], $_), 0..$#cols;
+  $h{COL_EXPL} = join "\t", map $self->fmt_bitmap_mods($cols[$_], $_, 'short'), 0..$#cols;
+  $h{BITS_TEMPLATE} = join "\n", map { "$cols[$_]\t// Column " . (4+$_) . " :\t" . $self->fmt_bitmap_mods($cols[$_], $_) } 0..$#cols;
+#  $h{BITS_TEMPLATE} =~ s(^(?=.*\bInvalid$))(#)m;					# XXX Actually, MSKLC is not ignoring the leading #
   $self->massage_template($template_win, \%h);
 }
 

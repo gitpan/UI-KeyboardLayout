@@ -8,49 +8,96 @@
          { 0x37, X37 | KBDEXT              },  // Snapshot
          { 0x38, X38 | KBDEXT              },  // RMenu
          { 0x47, X47 | KBDEXT              },  // Home
-@@ -144,7 +145,10 @@ static ALLOC_SECTION_LDATA VSC_VK aE1Vsc
+@@ -141,10 +142,15 @@ static ALLOC_SECTION_LDATA VSC_VK aE1Vsc
+ *     CTRL  (L & R) is used to generate control characters
+ *     ALT   (L & R) used for generating characters by number with numpad
+ \***************************************************************************/
++#define KBD_Z	0x40
++#define KBD_T	0x80
  static ALLOC_SECTION_LDATA VK_TO_BIT aVkToBits[] = {
      { VK_SHIFT    ,   KBDSHIFT     },
-     { VK_CONTROL  ,   KBDCTRL      },
-+    { VK_RCONTROL ,   KBDCTRL + KBDLOYA      },
-     { VK_MENU     ,   KBDALT       },
-+    { VK_RMENU    ,   KBDALT + KBDCTRL + KBDROYA       },
-+    { VK_OEM_AX   ,   KBDKANA      },
+-    { VK_CONTROL  ,   KBDCTRL      },
+-    { VK_MENU     ,   KBDALT       },
++    { VK_LCONTROL ,   KBDCTRL + KBDLOYA      },
++    { VK_RCONTROL ,   KBDCTRL + KBDALT + KBDROYA      },
++    { VK_LMENU    ,   KBDALT + KBDKANA       },
++    { VK_RMENU    ,   KBDALT + KBDCTRL + KBDLOYA + KBD_Z       },
++    { VK_OEM_AX   ,   KBDALT + KBDCTRL + KBD_T      },
      { 0           ,   0           }
  };
  
-@@ -195,8 +199,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
-         19,            // Shift + Control + Menu + Ror# + Ror# 
-         SHFT_INVALID, // Ror# 
-         SHFT_INVALID, // Shift + Ror# 
--        SHFT_INVALID, // Control + Ror# 
--        SHFT_INVALID, // Shift + Control + Ror# 
-+        2,		 // Control + Ror# 
-+        3,		 // Shift + Control + Ror# 
-         SHFT_INVALID, // Menu + Ror# 
-         SHFT_INVALID, // Shift + Menu + Ror# 
-         14,            // Control + Menu + Ror# 
-@@ -336,6 +340,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
+@@ -169,8 +175,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
+ 	SHFT_INVALID, // Shift		Alt
+ 	SHFT_INVALID, // 	Ctrl	Alt
+ 	SHFT_INVALID, // Shift	Ctrl	Alt
+-	SHFT_INVALID, // 			Kana
+-	SHFT_INVALID, // Shift			Kana
++	0,            // 			Kana
++	1,            // Shift			Kana
+ 	SHFT_INVALID, // 	Ctrl		Kana
+ 	SHFT_INVALID, // Shift	Ctrl		Kana
+ 	SHFT_INVALID, // 		Alt	Kana
+@@ -187,8 +189,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
+ 	SHFT_INVALID, // Shift	Ctrl			Roya
+ 	SHFT_INVALID, // 		Alt		Roya
+ 	SHFT_INVALID, // Shift		Alt		Roya
+-	SHFT_INVALID, // 	Ctrl	Alt		Roya
+-	SHFT_INVALID, // Shift	Ctrl	Alt		Roya
++	2,            // 	Ctrl	Alt		Roya
++	3,            // Shift	Ctrl	Alt		Roya
+ 	SHFT_INVALID, // 			Kana	Roya
+ 	SHFT_INVALID, // Shift			Kana	Roya
+ 	SHFT_INVALID, // 	Ctrl		Kana	Roya
+@@ -199,8 +201,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
+ 	16,           // Shift	Ctrl	Alt	Kana	Roya
+ 	SHFT_INVALID, // 					Loya
+ 	SHFT_INVALID, // Shift					Loya
+-	SHFT_INVALID, // 	Ctrl				Loya
+-	SHFT_INVALID, // Shift	Ctrl				Loya
++	2,            // 	Ctrl				Loya
++	3,            // Shift	Ctrl				Loya
+ 	SHFT_INVALID, // 		Alt			Loya
+ 	SHFT_INVALID, // Shift		Alt			Loya
+ 	SHFT_INVALID, // 	Ctrl	Alt			Loya
+@@ -523,16 +529,20 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS3
+   {0            ,0      ,0        ,0        ,0        }
+ };
+ 
+-static ALLOC_SECTION_LDATA VK_TO_WCHARS6 aVkToWch6[] = {
++static ALLOC_SECTION_LDATA VK_TO_WCHARS10 aVkToWch10[] = {
+ //                      |         |  Shift  |  Ctrl   |S+Ctrl   |  C+  X1 |  C+  X1 |
  //                      |=========|=========|=========|=========|=========|=========|
-   {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
-   {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
-+  {VK_CONVERT   ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
-+  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
-+  {VK_NONCONVERT,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
-+  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
-   {VK_ABNT_C2   ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
-   {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
-   {VK_OEM_8     ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
-@@ -425,7 +433,8 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS2
-   {VK_F9        ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2011   ,0x205f   ,0x2011   ,0x205f   ,WCH_NONE ,WCH_NONE ,0x2011   ,0x205f   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_F10       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x00ad   ,0x200b   ,0x00ad   ,0x200b   ,WCH_NONE ,WCH_NONE ,0x00ad   ,0x200b   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_F11       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2012   ,0x2007   ,0x2012   ,0x2007   ,WCH_NONE ,WCH_NONE ,0x2012   ,0x2007   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
--  {VK_F12       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x203e   ,0x2008   ,0x203e   ,0x2008   ,WCH_NONE ,WCH_NONE ,0x203e   ,0x2008   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {VK_F12       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x203e   ,0x2008   ,0x203e   ,0x2008   ,WCH_DEAD ,WCH_NONE ,0x203e   ,0x2008   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x06f0   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_HOME      ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2196   ,0x21d6   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2597   ,0x259b   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_UP        ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2191   ,0x21d1   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2584   ,0x2580   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_PRIOR     ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2197   ,0x21d7   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2596   ,0x259c   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
+-  {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
+-  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
+-  {VK_ABNT_C2   ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+-  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
+-  {VK_OEM_8     ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+-  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
+-  {0            ,0      ,0        ,0        ,0        ,0        ,0        ,0        }
++  {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_DEAD ,WCH_NONE },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   ,0x06f0   ,WCH_NONE ,0x06f0   ,WCH_NONE },
++  {VK_CONVERT   ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,WCH_NONE },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   ,0x06f0   ,WCH_NONE ,0x06f0   ,WCH_NONE },
++  {VK_NONCONVERT,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,WCH_NONE },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   ,0x06f0   ,WCH_NONE ,0x06f0   ,WCH_NONE },
++  {VK_ABNT_C2   ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {VK_OEM_8     ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {0            ,0      ,0        ,0        ,0        ,0        ,0        ,0        ,0		 ,0 }
+ };
+ 
+ static ALLOC_SECTION_LDATA VK_TO_WCHARS45 aVkToWch45[] = {
+@@ -656,6 +666,9 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS2
+ };
+ 
+ static ALLOC_SECTION_LDATA VK_TO_WCHAR_TABLE aVkToWcharTable[] = {
++    {  (PVK_TO_WCHARS1)aVkToWch3, 3, sizeof(aVkToWch3[0]) },
++    {  (PVK_TO_WCHARS1)aVkToWch10, 10, sizeof(aVkToWch10[0]) },
++    {  (PVK_TO_WCHARS1)aVkToWch45, 45, sizeof(aVkToWch45[0]) },
+     {  (PVK_TO_WCHARS1)aVkToWch2, 2, sizeof(aVkToWch2[0]) },
+     {  (PVK_TO_WCHARS1)aVkToWch25, 25, sizeof(aVkToWch25[0]) },
+     {                       NULL, 0, 0                    },
 --- iz-ru-la.H.orig	2013-03-09 16:06:20.394533900 -0800
 +++ iz-ru-la.H	2013-03-09 16:48:18.378554400 -0800
 @@ -37,3 +37,13 @@
@@ -77,71 +124,96 @@
          { 0x37, X37 | KBDEXT              },  // Snapshot
          { 0x38, X38 | KBDEXT              },  // RMenu
          { 0x47, X47 | KBDEXT              },  // Home
-@@ -144,7 +145,10 @@ static ALLOC_SECTION_LDATA VSC_VK aE1Vsc
+@@ -141,10 +142,15 @@ static ALLOC_SECTION_LDATA VSC_VK aE1Vsc
+ *     CTRL  (L & R) is used to generate control characters
+ *     ALT   (L & R) used for generating characters by number with numpad
+ \***************************************************************************/
++#define KBD_Z	0x40
++#define KBD_T	0x80
  static ALLOC_SECTION_LDATA VK_TO_BIT aVkToBits[] = {
      { VK_SHIFT    ,   KBDSHIFT     },
-     { VK_CONTROL  ,   KBDCTRL      },
-+    { VK_RCONTROL ,   KBDCTRL + KBDLOYA      },
-     { VK_MENU     ,   KBDALT       },
-+    { VK_RMENU    ,   KBDALT + KBDCTRL + KBDROYA       },
-+    { VK_OEM_AX   ,   KBDKANA      },
+-    { VK_CONTROL  ,   KBDCTRL      },
+-    { VK_MENU     ,   KBDALT       },
++    { VK_LCONTROL ,   KBDCTRL + KBDLOYA      },
++    { VK_RCONTROL ,   KBDCTRL + KBDALT + KBDROYA      },
++    { VK_LMENU    ,   KBDALT + KBDKANA       },
++    { VK_RMENU    ,   KBDALT + KBDCTRL + KBDLOYA + KBD_Z       },
++    { VK_OEM_AX   ,   KBDALT + KBDCTRL + KBD_T      },
      { 0           ,   0           }
  };
  
-@@ -195,8 +199,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
-         19,            // Shift + Control + Menu + Ror# + Ror# 
-         SHFT_INVALID, // Ror# 
-         SHFT_INVALID, // Shift + Ror# 
--        SHFT_INVALID, // Control + Ror# 
--        SHFT_INVALID, // Shift + Control + Ror# 
-+        2,		 // Control + Ror# 
-+        3,		 // Shift + Control + Ror# 
-         SHFT_INVALID, // Menu + Ror# 
-         SHFT_INVALID, // Shift + Menu + Ror# 
-         14,            // Control + Menu + Ror# 
-@@ -336,6 +340,10 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS6
+@@ -169,8 +175,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
+ 	SHFT_INVALID, // Shift		Alt
+ 	SHFT_INVALID, // 	Ctrl	Alt
+ 	SHFT_INVALID, // Shift	Ctrl	Alt
+-	SHFT_INVALID, // 			Kana
+-	SHFT_INVALID, // Shift			Kana
++	0,            // 			Kana
++	1,            // Shift			Kana
+ 	SHFT_INVALID, // 	Ctrl		Kana
+ 	SHFT_INVALID, // Shift	Ctrl		Kana
+ 	SHFT_INVALID, // 		Alt	Kana
+@@ -187,8 +189,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
+ 	SHFT_INVALID, // Shift	Ctrl			Roya
+ 	SHFT_INVALID, // 		Alt		Roya
+ 	SHFT_INVALID, // Shift		Alt		Roya
+-	SHFT_INVALID, // 	Ctrl	Alt		Roya
+-	SHFT_INVALID, // Shift	Ctrl	Alt		Roya
++	2,            // 	Ctrl	Alt		Roya
++	3,            // Shift	Ctrl	Alt		Roya
+ 	SHFT_INVALID, // 			Kana	Roya
+ 	SHFT_INVALID, // Shift			Kana	Roya
+ 	SHFT_INVALID, // 	Ctrl		Kana	Roya
+@@ -199,8 +201,8 @@ static ALLOC_SECTION_LDATA MODIFIERS Cha
+ 	16,           // Shift	Ctrl	Alt	Kana	Roya
+ 	SHFT_INVALID, // 					Loya
+ 	SHFT_INVALID, // Shift					Loya
+-	SHFT_INVALID, // 	Ctrl				Loya
+-	SHFT_INVALID, // Shift	Ctrl				Loya
++	2,            // 	Ctrl				Loya
++	3,            // Shift	Ctrl				Loya
+ 	SHFT_INVALID, // 		Alt			Loya
+ 	SHFT_INVALID, // Shift		Alt			Loya
+ 	SHFT_INVALID, // 	Ctrl	Alt			Loya
+@@ -523,16 +529,20 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS3
+   {0            ,0      ,0        ,0        ,0        }
+ };
+ 
+-static ALLOC_SECTION_LDATA VK_TO_WCHARS6 aVkToWch6[] = {
++static ALLOC_SECTION_LDATA VK_TO_WCHARS10 aVkToWch10[] = {
+ //                      |         |  Shift  |  Ctrl   |S+Ctrl   |  C+  X1 |  C+  X1 |
  //                      |=========|=========|=========|=========|=========|=========|
-   {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
-   {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
-+  {VK_CONVERT   ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
-+  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
-+  {VK_NONCONVERT,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
-+  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
-   {VK_ABNT_C2   ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
-   {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
-   {VK_OEM_8     ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
-@@ -388,8 +396,8 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS2
-   {'J'          ,CAPLOK | CAPLOKALTGR,'j'      ,'J'      ,0x000a   ,0x000a   ,0x00ed   ,0x00cd   ,0x03ca   ,0x03aa   ,0x0439   ,0x0419   ,0x05d7   ,0x05bb   ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR },
-   {'K'          ,CAPLOK | CAPLOKALTGR,'k'      ,'K'      ,0x000b   ,0x000b   ,0x00f3   ,0x00d3   ,0x03ba   ,0x039a   ,0x043a   ,0x041a   ,0x05db   ,0x05da   ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR },
-   {'L'          ,CAPLOK | CAPLOKALTGR,'l'      ,'L'      ,0x000c   ,0x000c   ,0x00f6   ,0x00d6   ,0x03bb   ,0x039b   ,0x043b   ,0x041b   ,0x05dc   ,0x05b9   ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,0x2113   ,0x2112   ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR },
--  {VK_OEM_1     ,0                   ,';'      ,':'      ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x00f7   ,0x0387   ,WCH_NONE ,';'      ,':'      ,0x059b   ,0x0594   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
--  {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x00a8   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {VK_OEM_1     ,0                   ,';'      ,':'      ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x00f7   ,0x0387   ,WCH_DEAD ,WCH_DEAD ,WCH_DEAD ,0x059b   ,0x0594   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x00a8   ,WCH_NONE ,WCH_NONE ,0x03a6   ,0x03a6   ,0x0483   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x03a6   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_OEM_7     ,0                   ,'\''     ,'"'      ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,WCH_DEAD ,0x2202   ,0x2207   ,0x2032   ,0x2033   ,0x05f3   ,0x05f4   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x00b4   ,0x02f5   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {'Z'          ,CAPLOK | CAPLOKALTGR,'z'      ,'Z'      ,0x001a   ,0x001a   ,0x00e0   ,0x00c0   ,0x03b6   ,0x0396   ,0x0437   ,0x0417   ,0x05d6   ,0x05b7   ,WCH_LGTR ,0x2128   ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,0x2124   ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR ,WCH_LGTR },
-@@ -403,8 +411,8 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS2
-   {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x00b8   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_OEM_PERIOD,0                   ,'.'      ,'>'      ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x2265   ,0x00b7   ,WCH_LGTR ,0x2026   ,'>'      ,0x05c3   ,0x059a   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_LGTR ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_LGTR ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x00b0   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
--  {VK_OEM_2     ,0                   ,'/'      ,'?'      ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x00bf   ,0x2044   ,0x037e   ,0x00f7   ,0xfffd   ,0x05a5   ,0x05c5   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_LGTR ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_LGTR ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
--  {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x0338   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {VK_OEM_2     ,0                   ,'/'      ,'?'      ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x00bf   ,0x2044   ,0x037e   ,0x00f7   ,0xfffd   ,0x05a5   ,0x05c5   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_LGTR ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x0338   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x03a6   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_OEM_102   ,0                   ,'\\'     ,'|'      ,0x001c   ,WCH_NONE ,0x00b6   ,0x2767   ,WCH_DEAD ,WCH_DEAD ,0x044a   ,0x042a   ,0x05bf   ,0x05c7   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x0342   ,0x0713   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_ABNT_C1   ,0                   ,'\\'     ,'|'      ,0x001c   ,WCH_NONE ,0x00b6   ,0x2767   ,WCH_DEAD ,WCH_DEAD ,0x044a   ,0x042a   ,0x05bf   ,0x05c7   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-@@ -428,7 +436,8 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS2
-   {VK_F9        ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2011   ,0x205f   ,WCH_NONE ,WCH_NONE ,0x2011   ,0x205f   ,0x2011   ,0x205f   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_F10       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x00ad   ,0x200b   ,WCH_NONE ,WCH_NONE ,0x00ad   ,0x200b   ,0x00ad   ,0x200b   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_F11       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2012   ,0x2007   ,WCH_NONE ,WCH_NONE ,0x2012   ,0x2007   ,0x2012   ,0x2007   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
--  {VK_F12       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x203e   ,0x2008   ,WCH_NONE ,WCH_NONE ,0x203e   ,0x2008   ,0x203e   ,0x2008   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {VK_F12       ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x203e   ,0x2008   ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x2008   ,0x203e   ,0x2008   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-+  {0xff         ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x06f0   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_HOME      ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2196   ,0x21d6   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2597   ,0x259b   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_UP        ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2191   ,0x21d1   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2584   ,0x2580   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
-   {VK_PRIOR     ,0                   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2197   ,0x21d7   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,0x2596   ,0x259c   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
+-  {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD },
+-  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   },
+-  {VK_ABNT_C2   ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+-  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
+-  {VK_OEM_8     ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   },
+-  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE },
+-  {0            ,0      ,0        ,0        ,0        ,0        ,0        ,0        }
++  {VK_SPACE     ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_DEAD ,WCH_NONE },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   ,0x06f0   ,WCH_NONE ,0x06f0   ,WCH_NONE },
++  {VK_CONVERT   ,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,WCH_NONE },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   ,0x06f0   ,WCH_NONE ,0x06f0   ,WCH_NONE },
++  {VK_NONCONVERT,0      ,' '      ,WCH_DEAD ,' '      ,WCH_NONE ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,WCH_NONE },
++  {0xff         ,0      ,WCH_NONE ,0x0138   ,WCH_NONE ,WCH_NONE ,0x0192   ,0x00a0   ,0x06f0   ,WCH_NONE ,0x06f0   ,WCH_NONE },
++  {VK_ABNT_C2   ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {VK_OEM_8     ,0      ,WCH_DEAD ,WCH_DEAD ,WCH_NONE ,WCH_NONE ,WCH_DEAD ,0x0301   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {0xff         ,0      ,0x06f0   ,0x00a0   ,WCH_NONE ,WCH_NONE ,0x00a3   ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE ,WCH_NONE },
++  {0            ,0      ,0        ,0        ,0        ,0        ,0        ,0        ,0		 ,0 }
+ };
+ 
+ static ALLOC_SECTION_LDATA VK_TO_WCHARS45 aVkToWch45[] = {
+@@ -656,6 +666,9 @@ static ALLOC_SECTION_LDATA VK_TO_WCHARS2
+ };
+ 
+ static ALLOC_SECTION_LDATA VK_TO_WCHAR_TABLE aVkToWcharTable[] = {
++    {  (PVK_TO_WCHARS1)aVkToWch3, 3, sizeof(aVkToWch3[0]) },
++    {  (PVK_TO_WCHARS1)aVkToWch10, 10, sizeof(aVkToWch10[0]) },
++    {  (PVK_TO_WCHARS1)aVkToWch45, 45, sizeof(aVkToWch45[0]) },
+     {  (PVK_TO_WCHARS1)aVkToWch2, 2, sizeof(aVkToWch2[0]) },
+     {  (PVK_TO_WCHARS1)aVkToWch25, 25, sizeof(aVkToWch25[0]) },
+     {                       NULL, 0, 0                    },
 --- iz-la-ru.H.orig	2013-03-09 16:06:20.205523100 -0800
 +++ iz-la-ru.H	2013-03-09 16:48:24.179886200 -0800
 @@ -37,3 +37,13 @@

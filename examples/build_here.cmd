@@ -36,10 +36,9 @@ perl -i~~ -wlpe "BEGIN { @ARGV = <*.C>; $k = {qw( ADD '+' SUBTRACT '-' MULTIPLY 
 copy iz-la-ru.C iz-la-ru.C~~~
 copy iz-ru-la.C iz-ru-la.C~~~
 
-@rem Fix the limitations of to-C converter kbdutool: convert LAYOUT manually (with main/secondary keys having 20/21 bindings)
-@rem N/A any more: 21st is fake (empty) - just to distinguish.
-perl %ex%\test-klc-tr.pl ../ooo-us iz-la-ru.C~~~ 28 24 >iz-la-ru.C
-perl %ex%\test-klc-tr.pl ../ooo-ru iz-ru-la.C~~~ 28 24 >iz-ru-la.C
+@rem Fix the limitations of to-C converter kbdutool: convert LAYOUT manually (with main/secondary keys having 29/25 bindings)
+perl %ex%\test-klc-tr.pl ../ooo-us iz-la-ru.C~~~ 45 25 >iz-la-ru.C
+perl %ex%\test-klc-tr.pl ../ooo-ru iz-ru-la.C~~~ 45 25 >iz-ru-la.C
 
 patch -p0 -b <%ex%\izKeys.patch
 

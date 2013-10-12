@@ -1188,3 +1188,41 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 		Penalize Planck ℎ on MathBlue, add stroked-font.
 		Add Planck ℎ on MathBlue AltGr-p, minus operator to -, horizontal line to _, Å on A, K on K.
 			Remove last two: Having AÅ KK contradicts Unicode recommendations.
+
+0.63	New configuration keys mods_keys_KBD (hash), layers_mods_keys.
+	Skip modification column=15.
+	Remove now ALL dead key names with Compose from the output table (another overflow hit again!).
+	Update to Unicode 6.3 changed only the description of one of dead keys (ID=ARABIC LETTER MARK).
+	Detect the (fake) prefix keys which appear only in output_layers directive; do not warn “unreachable”, do not output.
+			(Reduces the DLL size about 20%.)
+	Restore dead key names with only one Compose in the output table.
+			(Increases the DLL size about 8%.)
+	Document newly discovered bugs in MSKLC and Windows.
+	Better documentation of how to assign mask's bits to the Win key.
+
+	izKeys.kbdd:	Update version to 0.63.
+		Fix Amplify-∭ to get ⨌ instead of ⨜.
+		Exchange BoxDrawB1 and BoxDraw1B.
+		Generate Compose on Mnu-F12, and other extra keys on extra layers without patching.
+		Switch to new scheme of modifier masks (now CapsLock works, Alt-Mnu works — at least in cmd).
+		Move bold-digits to bold/italic.
+		In ssbiGreek, map extra symbol-letters (along diagonal) to the numbers' row (with ∂∇ also unmoved on '", as usual).
+		Exchange Double-Struck and Scripts (follow heuristics rC=flipBold, M=flipItalic).
+		Make Fraktur into BoldFraktur.
+		Move Monospace and Italic to lAlt-rAlt, lAlt-rAlt-Menu (follow heuristic lAlt-rAlt=MathLatin).
+		Add flip-bold versions of Double-Struck (make SSBI), Bold-Fraktur and Script (change AltGr to lCtrl).
+				(Adds 1.5% to the DLL size.)
+		Move Sans Serif Bold to lAlt-Menu (follow heuristic lAlt=SSBI).
+		Add Bold/Italic versions of Greek (modifying lCtrl-lAlt).
+		Add Bold versions of Latin (modifying lAlt-rAlt).	(Finishes B/I-flavors of Latin)
+		Make Menu-Space into Compose key (does not work since SPACE is not in visual map).
+		For the purpose of generation of BoxDraw chars: loner rCtrl is replaced by lCtrl+rCtrl (instead of lAlt+rCtrl).
+			(Apparently, lCtrl+rCtrl+NUMPADchar does not work — neither with nor without CapsLock; keep lAlt+rCtrl.)
+		Instrument MathBlue for highlight in HTML.
+
+	izKeys.patch:	Now patch only for bugs in MSKLC.
+			Update for the new scheme of modifier masks.
+			Update for MSKLC forgetting to emit aVkToWch3/6/8 (in presence of many modification columns).
+			Make Green-Space and Ripe-Space into Compose key.
+
+	test-klc-tr.pl:	Generate the mask → modification column table ourselves.

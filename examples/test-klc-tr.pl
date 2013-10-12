@@ -48,14 +48,14 @@ sub translate_key_line_c($$$$) {
   @O
 }
 
-sub extract_layout ($) {
-  my $in = shift;
+sub extract_section ($$;$) {
+  my($in, $sec, $strip) = (shift, shift, shift);
   $in =~ s([^\S\n]*//.*)()g;		# remove comments
   $in =~ s([^\S\n]+$)()gm;		# remove trailing whitespace (including \r!)
-  $in =~ s/\A.*?^\s*LAYOUT([ \t]*;[^\n]*)?\n//sm or die "Cannot find LAYOUT inside the KLC file";
+  $in =~ s/\A.*?^\s*$sec([ \t]*;[^\n]*)?\n//sm or die "Cannot find LAYOUT inside the KLC file";
   $in =~ s/^[^\S\n]*(KEYNAME|LIGATURE|COPYRIGHT|COMPANY|LOCALENAME|LOCALEID|VERSION|SHIFTSTATE|LAYOUT|ATTRIBUTES|KEYNAME_EXT|KEYNAME_DEAD|DESCRIPTIONS|LANGUAGENAMES|ENDKBD)\b.*//ms
      or die "Cannot find end of LAYOUT inside the KLC file";
-  $in =~ s/^\n//gm;			# remove emtpy lines
+  $in =~ s/^\n//gm if $strip;			# remove emtpy lines
   $in
 }
 
@@ -74,10 +74,33 @@ sub fix_liga ($$) {
   join '', @in, $z
 }
 
+sub format_modifiers ($) {
+  my ($in, @bits, @out) = (shift, qw(Shift Ctrl Alt Kana Roya Loya Z T));
+  push @out, (($in & (1<<$_)) ? $bits[$_] : '') for 0..$#bits;
+  (my $O = join "\t", @out) =~ s/\t+$//;
+  $O;
+}
+
+sub produce_masks (@) {
+  my(@masks, @OUT) = @_;
+  $OUT[$masks[$_]] = $_ for 0..$#masks;
+  defined and $_ != 15 or $_ = 'SHFT_INVALID' for @OUT;
+  <<EOP
+    $#OUT,
+    {
+    //  Modification# // ORed bitmap for pressed modifiers
+    //  ============= // =================================
+EOP
+    . join( '', map { sprintf "\t%-14s// %s\n", "$OUT[$_],", format_modifiers $_ } 0..$#OUT )
+    . <<EOP;
+    }
+EOP
+}
+
 if (@ARGV == 1) {
   my $b_len = shift;
   my $layout = do {local $/; <>};
-  $layout = extract_layout $layout;
+  $layout = extract_section $layout, 'LAYOUT', 'strip';
   my($prev_vk, @LIG);
   for my $in (split /\n/, $layout) {
     print for translate_key_line_c \$prev_vk, $b_len, $in, \@LIG;
@@ -89,10 +112,10 @@ my @prev_len = (8, 1);
 if (@ARGV == 4) {
   my($src_klc, $src_c, @b_len) = (shift, shift, shift, shift);
   @ARGV = $src_klc;
-  my $layout = do {local $/; <>};
+  my $klc = do {local $/; <>};
   @ARGV = $src_c;
   my $c_file = do {local $/; <>};
-  $layout = extract_layout $layout;
+  my $layout = extract_section $klc, 'LAYOUT', 'strip';
   my (@pass_table, $prev_vk, $skip_m1, %LIG) = ('', '');
 #  for my $pass (0, 1) {
     for my $in (split /\n/, $layout) {
@@ -120,6 +143,13 @@ if (@ARGV == 4) {
   }
   $c_file =~ s/(\baLigature\s*\[\s*\]\s*=\s*\{\s*)(.*?)(?=\s*\}\s*;)/ $1 . fix_liga $2, \%LIG /se
     or $c_file !~ /\baLigature\b/ or die "Can't find LIGATURE table definition";
+
+  my $masks = extract_section $klc, 'SHIFTSTATE', 'strip';	# Semantic of empty lines unclear; for now, ignore
+  my @masks = map {/^\s*(\d+)/ and $1} split /\n/, $masks;
+  my $Omasks = produce_masks @masks;
+  $c_file =~ s/(&aVkToBits\s*\[\s*0\s*\]\s*,[ \t]*\n).*?^\s+\}[ \t]*\n/$1$Omasks/ms
+    or $c_file !~ /\baLigature\b/ or die "Can't find CharModifiers table definition";
+
   print $c_file;
 }
 exit;
