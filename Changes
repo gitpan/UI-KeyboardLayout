@@ -1226,3 +1226,43 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 			Make Green-Space and Ripe-Space into Compose key.
 
 	test-klc-tr.pl:	Generate the mask → modification column table ourselves.
+
+0.64	Create layer named NAME² from every layer named NAME and the following layer (on uc) from rectangle visual maps.
+	Document the Windows' limit 126 for the number of modification columns.
+	Quiet a warning if compose key is on VK_array.
+	Add to docs classified shapes from http://std.dkuug.dk/jtc1/sc2/wg2/docs/n4384.pdf.
+	Document 3 keystate tables (‟internal”, async, and no-name one).
+	Document the restriction that the offsets of the (1 or 2) tables in keyboard layout should be less than 0x10000.
+
+	izKeys.kbdd:	Update version to 0.64.
+			Minor massage of the table of arrows.
+			Add WhiteTriangSmall,BlackTrianSmall rectangle visual maps.
+			Use Arrows² style references to Arrow visual layers.
+			Assign Black and “Player Controls” arrows to Boldified (=add rCtrl) [un-Shifted/Shifted).
+			Assign Hook  and ZigZag arrows to Script (=AltGr-Mnu) [un-Shifted/Shifted).
+			Assign White and Triple arrows to Double-Struck (=AltGr-rCtrl) [un-Shifted/Shifted).
+			Assign MapsTo and ToBar arrows to Fraktur (=AltGr-Mnu-rCtrl) [un-Shifted/Shifted).
+			Use ⮕ U+2b95 (from Unicode-v7.0) instead of ➡ on →.  Move ➡ to ./Del.
+				http://www.unicode.org/mail-arch/unicode-ml/y2013-m10/0083.html
+			Assign Large/Small Triang to arrows on SS-Bold (=lAlt-Menu) [un-Shifted/Shifted).
+			Assign Large/Small BlackTriang to arrows on SS (=lAlt-Menu-rCtrl) [un-Shifted/Shifted).
+			Assign White/Black PartialCircles to arrows on BoldItal (=lAlt-rAltGr-Menu-rCtrl) [un-Shifted/Shifted).
+			Assign ⊃/⊇ etc to arrows on Monospace (=lAlt-rAltGr) [un-Shifted/Shifted).
+			Assign ⊐/⊒ etc to arrows on MathItalic (=lAlt-rAltGr-Mnu) [un-Shifted/Shifted).
+			Assign ↠/⇉ etc to arrows on MathBold (=lAlt-rAltGr-rCtrl) [un-Shifted/Shifted).
+			Assign ➲/◑ etc to arrows on MathBoldItalic (=lAlt-rAltGr-Mnu-rCtrl) [un-Shifted/Shifted).
+			Add whiten to mogrification rules for Double-Struck.
+
+	build_here.cmd:			Bug of kdbutool with LIGATURES on unusual keys requires patching.
+	izKeys.pre-convert-fix.patch:	new file
+	izKeys.patch:	To move the structure-to-output earlier in the file (to make offset below 0x10000),
+				change static to extern, and pre-declare arrays.
+				(This does not help.  According to objconv -fasm, or to
+               D:\Programs\Microsoft-Keyboard_Layout_Creator\bin\i386\cl.exe      -nologo -ID:\Programs\Microsoft-Keyboard_Layout_Creator\inc -DNOGDICAPMASKS -DNOWINMESSAGES -DNOWINSTYLES -DNOSYSMETRICS -DNOMENUS -DNOICONS -DNOSYSCOMMANDS -DNORASTEROPS -DNOSHOWWINDOW -DOEMRESOURCE -DNOATOM -DNOCLIPBOARD -DNOCOLOR -DNOCTLMGR -DNODRAWTEXT -DNOGDI -DNOKERNEL -DNONLS -DNOMB -DNOMEMMGR -DNOMETAFILE -DNOMINMAX -DNOMSG -DNOOPENFILE -DNOSCROLL -DNOSERVICE -DNOSOUND -DNOTEXTMETRIC -DNOWINOFFSETS -DNOWH -DNOCOMM -DNOKANJI -DNOHELP -DNOPROFILER -DNODEFERWINDOWPOS -DNOMCX -DWIN32_LEAN_AND_MEAN -DRoster -DSTD_CALL -D_WIN32_WINNT=0x0500 /DWINVER=0x0500 -D_WIN32_IE=0x0500 /MD /c /Zp8 /Gy /W3 /WX /Gz /Gm- /EHs-c- /GR- /GF -Z7 /Oxs iz-la-ru.c
+               ..\objconv.exe -felf32 -nu iz-la-ru.obj iz-la-ru.o
+               nm iz-la-ru.o >iz-la-ru.o-nm
+				the KbdTable is moved to the end of the 1st data section (at off=0x36348), before the string table.
+	extra_c.zip:			Extra files to break C into two compilation units.
+	compile_link_kbd.cmd:		New option --with-extra-c BASENAME_of_C_FILE
+						(makes the returned table at minimal possible offset; but this does not fix
+						 the problem with installing large files)

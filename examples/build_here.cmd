@@ -31,23 +31,28 @@ perl -i~ -wlpe "BEGIN {@K = %ARROWSK%; $k = join q(|), @K[1..$#K]; $rx = qr/\b(F
 perl -i~ -wlpe "BEGIN { @ARGV = <*.[CH]>; $c=1; @K = (%ARROWSK%); @KK = (map(qq(F$_), 0), grep(!/^F\d+$/ && !/^INSERT$/, @K), qw(F2 F2 ?)); }; $vk = ($ARGV =~ /C$/i && q(VK_)); s/#ERROR#/${vk}$KK[$c]/ and $c++; $c=1 if eof"
 
 @rem the "old" short rows contain -1 instead of WCH_NONE
-perl -i~~ -wlpe "BEGIN { @ARGV = <*.C>; $k = {qw( ADD '+' SUBTRACT '-' MULTIPLY '*' DIVIDE '/' RETURN '\r' )}; $rx = join q(|), keys %%$k; }; s/^(\s+\{VK_($rx)\s*,\s*0\s*,\s*)'\S*\s+\S+\s+\S+\s*$//"
+@@@rem perl -i~~ -wlpe "BEGIN { @ARGV = <*.C>; $k = {qw( ADD '+' SUBTRACT '-' MULTIPLY '*' DIVIDE '/' RETURN '\r' )}; $rx = join q(|), keys %%$k; }; s/^(\s+\{VK_($rx)\s*,\s*0\s*,\s*)'\S*\s+\S+\s+\S+\s*$//"
+perl -i~~ -wlpe "BEGIN { @ARGV = <*.C>; $k = {qw( ADD '+' SUBTRACT '-' MULTIPLY '*' DIVIDE '/' RETURN '\r' )}; $rx = join q(|), keys %%$k; }; s/^(\s+\{VK_($rx)\s*,\s*0\s*,\s*)'\S*\s+\S+\s+\S+\s*$//; s/^static\s+(?=.*([a-zA-Z]\[\]|\bCharModifiers\b))//"
 
 copy iz-la-ru.C iz-la-ru.C~~~
 copy iz-ru-la.C iz-ru-la.C~~~
 
+patch -p0 -b <%ex%\izKeys.pre-convert-fix.patch
+
 @rem Fix the limitations of to-C converter kbdutool: convert LAYOUT manually (with main/secondary keys having 29/25 bindings)
-perl %ex%\test-klc-tr.pl ../ooo-us iz-la-ru.C~~~ 45 25 >iz-la-ru.C
-perl %ex%\test-klc-tr.pl ../ooo-ru iz-ru-la.C~~~ 45 25 >iz-ru-la.C
+perl %ex%\test-klc-tr.pl ../ooo-us iz-la-ru.C~~~ 45 46 >iz-la-ru.C
+perl %ex%\test-klc-tr.pl ../ooo-ru iz-ru-la.C~~~ 45 46 >iz-ru-la.C
 
 patch -p0 -b <%ex%\izKeys.patch
 
-%ex%\compile_link_kbd.cmd iz-la-ru 2>&1 | tee 00cl
-%ex%\compile_link_kbd.cmd iz-ru-la 2>&1 | tee 00cr
+unzip -u %ex%\extra_c.zip
+
+%ex%\compile_link_kbd.cmd --with-extra-c msklc_altgr iz-la-ru 2>&1 | tee 00cl
+%ex%\compile_link_kbd.cmd --with-extra-c msklc_altgr iz-ru-la 2>&1 | tee 00cr
 
 zip -ru iz-la-ru iz-la-ru
 zip -ru iz-ru-la iz-ru-la
-zip -ju src %src%/ooo-us %src%/ooo-ru %ex%\izKeys.kbdd %ex%\build-iz.pl %ex%\compile_link_kbd.cmd %ex%\izKeys.patch %ex%\test-klc-tr.pl %~f0 *.C *.H *.RC *.DEF
+zip -ju src %src%/ooo-us %src%/ooo-ru %ex%\izKeys.kbdd %ex%\build-iz.pl %ex%\compile_link_kbd.cmd %ex%\izKeys.patch %ex%\test-klc-tr.pl %~f0 *.C *.H *.RC *.DEF %ex%\izKeys.pre-convert-fix.patch %ex%\extra_c.zip
 zip -ju html %src%/izKeys-visual-maps-out.html %src%/coverage-1prefix-Cyrillic.html %src%/coverage-1prefix-Latin.html
 
 for %%d in (iz-la-ru iz-ru-la) do ls -l %%d\i386\%%d.dll %%d\ia64\%%d.dll %%d\amd64\%%d.dll %%d\wow64\%%d.dll

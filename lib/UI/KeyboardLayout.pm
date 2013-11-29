@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION = "0.63";
+$VERSION = $VERSION = "0.64";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -1285,11 +1285,14 @@ currently hardwired.  Some pictures and tables are available on
 
 =head1 FILES
 
-=head1 Useful tidbits from Unicode mailing list (unsorted)
+=head1 Useful tidbits from Unicode mailing list
+
+=for html
+<a name=Useful_tidbits_from_Unicode_mailing_list_(unsorted)></a>
 
 =head2 On keyboards
 
-MS keyboard (wrong?)
+On MS keyboard (absolutely wrong!)
 
   http://unicode.org/mail-arch/unicode-ml/y2012-m05/0268.html
 
@@ -1532,6 +1535,32 @@ CR symbols
 Math layout
 
   http://unicode.org/mail-arch/unicode-ml/y2007-m01/0303.html
+
+Attempts of classification
+
+  http://std.dkuug.dk/jtc1/sc2/wg2/docs/n4384.pdf
+  http://std.dkuug.dk/JTC1/SC2/WG2/
+
+					   Buttons	Target		Also=not-in-series-of-n4384
+ square		1🞌 2⬝ 3🞍 4▪ 5◾ 6◼ 7■ s⬛						(solid=s⬛)
+ box 		1□ 2🞎 3🞏 4🞐 5🞑 6🞒 7🞓 o⬜	   1🞔 2▣ 3🞕	🞖	=white square	(open=o⬜)  also: ▫◽◻⌑⧈⬚⸋⊡
+ black circle	1⋅ 2∙ 3🞄 4⦁ 5⦁ 6⚫ 7●						also: ·
+ ring		1○ 2⭘ 3🞆 4🞆 5🞇 6🞈 7🞉	   1⊙ 2🞊 3⦿	🞋	=white circle	also: ⊚⌾◌⚪⚬⨀◦⦾
+ black diamond	1🞗 2🞘 3⬩ 4🞙 5⬥ 6◆
+ white diamond	◇			   1🞚 2◈ 3🞛	🞜			also: ⋄
+ black lozenge	1🞝 2🞞 3⬪ 4🞟 5⬧ 6⧫
+ white lozenge	◊			   🞠
+ centered n-gon	3⯅ 4⯀ 5⬟ 6⬣ 8⯃
+ cent on-corner	3⯆ 4⯁ 5⯂ 6⬢ 8⯄					(also ⯇ ⯈)
+ cross		1🞡 2🞢 3🞣 4🞤 5🞥 6🞦 7🞧
+ saltire 	1🞨 2🞩 3🞪 4🞫 5🞬 6🞭 7🞮				≈ times (rotated cross)
+ 5-asterisk	1🞯 2🞰 3🞱 4🞲 5🞳 6🞴
+ 6-asterisk	1🞵 2🞶 3🞷 4🞸 5🞹 6🞺
+ 8-asterisk	1🞻 2🞼 3🞽 4🞾 5🞿
+ light star	3🟀 4🟄 5🟉 6✶ 8🟎 12🟒
+ medium star	3🟁 4🟅 5★ 6🟋 8🟏 12🟓
+ (heavy) star	3🟂 4🟆 5🟊 6🟌 8🟐 12✹
+ pinwheel	3🟃 4🟇 5✯ 6🟍 8🟑 12🟔				lighter: ✵
 
 =head2 Unicode and linguists
 
@@ -1836,9 +1865,10 @@ Translation of Unicode names
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0066.html
   http://unicode.org/mail-arch/unicode-ml/y2012-m12/0076.html
 
-Transliteration on passports (see p.IV-48)
+Transliteration on passports (see p.IV-48), UniDEcode
 
   http://www.icao.int/publications/Documents/9303_p1_v1_cons_en.pdf
+  http://unicode.org/mail-arch/unicode-ml/y2013-m11/0025.html
 
 =head1 Keyboard input on Windows: interaction of applications and the kernel
 
@@ -1847,7 +1877,8 @@ Transliteration on passports (see p.IV-48)
 This is not documented.  We try to provide a description which is
 both as simple as possible, and as complete as possible.  (We ignore
 many important parts: the handling of hot keys [or C<C-A-Del>]), IME,
-handling of focus switch [C<Alt-Tab> etc], the keyboard filters,
+handling of focus switch [C<Alt-Tab> etc], the syncronization of keystate
+between different queues, waking up the system, the keyboard filters,
 widening of virtual keycodes, and LED lights.)
 
 We omit Step 0, when the hardware keyboard drivers (PS/2 or USB) deliver keydown/up(/repeat???) event for scan
@@ -1863,6 +1894,7 @@ The scan codes are massaged (see “Low level scancode mapping” in L<"SEE ALSO
 
 The keyboard layout tables map the translated scancode to a virtual keycode.
 (This may also depend on the “modification column”; see L<"Far Eastern keyboards on Windows">.)
+The “internal” key state table is updated.
 
 =item 3
 
@@ -1871,7 +1903,7 @@ Mythology: the modification keys (C<Shift>, C<Alt>, C<Ctrl> etc) are taken into 
 What actually happens: any key may act as a modification key.  The keyboard layout tables
 map keycodes to 8-bit masks.  (The customary names for lower bits of the mask are C<KBDSHIFT>,
 C<KBDCTRL>, C<KBDALT>, C<KBDKANA>; two more bits are named C<KBDROYA> and C<KBDLOYA>; two more
-bits are unnamed.)  The keycodes of the currently pressed keys are translated to masks, and
+bits are unnamed.)  The keycodes of the currently pressed keys (from the “internal” table) are translated to masks, and
 these masks are ORed together.  (For the purpose of translation to C<WM_CHAR>/etc [done
 in ToUnicode()/ToUnicodeEx()], the bit C<KBDKANA> may be set
 also when key C<VK_KANA> was pressed odd number of times; this is
@@ -1898,12 +1930,21 @@ are generated.
 
 =item 5
 
-The message C<WM_(SYS)KEYDOWN/UP> is delivered to the application.  If C<VK_MENU> [usually
+If needed, asyncroneous key state for the current key's non-left-non-right flavor is updated.
+(The rest is dropped if the key is consumed by a C<WH_KEYBOARD_LL> hook.)
+
+Asyncroneous key state for the current key is updated.  Numpad-by-number flags are updated.
+(The rest is dropped if the key is a hotkey.)
+
+The message C<WM_(SYS)KEYDOWN/UP> is posted to the application.  If C<VK_MENU> [usually
 called the C<Alt> key] is
 down, but C<VK_CONTROL> is not, the event is of C<SYS> flavor (this info is duplicated in
 lParam.  Additionally, for C<VK_MENU> tapping, the UP event is also made C<SYS> — although
 at this moment C<VK_MENU> is not down!).
 (The C<KBDEXT> flag [of the scancode] is also delivered to the application.)
+
+(When a C<WM_(SYS)KEYDOWN/UP> message is posted, the key state is updated.  This key state
+may be used by TranslateMessage() as an argument to ToUnicode(), and is returned by GetKeyState() etc.)
 
 B<The following steps are applicable only if the application uses “the standard message pump”
 with TranslateMessage()/DispatchMessage() or uses some equivalent code.>
@@ -1936,7 +1977,8 @@ the semantic is not.  Here we fix this.
 =item 1
 
 If the bit 0x01 in C<wFlags> is not set, the key event is checked for contributing to
-character-by-number input via numeric KeyPad.  If so, the character is
+character-by-number input via numeric KeyPad (and numpad-by-number flags are updated).
+If so, the character is
 delivered only when C<Alt> is released.  (This the only case when KEYUP
 delivers a character.)  Unless the bit 0x02 in C<wFlags> is set, the KEYUP
 events are not processed any more.
@@ -1979,7 +2021,7 @@ dead key ID (one UTF-16 unit).  (I<Implementation>: the ID is taken from the nex
 (If the ORed mask corresponds to a valid modification column, but the row does not
 define the behaviour at this column, and the bit C<KBDCTRL> is set, and no other bits but C<KBDSHIFT>, C<KBDKANA>
 are set, then an autogenerated character in the range 0x00..0x1f is emitted for virtual keycodes
-'A'..'Z' and widened virtual keycodes 0xFF61..0xFF91 (for latter, based on the low bits of translation-to-scancode).
+'A'..'Z' and widened virtual keycodes 0xFF61..0xFF91 [for latter, based on the low bits of translation-to-scancode]).
 
 =item 8
 
@@ -2002,7 +2044,14 @@ If the automaton is in non-0 state, the state ID becomes the output.
 =back
 
 B<NOTE:> MSKLC restricts the length of the string associated to the row/column cell to
-be at most 4 UTF-16 code units.
+be at most 4 UTF-16 code units.  The restriction for keyboard layouts created with other tools
+is the maximal length 255 bytes storable in C<KBDTABLES.cbLgEntry>; it results in
+the maximal string length of 125 code units.
+
+B<NOTE:> If the application uses the stardard message pump
+with TranslateMessage()/DispatchMessage(), the caller of ToUnicode() is TranslateMessage().
+In this case, ToUnicode() is called with an output buffer consisting of 16 UTF-16 code units.  For
+such applications, the strings associated to keypresses are truncated after 16 code units.
 
 B<NOTE:> If the string is “long” (i.e., defined via LIGATURES), when it is fed through the
 finite automaton, the transitions to non-0 state do not generate deadkey IDs in the output
@@ -2019,8 +2068,8 @@ This would deliver C<Alt-f>, then C<1> would start character-by-number input
 provided C<Alt> and C<NumPad1> together have ORed mask “in between” of C<KBDALT>
 and C<KBDALT|KBDSHIFT|KBDKANA>.)
 
-After the starter keydown (NumPad: 0..9, DOT, PLUS) is recognized as such, all the keyups
-should be followed by the corresponding keydown (keydowns-due-to-repeat are ignored);
+After the starter keydown (NumPad: 0..9, DOT, PLUS) is recognized as such, all the keydowns
+should be followed by the corresponding keyup (keydowns-due-to-repeat are ignored);
 more precisely, between two KEYDOWN events, the KEYUP for the first of them must be present.
 (In other words, KEYDOWN/KEYUP events must come in the expected order, maybe with some intermixed “extra” KEYUP events.)
 In the decimal mode (numeric starter) only the keys with scancodes of NumPad 0..9 are allowed.
@@ -2029,17 +2078,30 @@ In the hex mode (starter is NumPad's DOT or PLUS) also the keys with virtual cod
 (=C<Alt>) key.
 
 B<NOTE:> In most cases, the resulting number is reduced mod 256.  The exceptions are: the starter key is C<KeyPadPLUS>, 
-or the translate-to codepage is multibyte (and the number is interpreted as big-endian).  In multibyte 
-codepages, (reduced) numbers above 0x80
+or the translate-to codepage is multibyte (then a number above 255 is interpreted as big-endian combination
+of bytes).  In multibyte codepages, numbers 0x80..0xFF
 are considered in C<cp1252> codepage (unless the translate-to codepage is Japanese, and the number’s codepoint is Katakana).
 
 B<NOTE:> If the starter key is C<KeyPad0> or C<KeyPadDOT>, the number is a codepoint in the default codepage of the keyboard layout;
 if it is another digit, it is in the OEM codepage.
-Hex mode (C<KeyPadPLUS> or C<KeyPadDOT>) requires extra tinkering; see L<"Hex input of unicode is not enabled">.
+Enabling hex modes (C<KeyPadPLUS> or C<KeyPadDOT>) requires extra tinkering; see L<"Hex input of unicode is not enabled">.
 
 B<NOTE:> since keyboard layout normally map C<Alt> to the mask C<KBDALT>, and do not define
 a modification column for the ORed mask C<=KBDALT>, and C<KBDALT> is B<NOT> stripped for
 key events in input-by-number, these key events usually do not generate spurious C<WM_CHAR>s.
+
+B<NOTE:> if the bit 0x01 of C<wFlags> is intended to be set, then there is a way to query
+the kernel “what would happen if a particular key with a particular combination of modifiers
+were pressed now”.  (Recall that a “usual” ToUnicode() call is “destructive”: it modifies the
+I<state> of the keyboard stored in the kernel.  The information about whether one is in the
+middle of entering-by-number and/or whether one is in a middle of a deadkey sequence is
+erased or modified by such calls.)  In general, there is no way preserve the state of
+entering-by-number; however, in presence of bit 0x01, this is of no concern, so a solution
+exists.
+
+Using C<wFlags=0x01|0x02>, and setting the high bit of C<wScanCode> gives the same result as
+ToUnicode() with C<wFlags=0x01> and no high bit in C<wScanCode>.  Moreover, this preserves the state of
+the deadkey-finite-automaton.  This way, one gets a “I<nondestrictive>” flavor of ToUnicode().
 
 =head2 Keyboard input on Windows, Part III: Customary “special” keybindings of typical keyboards
 
@@ -2063,7 +2125,7 @@ Additionally, the typical keyboards also define the following bindings:
   Enter		 ——→ ^M
   Ctrl-Enter	 ——→ ^J
 
-In addition to this, the standard US keyboard (and keyboards built by this module) define
+In addition to this, the standard US keyboard (and keyboards built by this Perl module) define
 the following bindings with C<Ctrl-Shift> modifiers:
 
   @	 ——→ 0x00
@@ -2073,7 +2135,7 @@ the following bindings with C<Ctrl-Shift> modifiers:
 =head2 Can an application on Windows accept keyboard events?  Part I: insert only
 
 The logic described above makes the kernel deliver more or less “correct” C<WM_(SYS)CHAR> messages
-to the application.  The only bindings which may be defined in the keyboard, but will not be
+to the application.  The only bindings which may be defined in the keyboard layout, but will not be
 seen as C<WM_(SYS)CHAR> are those in modification columns which involve C<KBDALT>, and do not
 involve any bits except C<KBDSHIFT> and C<KBDKANA>.  (Due to the stripping of C<KBDALT> described
 above, these modification columns are never accessed — I<well, they are, but only for input-by-number>.)
@@ -2111,7 +2173,7 @@ C<WM_CHAR> from C<WM_SYSCHAR> — no surprises here!)
 
 Assuming that the application uses this method, it would correctly recognize stripped
 events on the “primitive” keyboards.  However, on a keyboard with an extra modifier
-key (call it C<Super>; assume its mask to involve a non-SHIFT/ALT/CTRL/KANA bit),
+key (call it C<Super>; assume its mask involves a non-SHIFT/ALT/CTRL/KANA bit),
 the C<Alt-Super-key> combination will not be stripped by the kernel, but the application
 would think that it was, and would not insert the character in C<WM_CHAR> message.  A bug!
 
@@ -2129,9 +2191,7 @@ work with all keyboards and all combinations of modifiers.
 B<CAVEAT with the above assignment:> some applications (e.g., Emacs) manage to distinguish
 C<lCtrl+lAlt> combination of modifier keys from the combination C<lCtrl+rAlt> produced by 
 a typical C<AltGr>; these applications are able to use C<lCtrl+lAlt>-modified 
-keys as a bindable accelerator keys.  Currently, it is not clear how to embrace these
-applications into the above scheme, without giving up the C<lCtrl+lAlt-key> combination
-as character-producing combinations.
+keys as a bindable accelerator keys.  We address this question in the L<Part IV|"Can an application on Windows accept keyboard events?  Part IV: application-specific modifiers">.
 
 =head2 Can an application on Windows accept keyboard events?  Part II: special key events
 
@@ -2183,7 +2243,7 @@ the fact that ToUnicode() produces nothing or C<'0'..'9','.',',','+'>.
 =item *
 
 After the starter, allow continuation by checking the scancode/virtual-keycode and the presence of C<VK_MENU> down.
-Do not call ToUnicode() for continuation messages.
+Do not call ToUnicode() for continuation keydown/up events.
 
 =item *
 
@@ -2238,7 +2298,7 @@ keyboards uses different modification columns for C<lCtrl-lAlt> and C<AltGr>=C<r
 modifiers, pressing C<AltGr-key> inputs wrong characters in Firefox.
 
 B<NOTE:> Among notable applications which fail spectacularly is Emacs.  The developers
-forget that for a generation, it is already XXI century, and L<use ToAscii() instead of
+forget that for a generation, it is already XXI century; so they L<use ToAscii() instead of
 ToUnicode()|http://fossies.org/linux/misc/emacs-24.3.tar.gz:a/emacs-24.3/src/w32fns.c>!
 (Even if ToUnicode() is available, its result is converted to the result of the
 corresponding ToAscii() code.)
@@ -2259,7 +2319,7 @@ the C<lAlt-Menu-key> modifier combinations with L<the assignment of mask
 from that section|"A convenient assignment of C<KBD*> bitmaps to modifier keys">.
 
 Indeed, with this assignment, the only combination of modifiers for which the kernel will strip C<KBDALT>
-is C<lAlt> (and C<lAlt+Win> if one does not assign anything any bits to C<Win>).
+is C<lAlt> (and C<lAlt+Win> if one does not assign any bits to C<Win>).
 So C<lAlt-Menu-key> is not stripped, hence the 
 correct C<WM_*CHAR> is delivered by the kernel.  However, since this combination is
 still visible to the application as having C<Alt>, and not having C<Ctrl>,
@@ -2271,11 +2331,13 @@ of I<the kernel>’s calculations of the character to deliver.  However, the nai
 algorithm used by I<the application> will force the application to ignore this
 correctly delivered character to insert.
 
-What one needs is an extra heuristic to recognize the combinations involving 
+A very robust workaround for this problem is introduced in the
+L<Part IV|"Can an application on Windows accept keyboard events?  Part IV: application-specific modifiers">.
+What we discuss here is a simple heuristic to recognize the combinations involving 
 C<Alt> and an “unexpected modifier”, so that these combinations become
 exceptions to the rule “C<SYS> flavor means ‘do not insert’”.
 
-B<SOLUTION:> when C<WM_SYS*CHAR> message arrives, inspect the virtual keycodes
+B<NAIVE SOLUTION:> when C<WM_SYS*CHAR> message arrives, inspect the virtual keycodes
 which are reported as pressed.  Ignore the keycode for the current message.
 Ignore the keycodes for “usual modifiers” (C<Shift/Alt/Kana>) which are
 expected to keep stripping.  Ignore the keycode for the keys which may be
@@ -2283,16 +2345,154 @@ kept “stuck down” by the keyboards (see L<"Far Eastern keyboards on Windows"
 If some keycode remains, then consider it as an “extra” modifier, and ignore
 the fact that the message was of C<SYS> flavor.
 
-So all one must do is to define one user message, code two very simple routines, 
-MyTranslateMessage() and HasExtraModifiersHeuristical(), and perform two 
+So all one must do is to define one user message (for input-by-number-in-progress),
+code two very simple routines,  MyTranslateMessage() and HasExtraModifiersHeuristical(), and perform two 
 PeekMessage() on KEYDOWN event, and one gets a powerful almost-robust
 algorithm for keyboard input on Windows.  (Recall that all the applications
 I saw provide close-to-abysmal support of keyboard input on Windows.)
 
+=head2 Can an application on Windows accept keyboard events?  Part IV: application-specific modifiers
+
+Some application handle certain keys as “extra modifiers for the purpose of
+application-specific accelerator keypresses”.  For example, Emacs may treat
+the C<ApplicationMenu> in this way (as a C<Super> modifier for its bindable-keys
+framework).  Usually, C<ApplicationMenu> does not
+contribute anything into the ORed mask; hence, C<ApplicationMenu-letter>
+combination will deliver the same character as just C<letter> alone.  When
+the application treats C<ApplicationMenu-letter> as an accelerator, it must
+ignore the character delivered by this combination.
+
+Additionally, many keyboard layouts
+use the C<KLLF_ALTGR> flag (it makes the kernel to fake pressing/releasing the 
+left C<Ctrl> key when the right C<Alt> is pressed/released) with “standard”
+assignments of the ORed masks.  On such keyboards, pressing right C<Alt> (i.e.,
+C<AltGr>) delivers the same characters as pressing any C<Ctrl> together with 
+any C<Alt>.  On the other hand, an application may distinguish left-C<Ctrl> combinined 
+with left-C<Alt> from C<AltGr> pressed
+on such keyboards by inspecting which (virtual) keys are currently down.  So the application 
+may consider left-C<Ctrl> combinined with left-C<Alt>
+as “intended to be an accelerator”; then the application would ignore the characters delivered by
+such a keypress.
+
+One can immediately see that such applications would inevitably enter into conflict
+with keyboards which B<define> these key combinations.  For example, on a keyboard
+which defines an ORed mask for C<ApplicationMenu>, pressing C<ApplicationMenu-letter>
+I<should> deliver a different character than pressing C<letter>.  However, the
+application does not know this, and just ignores the character delivered by
+C<ApplicationMenu-letter>.
+
+A similar situation arises when the keyboard defines C<leftCtrl-leftAlt-letter> to
+deliver a different character than C<AltGr-letter>.  Again, the character will be ignored
+by the application.  Since the fact that such a “unusual” keyboard is active
+implies user's intent, such behaviour is a bug of the application.
+
+B<CONCLUSION:> an application must interpret a keypress as “intended to be an accelerator”
+only if this keypress produces no character, or produces B<the same> character as
+the key without the “extra” modifier.  (Correspondingly, if replacing C<leftAlt> by
+C<rightAlt> does not change the delivered character.)
+
+B<IMPLEMENTATION:> to do this, the application must be able to query “what would happen
+if the user pressed different key combinations?”; such a query requires “non-destructive”
+calls of ToUnicode().  (These calls must be done I<before> the “actual”, destructive, 
+call of ToUnicode() corresponding to the currently pressed down modifiers.)
+
+Fortunately, with the framework described in the
+L<Part III|"Can an application on Windows accept keyboard events?  Part III: better detection of C<KBDALT> stripping">,
+the call of ToUnicode() is performed with C<wFlags> being 0x01.  As explained near the end of the section
+L<"Keyboard input on Windows, Part II: The semantic of ToUnicode()">, this call has a “non-destructive”
+flavor!  Hence, for applications with such “enhanced” modifier keys, the logic of the
+L<Part III|"Can an application on Windows accept keyboard events?  Part III: better detection of C<KBDALT> stripping">
+should be enhanced in the following ways:
+
+=over 4
+
+=item *
+
+Make a non-destructive call of ToUnicode().  Store the result.  If no insertable character
+(or deadkey) is delivered, ignore the rest.
+
+=item *
+
+If both left C<Ctrl> and left C<Alt> are down (AND right C<Ctrl> AND right C<Alt> are up!) 
+replace left C<Alt> by the right C<Alt>, and
+make another non-destructive call of ToUnicode().  If the result is identical to the first one,
+mark C<leftCtrl+leftAlt> as “special modifiers present for accelerators”.
+
+Remove left C<Ctrl> and left C<Alt> from the collection of keys which are down (argument to ToUnicde()),
+and continue with the previous step.
+(This may be generalized to other combinations of left/right C<Alt>/C<Ctrl>.)
+
+=item *
+
+For every other “special modifier” virtual key which is down,
+make another non-destructive call of ToUnicode() with this virtual key up.
+If the result is identical to the first one, mark this “special modifier” as “present for accelerators”.
+
+=item *
+
+Finally, if nothing suitable for accelerators is found, make a “usual” call of ToUnicode()
+(so that on future keypresses the deadkey finite automaton behaves as expected).  Generate the
+corresponding messages.
+
+=back
+
+If no insertable character is delivered, or suitable “extra” accelerators are found, the 
+process-the-accelerator logic should be triggered.
+
+For example, if the character Ω is delivered, and a special modifier C<ApplicationMenu> is down
+and marked as suitable as accelerator, then Ω will be ignored.  The accelerator for C<ApplicationMenu-Ω>
+should be triggered.  (Processing this as C<ApplicationMenu-Shift-ω> may be also done.  This may require an 
+extra non-destructive call.)
+
+An alternative logic is possible: if this Ω was generated by modifiers C<lCtrl-rAlt-Shift-ApplicationMenu>
+with the virtual key C<VK_W>, then the application may query what C<VK_W> generates standalone (for example,
+cyrillic ц), and trigger the accelerator for C<Ctrl-Alt-Shift-ApplicationMenu-ц>.  (This assumes that
+C<lCtrl-rAlt-Shift> with C<VK_W> generates the same Ω!)
+
+If no character is delivered, then this is a “trivial” situation, and the framework of accelerator keys
+should be called as if the complication considered here did not exist.
+
+B<NOTE:> this logic handles the intended behaviour of C<Alt> key as well!  So, with this implementation,
+the application would
+
+=over 5
+
+=item *
+
+Handle C<Alt>-NUMPAD input-by-number in an intuitive mostly compatible with Windows way 
+(but not bug-for-bug compatible with the Windows' way);
+
+=item *
+
+Would recognize C<Alt> modifier which does not change the delivered character as such.  (So it may be processed
+as the menu accessor.)
+
+=item *
+
+Would recognize B<all> the key combinations defined by the keyboard layout (and deliverable via ToUnicode());
+
+=item *
+
+Would recognize all the application-specific extra modifier keys which do not interfere with the
+key combinations defined by the keyboard layout.
+
+=back
+
 =head2 Far Eastern keyboards on Windows
 
-The syntax of defining these keyboards is documented in F<kbd.h> of the toolkit.  The semantic is undocumented.  Here we fix this.
+The syntax of defining these keyboards is documented in F<kbd.h> of the toolkit.  
+The semantic of the NLS table is undocumented.  Here we fix this.
 
+The function returning the NLS table should be exported with ordinal 2.
+The offsets of both tables in the module should be below 0x10000.
+The keyboard layout should define a function with ordinal 3 or 5 returning 0, or
+be loaded through such a function returning non-0; the signature is
+
+    BOOL ordinal5(HKL hkl, LPWSTR __OUT__ dllname , PCLIENTKEYBOARDTYPE type_if_remote_session, LPVOID dummy);
+    BOOL ordinal3(LPWSTR __OUT__ dllname);
+
+if return is non-0, keyboard is reloaded from C<dllname>.
+    
 In short, these layouts have an extra table which may define the following enhancements:
 
   One 3-state (or 2-state) radio-button:
@@ -2305,18 +2505,20 @@ In short, these layouts have an extra table which may define the following enhan
   Manipulate a couple of bits of IME state.
   A few random hacks for key-deficient hardware layouts.
 
-(One may use the usual maps to modification columns to make the radio-buttons and toggle-buttons above affect the layout.
+(Via assigning ORed masks to radio-buttons, the radio-buttons and toggle-buttons above may affect the layout.
 Using this, it is easy to convert each toggling buttons to 2-state radiobuttons.
 The limitation is that the number of modification columns compatible with the
 extra table is at most 8 — counting one for C<Ctrl>.)
 
-Every C<VK> may be associated to two tables of functions, the “normal” one, and the “alternative” one.  Both tables
-associate a keyboard-description-column to a filter id, and a parameter for the filter.  (Recall that columns are associated
-to the 6-bit modifier state by the table in the C<MODIFIERS> structure.  One B<must> define all the states reachable by the 
+Every C<VK> may be associated to two tables of functions, the “normal” one, and the “alternative” one.  For
+every modification column, each table
+assigns a filter id, and a parameter for the filter.  (Recall that columns are associated
+to the ORed masks by the table in the C<MODIFIERS> structure.  One B<must> define all the entries 
+in the table — or at least the entries reachable by the 
 modifier keys.  B<NOTE:> the limit on the number of states in the tables is 8; it is not clear what happens with the 
-states above this.)
+states above this; some versions of Windows may buffer-overflow.)
 
-The filters operate on: C<VK>, C<UP>/C<DOWN> flag, the flags associated to the scancode in C<< KBDTABLES->ausVK >>
+The input/output for the filters consists of: the C<VK>, C<UP>/C<DOWN> flag, the flags associated to the scancode in C<< KBDTABLES->ausVK >>
 (may be added to upsteam), the 
 parameter given in C<VK_F> structure (and an unused C<DWORD> read/write parameter).  A filter may change these parameters,  
 then pass the event forward, or it may ignore an event.  Filters by ID:
@@ -2325,10 +2527,13 @@ then pass the event forward, or it may ignore an event.  Filters by ID:
   KBDNLS_NOEVENT	Ignore key.
   KBDNLS_SEND_BASE_VK	Pass through VK unchanged.
   KBDNLS_SEND_PARAM_VK	Replace VK by the number specified as the parameter.
-  KBDNLS_KANAMODE	Ignore UP; on DOWN, generate UP-or-DOWN for DBE_KATAKANA
+  KBDNLS_KANAMODE	Ignore UP; on DOWN, toggle (=generate UP-or-DOWN for) DBE_KATAKANA
+
+			  These 3 generate UP for “other” key, then DOWN for the target (as needed!):
   KBDNLS_ALPHANUM	Ignore UP;	DBE_ALPHANUMERIC,DBE_HIRAGANA,DBE_KATAKANA → DBE_ALPHANUMERIC
   KBDNLS_HIRAGANA	Ignore UP;	DBE_ALPHANUMERIC,DBE_HIRAGANA,DBE_KATAKANA → DBE_HIRAGANA
   KBDNLS_KATAKANA	Ignore UP;	DBE_ALPHANUMERIC,DBE_HIRAGANA,DBE_KATAKANA → DBE_KATAKANA
+
   KBDNLS_SBCSDBCS	Ignore UP;	Toggle DBE_SBCSCHAR / DBE_DBCSCHAR
   KBDNLS_ROMAN		Ignore UP;	Toggle DBE_ROMAN / DBE_NOROMAN
   KBDNLS_CODEINPUT	Ignore UP;	Toggle DBE_CODEINPUT / DBE_NOCODEINPUT
@@ -2397,7 +2602,7 @@ used on the following KEYUP if the indexed bit is set.  (The KEYREPEAT events ar
 
 The typical usage of C<TOGGLE> keys is to make the KEYUP event match B<what KEYDOWN did> no matter what
 is the order of releasing the modifier keys and the main key.
-Having this bit “propagates” to KEYUP the information about which modifiers were active on KEYDOWN.  This helps in ensuring
+Having the history bit up “propagates” to KEYUP the information about which modifiers were active on KEYDOWN.  This helps in ensuring
 consistency of some actions between the KEYDOWN event and the corresponding KEYUP event: remember that the state of modifiers 
 on KEYUP is often different than the state on KEYDOWN: people can release modifiers in different orders: 
 
@@ -2409,13 +2614,15 @@ to make releasing C<Shift-Enter> B<and> also releasing C<Enter> to act as if it 
 C<Shift-Enter> special (via the first table), sets the history bit on C<Shift-Enter>, and make I<the second table> map C<Enter> 
 and C<Shift-Enter> to be special too (send C<F38>) I<if the history bit is set>.
 
-B<Remark:> the standard key processing has its own filters too.  C<AltGr> processing adds fake C<lCtrl> up/down events;
-C<Shift-Cancels-CapsLock> processing ignores/fakes the C<KEYDOWN>/C<KEYUP> for C<Capital>; C<Shift-Multiply> becomes
-C<VK_SNAPSHOT> (same for C<Alt>; C<Ctrl-ScrollLck/Numlock> become C<VK_CANCEL>/C<VK_PAUSE>; C<Ctrl-Pause> may become C<VK_CANCEL>.
+B<Remark:> the standard key processing has its own filters too.  C<AltGr> processing adds fake C<lCtrl> up/down events
+(provided the flag C<KLLF_ALTGR> is set);
+C<Shift-Cancels-CapsLock> processing ignores/fakes the C<KEYDOWN>/C<KEYUP> for C<VK_CAPITAL> (=C<CapsLock>)
+(provided the flag C<KLLF_SHIFTLOCK> is set); C<Shift-Multiply> becomes
+C<VK_SNAPSHOT> (same for C<Alt>); C<Ctrl-ScrollLck/Numlock> become C<VK_CANCEL>/C<VK_PAUSE>; C<Ctrl-Pause> may become C<VK_CANCEL>.
 OEM translations (NumPad→Cursor, except C<C-A-Del>; C<00> to double-press of C<0>) come first, then locale-specific (C<AltGr>,
 C<Shift-Cancels-CapsLock>), then those defined in the tables above.
 
-B<Remark:> As opposed to these translations, C<KLLF_LRM_RLM> and C<Alt-NUMPADn) is actually handled inside the 
+B<Remark:> As opposed to these translations, C<KLLF_LRM_RLM> and C<Alt-NUMPADn> is actually handled inside the 
 even loop, by ToUnicode().
 
 B<Remark:> L<http://www.toppa.com/2007/english-windows-xp-with-a-japanese-keyboard/> (and references inside!)
@@ -2424,7 +2631,8 @@ explains fine points of using Japanese keyboards.  See also: L<http://www.coscom
 =head2 A convenient assignment of C<KBD*> bitmaps to modifier keys
 
 In this section, we omit discussion of C<Shift> modifier; so every
-bitmap may be further combined with C<KBDSHIFT> to produce two different bindings:X<AssignMasksSmart>
+bitmap may be further combined with C<KBDSHIFT> to produce two different bindings.
+Assign ORed masks to the modifier keys as follows:X<AssignMasksSmart>
 
   lCtrl		Win	 lAlt		rAlt			Menu		rCtrl
   CTRL|LOYA	CTRL|X1	 ALT|KANA	CTRL|ALT|LOYA|X1	CTRL|ALT|X2	CTRL|ALT|ROYA
@@ -2490,6 +2698,13 @@ map this combination of modifiers to an arbitatrary modification column!
 In particular, one can map such combination of modifiers to a certain choice of handedness
 of C<Ctrl> and C<Alt>.  (An example of such a problematic application is L<Firefox|"Firefox misinterprets keypresses">;
 look for “I<impossible modifier>”.)
+
+B<NOTE:> The maximal number of “modification columns” supported by Windows is 126.  A
+larger number would make the size of C<VK_TO_WCHARS...> to overflow the maximal number
+storable in the field C<VK_TO_WCHAR_TABLE.cbSize> of type C<BYTE> = C<unsigned char>.
+
+Given that the column 15 is ignored, this reduces the number of strings associated to
+a keypress (with different “modifiers”) to 125.
 
 =head1 SEE ALSO
 
@@ -2696,11 +2911,15 @@ Convert Apple to MSKLC
   http://typophile.com/node/90606
 
 VK_OEM_8 Kana modifier - Using instead of AltGr
+
   http://www.kbdedit.com/manual/ex13_replacing_altgr_with_kana.html
+
 Limitations of using KANA toggle
+
   http://www.kbdedit.com/manual/ex12_trilang_ser_cyr_lat_gre.html
   
 FE (Far Eastern) keyboard source code example (NEC AT is 106 with SPECIAL MULTIVK flags changed on some scancodes, OEM_7/8 producing 0x1e 0x1f, and no OEM_102):
+  
   http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/ntos/w32/ntuser/kbd/fe_kbds/jpn/ibm02/kbdibm02.c__.htm
   http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/ntos/w32/ntuser/kbd/fe_kbds/jpn/kbdnecat/kbdnecat.c__.htm
   http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/ntos/w32/ntuser/kbd/fe_kbds/jpn/106/kbd106.c__.htm
@@ -2749,7 +2968,7 @@ Low level scancode mapping
 
 CapsLock as on typewriter:
 
-  http://www.annoyances.org/exec/forum/winxp/1071197341
+  http://web.archive.org/web/20120717083202/http://www.annoyances.org/exec/forum/winxp/1071197341
 
 Problems on X11:
 
@@ -4401,6 +4620,20 @@ modification column.  The format of F<.klc> files does not allow sharing.)
 If the F<.klc> file has many modification columns, the emitted aVkToWcharTable 
 contains only C<aVkToWch1>/2.
 
+=head2 F<kbdutool> confuses LIGATURES on unusual keys
+
+For example, C<VK_SUBTRACT> may be replaced by C<VK_F2> in the LIGATURES table.
+
+Time to switch to direct generation of F<.C> files?
+
+=head2 F<kbdutool> places C<KbdTables> at end of the generated F<.c> file
+
+The offset of this structure should be no more than 0x10000.  Thus keyboards
+with large tables of prefixed keys may fail to load.  This may be related to
+the bug L<"If data in C<KEYNAME_DEAD> takes too much space, keyboard is mis-installed, and “Language Bar” goes crazy">.
+
+Time to switch to direct generation of F<.C> files?
+
 =head1 WINDOWS GOTCHAS for keyboard developers (problems in kernel)
 
 =head2 It is hard to understand what a keyboard really does
@@ -4456,18 +4689,19 @@ state, and not producing any character — and this exactly what is requeste
 =head2 If data in C<KEYNAME_DEAD> takes too much space, keyboard is mis-installed, and “Language Bar” goes crazy
 
 Installation reports success, the keyboard appears in the list in the Language Bar's "Settings".
-But the keyboard is not listed in the menu of the Language Bar itself.
+But the keyboard is not listed in the menu of the Language Bar itself.  (This is not fixed
+by a reboot.)
 
-Deinstalling (by F<MSKLC>'s installer) in such a case removes one (apparently, last) of the listed keyboards for the language;
+Deinstalling (by F<MSKLC>'s installer) in such a case removes one (apparently, the last) of the listed keyboards for the language;
 at least it is removed from the menu of the Language Bar itself.  However, the list in the “Settings”
 does not change!  One can't restore the (wrongly) removed (unrelated!) layout by manipulating the latter list.
 (I did not try to check what will happen if only one keyboard for the language is available — is it removed
-for good?.)
+for good?)  I<This> condition is fixed by a reboot: the “missing” “unrelated” layout jumps to existence.
 
-I did not find a way to restore the deleted keyboard.  Experimenting with these is kinda painful: with each failure,
+I did not find a way to restore the deleted keyboard layout (without a reboot).  Experimenting with these is kinda painful:
+with each failure,
 I add one extra keyboard to the list in the “Settings”; - so the list is growing and growing!  [Better
-add useless-to-you keyboards, since there may be a chance you will never be able to install them again.
-Maybe a reboot will fix it?]
+add useless-to-you keyboards, since until the reboot you will never be able to install them again.]
 
 B<Update:> this condition reappeared in update from v0.61 to v0.63 of B<izKeys> layouts.  Between
 these versions, there was
@@ -4475,6 +4709,8 @@ a very small increment of the size: one modification column was added, and two d
 Removing a bunch of (useless?) dead keys descriptions fixed this again; but now I have my doubts on
 whether it was due to I<ONLY> increasing the size of C<KEYNAME_DEAD>…  Maybe it is due to the total
 size of certain segments in the DLL.
+
+(This may be related to the bug L<"F<kbdutool> places C<KbdTables> at end of the generated F<.c> file">.)
 
 =head2 Windows ignores column=15 of the keybinding definition table
 
@@ -4868,6 +5104,10 @@ sub decode_rect_layers ($@) {
   my(%seen, %out);
   $seen{$_}++ and die "Duplicate layer name `$_'" for @{$opt->{layer_names}};
   @out{ @{$opt->{layer_names}} } = @out;
+  for my $i ( 0 .. ($#{ $opt->{layer_names} } - 1) ) {
+    my($base,$shift) = ($out[$i], $out[$i+1]);
+    $out{$opt->{layer_names}[$i] . '²'} ||= [ map [$base->[$_][0], $shift->[$_][0]], 0..$#$base ];
+  }
   \%out, [($opt->{rect_rows_cols}[1]) x $opt->{rect_rows_cols}[0]];
 }
 
@@ -5645,12 +5885,19 @@ EOP
   my @LL = map $self->{layers}{$_}, @$LL;
   $s{$_}++ or push @d, $_ for map @{ $self->{faces}{$F}{"[$_]"} || [] }, qw(dead_array dead_in_VK_array extra_report_DeadChar);
   my (@A, %isD2, @Dface, @DfaceKey, %d_seen) = [];
+  my $compK = $self->{faces}{$F}{'[ComposeKey]'};
+  if (defined $compK) {
+    $compK = $self->key2hex($self->charhex2key($compK));
+  } else {
+    $compK = 'N/A';
+  }
 #warn 'prefix keys to report: <', join('> <', @d), '>';
   for my $ddK (@d) {
     (my $dK = $ddK) =~ s/^\s+//;
     my $c = $self->key2hex($self->charhex2key($dK));
     next if $d_seen{$c}++;
-    warn("??? Skip prefix key `$c' for face `$F', k=`$dK'"), next unless defined (my $FF = $self->{faces}{$F}{'[deadkeyFace]'}{$c});
+    ($c eq $compK or warn("??? Skip non-array prefix key `$c' for face `$F', k=`$dK'")), next 
+      unless defined (my $FF = $self->{faces}{$F}{'[deadkeyFace]'}{$c});
     $access{$FF} = [$self->charhex2key($dK)];
     push @Dface, $FF;
     push @DfaceKey, $c;
@@ -8590,7 +8837,7 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
 		  		     ⊤ ⩚  ⊥ ⩛  ◇ ⟡  ▽ ⧍  • ⏣  ≟ ≙  + ⧾  - ⧿)],	# ⋆
 		  unsharpen  => [qw( < ⊏  > ⊐  ( ⟮  ) ⟯  ∩ ⊓  ∪ ⊔  ∧ ⊓  ∨ ⊔  . ∷  ∫ ⨒  ∮ ⨖  { ⦉  } ⦊
 		  		     / ⧄  \ ⧅  ° ⧇  ◇ ⌺  • ⌼  ≟ ≚  ≐ ∺  ( 〘  ) 〙  )],	#   + ⊞  - ⊟  * ⊠  . ⊡  × ⊠,   ( ⦗  ) ⦘  ( 〔  ) 〕
-		  whiten     => [qw( [ ⟦  ] ⟧  ( ⟬  ) ⟭  { ⦃  } ⦄  ⊤ ⫪  ⊥ ⫫  ; ⨟  ⊢ ⊫  ⊣ ⫥  ⊔ ⩏  ⊓ ⩎  ∧ ⩓  ∨ ⩔
+		  whiten     => [qw( [ ⟦  ] ⟧  ( ⟬  ) ⟭  { ⦃  } ⦄  ⊤ ⫪  ⊥ ⫫  ; ⨟  ⊢ ⊫  ⊣ ⫥  ⊔ ⩏  ⊓ ⩎  ∧ ⩓  ∨ ⩔  _ ‗  = ≣
 		  		     : ⦂  | ⫾  | ⫿  • ○  < ⪡  > ⪢  ⊓ ⩎  ⊔ ⩏  )],	# or blacken □ ■  ◻ ◼  ◽ ◾  ◇ ◆  △ ▲  ▵ ▴  ▽ ▼  ▿ ▾
 		  quasisynon => [qw( ∈ ∊  ∋ ∍  ≠ ≶  ≠ ≷  = ≸  = ≹  ≼ ⊁  ≽ ⊀  ≺ ⋡  ≻ ⋠  < ≨  > ≩  Δ ∆
 		  		     ≤ ⪕  ≥ ⪖  ⊆ ⊅  ⊇ ⊄  ⊂ ⊉  ⊃ ⊈  ⊏ ⋣  ⊐ ⋢  ⊳ ⋬  ⊲ ⋭  … ⋯  / ⟋  \ ⟍
@@ -8601,11 +8848,11 @@ my %uni_manual = (phonetized => [qw( 0 ə  s ʃ  z ʒ  j ɟ  v ⱱ  n ɳ  N ⁿ 
 		  		     : ∶  ≈ ≋  ≏ ≎  ≡ ≣  × ⨯  + ∑  Π ∏  Σ ∑  ρ ∐  ∐ ⨿  ⊥ ⟘  ⊤ ⟙  ⟂ ⫡  ; ⨾  □ ⧈  ◇ ◈
 		  		     ⊲ ⨞  ⊢ ⊦  △ ⟁  ∥ ⫴  ⫴ ⫼  / ⫽  ⫽ ⫻  • ●  ⊔ ⩏  ⊓ ⩎  ∧ ⩕  ∨ ⩖  ▷ ⊳  ◁ ⊲
 		  		     ⋉ ⧔  ⋊ ⧕  ⋈ ⧓  ⪡ ⫷  ⪢ ⫸  ≟ ≛  ≐ ≎  ⊳ ⫐  ⊲ ⫏  { ❴  } ❵  × ⨶  )],	#   ⋆ ☆  ⋆ ★ ;  ˆ ∧ conflicts with combining-ˆ; * ∏ stops propagation *->×->⋈, : ⦂ hidden; ∥ ⫴; × ⋈ not needed; ∰ ⨌ - ???; ≃ ≌ not useful
-		  turnaround => [qw( ∧ ∨  ∩ ∪  ∕ ∖  ⋏ ⋎  ∼ ≀  ⋯ ⋮  … ⋮  ⋰ ⋱  
+		  turnaround => [qw( ∧ ∨  ∩ ∪  ∕ ∖  ⋏ ⋎  ∼ ≀  ⋯ ⋮  … ⋮  ⋰ ⋱  _ ‾
 		  		     8 ∞  ∆ ∇  Α ∀  Ε ∃  ∴ ∵  ≃ ≂
 		  		     ∈ ∋  ∉ ∌  ∊ ∍  ∏ ∐  ± ∓  ⊓ ⊔  ≶ ≷  ≸ ≹  ⋀ ⋁  ⋂ ⋃  ⋉ ⋊  ⋋ ⋌  ⋚ ⋛  ≤ ⋜  ≥ ⋝  ≼ ⋞  ≽ ⋟  )],			# XXXX Can't do both directions
-		  superize   => [qw( h ʱ  ' ʹ  < ˂  > ˃  ^ ˑ       ( ˓  ) ˒  ⊢ ˫  0 ᵊ  )],	# Additions to <super>!
-		  subize     => [qw( < ˱  > ˲  _ ˍ  ' ˏ  " ˶  ˵ ˵  . ˳  ° ˳  ˘ ˯  ˘ ˬ  ( ˓  ) ˒  0 ₔ)],			# "
+		  superize   => [qw( h ʱ  ' ʹ  < ˂  > ˃  ^ ˑ       ( ˓  ) ˒  ⊢ ˫  0 ᵊ  * ˟  × ˟  ~ ﹋  ≈ ﹌  ─ ‾  □ ⸋)],	# Additions to <super>!
+		  subize     => [qw( < ˱  > ˲  _ ˍ  ' ˏ  " ˶  ˵ ˵  . ˳  ° ˳  ˘ ˯  ˘ ˬ  ( ˓  ) ˒  0 ₔ  ~ ﹏  ═ ‗)],	# "
 		  subize2    => [qw( < ˂  > ˃    )],		# these are in older Unicode, so would override if in subize
 		  round      => [qw( < ⊂  > ⊃  = ≖  = ≗  = ≍  ∫ ∮  ∬ ∯  ∭ ∰  ∼ ∾  - ⊸  □ ▢  ∥ ≬  ‖ ≬  • ⦁
 		  		     … ∴  ≡ ≋  ⊂ ⟃  ⊃ ⟄  ⊤ ⫙  ⊥ ⟒  ( ⦖  ) ⦕  ( ⦓  ) ⦔  ( ⦅  ) ⦆  ⊳ ⪧  ⊲ ⪦  ≟ ≘  ≐ ≖  . ∘

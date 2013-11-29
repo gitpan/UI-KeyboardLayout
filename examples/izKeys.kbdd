@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2013
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.63
+VERSION=0.64
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -183,13 +183,13 @@ SpecialKey_Images2=	ByPairs[000d↲ 000a⤶ 0008⎌ 001b⎗ 001d⎘ 007f⌧ 0003
 ##+Add_Green1=			AssignTo[ARROWS,16](Id(Arrows) FlipShift(Arrows2))
 ##+Add_Green1=			AssignTo[NUMPAD,16](Id(BoxDraw11))
 +Add_Ripe1=	Mutate[<sub>+lc+dectrl|<sub>+dectrl]	ByPairs[0020.00a0 0138.202f]
-+Add_Ripe1=			AssignTo[ARROWS,16](Id(Arrows) FlipShift(Arrows2))	AssignTo[NUMPAD,16](Id(BoxDrawBB))
++Add_Ripe1=			AssignTo[ARROWS,16](Id(Arrows²))	AssignTo[NUMPAD,16](Id(BoxDrawBB))
 +Add_Ripe1=			AssignTo[FKEYS,12](ByPairsPrefix[=06f0](SubExtraLetters))
 Add_Ripe3=	ByPairs[0020.2009 0138.200a]	Face(SpecialKey_Images2)
-Add_2Ripe=	AssignTo[NUMPAD,16](Id(BoxDrawB1))
+Add_2Ripe=	AssignTo[NUMPAD,16](Id(BoxDrawB1))	AssignTo[ARROWS,16](Id(ArrowsBlack²))
 #				Some of subize/superize duplicate the AltGr version of pseudo-fake; should be put in front
 SupersPhonetic=		Mutate[\ªº,<super>,<super>+<pseudo-calculated-sign>|<any-superize>,<pseudo-fake-super>|<any-phonetize0>,<any-phonetized>,<any-stretched>|<any-phonetize2>|<any-phonetize3>|<subst-extra_phonetic>](Face(Latin))
-SubsSmallCapsLegs=	Mutate[<sub>,<sub>+<pseudo-calculated-sign>|<any-subize>,<pseudo-fake-sub>|<any-subize2>|<pseudo-smallcaps>|<any-smallcaps>|<any-tail>,<any-curl>,<any-leg>](Face(Latin))
+SubsSmallCapsLegs=	Mutate[\﹏,<sub>,<sub>+<pseudo-calculated-sign>|<any-subize>,<pseudo-fake-sub>|<any-subize2>|<pseudo-smallcaps>|<any-smallcaps>|<any-tail>,<any-curl>,<any-leg>](Face(Latin))
 #SmallCaps=	Mutate[<pseudo-smallcaps>|<any-smallcaps>](Face(Latin))
 RotatedsHooks=	Mutate[<any-manual-turnaround>|<any-inverted-!breve>,<any-sideways>,<any-inverted>+<any-phonetized>,<any-dot>+<any-reversed>,<any-reversed>,<any-turned>|<any-retroflex-hook>,<any-right-hook>|<any-hook-!palatal-!left>|<any-palatal-hook>|<any-left-hook>|<any-inverted-breve>](Face(Latin))
 LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
@@ -243,29 +243,32 @@ LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
 +DeadKey_Map019c=	  ByPairs[0020␢ \⧵ pℎ c℃ f℉](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)
 # '
 # It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
-+DeadKey_Map06ff=	PrefixDocs[delivers BoldFraktur to an extra layer]		
-+DeadKey_Map06ff=		Mutate32OK[<font=bold-fraktur>](Face(Latin))			AssignTo[NUMPAD,16](Id(BoxDraw21))
++DeadKey_Map06ff=	PrefixDocs[delivers BoldFraktur to an extra layer]		AssignTo[ARROWS,16](Id(ArrowsMapsTo²))
++DeadKey_Map06ff=		Mutate32OK[<font=bold-fraktur>](Face(Latin))		AssignTo[NUMPAD,16](Id(BoxDraw21))
 #
 +DeadKey_Map06fe=	PrefixDocs[delivers Double-Struck to an extra layer]
-+DeadKey_Map06fe=		Mutate32OK[<font=double-struck>](Face(Latin))		AssignTo[NUMPAD,16](Id(BoxDraw12))
-+DeadKey_Map06fe=		Face(LongStrings)
++DeadKey_Map06fe=		Mutate32OK[<font=double-struck>|<any-whiten>](Face(Latin))	AssignTo[NUMPAD,16](Id(BoxDraw12))
++DeadKey_Map06fe=		Face(LongStrings)	AssignTo[ARROWS,16](Id(ArrowsWhite²))
 #
 +DeadKey_Map06fd=	PrefixDocs[delivers Script to an extra layer]			AssignTo[NUMPAD,16](Id(BoxDraw22))
 +DeadKey_Map06fd=		Mutate32OK[<font=script>|<any-script>](Face(Latin))	ByPairsPrefix[:03a6](Face(Latin))
-+DeadKey_Map06fd=		Face(LongStrings)
++DeadKey_Map06fd=		Face(LongStrings)	AssignTo[ARROWS,16](Id(HookArrows²))
 #							ByPairs[:03a6](Face(Latin))
 #		These are non-essential, added for testing of applications only (B1, Frames??? eventually should be on rCtrl! ???)
 #+DeadKey_Map06fc=	PrefixDocs[delivers SansSerif BoldItalic Greek, Bold Digits to an extra layer]
 #+DeadKey_Map06fc=	  Mutate32OK[<font=sans-serif-bold-italic>](Id(Greek_w_Symbols_on_Digit_Row))
 #+DeadKey_Map06fc=	  AssignTo[NUMPAD,16](Id(BoxDraw1B))	AssignTo[ARROWS,16](Id(WhiteFrame) FlipShift(BlackFrame))
 +DeadKey_Map06fc=	PrefixDocs[delivers SansSerif Italic to an extra layer]	Mutate32OK[<font=sans-serif-italic>](Face(Latin))
-+DeadKey_Map06fc=		AssignTo[NUMPAD,16](Id(BoxDraw1B))	AssignTo[ARROWS,16](Id(WhiteFrame) FlipShift(BlackFrame))
++DeadKey_Map06fc=		AssignTo[NUMPAD,16](Id(BoxDraw1B))	AssignTo[ARROWS,16](Id(WhiteFrame²))
 #
-DeadKey_Map06fb=	PrefixDocs[delivers SansSerif Bold to an extra layer]	Mutate32OK[<font=sans-serif-bold>](Face(Latin))
++DeadKey_Map06fb=	PrefixDocs[delivers SansSerif Bold to an extra layer]	Mutate32OK[<font=sans-serif-bold>](Face(Latin))
++DeadKey_Map06fb=		AssignTo[ARROWS,16](Id(WhiteTriang²))
 +DeadKey_Map06fa=	PrefixDocs[delivers BoldItalic to an extra layer]	Mutate32OK[<font=bold-italic>](Face(Latin))
-+DeadKey_Map06fa=		Mutate32OK[<font=bold>](Face(Latin))
-DeadKey_Map06f9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<font=monospace>](Face(Latin))
-DeadKey_Map06f8=	PrefixDocs[delivers Italic to an extra layer]		Mutate32OK[<font=italic>](Face(Latin))
++DeadKey_Map06fa=		Mutate32OK[<font=bold>](Face(Latin))	AssignTo[ARROWS,16](Id(PartCircles²))
++DeadKey_Map06f9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<font=monospace>](Face(Latin))
++DeadKey_Map06f9=		AssignTo[ARROWS,16](Id(RoundDirections²))
++DeadKey_Map06f8=	PrefixDocs[delivers Italic to an extra layer]		Mutate32OK[<font=italic>](Face(Latin))
++DeadKey_Map06f8=		AssignTo[ARROWS,16](Id(RectArr²))
 #
 DeadKey_Map06f7=	PrefixDocs[Superscript (and MODIFIER LETTERS), Phonetic]	Face(SupersPhonetic)
 DeadKey_Map06f6=	PrefixDocs[Subscript (and MODIFIER LETTERS LOW), Small Caps, Legs]	Face(SubsSmallCapsLegs)
@@ -277,19 +280,21 @@ DeadKey_Map06f2=	ByPairsPrefix[;03a6 :0483 0020.06f0](Face(Latin))	prefix=0192
 #
 DeadKey_Map06f1=	PrefixDocs[delivers Fraktur to an extra layer]		Mutate32OK[<font=fraktur>](Face(Latin))
 +DeadKey_Map06ef=	PrefixDocs[delivers Bold Script to an extra layer]		Mutate32OK[<font=bold-script>](Face(Latin))
-+DeadKey_Map06ef=		ByPairsPrefix[/03a6](Face(Latin))		Face(LongStrings)
++DeadKey_Map06ef=		ByPairsPrefix[/03a6](Face(Latin))		Face(LongStrings)	AssignTo[ARROWS,16](Id(ArrowsDashedCurved²))
 #
 #				These AssignTo() do not trigger any action in applications???
 +DeadKey_Map06ee=	PrefixDocs[delivers SansSerif Bold Italic to an extra layer]
 +DeadKey_Map06ee=	 	Mutate32OK[<font=sans-serif-bold-italic>](Face(Latin))	AssignTo[NUMPAD,16](Id(BoxDraw1B))
-+DeadKey_Map06ee=		AssignTo[ARROWS,16](Id(WhiteFrame) FlipShift(BlackFrame))
++DeadKey_Map06ee=		AssignTo[ARROWS,16](Id(WhiteFrame²))
 #
 DeadKey_Map06ed=	PrefixDocs[delivers BoldItalic Greek to an extra layer] Mutate32OK[<font=bold-italic>](Id(Greek_w_Symbols_on_Digit_Row))
 DeadKey_Map06ec=	PrefixDocs[delivers Bold Greek to an extra layer]	Mutate32OK[<font=bold>](Id(Greek_w_Symbols_on_Digit_Row))
 DeadKey_Map06eb=	PrefixDocs[delivers Italic Greek to an extra layer] Mutate32OK[<font=italic>](Id(Greek_w_Symbols_on_Digit_Row))
 #
-DeadKey_Map06ea=	PrefixDocs[delivers Bold to an extra layer]	Mutate32OK[<font=bold>](Face(Latin))
-DeadKey_Map06e9=	PrefixDocs[delivers SansSerif to an extra layer]	Mutate32OK[<font=sans-serif>](Face(Latin))
++DeadKey_Map06ea=	PrefixDocs[delivers Bold to an extra layer]	Mutate32OK[<font=bold>](Face(Latin))
++DeadKey_Map06ea=		AssignTo[ARROWS,16](Id(ArrowsDtip²))
++DeadKey_Map06e9=	PrefixDocs[delivers SansSerif to an extra layer]	Mutate32OK[<font=sans-serif>](Face(Latin))
++DeadKey_Map06e9=		AssignTo[ARROWS,16](Id(BlackTrian²))
 #
 geometry_via_layer=US-Base
 #
@@ -753,11 +758,11 @@ DEADKEY	00A3
 
 [visual -> RECT/keypad]
 @rect_rows_cols=4,4 
-@rect_horizontal_counts=11,10,11,9
+@rect_horizontal_counts=11,10,12,12
 @layer_names=Base-Keypad,BoxDraw11,BoxDraw22,BoxDraw12,BoxDraw21,BoxDrawBB,BoxDraw1B,BoxDrawB1,BBoxDrawOnH,BBoxDrawOnV,BBoxDrawOnHV
-@layer_names=BlackTriang,WhiteTriang,PartBlackCircles,WhiteFrame,BlackFrame,RoundDirections,RoundDirectionsPlus,Arcs,PartCircles,RectArr
-@layer_names=Arrows,Arrows2,ArrowsMapsTo,ArrowsWhite,ArrowsBlack,Arrows3,ArrowsDtip,ArrowsDoubled,ArrowsDashedCurved,ArrowDStroked,ArrowsPlay
-@layer_names=HookArrows,ArrowsZigZag,CrossedArrows,ArrowAngles,ArrowsShortArcs,ArrowsArcs,ArrowsToBar,Arrows4andCircles,ArrowsVStroke
+@layer_names=Arrows,Arrows2,ArrowsBlack,ArrowsPlay,ArrowsWhite,Arrows3,HookArrows,ArrowsZigZag,ArrowsMapsTo,ArrowsToBar
+@layer_names=WhiteFrame,BlackFrame,WhiteTriang,WhiteTriangSmall,BlackTrian,BlackTrianSmall,PartCircles,PartBlackCircles,RoundDirections,RoundDirectionsPlus,RectArr,RectArrOther
+@layer_names=ArrowsDtip,ArrowsDoubled,ArrowsDashedCurved,ArrowsArcs,ArrowDStroked,CrossedArrows,ArrowAngles,ArrowsShortArcs,Arrows4andCircles,ArrowsVStroke,PartSquares,Arcs
 empty=!
 COLgap=1
 ROWgap=1
@@ -767,23 +772,23 @@ ROWgap=1
 123-	└┴┘!	╚╩╝!	╙╨╜!	╘╧╛!	┗┻┛!	┖┸┚!	┕┷┙!	┺!┹!	┡╇┩!	╄╿╃!
 0.↲+	─│!!	═║!!	╶╴!!	╷╵!!	━┃!!	╻╹!!	╺╸!!	╼╾!!	╽╿!!	!!!!
 #
-◤▲◥!	⌌△⌍!	◕◓◔!	▗▄▖!	▛▀▜!	◜∩◝⊘	⌈⋂⌉!	╭◠╮!	◴◚◷!	⌜⊓⌝⍁
-◀■▶!	◁□▷!	◐○◑!	▐█▌!	▌ ▐!	⊂⥀⊃⊗	⊆⥁⊇⨂	◖⚪◗!	!!➲!	⊏□⊐⊠
-◣▼◢!	⌎▽⌏!	!◒!!	▝▀▘!	▙▄▟!	◟∪◞⊖	⌊⋃⌋!	╰◡╯!	◵◛◶!	⌞⊔⌟⊟
-!!!!	!!!!	!!!!	▞▚↵!	░▒▓!	!!!⊕	!!!⨁	!!!!	!!!!	!!!⊞
+↖↑↗÷	⇖⇑⇗∕	⬉⬆⬈➗	⏮⏫⏭!	⬁⇧⬀!	⬑⤊⬏!	⤣!⤤!	↜!↝╱	↰↥↱!	⬑⤒⬏!
+←⎯→×	⇐⏐⇒⨯	⬅●⮕✖	⏪⏯⏩!	⇦○⇨!	⇚◯⇛!	↩!↪!	⇜╳⇝╲	↤!↦!	⇤!⇥!
+↙↓↘‒	⇙⇓⇘−	⬋⬇⬊➖	⇽⏬⇾!	⬃⇩⬂!	⬐⤋⬎!	⤦!⤥!	╱↯╲⌁	↲↧↳!	⬐⤓⬎!
+↔⟷↕﬩	⇔⟺⇕∑	⬌➡⬍➕	⇿⦿!!	⬄⟾⇳!	!!!⧻	⥹⥻⨗!	⟿⬳⦚⍼	↹⟼↨!	↹!↨!
 #
-↖↑↗÷	⇖⇑⇗∕	↰↥↱!	⬁⇧⬀!	⬉⬆⬈➗	⬑⤊⬏!	⇱↟!!	↫⇈↬!	⤎⇡⤏⋰	↸⇞!!	⏮⏫⏭!
-←⎯→×	⇐⏐⇒⨯	↤!↦!	⇦○⇨!	⬅●➡✖	⇚◯⇛!	↞!↠!	⇇!⇉!	⇠◌⇢⋱	⇺❍⇻!	⏪⦿⏩!
-↙↓↘‒	⇙⇓⇘−	↲↧↳!	⬃⇩⬂!	⬋⬇⬊➖	⬐⤋⬎!	!↡⇲!	↩⇊↪!	⤌⇣⤍⋯	↵⇟↴⧺	⇽⏬⇾!
-↔⟷↕﬩	⇔⟺⇕∑	↹⟼↨!	⬄⟾⇳!	⬌!⬍➕	!!!⧻	!!⥉!	⇄⇆⇅⧺	⤑⬸⋮⁜	⇼!!⧻	⇿!⏯!
+▗▄▖!	▛▀▜!	◸△◹⨞	⌌▵⌍!	◤▲◥⍁	◭▴◮!	◴◚◷!	◕◓◔!	◜∩◝⊘	╭⋂╮⦸	⌈⊓⌉⧄	⌜∏⌝⧅
+▐█▌!	▌▣▐!	◁◇▷⨻	◃⋄▹!	◀◆▶⍂	◂⬩▸⸋	!⦾➲!	◐⦿◑!	⊂⥀⊃⊗	⊆⥁⊇⨂	⊏□⊐⊠	⊑◽⊒⧆
+▝▀▘!	▙▄▟!	◺▽◿⨺	⌎▿⌏▫	◣▼◢!	⧨▾⧩🞗	◵◛◶!	!◒!!	◟∪◞⊖	╰⋃╯⊜	⌊⊔⌋⊟	⌞∐⌟▫
+▞▚↵!	░▒▓!	▭◬▯⨹	!⎊!◻	▬⟁▮⨨	!⬚!⬥	!⊚!!	!!!!	⊝⊙⦶⊕	⎉⨀⦷⨁	▭⊡▯⊞	■◾⧈◻
 #
-⤣!⤤!	↜!↝╱	⤲⤧⤱!	⦭⦬⦨!	⤵⤸⤴!	↻!↺!	!⤒!!	⥀⟰⥁⨸	⤆⤉⤇!
-↩!↪!	⇜╳⇝╲	⤪⤫⤨!	⦩⦽⦪!	⤺!⤻!	↜!↝!	⇤!⇥!	⭅⦾⭆⊛	⇷!⇸!
-⤦!⤥!	╱↯╲⌁	⤮⤩⤭!	⦫⦯⦮!	⤶⤹⤷⤼	↶!↷⧿	!⤓!!	↻⟱↺⊖	⤂⤈⤃!
-⥻⥹⨗!	⟿⬳⦚⍼	⤰⤬⤯!	!!!!	⤳⤿⤾⤽	↭⤳!⧾	↹!!!	➲⥰⊜⊕	⇹⤄!!
+⇱↟!!	↫⇈↬!	⤎⇡⤏⋰	↻⥀↺!	↸⇞!!	⤲⤧⤱!	⦭⦬⦨!	⤵⤸⤴!	⥀⟰⥁⨸	⤆⤉⤇!	◩⬒⬔⧄	╭◠╮⧅
+↞!↠!	⇇!⇉!	⇠◌⇢⋱	↜!↝!	⇺❍⇻!	⤪⤫⤨!	⦩⦽⦪!	⤺!⤻!	⭅⦾⭆⊛	⇷!⇸!	◧▣◨⧅	◖⚪◗⸋
+!↡⇲!	↩⇊↪!	⤌⇣⤍⋯	↶⥁↷⧿	↵⇟↴⧺	⤮⤩⤭!	⦫⦯⦮!	⤶⤹⤷⤼	↻⟱↺⊖	⤂⤈⤃!	⬕⬓◪▪	╰◡╯!
+!!⥉!	⇄⇆⇅⧺	⤑⬸⋮⁜	↭⤳!⧾	⇼!!⧻	⤰⤬⤯!	!!!!	⤳⤿⤾⤽	➲⥰⊜⊕	⇹⤄!!	!!!◼	▬⧇▮⧈
 # Elementary-school minus is FIGURE DASH; for arrow-angles, clockwise are H/V, ccw are diag.
 # Usurp diagonals: dashed, Double/Triple arrows, Arrows with double-bar, Zigzag
-# * is sometimes opposite of /, i.e., \.  We abuse .Del often…   ※ near ⁜???
+# * is sometimes opposite of /, i.e., \.  We abuse .Del often…   ※ near ⁜???	☺
 [visual -> KBD/Digits]
 #
 # For fractions, we look for fractions with minimal denominator/numerator which contain the given digit in numerator/denominator.  We take the first one and the second one from the list.
