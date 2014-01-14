@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2013
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.64
+VERSION=0.65
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -66,11 +66,11 @@ prefix_repeat=3
 	а/ә/ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	;://ӹ/ӳ		'"/ ́´/ ̀ ̀/ ́ ́
 ‭???	א ָ/ ַ ֲ סשׂ/ ׂ ֒ ד ֶ/ ְ ֧ פף/פּףּ	ג״/׳ ֞ הח/ ֢ ֜ ח ֻ/ ﬞ ֝ כך/ ֦ ֫ ל ֹ/ ׇ ֳ --/ ֛ ֔	--/׳״ ‬
 #"
-	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	‼200a—200a/--1d11e ·/--‼1d121.1d121	⁄/⋰//‼2009—2009
-	--	--	--//ꙡ	--//ԃ	--	--//ӈ	--//ꙧ	≲//ԇ/ԅ		≳//ꙝ/ꙙ		…≟//ꙓ/ҍ
-***	z/à	x/é	c/ç	v/ì	b/ù	n/ñ	m/ò	,</¸≤		.>/°≥/…		/?/0338¿/÷�
-	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ꙋ/ѹ	н/њ/ң/ҥ	м/ӎ/ꙟ/ԣ	,</«/⁘⁙/ԋ	.>/»/·։/჻⁖	/?/ј/ԛ/ꙏ
-‭???	ז ַ/ ֮ ֕ כך/כּךּ	צץ/ ֯ ׄ ו ְ/ ֺװ ב₪/בּ ֪	נן/׆ ֦	מם/ ֽ ֣	--/ ֑ ֤		--/׃ ֚		--/ ֥ ׅ ‬
+	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	‼2009—2009/--‼200a—200a ·/--‼1d121.1d121	⁄/⋰//1d11e
+	--	--	--//ꙡ	--//ԃ	--	--//ӈ	--//ꙧ	≲//ԇ/ԅ			≳//ꙝ/ꙙ		…≟//ꙓ/ҍ
+***	z/à	x/é	c/ç	v/ì	b/ù	n/ñ	m/ò	,</¸≤			.>/°≥/…		/?/0338¿/÷�
+	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ꙋ/ѹ	н/њ/ң/ҥ	м/ӎ/ꙟ/ԣ	,</«/⁘⁙/ԋ		.>/»/·։/჻⁖	/?/ј/ԛ/ꙏ
+‭???	ז ַ/ ֮ ֕ כך/כּךּ	צץ/ ֯ ׄ ו ְ/ ֺװ ב₪/בּ ֪	נן/׆ ֦	מם/ ֽ ֣	--/ ֑ ֤			--/׃ ֚		--/ ֥ ׅ ‬
 	--		--
 	--		--
 ***	\|/¶❧		./,
@@ -140,7 +140,9 @@ CyrillicRipe=		NotSameKey(Face(Latin)		Face(CyrillicPhonetic)	Layers(Subs_Dashes
 CyrillicRipeMax=	ByPairs[˵〃](Face(Latin))	Face(CyrillicRipe)	Face(CyrillicPhonetic)
 #
 Hebrew=		Layers(Hebrew-Base+Hebrew-AltGr)
-MathBlue=	Mutate[\ℯℹℎ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin)) Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301] Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty))
++MathBlue=	Mutate[\ℯℹℎ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin)) 
++MathBlue=		Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301] 
++MathBlue=		Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty)) ByPairs[<⟨ >⟩ ≤≪ ≥≫]
 #
 +LGreekGreen=	NotSameKey(Face(Latin)	Face(Greek__Letters)	Layers(Green+Green-AltGr))	
 +LGreekGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
@@ -185,6 +187,7 @@ SpecialKey_Images2=	ByPairs[000d↲ 000a⤶ 0008⎌ 001b⎗ 001d⎘ 007f⌧ 0003
 +Add_Ripe1=	Mutate[<sub>+lc+dectrl|<sub>+dectrl]	ByPairs[0020.00a0 0138.202f]
 +Add_Ripe1=			AssignTo[ARROWS,16](Id(Arrows²))	AssignTo[NUMPAD,16](Id(BoxDrawBB))
 +Add_Ripe1=			AssignTo[FKEYS,12](ByPairsPrefix[=06f0](SubExtraLetters))
++Add_Ripe1=			AssignTo[FKEYS,12](ByPairsPrefix[=06e8](FlipShift(SubExtraLetters)))
 Add_Ripe3=	ByPairs[0020.2009 0138.200a]	Face(SpecialKey_Images2)
 Add_2Ripe=	AssignTo[NUMPAD,16](Id(BoxDrawB1))	AssignTo[ARROWS,16](Id(ArrowsBlack²))
 #				Some of subize/superize duplicate the AltGr version of pseudo-fake; should be put in front
@@ -239,7 +242,7 @@ LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
 +DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]	Face(Add_2Ripe)
 #								Having AÅ KK contradicts Unicode recommendations	
 +DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]
-+DeadKey_Map019c=	  ByPairs[0020␠ 0192␢ '⎖ "〃 :⫶ \∖ -− _―]	HTML_classes[C,special,∼∗⧵⋅−⫶,C,very-special,∖﬩ℏ―⎖〃,C,need-learn,ℎ]
++DeadKey_Map019c=	  ByPairs[0020␠ 0192␢ '⎖ "〃 :⫶ \∖ -− _―]	HTML_classes[C,special,∼∗⧵⋅−⫶⟨⟩≪≫,C,very-special,∖﬩ℏ―⎖〃,C,need-learn,ℎ]
 +DeadKey_Map019c=	  ByPairs[0020␢ \⧵ pℎ c℃ f℉](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)
 # '
 # It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
@@ -253,22 +256,38 @@ LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
 +DeadKey_Map06fd=	PrefixDocs[delivers Script to an extra layer]			AssignTo[NUMPAD,16](Id(BoxDraw22))
 +DeadKey_Map06fd=		Mutate32OK[<font=script>|<any-script>](Face(Latin))	ByPairsPrefix[:03a6](Face(Latin))
 +DeadKey_Map06fd=		Face(LongStrings)	AssignTo[ARROWS,16](Id(HookArrows²))
+#
++DeadKey_Map06f1=	PrefixDocs[delivers Fraktur to an extra layer]		Mutate32OK[<font=fraktur>](Face(Latin))
++DeadKey_Map06f1=		AssignTo[ARROWS,16](Id(PartSquares²))	AssignTo[NUMPAD,16](Id(BBoxDrawOnV))
++DeadKey_Map06ef=	PrefixDocs[delivers Bold Script to an extra layer]		Mutate32OK[<font=bold-script>](Face(Latin))
++DeadKey_Map06ef=		ByPairsPrefix[/03a6](Face(Latin))		Face(LongStrings)	
++DeadKey_Map06ef=		AssignTo[ARROWS,16](Id(RoundDirections²))	AssignTo[NUMPAD,16](Id(BBoxDrawOnHV))
+#
+#				These AssignTo() do not trigger any action in applications???
++DeadKey_Map06ee=	PrefixDocs[delivers SansSerif Bold Italic to an extra layer]
++DeadKey_Map06ee=	 	Mutate32OK[<font=sans-serif-bold-italic>](Face(Latin))
++DeadKey_Map06ee=		AssignTo[ARROWS,16](Id(RectArr²))	AssignTo[NUMPAD,16](Id(BBoxDrawOnH))
 #							ByPairs[:03a6](Face(Latin))
 #		These are non-essential, added for testing of applications only (B1, Frames??? eventually should be on rCtrl! ???)
 #+DeadKey_Map06fc=	PrefixDocs[delivers SansSerif BoldItalic Greek, Bold Digits to an extra layer]
 #+DeadKey_Map06fc=	  Mutate32OK[<font=sans-serif-bold-italic>](Id(Greek_w_Symbols_on_Digit_Row))
 #+DeadKey_Map06fc=	  AssignTo[NUMPAD,16](Id(BoxDraw1B))	AssignTo[ARROWS,16](Id(WhiteFrame) FlipShift(BlackFrame))
 +DeadKey_Map06fc=	PrefixDocs[delivers SansSerif Italic to an extra layer]	Mutate32OK[<font=sans-serif-italic>](Face(Latin))
-+DeadKey_Map06fc=		AssignTo[NUMPAD,16](Id(BoxDraw1B))	AssignTo[ARROWS,16](Id(WhiteFrame²))
++DeadKey_Map06fc=		AssignTo[NUMPAD,16](Id(BoxDraw1B))	AssignTo[ARROWS,16](Id(ArrowsDtip²))
 #
 +DeadKey_Map06fb=	PrefixDocs[delivers SansSerif Bold to an extra layer]	Mutate32OK[<font=sans-serif-bold>](Face(Latin))
-+DeadKey_Map06fb=		AssignTo[ARROWS,16](Id(WhiteTriang²))
++DeadKey_Map06fb=		AssignTo[ARROWS,16](Id(ArrowsVStroke²))
++DeadKey_Map06e9=	PrefixDocs[delivers SansSerif to an extra layer]	Mutate32OK[<font=sans-serif>](Face(Latin))
++DeadKey_Map06e9=		AssignTo[ARROWS,16](Id(CrossedArrows²))
+#					ARROWS is a dup of lAlt-Mnu (SS-Bold; not working in many apps)
++DeadKey_Map06f9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<font=monospace>](Face(Latin))
++DeadKey_Map06f9=		AssignTo[ARROWS,16](Id(ArrowsVStroke²))
 +DeadKey_Map06fa=	PrefixDocs[delivers BoldItalic to an extra layer]	Mutate32OK[<font=bold-italic>](Face(Latin))
 +DeadKey_Map06fa=		Mutate32OK[<font=bold>](Face(Latin))	AssignTo[ARROWS,16](Id(PartCircles²))
-+DeadKey_Map06f9=	PrefixDocs[delivers Monospace to an extra layer]	Mutate32OK[<font=monospace>](Face(Latin))
-+DeadKey_Map06f9=		AssignTo[ARROWS,16](Id(RoundDirections²))
 +DeadKey_Map06f8=	PrefixDocs[delivers Italic to an extra layer]		Mutate32OK[<font=italic>](Face(Latin))
-+DeadKey_Map06f8=		AssignTo[ARROWS,16](Id(RectArr²))
++DeadKey_Map06f8=		AssignTo[ARROWS,16](Id(Arrows4andCircles²))
++DeadKey_Map06ea=	PrefixDocs[delivers Bold to an extra layer]	Mutate32OK[<font=bold>](Face(Latin))
++DeadKey_Map06ea=		AssignTo[ARROWS,16](Id(ArrowsDashedCurved²))
 #
 DeadKey_Map06f7=	PrefixDocs[Superscript (and MODIFIER LETTERS), Phonetic]	Face(SupersPhonetic)
 DeadKey_Map06f6=	PrefixDocs[Subscript (and MODIFIER LETTERS LOW), Small Caps, Legs]	Face(SubsSmallCapsLegs)
@@ -278,23 +297,12 @@ DeadKey_Map06f4=	PrefixDocs[Hooks to the left (and palatal)](Face(Latin))		Face(
 DeadKey_Map06f3=	ByPairsPrefix[:03a6](Face(Latin))	prefix=0138
 DeadKey_Map06f2=	ByPairsPrefix[;03a6 :0483 0020.06f0](Face(Latin))	prefix=0192
 #
-DeadKey_Map06f1=	PrefixDocs[delivers Fraktur to an extra layer]		Mutate32OK[<font=fraktur>](Face(Latin))
-+DeadKey_Map06ef=	PrefixDocs[delivers Bold Script to an extra layer]		Mutate32OK[<font=bold-script>](Face(Latin))
-+DeadKey_Map06ef=		ByPairsPrefix[/03a6](Face(Latin))		Face(LongStrings)	AssignTo[ARROWS,16](Id(ArrowsDashedCurved²))
-#
-#				These AssignTo() do not trigger any action in applications???
-+DeadKey_Map06ee=	PrefixDocs[delivers SansSerif Bold Italic to an extra layer]
-+DeadKey_Map06ee=	 	Mutate32OK[<font=sans-serif-bold-italic>](Face(Latin))	AssignTo[NUMPAD,16](Id(BoxDraw1B))
-+DeadKey_Map06ee=		AssignTo[ARROWS,16](Id(WhiteFrame²))
-#
-DeadKey_Map06ed=	PrefixDocs[delivers BoldItalic Greek to an extra layer] Mutate32OK[<font=bold-italic>](Id(Greek_w_Symbols_on_Digit_Row))
-DeadKey_Map06ec=	PrefixDocs[delivers Bold Greek to an extra layer]	Mutate32OK[<font=bold>](Id(Greek_w_Symbols_on_Digit_Row))
-DeadKey_Map06eb=	PrefixDocs[delivers Italic Greek to an extra layer] Mutate32OK[<font=italic>](Id(Greek_w_Symbols_on_Digit_Row))
-#
-+DeadKey_Map06ea=	PrefixDocs[delivers Bold to an extra layer]	Mutate32OK[<font=bold>](Face(Latin))
-+DeadKey_Map06ea=		AssignTo[ARROWS,16](Id(ArrowsDtip²))
-+DeadKey_Map06e9=	PrefixDocs[delivers SansSerif to an extra layer]	Mutate32OK[<font=sans-serif>](Face(Latin))
-+DeadKey_Map06e9=		AssignTo[ARROWS,16](Id(BlackTrian²))
++DeadKey_Map06ed=	PrefixDocs[delivers BoldItalic Greek to an extra layer] AssignTo[ARROWS,16](Id(BlackTrian²))
++DeadKey_Map06ed=		Mutate32OK[<font=bold-italic>](Id(Greek_w_Symbols_on_Digit_Row))
++DeadKey_Map06ec=	PrefixDocs[delivers Bold Greek to an extra layer]	AssignTo[ARROWS,16](Id(WhiteFrame²))
++DeadKey_Map06ec=		Mutate32OK[<font=bold>](Id(Greek_w_Symbols_on_Digit_Row))	AssignTo[NUMPAD,16](Id(BoxDrawOnBH))
++DeadKey_Map06eb=	PrefixDocs[delivers Italic Greek to an extra layer]	AssignTo[ARROWS,16](Id(WhiteTriang²))
++DeadKey_Map06eb=		Mutate32OK[<font=italic>](Id(Greek_w_Symbols_on_Digit_Row))	AssignTo[NUMPAD,16](Id(BoxDrawOnBV))
 #
 geometry_via_layer=US-Base
 #
@@ -302,7 +310,8 @@ geometry_via_layer=US-Base
 Auto_Diacritic_Start=0700
 #
 Flip_AltGr_Key=00a0
-ComposeKey=06f0
+#ComposeKey=06f0
+/ComposeKey=ComposeFiles,dotcompose,warn,06f0/EntityFiles,entity,warn,,06f0/rfc1345Files,rfc1345,warn,06e8,06f0
 #
 # Apparently, binding-column 15 (0-based) of aVkToWch18 is as if with WCH_NONE.  When there are 2 Ctrl-columns, this corresponds to
 #    Shift of (0-based) elt 6 below ((7+1)*2=16).	Better put something fake into elt 6!
@@ -362,7 +371,7 @@ ExportDeadKeys=	´  ˋ  ˆ  ˜  ° ¸  ˇ  ¯  0338  ¨ ˵
 @Import_Prefix_Keys=	0301:CyrillicPhonetic,03a6,	0483:CyrillicPhonetic,0483
 #
 +DeadKey_InvMap0000=	ByPairs[0192.202f]	
-+DeadKey_InvMap0000=	HTML_classes[k=latinAlt,from_ne,x,k=latinAlt,to_ne,ac,k=latinAlt,xfrom_sw,wf,k=latinAlt,from_nw,l]
++DeadKey_InvMap0000=	HTML_classes[k=latinAlt,from_ne,x,k=latinAlt,to_ne,ac,k=latinAlt,xfrom_sw,wf,k=latinAlt,from_nw,l,k=latinAlt,from_w high,p]
 +DeadKey_InvMap0000=	HTML_classes[c=latinBase,special,aeyuio,C=latinAlt,special,ê,C=latinAlt,very-special,ºª№€§æßðþçñĳœ¡¿]
 +DeadKey_InvMap0000=	HTML_classes[C1,need-learn,åøì]
 #                   Chaining makes sense if Flip_AltGr_Key is on AltGr key (repeating will reach inverted faces of:)
@@ -758,34 +767,38 @@ DEADKEY	00A3
 
 [visual -> RECT/keypad]
 @rect_rows_cols=4,4 
-@rect_horizontal_counts=11,10,12,12
-@layer_names=Base-Keypad,BoxDraw11,BoxDraw22,BoxDraw12,BoxDraw21,BoxDrawBB,BoxDraw1B,BoxDrawB1,BBoxDrawOnH,BBoxDrawOnV,BBoxDrawOnHV
+@rect_horizontal_counts=13,10,12,12
+@layer_names=Base-Keypad,BoxDraw11,BoxDraw22,BoxDraw12,BoxDraw21,BoxDrawBB,BoxDraw1B,BoxDrawB1,BBoxDrawOnH,BBoxDrawOnV,BBoxDrawOnHV,BoxDrawOnBV,BoxDrawOnBH
 @layer_names=Arrows,Arrows2,ArrowsBlack,ArrowsPlay,ArrowsWhite,Arrows3,HookArrows,ArrowsZigZag,ArrowsMapsTo,ArrowsToBar
-@layer_names=WhiteFrame,BlackFrame,WhiteTriang,WhiteTriangSmall,BlackTrian,BlackTrianSmall,PartCircles,PartBlackCircles,RoundDirections,RoundDirectionsPlus,RectArr,RectArrOther
-@layer_names=ArrowsDtip,ArrowsDoubled,ArrowsDashedCurved,ArrowsArcs,ArrowDStroked,CrossedArrows,ArrowAngles,ArrowsShortArcs,Arrows4andCircles,ArrowsVStroke,PartSquares,Arcs
+@layer_names=ArrowsDashedCurved,ArrowsArcs,WhiteFrame,BlackFrame,Arrows4andCircles,ArrowsShortArcs,RectArr,RectArrOther,PartCircles,PartBlackCircles,ArrowsDtip,ArrowsDoubled
+@layer_names=WhiteTriang,WhiteTriangSmall,BlackTrian,BlackTrianSmall,RoundDirections,RoundDirectionsPlus,PartSquares,Arcs,ArrowsVStroke,ArrowDStroked,CrossedArrows,ArrowAngles
 empty=!
 COLgap=1
-ROWgap=1
+ROWgap=2
 # Arrows: Mid: Hor/Ver Extension, bottom row: LeftRight, LongLeftRight-or-LongRight (or Mirrored LR), UpDown
-789/	┌┬┐!	╔╦╗!	╓╥╖!	╒╤╕!	┏┳┓!	┎┰┒!	┍┯┑!	┲!┱!	┢╈┪!	╆╽╅!
-456*	├┼┤!	╠╬╣!	╟╫╢!	╞╪╡!	┣╋┫!	┠╂┨!	┝┿┥!	╊!╉!	!!!!	╼!╾!
-123-	└┴┘!	╚╩╝!	╙╨╜!	╘╧╛!	┗┻┛!	┖┸┚!	┕┷┙!	┺!┹!	┡╇┩!	╄╿╃!
-0.↲+	─│!!	═║!!	╶╴!!	╷╵!!	━┃!!	╻╹!!	╺╸!!	╼╾!!	╽╿!!	!!!!
+#[ AltGr +1=Dbl=Mnu +2=FlipRight=rCtrl]  [Bold=removeAltGr]	(rCtrl needs →lAlt+rCtrl)
+789/	┌┬┐!	╔╦╗!	╓╥╖!	╒╤╕!	┏┳┓!	┎┰┒!	┍┯┑!	┲!┱!	┢╈┪!	╆╽╅!	┞╀┦!	┭!┮!
+456*	├┼┤!	╠╬╣!	╟╫╢!	╞╪╡!	┣╋┫!	┠╂┨!	┝┿┥!	╊▧╉!	!▨!!	╼▦╾!	!!!!	┽!┾!
+123-	└┴┘!	╚╩╝!	╙╨╜!	╘╧╛!	┗┻┛!	┖┸┚!	┕┷┙!	┺!┹!	┡╇┩!	╄╿╃!	┟╁┧!	┵!┶!
+0.↲+	─│!!	═║!!	╶╴!!	╷╵!!	━┃!!	╻╹!!	╺╸!!	╼╾!!	╽╿!!	!!!!	!!!!	!!!!
+#    Mnu	  Mnu+Ctrl	 AltGr+rCtrl	 AltGr+Mnu	 AltGr+Mnu+rCtrl
+#   Base	    Bold	  Bbb=White	   Script	   Fraktur
+↖↑↗÷	⇖⇑⇗∕	⬉⬆⬈➗	⏮⏫⏭!	⬁⇧⬀!	⬑⤊⬏!	⤣!⤤!	↜!↝╱	↰↥↱✘	⬑⤒⬏☐
+←⎯→×	⇐⏐⇒⨯	⬅●⮕✖	⏪⏯⏩!	⇦○⇨!	⇚◯⇛!	↩!↪!	⇜╳⇝╲	↤!↦✔	⇤!⇥!
+↙↓↘‒	⇙⇓⇘−	⬋⬇⬊➖	⇽⏬⇾!	⬃⇩⬂!	⬐⤋⬎!	⤦!⤥!	╱↯╲⌁	↲↧↳✗	⬐⤓⬎☒
+↔⟷↕﬩	⇔⟺⇕∑	⬌➡⬍➕	⇿⦿!!	⬄⟾⇳!	!!!⧻	⥹⥻⨗!	⟿⬳⦚⍼	↹⟼↨✓	↹!↨☑
+#    (All: 2[Shift] × 2→[Ctrl] × 2↓[Mnu];   out of 4 Shift-Groups, the base one is disabled)
+#  Shapes on Greek=lAlt+lCtrl	Mathop on lCtrl=Bold↕-MathBizarre  Doubled/Crossed on lAlt=SS
+⤎⇡⤏⋰	↻⥀↺!	▗▄▖!	▛▀▜!	⥀⟰⥁⨸	⤵⤸⤴!	⌈⊓⌉⧄	⌜∏⌝⧅	◴◚◷!	!◓◔!	⇱↟!!	↫⇈↬!
+⇠◌⇢⋱	↜!↝!	▐█▌!	▌▣▐!	⭅⦾⭆⊛	⤺!⤻!	⊏□⊐⊠	⊑◽⊒⧆	!⦾➲!	◐⦿◑!	↞!↠!	⇇!⇉!
+⤌⇣⤍⋯	↶⥁↷⧿	▝▀▘!	▙▄▟!	↻⟱↺⊖	⤶⤹⤷⤼	⌊⊔⌋⊟	⌞∐⌟▫	◵◛◶!	!◒◕!	!↡⇲!	↩⇊↪!
+⤑⬸⋮⁜	↭⤳!⧾	▞▚↵!	░▒▓!	➲⥰⊜⊕	⤳⤿⤾⤽	▭⊡▯⊞	■◾⧈◻	!⊚!!	!!!!	!!⥉!	⇄⇆⇅⧺
 #
-↖↑↗÷	⇖⇑⇗∕	⬉⬆⬈➗	⏮⏫⏭!	⬁⇧⬀!	⬑⤊⬏!	⤣!⤤!	↜!↝╱	↰↥↱!	⬑⤒⬏!
-←⎯→×	⇐⏐⇒⨯	⬅●⮕✖	⏪⏯⏩!	⇦○⇨!	⇚◯⇛!	↩!↪!	⇜╳⇝╲	↤!↦!	⇤!⇥!
-↙↓↘‒	⇙⇓⇘−	⬋⬇⬊➖	⇽⏬⇾!	⬃⇩⬂!	⬐⤋⬎!	⤦!⤥!	╱↯╲⌁	↲↧↳!	⬐⤓⬎!
-↔⟷↕﬩	⇔⟺⇕∑	⬌➡⬍➕	⇿⦿!!	⬄⟾⇳!	!!!⧻	⥹⥻⨗!	⟿⬳⦚⍼	↹⟼↨!	↹!↨!
-#
-▗▄▖!	▛▀▜!	◸△◹⨞	⌌▵⌍!	◤▲◥⍁	◭▴◮!	◴◚◷!	◕◓◔!	◜∩◝⊘	╭⋂╮⦸	⌈⊓⌉⧄	⌜∏⌝⧅
-▐█▌!	▌▣▐!	◁◇▷⨻	◃⋄▹!	◀◆▶⍂	◂⬩▸⸋	!⦾➲!	◐⦿◑!	⊂⥀⊃⊗	⊆⥁⊇⨂	⊏□⊐⊠	⊑◽⊒⧆
-▝▀▘!	▙▄▟!	◺▽◿⨺	⌎▿⌏▫	◣▼◢!	⧨▾⧩🞗	◵◛◶!	!◒!!	◟∪◞⊖	╰⋃╯⊜	⌊⊔⌋⊟	⌞∐⌟▫
-▞▚↵!	░▒▓!	▭◬▯⨹	!⎊!◻	▬⟁▮⨨	!⬚!⬥	!⊚!!	!!!!	⊝⊙⦶⊕	⎉⨀⦷⨁	▭⊡▯⊞	■◾⧈◻
-#
-⇱↟!!	↫⇈↬!	⤎⇡⤏⋰	↻⥀↺!	↸⇞!!	⤲⤧⤱!	⦭⦬⦨!	⤵⤸⤴!	⥀⟰⥁⨸	⤆⤉⤇!	◩⬒⬔⧄	╭◠╮⧅
-↞!↠!	⇇!⇉!	⇠◌⇢⋱	↜!↝!	⇺❍⇻!	⤪⤫⤨!	⦩⦽⦪!	⤺!⤻!	⭅⦾⭆⊛	⇷!⇸!	◧▣◨⧅	◖⚪◗⸋
-!↡⇲!	↩⇊↪!	⤌⇣⤍⋯	↶⥁↷⧿	↵⇟↴⧺	⤮⤩⤭!	⦫⦯⦮!	⤶⤹⤷⤼	↻⟱↺⊖	⤂⤈⤃!	⬕⬓◪▪	╰◡╯!
-!!⥉!	⇄⇆⇅⧺	⤑⬸⋮⁜	↭⤳!⧾	⇼!!⧻	⤰⤬⤯!	!!!!	⤳⤿⤾⤽	➲⥰⊜⊕	⇹⤄!!	!!!◼	▬⧇▮⧈
+# These blocks = block on top + Mnu
+◸△◹⨞	⌌▵⌍!	◤▲◥⍁	◭▴◮!	◜∩◝⊘	╭⋂╮⦸	◩⬒⬔⧄	◴⯊◷⧅	⤆⤉⤇!	↸⇞!!	⤲⤧⤱!	⦭⦬⦨!
+◁◇▷⨻	◃⋄▹!	◀◆▶⍂	◂⬩▸⸋	⊂⥀⊃⊗	⊆⥁⊇⨂	◧▣◨⧅	◖⚪◗⧈	⇷!⇸!	⇺❍⇻!	⤪⤫⤨!	⦩⦽⦪!
+◺▽◿⨺	⌎▿⌏▫	◣▼◢!	⧨▾⧩🞗	◟∪◞⊖	╰⋃╯⊜	⬕⬓◪▪	◵⯋◶◠	⤂⤈⤃!	↵⇟↴⧺	⤮⤩⤭!	⦫⦯⦮!
+▭◬▯⨹	!⎊!◻	▬⟁▮⨨	!⬚!⬥	⊝⊙⦶⊕	⎉⨀⦷⨁	▬⸋▮◼	⌒⌓⧇◡	⇹⤄!!	⇼!!⧻	⤰⤬⤯!	!!!!
 # Elementary-school minus is FIGURE DASH; for arrow-angles, clockwise are H/V, ccw are diag.
 # Usurp diagonals: dashed, Double/Triple arrows, Arrows with double-bar, Zigzag
 # * is sometimes opposite of /, i.e., \.  We abuse .Del often…   ※ near ⁜???	☺
@@ -848,7 +861,7 @@ in_key_separator2=‼
 /DBL_GRAVE_ACCENT=	`ˋʿˁˤ˵/ˎ/ʻʽ/˴/ ̀ ̀  ͑  ᷆  ᷅  ᷀ / ̖  ̜   ᷂ / ̒ ̔ /  ⃑  ⃭  ⃠  ⃥
 /CIRCUMFLEX_ACCENT=	^ˆ˄˟/˰/˪˫ꜛʳʴʵʶˣ// ̂ ̑  ͒  ͡   ̽  ͆  ᷍ / ̭ ̯   ᷼  ͓  ̪  ̼  ͎  ᷊ /  ̘  ̙   ͉  ̘  ͉ /  ⃟   ⃤  ⃧  ⃩ ⃰  ⃟ 
 /BREVE=			˘ˇ˅/ˬ˯˽˾/˱˲˿ˠʸꜜ/˂˃/ ̆ ̌ ̐ ͝  ᷓ  ᷾   ͐  ᷌  ᷋  ᷃ / ̮ ̬ ͜    ̺  ̫ ͔  ͕ ͖ ᷿   /  ͍  ͢  /   ⃞   ⃢   ⃣ 
-/DEGREE_SIGN=		°˚˙/˳/˙ˠʰʱʲˢʷᵊᶣ/˓˒/ ̊  ᷒  ゚ / ̣ ̥ ̤  ̻   ͙   ͚ / ̇ ͘  ̣ ̤ ͘ /   ⃝  ⃘
+/DEGREE_SIGN=		°˚˙/˳/˙ˠʰʱʲˢʷᵊᶣ/˓˒/ ̊  ̇ ̣  ᷒  ゚ / ̣ ̥ ̤  ̻   ͙   ͚ / ̇ ͘  ̣ ̤ ͘ /   ⃝  ⃘
 /TILDE=			~ ˜/˷/ⸯꙿ/˞/ ̃  ̴ ͂ ͊ ͋ ͌ ͠   ᷑  / ̰  ̧  ̨  ̡  ̢  ᷏  ᷐  ᷽  ᷽ / ̾ ̾ /  ⃗  ⃖  ⃯  ⃮  ⃕  ⃔ ⃙ ⃚ ⃡
 /CEDILLA=		¸˛ͺ/˷/ⸯꙿ/˞/  ̧  ̨  ̡  ̢  ̰  ᷏  ᷐  ᷽  ᷽ /  ᷎  ̃  ̴ ͂ ͊ ͋ ͌ ͠   ᷑  / ̾ ̾ /   ⃗  ⃖ ⃯  ⃮  ⃕ ⃔ ⃙ ⃚ ⃡
 /MACRON=		¯ˉ˹˺/ˍ˻˼‗/˭/˔˕˖˗/ ̄ ̅ ̵ ̶ ̿ ͞   ̚  / ̱  ̲  ̳ ͇ ͟   ̠  /  ͍   ̝  ̞  ̟  ̠  ̘  ̙   ͉ /  ⃒ ⃓ ⃦  ⃪  ⃡  ⃡  ⃗  ⃖  ⃯  ⃮

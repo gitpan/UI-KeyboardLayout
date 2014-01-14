@@ -1266,3 +1266,37 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 	compile_link_kbd.cmd:		New option --with-extra-c BASENAME_of_C_FILE
 						(makes the returned table at minimal possible offset; but this does not fix
 						 the problem with installing large files)
+
+0.65	Major cleanup of the documentation.
+	Tables to support emitting OS X keyboards.
+	Support colors and high position in CSS for inter-keycaps-arrows.
+	Do not emit empty rows in the coverage tables.
+	Allow for spaces in user-specified CSS classes.
+	Document ComposeKey.
+	Allow ComposeKey to be an array.
+	Better stats for the coverage of the keyboard
+		(but still mix up extra layers vs. single-prefix, and do not discard AltGr-layer for extra-layers).
+	Include Compose Key into stats of coverage 
+		(but we do not filter out unreachable sequences).
+	Add to adddot: (m-)dash/bar, [h/v]draw (+ with bold/dbl) generate ┄┅┈┉┆┇┊┋
+		(bold variants not accessible now from izKeys since bold/dbl-draw is on extra layers).
+
+	izKeys.kbdd:	Mark Ø as from_w/high.
+			Organize the “rest” of arrows into 2×2×2 groups.
+			(Re-)bind the “rest” of arrows in groups (undocumented!):
+				???
+			Re-bind 2009—2009, 200a—200a and music C clef cyclically.
+			Add ⟨⟩ to Blue <> (Green conflicts with 200a—200a) and ≪≫ to Blue AltGr.
+			Enable shortening Compose Compose to Shift-Compose.
+			(Temporarily?) put combining dot above/below after ring in 4th section of DIACRITICS.
+			Two new box-drawing rect-maps: BoxDrawOnBH,BoxDrawOnBV (thin lines on background of horizontal/vertical
+				bold lines).
+			Add bold-box-draw on on background of thin lines to: 
+				lCtrl        +Mnu (add both V and H background lines) +rCtrl (flip H background lines).
+					Add lAlt to flip bold vs thin.
+						(but Mnu means Vertical Bold background).
+			Add ballot marks to frakture’s numpad (Shift adding frames; *// is bold +/-).
+
+	izKeys.patch:	Enable shortening Compose Compose to Shift-Compose.
+
+	izKeys.pre-convert-fix.patch:	Update for rebinding of 2009—2009, 200a—200a etc.

@@ -761,8 +761,8 @@ on digits 1–9, with horizontal line on the “wide” key <code>0 Ins</code>, 
 <code>Application-Menu</code> to get double-lines, or/and with <code>rCtrl</code> to flip doubling of vertical lines (heuristic:
 the <em>right</em> Control-key controls doubling-of-the-symbol to-the-right).  <b>Example:</b> with <code>AltGr-rCtrl</code> 
 the top row 789 produces ╓ ╥ ╖.  (Easter eggish: removing <code>AltGr</code> replaces double lines by bold lines: ┎ ┰ ┒!  Currently.
-single <code>rCtrl</code> requires addition of <code>lAlt-rCtrl</code>.  Also: removing <code>NumLock</code> produces
-wide-frame drawings, white/black frame without/with <code>Shift</code>: ▗ ▄ ▖/▛ ▀ ▜ on 789.
+single <code>rCtrl</code> requires addition of <code>lAlt-rCtrl</code>; with this prefix: removing <code>NumLock</code> produces
+wide-frame drawings, white/black frame without/with <code>Shift</code>: ▗ ▄ ▖/▛ ▀ ▜ on 789.)
 
 <a name=f-keys></a>
 <p>Fifth, the <code>F</code>-keys with <code>AltGr</code> modifier produce dashes (or whitespace when <code>Shift</code> is added).
@@ -785,10 +785,10 @@ SPACE is narrower than ⅙-em.  Anyway, we put it on 8.)</p>
 <a name=multi-char></a>
 <p>Lastly, several multi-character strings may be inserted (the current key assignment is random, and selected
 to simplify debugging of keyboard input in applications).  Two variants of m-dash surrounded by tiny whitespace
-are provided: one with narrowest whitespace is on <code>lCtrl-lAlt-comma</code>, one with
-slightly wider whitespace was on <code>rCtrl-AltGr-slash</code>).  One-character long Plane1 string is on <code>lCtrl-lAlt-&lt;</code>,
-and two-character long Plane1 string is on <code>lCtrl-lAlt-&gt;</code>; they enter     𝄞 and     𝄡𝄡.
-One can also replace any of these <code>lCtrl-lAlt-</code> by <code>AltGr-rCtrl-</code> or by <code>lCtrl-Mnu-</code>
+are provided: one with narrow whitespace is on <code>lCtrl-lAlt-comma</code>, to make whitespace yet more narrow add <code>Shift</code>. 
+One-character long Plane1 string is on <code>rCtrl-AltGr-slash</code>,
+and two-character long Plane1 string is on <code>lCtrl-lAlt-&gt;</code>; they enter     𝄞 and     𝄡𝄡 (G clef and doubled C clef).
+One can also replace any of these <code>lCtrl-lAlt-</code> by <code>rCtrl-AltGr-</code> or by <code>lCtrl-Mnu-</code>
 (except for <code>lCtrl-Mnu-/</code> which conflicts with fractions prefix!).</p>
 
 <h1>Extras: mathematical letters</h1>
@@ -804,9 +804,9 @@ multiple modifier keys: <code>AltGr-rCtrl-</code> enters Double-Struck (𝕢𝕨
 <code>ApplicationMenu</code> adds (or removes) italic-ness; call them “B/I modifiers”.  Go along these lines: in combination with these keys, <code>AltGr</code> is
 <b>MathBizarre</b>, and Bold/Italic/BoldItalic flavors of MathBizarre are Double-Struck/Script/Bold-Fraktur.</p>
 
-<p><b>Trivia:</b> Actually, Script and Fracture come in 2 flavors of boldness.  Moreover, letter-symbols used
+<p><b>Trivia:</b> Actually, Script and Frakture come in 2 flavors of boldness.  Moreover, letter-symbols used
 for “ISO-80000-2 tensors” (SansSerif-Bold-Italic) may be considered as “yet bolder” flavor of Double-Struck.  To get these extra
-flavors, replace <code>AltGr</code> by <code>lCtrl</code>.  Heuristic: <code>lCtrl</code> behaves similar to <code>rCtrl</code> </p>
+flavors, replace <code>AltGr</code> by <code>lCtrl</code>.  Heuristic: <code>lCtrl</code> behaves similar to <code>rCtrl</code>.</p>
 
 <a name=math-letters-more></a>
 <p>Unicode defines also multiple ranges of <b>Latin</b> mathematical letters, with just minor typographical variations.
@@ -821,19 +821,20 @@ measurable impact on the system memory footprint.</p>
 
 <a name=math-letters-more-mapping></a>
 <p>To follow on these lines we define the following mappings; they are made as orthogonal as possible:
-<ul><li><code>AltGr-</code> + B/I modifiers: MathBizarre (𝔸/ℬ/𝕮);
+<ul>
+<li><code>AltGr-</code> + B/I modifiers: MathBizarre (𝔸/ℬ/𝕮);
 <li><code>lCtrl-</code> + B/I modifiers: Bold-flipped flavor of MathBizarre (𝘼/𝓑/𝔔);
 <li><code>lAlt+AltGr-</code>: Math Latin monospace (𝚀𝚆𝙴𝚁𝚃𝚈);
-<li><code>lAlt+AltGr-</code> + B/I modifiers: Bold/Italic variants of Math Latin (𝑞𝑤𝑒𝑟𝑡𝑦𝑄𝑊𝐸𝑅𝑇𝑌|𝐪𝐰𝐞𝐫𝐭𝐲𝐐𝐖𝐄𝐑𝐓𝐘|𝒒𝒘𝒆𝒓𝒕𝒚𝑸𝑾𝑬𝑹𝑻𝒀);
+<li><code>&nbsp;&nbsp;&nbsp; lAlt+AltGr-</code> + B/I modifiers: Bold/Italic variants of Math Latin (𝑞𝑤𝑒𝑟𝑡𝑦𝑄𝑊𝐸𝑅𝑇𝑌|𝐪𝐰𝐞𝐫𝐭𝐲𝐐𝐖𝐄𝐑𝐓𝐘|𝒒𝒘𝒆𝒓𝒕𝒚𝑸𝑾𝑬𝑹𝑻𝒀);
 <li><code>lCtrl+lAlt-</code>: Greek (θωερτψ);
-<li><code>lCtrl+lAlt-</code> + B/I modifiers: Bold/Italic variants of Greek (𝜃𝜔𝜀𝜌𝜏𝜓/𝛉𝛚𝛆𝛒𝛕𝛙/𝜽𝝎𝜺𝝆𝝉𝝍);
+<li><code>&nbsp;&nbsp;&nbsp; lCtrl+lAlt-</code> + B/I modifiers: Bold/Italic variants of Greek (𝜃𝜔𝜀𝜌𝜏𝜓/𝛉𝛚𝛆𝛒𝛕𝛙/𝜽𝝎𝜺𝝆𝝉𝝍);
 <li><code>lAlt-</code> + B/I modifiers: unBold/unItalic variants of tensor = SansSerif-Bold-Italic (𝗾𝘄𝗲𝗿𝘁𝘆/𝘲𝘸𝘦𝘳𝘵𝘺/𝗊𝗐𝖾𝗋𝗍𝗒).
 </ul>
 
 <p><b>Note:</b> Out of <a href=http://en.wikipedia.org/wiki/Mathematical_Alphanumeric_Symbols>18 additional Latin/Greek 
 mathematical alphabets defined by Unicode</a>, this supports all but 2 Greek Sans Serif alphabets.  However, 
-<code>lCtrl+rCtrl-</code>combinations <a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout/lib/UI/KeyboardLayout.pm#c_lctrl_rctrl__combination__multiple_problems>cause
-several problems</a>.</p>
+<code>lCtrl+rCtrl-</code>combinations <a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout/lib/UI/KeyboardLayout.pm#lCtrl-rCtrl_combination:_multiple_problems>cause
+several problems</a> (likewise for <a href=http://search.cpan.org/~ilyaz/UI-KeyboardLayout/lib/UI/KeyboardLayout.pm#lAlt-rAlt_combination:_many_keys_are_not_delivered_to_applications>C<lAlt-rAlt> combinations</a>.</p>
 
 <p><b>Trivia:</b> The International standard <a href=http://mirrors.ctan.org/macros/latex/contrib/isomath/isomath.pdf>layout rules are</a>
 
@@ -856,7 +857,7 @@ one could decompose <code>á</code> into <code>' a</code>, and <code>ŋ</code> i
 
 <a name=compose-flavors></a>
 <p>Currently, the <code>Compose</code> key may be entering either using the <a href="#2nd_extra_key">“second extra key”</a> in 
-the base region, or (temporarily) as <code>Mnu-F12</code>.  There are 3 modes depending on how may times you punch
+the base region, or (temporarily) as <code>Mnu-F12</code>, <code>Mnu-Space</code>, or <code>lCtrl-lAlt-Space</code>.  There are 3 modes depending on how may times you punch
 <code>Compose</code> before typing the decomposition: X11's 
 <a href=http://www.x.org/releases/X11R7.6/doc/libX11/Compose/en_US.UTF-8.html>standard <code>.Compose</code> rules</a>, 
 <a href=http://www.w3.org/TR/xml-entity-names/>MathML entities</a>, and <a href=http://en.wikipedia.org/wiki/Unicode_input#Character_mnemonics>RFC 1345 character mneumonics</a>.</p>
@@ -874,7 +875,8 @@ more useful to inspect entity names via <a href=http://www.w3.org/TR/xml-entity-
 
 <p>(With version 0.60, one
 must use Latin characters in the decomposition; hence using <code>Compose</code> from, e.g., Cyrillic personality is
-tricky.)</p>
+tricky.)  One can replace C<Compose Compose Compose> sequence by C<Shift-Compose> (except for the version of C<Compose>
+on the JIS/ABNT “extra-extra” key).</p>
 
 <a name=goals-progress></a><h1>General goals and progress report</h1>
 
@@ -916,13 +918,14 @@ Currently it is unclear if the general rules may be shared by all the “applica
 <li>Full coverage of currency symbols;</li>
 <li>Full coverage of vulgar fractions;</li>
 <li>Full coverage of Coptic alphabet (if not accessed from Greek personality, requires double-or-"special" prefix keys);</li>
-<li>Full coverage of characters covered by <a href=http://eurkey.steffen.bruentjen.eu/>EurKey</a>/<a href=http://bepo.fr>Bépo</a> keyboards (except <code>0323</code>);</li>
+<li>Full coverage of characters covered by <a href=http://eurkey.steffen.bruentjen.eu/>EurKey</a>/<a href=http://bepo.fr>Bépo</a> keyboards;</li>
 <li>50% coverage of math symbols in BMP (the most useful implemented first);</li>
 <li>Full coverage of Math Fraktur, Math Double-Strike and Math Script Latin letters;</li>
+<li>Full coverage of Math Latin alphabets, and non-SansSerif Math Greek alphabets;</li>
 <li>Full coverage of double-accented letters of MES-3b;</li>
 <li>Full coverage of non-modifiers/combiners of IPA and UPA;</li>
 <li>Full coverage of obsolete-IPA and case-extended IPA;</li>
-<li>Simple/double arrows and most of box-drawing characters (via numeric keypad);</li>
+<li>Reasonable covering of arrows (all with 4 directional variants) and all of box-drawing characters [except ┅┉┇┋] (via numeric keypad);</li>
 <li>Latin and Cyrillic personalities (pre-release of Greek and Hebrew personality);</li>
 <li>Visual bell to report unrecognized/unsupported combinations (except for those using <code>Application-Menu</code> 
 modifier and <code>Compose</code>);</li>
@@ -940,7 +943,6 @@ modifier and <code>Compose</code>);</li>
 <code>Green</code> keys</a> were implemented);</li>
 <li>Full coverage of Unicode's paleo-Latin characters;</li>
 <li>Full (is it compatible with other goals???) coverage of math symbol ranges in BMP;</li>
-<li>reasonable coverage of arrows;</li>
 <li>reasonable coverage of ASCII/Unicode box drawing characters (almost finished);</li>
 <li>Full coverage of non-Eastern characters covered by <a href=http://neo-layout.org/index_en.html>Neo keyboard</a>, and X11+Neo composition tables;</li>
 <li>Easy-to-describe quick access to Vietnamese characters (seems to be present - needs documentation).</li>
@@ -1072,7 +1074,7 @@ The examples cover the Latin personality of the keyboard only.</p>
   AltGr-; 2                              --->  ∫	(Blue)
   AltGr-^ 2                              --->  ∬	(Amplified Blue)
   Shift-Space Shift-Space AltGr-2        --->  ∭	(Blue AltGr; same with AltGr-;)
-  AltGr-^ AltGr-2                        --->  ⨌	(Amplified Blue AltGr; pre-0.63 had ⨜)
+  AltGr-^ AltGr-2                        --->  ⨌	(Amplified Blue AltGr)
 
   Menu-Right				 --->  →	(Moves position in Notepad)
   Menu-Shift-Right			 --->  ⇒
@@ -1085,12 +1087,14 @@ The examples cover the Latin personality of the keyboard only.</p>
   AltGr-rCtrl-KeyPad6			 --->  ╢	(With NumLock; rCtrl=[flip]DoubleToRight)
   AltGr-Menu-rCtrl-KeyPad6		 --->  ╡	(With NumLock; Double and flip DoubleToRight)
   Menu-KeyPad6				 --->  ┫	(With NumLock; no-AltGr means Bold)
-  Menu-rCtrl-KeyPad6			 --->  ┥	(With NumLock; [this and the next line were exchanged before 0.63])
+  Menu-rCtrl-KeyPad6			 --->  ┥	(With NumLock)
   lAlt-rCtrl-KeyPad6			 --->  ┨	(With NumLock; lAlt must be added to loner rCtrl)
 
   lAlt-rCtrl-Right			 --->  (▌)	(Draw a frame by whitespace on black background)
   lAlt-rCtrl-Right			 --->  (▐)	(Draw a frame by black on white background)
 
+  AltGr-F3				 --->  —	(3rd dash == em; not in Notepad)
+  AltGr-Shift-F3			 --->  ( )	(⅓em whitespace)
   Menu-F3				 --->  —	(3rd dash == em; not in Notepad)
   Menu-Shift-F3				 --->  ( )	(⅓em whitespace)
 
@@ -1133,7 +1137,7 @@ The examples cover the Latin personality of the keyboard only.</p>
 
   AltGr-_				 ---> —		(m-dash)
   Shift-Space _				 ---> –		(n-dash)
-  Shift-Space Shift-Space _		 ---> ―		(horizontal dash; after 0.62)
+  Shift-Space Shift-Space _		 ---> ―		(horizontal dash)
 
   Menu-F12 ' a				 ---> á		(Compose = as X11's .Compose)
   Menu-F12 Menu-F12 I n t		 ---> ∬		(Compose × 2 = as HTML entities [MathML])
@@ -1200,7 +1204,7 @@ The examples cover the Latin personality of the keyboard only.</p>
   AltGr-rCtrl-/				 ---> ( — )	(Typographically sound m-dash — surrounded by thin space)
 
   lCtrl-lAlt-<				 ---> (𝄞)	(Example string with 1 SMP char)
-  lCtrl-lAlt->				 ---> (𝄡𝄡)	(Example string with 2 SMP char)
+  lCtrl-lAlt->				 ---> (𝄡𝄡)	(Example string with 2 SMP chars)
 
 </code></pre>
 
