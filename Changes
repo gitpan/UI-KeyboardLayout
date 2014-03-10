@@ -1297,6 +1297,35 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 						(but Mnu means Vertical Bold background).
 			Add ballot marks to frakture’s numpad (Shift adding frames; *// is bold +/-).
 
-	izKeys.patch:	Enable shortening Compose Compose to Shift-Compose.
+	izKeys.patch:	Enable shortening Compose Compose Compose to Shift-Compose.
 
 	izKeys.pre-convert-fix.patch:	Update for rebinding of 2009—2009, 200a—200a etc.
+
+0.66	Add an optional argument $dummy to fill_win_template() (creates a file readable with GUI; one can make an install package).
+		(the only key defined is ⟨q⟩)
+	ByPairsInvPrefix not working in the principal layers (still does not!).
+	Warn if the description is longer than 63 chars.
+	Protect " and \ in the description.
+	Add DIAMETER as quasisyn of ∅, and APL quad as unsharpen (kills squared ⟏⟎, ⩻, ⭀).
+	APL postfixes were not recognized.
+	Require appending explicit apl at end since the usability of these is severely limited.
+		(not always beneficial)
+	Warn if the description of the keyboard exceeds 63 UTF-16 codepoints.
+	In the main face, flagw from deadkeys-in-the-list were overwriting flags explicit deadkeys in the layers
+		(important for Inv only).
+
+	build-iz.pl:	Generate “dummy” files processable with GUI (if directory ./dummy is not present)
+
+	izKeys.kbdd:	Change DLL names, fix descriptions
+			Hebrew had Green on the Ripe keys.
+			Add Inverted Prefixes to Greek Poly.
+			Add a few new chars to keypads.
+			Add ≃ to MathBlue =. 
+				duplicates AltGr-8
+			
+	izKeys.pre-convert-fix.patch:	Extend to handle Greek and Hebrew
+	izKeys.patch:			Likewise
+
+	dump_kbd_reg.cmd:	Output the keyboard-related part of the registry.
+	Layout63.klc:		Working long description
+	Layout64.klc:		Not working long description

@@ -40,6 +40,7 @@ examples/charlists/IPA-obsolete-and-capital-small
 examples/charlists/UPA
 examples/charlists/UGL
 examples/charlists/all-greekish
+examples/charlists/APL
 examples/enable-hex-unicode-entry.reg
 diff-trade-combining-for-math
 examples/compile_link_kbd.cmd
@@ -60,4 +61,7 @@ examples/Keyboard_API.pm
 examples/qwerty					tests of entering chars (Note: it helps that Ctrl-QWERTY are ignored in Notepad)
 examples/izKeys.pre-convert-fix.patch
 examples/extra_c.zip
+examples/dump_kbd_reg.cmd
+examples/Layout63.klc				Name is 63 chars long.  Installs fine, name is shown in Settings of Language Bar
+examples/Layout64.klc 				Name is 64 chars long.  Installs fine, name is NOT shown in Settings of Language Bar
 META.yml                                 Module meta-data (added by MakeMaker)

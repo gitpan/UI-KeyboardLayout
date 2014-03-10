@@ -1,18 +1,18 @@
 []
 ExtraScanCodesWin=
 COMPANYNAME=Ilya Zakharevich
-+LAYOUTNAME=US-Intl Shift-Space -> Russian phonetic, k.ilyaz.org/iz
-+LAYOUTNAME=Russian phonetic Shift-Space -> US-Intl, k.ilyaz.org/iz
-+LAYOUTNAME=Greek-QWERTY Polytonic, Shift-Space -> US-Intl, k.ilyaz.org/iz
-+LAYOUTNAME=Hebrew-QWERTY, Shift-Space -> US-Intl, k.ilyaz.org/iz
-COPYR_YEARS=2011-2013
++LAYOUTNAME=US·Int Grk=Ⓖ➡⇧␣=^ˡⒶˡ- Rus·ЯВЕ=Ⓡ➡Ⓐʳ␣=Ⓜ Hbr➡Ⓡ²=Ⓜ^ʳ- • k.ilyaz.org
++LAYOUTNAME=RUS·ЯВЕРТЫ Lat=Ⓖ➡⇧␣=^ˡⒶˡ- Grk=Ⓡ➡Ⓐʳ␣=Ⓜ Hbr➡Ⓡ²=Ⓜ^ʳ- • k.ilyaz.org
++LAYOUTNAME=Gr·ΘΩΕΡΤΨ↻[]\ Lat=Ⓖ➡⇧␣=^ˡⒶˡ Rus=Ⓡ➡Ⓐʳ␣=Ⓜ Hbr➡Ⓡ²=Ⓜ^ʳ •k.ilyaz.org
++LAYOUTNAME=Hebr·QWERTY Lat=Ⓖ➡⇧␣=^ˡⒶˡ- Grk=Ⓡ➡Ⓐʳ␣=Ⓜ Rus➡Ⓡ²=Ⓜ^ʳ- •k.ilyaz.org
+COPYR_YEARS=2011-2014
 @LOCALE_NAME=en-US,ru-RU,el-GR,he-IL
 @LOCALE_ID=0409,0419,0408,040d
-@DLLNAME=iz-la-ru,iz-ru-la,iz-grPol,iz-hb-la
+@DLLNAME=iz-la-4s,iz-ru-4s,iz-gr-p4,iz-hb-4s
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.65
+VERSION=0.66
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -142,7 +142,7 @@ CyrillicRipeMax=	ByPairs[˵〃](Face(Latin))	Face(CyrillicRipe)	Face(CyrillicPho
 Hebrew=		Layers(Hebrew-Base+Hebrew-AltGr)
 +MathBlue=	Mutate[\ℯℹℎ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin)) 
 +MathBlue=		Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301] 
-+MathBlue=		Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty)) ByPairs[<⟨ >⟩ ≤≪ ≥≫]
++MathBlue=		Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty)) ByPairs[<⟨ >⟩ ≤≪ ≥≫ =≃]
 #
 +LGreekGreen=	NotSameKey(Face(Latin)	Face(Greek__Letters)	Layers(Green+Green-AltGr))	
 +LGreekGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
@@ -155,6 +155,10 @@ CGreekGreenMax=	Face(CGreekGreen)	Face(Greek__Letters)
 +CGreekRipe=	NotSameKey(Face(CyrillicPhonetic)	Face(Greek__Letters)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))	
 +CGreekRipe=		MutateDupsOK[<sub>](SelectRX[[0-9]])	
 CGreekRipeMax=	Face(CGreekRipe)	Face(Greek__Letters)
+#
++HGreekRipe=	NotSameKey(Face(Hebrew)	Face(Greek__Letters)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))	
++HGreekRipe=		MutateDupsOK[<sub>](SelectRX[[0-9]])	
+HGreekRipeMax=	Face(HGreekRipe)	Face(Greek__Letters)
 #
 +CLatinGreen=	NotSameKey(Face(CyrillicPhonetic)	Face(Latin)	Layers(Green+Green-AltGr))	
 +CLatinGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
@@ -242,7 +246,7 @@ LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
 +DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]	Face(Add_2Ripe)
 #								Having AÅ KK contradicts Unicode recommendations	
 +DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]
-+DeadKey_Map019c=	  ByPairs[0020␠ 0192␢ '⎖ "〃 :⫶ \∖ -− _―]	HTML_classes[C,special,∼∗⧵⋅−⫶⟨⟩≪≫,C,very-special,∖﬩ℏ―⎖〃,C,need-learn,ℎ]
++DeadKey_Map019c=	  ByPairs[0020␠ 0192␢ '⎖ "〃 :⫶ \∖ -− _―]	HTML_classes[C,special,∼∗⧵⋅−⫶⟨⟩≪≫≃,C,very-special,∖﬩ℏ―⎖〃,C,need-learn,ℎ]
 +DeadKey_Map019c=	  ByPairs[0020␢ \⧵ pℎ c℃ f℉](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)
 # '
 # It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
@@ -598,7 +602,8 @@ ExportDeadKeys=	́	҃
 #
 [faces/GreekPoly]
 #
-@layers=Id(Greek_and_More_0)	ByPairsPrefix[\0342 [0314 ]0313 `03e2](Id(US-Base))	Id(US-Base),	Id(Greek_and_More_1)    ByPairs[Vϔ 6͵ ^ʹ 002c« .»](Id(US-Base))		Id(Add_AltGr)
+@layers=Id(Greek)	ByPairsPrefix[\0342 [0314 ]0313 `03e2](Id(US-Base))	ByPairsInvPrefix[|0342 {0314 }0313 ~03e2](Id(US-Base))	Id(US-Base)
+@layers=Id(Greek_and_More_1)    ByPairs[Vϔ 6͵ ^ʹ 002c« .»](Id(US-Base))		Id(Add_AltGr)
 #	Id(USLatin-AltGr)
 BaseLayer=US-Base
 LinkFace=Latin
@@ -614,8 +619,8 @@ ExportDeadKeys=	0342 0314 0313 03e2
 #
 # (Ё would be mapped to Е if we do not specify it explicitly:)
 +DeadKey_InvMap0000=	ByPairs[0192.202f]
-+DeadKey_InvMap0000=	HTML_classes[C=cyr,may-guess,всыхѣєә,C1=cyr,special,ёъ,C0,need-learn,ючяшщэьжёъЁЪ,C,need-learn,ѓј]
-+DeadKey_InvMap0000=	HTML_classes[K,from_nw,ѓ,K,pure,ѓ]
+#+DeadKey_InvMap0000=	HTML_classes[C=cyr,may-guess,всыхѣєә,C1=cyr,special,ёъ,C0,need-learn,ючяшщэьжёъЁЪ,C,need-learn,ѓј]
+#+DeadKey_InvMap0000=	HTML_classes[K,from_nw,ѓ,K,pure,ѓ]
 #                   Chaining makes sense if Flip_AltGr_Key is on AltGr key (repeating will reach inverted faces of:)
 @chainAltGr=0192,0138
 +PrefixChains=0192,0192,012e,0301,0338,¨,⍽
@@ -663,8 +668,8 @@ MetaData_Index=3
 +DeadKey_Map012e=	InheritPrefixKeys[Face(CyrillicPhonetic)](Face(CyrillicRipeMax))	Face(SpecialKey_Images)
 +DeadKey_Map012e=	HTML_classes[C=cyr,may-guess,всыхѣєә,C0,need-learn,ючяшщэьжёъЁЪ]	Face(Add_2Ripe)
 #
-+DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), Superscript digits/symbols, “Green Keys”]
-+DeadKey_Map0192=	Face(CGreekGreenMax)	Face(Add_Ripe1)
++DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), Subscript digits/symbols, “Green Keys”]
++DeadKey_Map0192=	Face(HGreekRipeMax)	Face(Add_Ripe1)
 #
 ####[DEADKEYS/eurkey/1/1]
 #####
@@ -789,8 +794,8 @@ ROWgap=2
 ↔⟷↕﬩	⇔⟺⇕∑	⬌➡⬍➕	⇿⦿!!	⬄⟾⇳!	!!!⧻	⥹⥻⨗!	⟿⬳⦚⍼	↹⟼↨✓	↹!↨☑
 #    (All: 2[Shift] × 2→[Ctrl] × 2↓[Mnu];   out of 4 Shift-Groups, the base one is disabled)
 #  Shapes on Greek=lAlt+lCtrl	Mathop on lCtrl=Bold↕-MathBizarre  Doubled/Crossed on lAlt=SS
-⤎⇡⤏⋰	↻⥀↺!	▗▄▖!	▛▀▜!	⥀⟰⥁⨸	⤵⤸⤴!	⌈⊓⌉⧄	⌜∏⌝⧅	◴◚◷!	!◓◔!	⇱↟!!	↫⇈↬!
-⇠◌⇢⋱	↜!↝!	▐█▌!	▌▣▐!	⭅⦾⭆⊛	⤺!⤻!	⊏□⊐⊠	⊑◽⊒⧆	!⦾➲!	◐⦿◑!	↞!↠!	⇇!⇉!
+⤎⇡⤏⋰	↻⥀↺⋱	▗▄▖!	▛▀▜!	⥀⟰⥁⨸	⤵⤸⤴!	⌈⊓⌉⧄	⌜∏⌝⧅	◴◚◷!	!◓◔!	⇱↟!!	↫⇈↬!
+⇠◌⇢※	↜☺↝!	▐█▌!	▌▣▐!	⭅⦾⭆⊛	⤺!⤻!	⊏□⊐⊠	⊑◽⊒⧆	!⦾➲!	◐⦿◑!	↞!↠!	⇇!⇉!
 ⤌⇣⤍⋯	↶⥁↷⧿	▝▀▘!	▙▄▟!	↻⟱↺⊖	⤶⤹⤷⤼	⌊⊔⌋⊟	⌞∐⌟▫	◵◛◶!	!◒◕!	!↡⇲!	↩⇊↪!
 ⤑⬸⋮⁜	↭⤳!⧾	▞▚↵!	░▒▓!	➲⥰⊜⊕	⤳⤿⤾⤽	▭⊡▯⊞	■◾⧈◻	!⊚!!	!!!!	!!⥉!	⇄⇆⇅⧺
 #
@@ -798,7 +803,7 @@ ROWgap=2
 ◸△◹⨞	⌌▵⌍!	◤▲◥⍁	◭▴◮!	◜∩◝⊘	╭⋂╮⦸	◩⬒⬔⧄	◴⯊◷⧅	⤆⤉⤇!	↸⇞!!	⤲⤧⤱!	⦭⦬⦨!
 ◁◇▷⨻	◃⋄▹!	◀◆▶⍂	◂⬩▸⸋	⊂⥀⊃⊗	⊆⥁⊇⨂	◧▣◨⧅	◖⚪◗⧈	⇷!⇸!	⇺❍⇻!	⤪⤫⤨!	⦩⦽⦪!
 ◺▽◿⨺	⌎▿⌏▫	◣▼◢!	⧨▾⧩🞗	◟∪◞⊖	╰⋃╯⊜	⬕⬓◪▪	◵⯋◶◠	⤂⤈⤃!	↵⇟↴⧺	⤮⤩⤭!	⦫⦯⦮!
-▭◬▯⨹	!⎊!◻	▬⟁▮⨨	!⬚!⬥	⊝⊙⦶⊕	⎉⨀⦷⨁	▬⸋▮◼	⌒⌓⧇◡	⇹⤄!!	⇼!!⧻	⤰⤬⤯!	!!!!
+▭◬▯⨹	!⎊!◻	▬⟁▮⨨	!⬚!⬥	⊝⊙⦶⊕	⎉⨀⦷⨁	▬⸋▮◼	⌒⌓⧇◡	⇹⤄!!	⇼!!⧻	⤰⤬⤯!	∅⌀!!
 # Elementary-school minus is FIGURE DASH; for arrow-angles, clockwise are H/V, ccw are diag.
 # Usurp diagonals: dashed, Double/Triple arrows, Arrows with double-bar, Zigzag
 # * is sometimes opposite of /, i.e., \.  We abuse .Del often…   ※ near ⁜???	☺

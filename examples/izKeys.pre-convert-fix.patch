@@ -1,5 +1,5 @@
---- iz-la-ru.C~~~.ini	2013-11-26 11:43:39.047399600 -0800
-+++ iz-la-ru.C~~~	2013-11-26 14:00:16.564192200 -0800
+--- iz-la-4s.C~~~.ini	2013-11-26 11:43:39.047399600 -0800
++++ iz-la-4s.C~~~	2013-11-26 14:00:16.564192200 -0800
 @@ -28797,7 +28797,7 @@ static ALLOC_SECTION_LDATA LIGATURE4 aLi
    {VK_OEM_PERIOD,2      ,0xd834   ,0xdd21   ,0xd834   ,0xdd21   },
    {VK_OEM_2     ,1      ,0xd834   ,0xdd1e   ,WCH_NONE ,WCH_NONE },
@@ -9,8 +9,30 @@
    {VK_DECIMAL   ,2      ,0x2009   ,0x2014   ,0x2009   ,WCH_NONE },
    {0            ,0      ,0        ,0        ,0        ,0        }
  };
---- iz-ru-la.C~~~.ini	2013-11-26 11:43:39.047399600 -0800
-+++ iz-ru-la.C~~~	2013-11-26 14:00:16.564192200 -0800
+--- iz-ru-4s.C~~~.ini	2013-11-26 11:43:39.047399600 -0800
++++ iz-ru-4s.C~~~	2013-11-26 14:00:16.564192200 -0800
+@@ -28797,7 +28797,7 @@ static ALLOC_SECTION_LDATA LIGATURE4 aLi
+   {VK_OEM_PERIOD,2      ,0xd834   ,0xdd21   ,0xd834   ,0xdd21   },
+   {VK_OEM_2     ,1      ,0xd834   ,0xdd1e   ,WCH_NONE ,WCH_NONE },
+   {VK_OEM_2     ,1      ,0xd834   ,0xdd1e   ,WCH_NONE ,WCH_NONE },
+-  {VK_F2      ,3      ,0xd83d   ,0xdf97   ,WCH_NONE ,WCH_NONE },
++  {VK_SUBTRACT  ,3      ,0xd83d   ,0xdf97   ,WCH_NONE ,WCH_NONE },
+   {VK_DECIMAL   ,2      ,0x2009   ,0x2014   ,0x2009   ,WCH_NONE },
+   {0            ,0      ,0        ,0        ,0        ,0        }
+ };
+--- iz-hb-4s.C~~~.ini	2013-11-26 11:43:39.047399600 -0800
++++ iz-hb-4s.C~~~	2013-11-26 14:00:16.564192200 -0800
+@@ -28797,7 +28797,7 @@ static ALLOC_SECTION_LDATA LIGATURE4 aLi
+   {VK_OEM_PERIOD,2      ,0xd834   ,0xdd21   ,0xd834   ,0xdd21   },
+   {VK_OEM_2     ,1      ,0xd834   ,0xdd1e   ,WCH_NONE ,WCH_NONE },
+   {VK_OEM_2     ,1      ,0xd834   ,0xdd1e   ,WCH_NONE ,WCH_NONE },
+-  {VK_F2      ,3      ,0xd83d   ,0xdf97   ,WCH_NONE ,WCH_NONE },
++  {VK_SUBTRACT  ,3      ,0xd83d   ,0xdf97   ,WCH_NONE ,WCH_NONE },
+   {VK_DECIMAL   ,2      ,0x2009   ,0x2014   ,0x2009   ,WCH_NONE },
+   {0            ,0      ,0        ,0        ,0        ,0        }
+ };
+--- iz-gr-p4.C~~~.ini	2013-11-26 11:43:39.047399600 -0800
++++ iz-gr-p4.C~~~	2013-11-26 14:00:16.564192200 -0800
 @@ -28797,7 +28797,7 @@ static ALLOC_SECTION_LDATA LIGATURE4 aLi
    {VK_OEM_PERIOD,2      ,0xd834   ,0xdd21   ,0xd834   ,0xdd21   },
    {VK_OEM_2     ,1      ,0xd834   ,0xdd1e   ,WCH_NONE ,WCH_NONE },

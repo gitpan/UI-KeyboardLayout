@@ -24,6 +24,7 @@ die "Usage: $0 KBDD_FILE\n" unless @ARGV == 1;
 
 my $l = UI::KeyboardLayout::->new_from_configfile(shift);
 
+my $skip_dummy = -e 'dummy';
 for my $kbd ([qw(ooo-us Latin)], [qw(ooo-ru CyrillicPhonetic)], [qw(ooo-gr GreekPoly)], [qw(ooo-hb Hebrew)]) {
   open my $kbdd, '>', $kbd->[0] or die;
   select $kbdd;
@@ -31,6 +32,19 @@ for my $kbd ([qw(ooo-us Latin)], [qw(ooo-ru CyrillicPhonetic)], [qw(ooo-gr Greek
   $l->print_coverage($kbd->[1]);
   # print "### RX_comb: <<<", $l->rxCombining, ">>>\n";
   close $kbdd or die;
+
+  next if $skip_dummy;
+  mkdir $_ for 'dummy', 'dummy2';
+  my $idx = $l->get_deep($l, 'faces', $kbd->[1], 'MetaData_Index');
+  my $n = $l->get_deep_via_parents($l, $idx, 'faces', $kbd->[1], 'DLLNAME');	# MSKLC would ignore the name otherwise???
+
+  for my $dummy ('', '2') {
+    open $kbdd, '> :raw:encoding(UTF-16LE):crlf', "dummy$dummy/$n.klc" or die;	# must force LE!  crlf is a complete mess!
+    select $kbdd;
+    print chr 0xfeff;							# Add BOM manually
+    print $l->fill_win_template(1, ['faces', $kbd->[1]], 'dummy', $dummy);
+    close $kbdd or die;
+  }
 }
 
 select STDOUT;
@@ -38,6 +52,10 @@ open STDOUT, q(>), q(coverage-1prefix-Latin.html);
 $l->print_table_coverage(q(Latin),		'html');
 open STDOUT, q(>), q(coverage-1prefix-Cyrillic.html);
 $l->print_table_coverage(q(CyrillicPhonetic),	'html');
+open STDOUT, q(>), q(coverage-1prefix-Greek.html); 
+$l->print_table_coverage(q(GreekPoly),		'html');
+open STDOUT, q(>), q(coverage-1prefix-Hebrew.html); 
+$l->print_table_coverage(q(Hebrew),		'html');
 
 unless (-e 'izKeys-visual-maps-base.html') {
   require File::Copy;
