@@ -64,4 +64,6 @@ examples/extra_c.zip
 examples/dump_kbd_reg.cmd
 examples/Layout63.klc				Name is 63 chars long.  Installs fine, name is shown in Settings of Language Bar
 examples/Layout64.klc 				Name is 64 chars long.  Installs fine, name is NOT shown in Settings of Language Bar
+examples/nano-en.kbdd
+examples/logo-base.html
 META.yml                                 Module meta-data (added by MakeMaker)

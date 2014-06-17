@@ -70,3 +70,12 @@ open STDOUT, q(>), q(izKeys-visual-maps-out.html);
 print $l->apply_filter_div($l->apply_filter_style($html));
 open STDOUT, q(>), q(izKeys-visual-maps-fake.html); 
 print $l->apply_filter_div($l->apply_filter_style($html, {fake => 1}), {fake => 1});
+
+open F, '<', 'logo-base.html' or die "Can't open logo-base.html for read";
+$html = do {local $/; <F>};
+close F or die "Can't close logo-base.html for read";
+
+open STDOUT, q(>), q(logo-out.html); 
+print $l->apply_filter_div($l->apply_filter_style($html));
+open STDOUT, q(>), q(logo-fake.html); 
+print $l->apply_filter_div($l->apply_filter_style($html, {fake => 1}), {fake => 1});

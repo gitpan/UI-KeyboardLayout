@@ -1313,6 +1313,7 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 	Warn if the description of the keyboard exceeds 63 UTF-16 codepoints.
 	In the main face, flagw from deadkeys-in-the-list were overwriting flags explicit deadkeys in the layers
 		(important for Inv only).
+	Put a plug for my unifont build into the browser setup section of the docs.
 
 	build-iz.pl:	Generate “dummy” files processable with GUI (if directory ./dummy is not present)
 
@@ -1329,3 +1330,27 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 	dump_kbd_reg.cmd:	Output the keyboard-related part of the registry.
 	Layout63.klc:		Working long description
 	Layout64.klc:		Not working long description
+
+0.67	Put a plug for my Dejavu+unifont build into the console font setup section of the docs.
+	Implement FullFace(Name_or_Recipe) accessor which accesses a face with LinkLayer substitutions.
+		was a synonim for Face() before.
+		If called too early, gives different results than when called later.
+	Start documenting the ways we mutate faces and layers during construction.
+	New options oneRow, startKey, cntKeys for generation of HTML keyboards.
+	Do not apply diacritics rules to ComposeKeys and flip_AltGr_Key.
+	Allow BaseLayer to be a full recipe.
+	Make BaseLayer to be prepended to the layer 0 (so it may be incomplete).
+	Allow Space as a key in BaseLayer.
+	Switch generation of ABNT_C1 and ABNT_C2 and make C2 a double of DECIMAL 
+		(now JIS’ left is ABNT’s right is /, JIS’ right is ISO is \)
+		(now both on JIS and on ABNT main island has 2 distinct additional keys)
+
+	izKeys.kbdd:	Attempt to put Ripe/Green in a correct Left/Right positions (duplicating Green symbols on Ripe if possible).
+				Removes: ⨃⨄⨊ from Russian.
+			Remove duplicates-of-Latin from Russian visual layer.
+
+	izKeys.patch:	Latin was not defining Shift-Mnu-Space (as Compose³).
+
+	examples/nano-en.kbdd:	New file.
+				(compile of .klc not tested yet; misses 0331)
+	examples/logo-base.html:	New file.

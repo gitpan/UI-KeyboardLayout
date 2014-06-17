@@ -72,6 +72,6 @@ zip -ru iz-ru-4s iz-ru-4s
 zip -ru iz-gr-p4 iz-gr-p4
 zip -ru iz-hb-4s iz-hb-4s
 zip -ju src %src%/ooo-us %src%/ooo-ru %src%/ooo-gr %src%/ooo-hb %ex%\izKeys.kbdd %ex%\build-iz.pl %ex%\compile_link_kbd.cmd %ex%\izKeys.patch %ex%\test-klc-tr.pl %~f0 *.C *.H *.RC *.DEF %ex%\izKeys.pre-convert-fix.patch %ex%\extra_c.zip
-zip -ju html %src%/izKeys-visual-maps-out.html %src%/coverage-1prefix-Cyrillic.html %src%/coverage-1prefix-Latin.html
+zip -ju html %src%/izKeys-visual-maps-out.html %src%/coverage-1prefix-Cyrillic.html %src%/coverage-1prefix-Latin.html %src%/coverage-1prefix-Hebrew.html %src%/coverage-1prefix-Greek.html 
 
 for %%d in (iz-la-4s iz-ru-4s iz-gr-p4 iz-hb-4s) do ls -l %%d\i386\%%d.dll %%d\ia64\%%d.dll %%d\amd64\%%d.dll %%d\wow64\%%d.dll

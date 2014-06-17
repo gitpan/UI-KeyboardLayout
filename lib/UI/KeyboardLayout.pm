@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION = "0.66";
+$VERSION = $VERSION = "0.67";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -1763,6 +1763,10 @@ Right now, I feel there is a lack of keyboard maps. You can develop them on your
 
   http://unicode.org/mail-arch/unicode-ml/y2011-m04/0117.html
 
+Fallback in “smart keyboards” interacting with Text-Service unaware applications
+
+  http://unicode.org/mail-arch/unicode-ml/y2014-m03/0165.html
+
 Keyboards - agreement (5 scripts at end)
 
   ftp://ftp.cen.eu/CEN/Sectors/List/ICT/CWAs/CWA-16108-2010-MEEK.pdf
@@ -1787,6 +1791,10 @@ Structure of development of Unicode
       I don't have a problem with Unicode. It is what it is; it cannot
       possibly be all things to all people:
   http://unicode.org/mail-arch/unicode-ml/y2005-m07/0101.html
+
+Control characters’ names
+
+  http://unicode.org/mail-arch/unicode-ml/y2014-m03/0036.html
 
 Compromizes vs reality
 
@@ -1827,7 +1835,7 @@ Silly quotation marks: 201b, 201f
   http://unicode.org/unicode/reports/tr8/ 
   		under "4.6 Apostrophe Semantics Errata"
 
-OHM: In modern usage, for new documents, this character should not be used. 
+OHM: In modern usage, for new documents, this character should not be used
 
   http://unicode.org/mail-arch/unicode-ml/y2011-m08/0060.html
 
@@ -2355,7 +2363,8 @@ Mythology: the modification keys (C<Shift>, C<Alt>, C<Ctrl> etc) are taken into 
 
 What actually happens: any key may act as a modification key.  The keyboard layout tables
 map keycodes to 8-bit masks.  (The customary names for lower bits of the mask are C<KBDSHIFT>,
-C<KBDCTRL>, C<KBDALT>, C<KBDKANA>; two more bits are named C<KBDROYA> and C<KBDLOYA>; two more
+C<KBDCTRL>, C<KBDALT>, C<KBDKANA>; two more bits are named C<KBDROYA> and C<KBDLOYA> — after
+OYAYUBI 親指, meaning THUMB; two more
 bits are unnamed.)  The keycodes of the currently pressed keys (from the “internal” table) are translated to masks, and
 these masks are ORed together.  (For the purpose of translation to C<WM_CHAR>/etc [done
 in ToUnicode()/ToUnicodeEx()], the bit C<KBDKANA> may be set
@@ -3325,6 +3334,15 @@ in different weight, it is a Russian Rullette which one of them will be taken
 the "normal" flavor of the font, then do as above (so the system has no way of picking
 the wrong flavor!), and only after this install the remaining
 flavors.
+
+B<NOTE:> keep in mind that I distribute a good-for-console L<“merge” of two
+fonts|http://ilyaz.org/software/fonts/>: C<DejaVu+unifont>; C<DejaVu> brings
+in nicely shaped nicely-scalable 
+glyphs, and C<unifont> brings a complete coverage of BMP (of Unicode C<v6.3>).
+(We omit Han/Hangul since it does not fit in a narrow box of a console font.
+Additionally, the versions of February 2014 do not include
+Katakana/Bopomoto/Hangul-Compatibility-Jamo since, apparently, Windows do not
+allow these characters in a console font.)
 
 B<CAVEAT:> the string to put into C<Console\TrueTypeFont> is the I<Family Name> of the font.
 The family name is what is shown in the C<Fonts> list of the C<Control Panel> — but only
@@ -5491,6 +5509,23 @@ Long s and "preceded by" are not handled since the table has its own (useless) c
  ░▒▓
 
 
+=head2 Implementation details
+
+Since the C<FullFace[FNAME]> accessor may have different effects at different moment of
+a face C<FNAME> synthesis, here is the order in which C<FullFace[FNAME]> changes:
+
+  ini_layers:   essentially, contains what is given in the key “layers” of the face recipe
+	Later, a version of these layers with exportable keys marked is created as ini_layers_prefix.
+  ini_filled_layers: adds extra (fake) keys containing control characters and created via-VK-keys
+	  (For these extended layers, the previous version can be inspected via ini_copy1.)
+	(created when exportable keys are handled.)
+
+The next modification is done not by modifying the list of names of layers
+associated to the face, but by editing the corresponding layers in place.
+(The unmodified version of layer, one containing the exportable keys, is
+accessible via C<ini_copy>.)  On this step one adds the missing characters via
+from the face specified in the C<LinkFace> key.
+
 =cut
 
 # '
@@ -6022,6 +6057,16 @@ sub massage_faces ($) {
       for @{ $self->{faces}{$f}{char2key_prefer_first} || [] } ;
     $self->{faces}{$f}{'[char2key_prefer_last]'}{$_}++ 			# Make a hash
       for @{ $self->{faces}{$f}{char2key_prefer_last} || [] } ;
+    my ($compK, %compK) = $self->{faces}{$f}{'[ComposeKey]'};
+    if ($compK and ref $compK) {
+      for my $cK (@$compK) {
+        my @kkk = split /,/, $cK;
+        $compK{ $self->key2hex($self->charhex2key($kkk[3])) }++ if defined $kkk[3] and length $kkk[3];
+      }
+    } elsif (defined $compK) {
+      $compK{ $self->key2hex($self->charhex2key($compK)) }++;
+    }
+    $self->{faces}{$f}{'[ComposeKeys]'} = \%compK;
     unless ($self->{faces}{$f}{layers}) {
       next unless $self->{face_recipes}{$f};
       die "Can't determine number of layers in face `$f': face_recipe exists, but not numLayers" 
@@ -6100,7 +6145,7 @@ sub massage_faces ($) {
       }
     }  
   }
-  for my $f (keys %{$self->{faces}}) {	# Linking uses the number of slots in layer 0 as the limit
+  for my $f (keys %{$self->{faces}}) {	# Linking uses the number of slots in layer 0 as the limit; fill to make into max
     next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
     my $L = $self->{faces}{$f}{layers};
     my @last = map $#{$self->{layers}{$_}}, @$L;
@@ -6112,6 +6157,7 @@ sub massage_faces ($) {
     next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
     my $o = $self->{faces}{$f}{LinkFace};
     $self->pre_link_layers($o, $f) if defined $o;		# May add keys to $f
+# warn("pre_link <$o> <$f>\n") if defined $o;
   }
   for my $f (keys %{$self->{faces}}) {
     next if 'HASH' ne ref $self->{faces}{$f} or $f =~ m(\bVK$);			# "parent" taking keys for a child
@@ -6520,21 +6566,13 @@ EOP
   my @LL = map $self->{layers}{$_}, @$LL;
   $s{$_}++ or push @d, $_ for map @{ $self->{faces}{$F}{"[$_]"} || [] }, qw(dead_array dead_in_VK_array extra_report_DeadChar);
   my (@A, %isD2, @Dface, @DfaceKey, %d_seen) = [];
-  my ($compK, %compK) = $self->{faces}{$F}{'[ComposeKey]'};
-  if ($compK and ref $compK) {
-    for my $cK (@$compK) {
-      my @kkk = split /,/, $cK;
-      $compK{ $self->key2hex($self->charhex2key($kkk[3])) }++ if defined $kkk[3] and length $kkk[3];
-    }
-  } elsif (defined $compK) {
-    $compK{ $self->key2hex($self->charhex2key($compK)) }++;
-  }
+  my $compK = $self->{faces}{$F}{'[ComposeKeys]'};
 #warn 'prefix keys to report: <', join('> <', @d), '>';
   for my $ddK (@d) {
     (my $dK = $ddK) =~ s/^\s+//;
     my $c = $self->key2hex($self->charhex2key($dK));
     next if $d_seen{$c}++;
-    ($compK{$c} or warn("??? Skip non-array prefix key `$c' for face `$F', k=`$dK'")), next 
+    ($compK->{$c} or warn("??? Skip non-array prefix key `$c' for face `$F', k=`$dK'")), next 
       unless defined (my $FF = $self->{faces}{$F}{'[deadkeyFace]'}{$c});
     $access{$FF} = [$self->charhex2key($dK)];
     push @Dface, $FF;
@@ -7017,9 +7055,9 @@ my %oem_keys = do {{ no warnings 'qw' ; reverse (qw(
      OEM_102	\#
      SPACE	#
      DECIMAL	.#
-     ABNT_C2	/#
-     ABNT_C2	¥
-     ABNT_C2	¦
+     ABNT_C1	/#
+     ABNT_C1	¥
+     ABNT_C1	¦
 )) }};			#'# Here # marks "second occurence" of keys...
 
 	# For type 4 of keyboard (same as types 1,3, except OEM_AX, (NON)CONVERT, ABNT_C1)
@@ -7362,8 +7400,10 @@ sub auto_capslock($$) {
   return 0;
 }
 
-my %double_scan_VK = ('56 OEM_102' => '73 ABNT_C1',	# ISO vs JIS keyboard
-		      '7E ABNT_C2' => '7D OEM_8',	# ABNT vs JIS keyboard
+my %double_scan_VK = ('56 OEM_102' => '7D OEM_8',	# ISO vs JIS (right) keyboard
+	#	      '73 ABNT_C1' => '7E ABNT_C2',	# ABNT (right) = JIS (left) keyboard vs ABNT (numpad)
+	#	      '53 DECIMAL' => '7E ABNT_C2',	# NUMPAD-period vs ABNT (numpad) [Does not work??? DECIMAL too late?]
+		      '34 OEM_PERIOD' => '7E ABNT_C2',	# period vs ABNT (numpad)
 		      '7B NONCONVERT' => '79 CONVERT');	# JIS keyboard: left of SPACE, right of SPACE
 my %shift_control_extra = (2 => "\x00", 6 => "\x1e", OEM_MINUS => "\x1f");
 
@@ -7464,9 +7504,9 @@ EOP
 
   sub output_unit0 ($$$$$$$;$$) {
     my @i = &output_unit00 or return;
-    my $add = $double_scan_VK{uc "$i[0] $i[1]"};
+    my @add = split '/', ($double_scan_VK{uc "$i[0] $i[1]"} || '');
 #warn "<<<<< Secondary key <$add> for <$i[0] $i[1]>" if $add;
-    push @add_scan_VK, [split(/ /, $add), @i[2,3]] if $add;
+    push @add_scan_VK, map [split(/ /, $_), @i[2,3]], grep $_, @add;
     "$i[0]\t$i[1]$i[2]\t$i[3]"
   }
   
@@ -7513,10 +7553,12 @@ EOP
     my ($self, $face, $layers, $basesub, $u, $deadkeys, $Used, $lim, $c, $k) = (shift, shift, shift, shift, shift, shift, shift, shift);
     my $U = [map $self->{layers}{$_}[$u], @$layers];
     if ($u < $lim) {
-      $c = $self->{layers}{$basesub}[$u][0];
+      my @c = map $self->{layers}{$_}[$u][0], @$basesub;
+      ($c) = grep defined, @c;
       $c = $c->[0] if 'ARRAY' eq ref $c;
       $k = uc $c;
       $c .= '#' if $seen{$c}++;
+      $c = '#' if $c eq ' ';
       $k = $oem_keys{$c} or warn("Can't find a key with VKEY `$c', unit=$u, lim=$lim"), return
         unless $k =~ /^[A-Z0-9]$/;
     } else {
@@ -7532,7 +7574,7 @@ EOP
 
 sub output_layout_win ($$$$$$$) {
   my ($self, $face, $layers, $basesub, $deadkeys, $Used, $cnt) = (shift, shift, shift, shift, shift, shift, shift);
-  $basesub = $layers->[0] unless defined $basesub;
+  $basesub = [((defined $basesub) ? $basesub : ()), $layers->[0]];
   $self->reset_units;
   die "Count of non-VK entries mismatched: $cnt vs ", scalar @{$self->{layers}{$layers->[0]}}
     unless $cnt <= scalar @{$self->{layers}{$layers->[0]}};
@@ -8640,9 +8682,10 @@ sub layers_by_face_recipe ($$$) {
   $L;
 }
 
-sub export_layers ($$$) {
-  my ($self, $face, $base) = (shift, shift, shift);
-  $self->{faces}{$face}{'[ini_layers_prefix]'} || $self->{faces}{$face}{'[ini_layers]'} || 
+sub export_layers ($$$;$) {
+  my ($self, $face, $base, $full) = (shift, shift, shift, shift);
+# warn "Doing FullFace on <$face>, base=<$base>\n" if $full;
+  ($full ? undef : $self->{faces}{$face}{'[ini_layers_prefix]'} || $self->{faces}{$face}{'[ini_layers]'}) || 
     $self->{faces}{$face}{layers} 
       || $self->layers_by_face_recipe($face, $base)
 }
@@ -8679,12 +8722,12 @@ sub pseudo_layer0 ($$$$) {
   return ($self->export_layers($face, $face))->[$N1] if $recipe eq 'FlipLayers';
 #  my $gr_debug = ($recipe =~ /Greek__/);
   if (debug_PERL_dollar1_scoping) {
-    return ($self->export_layers("$3", $face))->[$1 ? $N : $N1]
+    return ($self->export_layers("$3", $face, !!$2))->[$1 ? $N : $N1]
       if $recipe =~ /^(?:((Full)?Face)|FlipLayers)\((.*)\)$/;
   } else {
     my $m1;	# Apparently, in perl5.10, if replace $m1 by $1 below, $1 loses its TRUE value between match and evaluation of $1
 #  ($gr_debug and warn "Pseudo-layer `$recipe', face=`$face', N=$N, N1=$N1\n"),
-    return ($self->export_layers("$3", $face))->[$m1 ? $N : $N1]
+    return ($self->export_layers("$3", $face, !!$2))->[$m1 ? $N : $N1]
       if $recipe =~ /^(?:((Full)?Face)|FlipLayers)\((.*)\)$/ and ($m1 = $1, 1);
   }
   if ($recipe =~ /^prefix(NOTSAME(case)?)?=(.+)$/) {	# `case´ unsupported
@@ -8943,10 +8986,15 @@ sub create_DeadKey_Maps ($) {
   for my $F (keys %{ $self->{faces} }) {
     next if 'HASH' ne ref $self->{faces}{$F} or $F =~ /\bVK$/;			# "parent" taking keys for a child
     my $H = $self->{faces}{$F};
+    my $flip_AltGr = $H->{'[Flip_AltGr_Key]'};
+    $flip_AltGr = (defined $flip_AltGr) ? $self->charhex2key($flip_AltGr) : 'N/A';
     # Treat first the specific maps (for one deadkey) then the deadkeys which were not seen via the universal map
     for my $key (keys %{$H->{'[DeadKey__Maps]'}}) {
       my $v0 = $H->{'[DeadKey__Maps]'}{$key};
-      my @keys = (($key ne '') ? $key : (grep {not $H->{'[DeadKey__Maps]'}{$_}} map $self->key2hex($_), keys %{ $H->{'[DEAD]'} }));
+      my @keys = (($key ne '')
+      		   ? $key 
+      		   : (grep {not $H->{'[DeadKey__Maps]'}{$_} and not $H->{'[ComposeKeys]'}{$_}} 
+			map $self->key2hex($_), grep $_ ne $flip_AltGr, keys %{ $H->{'[DEAD]'} }));
       $self->ensure_DeadKey_Map($F, $_, $key) for @keys;
     }
   }
@@ -9131,7 +9179,7 @@ sub fill_win_template ($$$;$$) {
 # warn "Translate: ", %h;
   my $F = $self->get_deep($self, @$k);		# Presumably a face hash, as in $k = [qw(faces US)]
   my $b = $F->{BaseLayer};
-  $b = $self->pseudo_layer($b, $k->[-1], 0) if defined $b and not $self->{layers}{$b};
+  $b = $self->make_translated_layers($b, $k->[-1], [0])->[0] if defined $b and not $self->{layers}{$b};
   $F->{'[dead-used]'} = [map {}, @{$F->{layers}}];		# Which of deadkeys are reachable on the keyboard
   my $cnt = $F->{'[non_VK]'};
   if ($dummy) {
@@ -10962,22 +11010,32 @@ sub a_pair ($$$$$$$$$$;@) {
   }
 }
 
+my $kbdrow = 0;
 sub keys2html_diagram ($$$$@) {
   my ($self, $opts, $cnt, $new_row) = (shift, shift, shift, shift);
-  my @fixed = @HTML_KBD_FIXED;
+  my %opts = map { /^\w+=/ ? split /=/, $_, 2 : ($_, 1)} @$opts;
+  my $off = (($opts{oneRow} && $kbdrow++) || 0) % 3;
+  $off = "\xA0" x (2*$off);
+  my @fixed = ($opts{oneRow} ? ("<span class=arow>$off") : @HTML_KBD_FIXED);
   my $out = shift @fixed;
 #  $cnt = $#{$layers_info->[0]} if $cnt > $#{$layers_info->[0]};
+  my @keys = (0..($cnt-1));
+  my $start = ($opts{startKey} || 0) % $cnt;
+  my $CNT = $opts{cntKeys} || $cnt;
+  @keys = (@keys) x ( 1 + int( ($start+$CNT-1)/$cnt ) );
+  @keys = @keys[$start .. ($start + $CNT - 1)];
  KEY:
-  for my $kn (0..($cnt-1)) {	# Ordinal of keyboard's key
+  for my $kn (@keys) {			# Ordinal of keyboard's key
     $out .= (shift(@fixed) || '') if $new_row->{$kn};
     my ($symb, @keys, $last) = 0;
     for my $KK (@_) {			# Layers
-      my($layer, @rest) = @$KK;			# rest = face, kmap, layerN, class_hash, name, classes
+      my($layer, @rest) = @$KK;		# rest = face, kmap, layerN, class_hash, name, classes
       push @keys, [@{$layer->[$kn]}[0,1], @rest];
     }
     $out .= $self->do_keys($opts, @keys);
   }
   $out .= join '', @fixed;
+  $out .= "</span\n>" if $opts{oneRow};
   $out
 }
 

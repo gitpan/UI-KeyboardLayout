@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2014
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.66
+VERSION=0.67
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -47,11 +47,10 @@ prefix_repeat=3
 @keyline_offsets=0,1,1,1,20
 #
 # Perl 5.8.8 does not recognize  ҇ as a combining character...
-# +-=(): ⁺⁻⁼⁽⁾	⁼⁺
 	--/⋱≀	--∣/∤∁	--≈/∃∀	--⧣/∛∄	--€/∜⨋	--◌/☆★	--£/⨊		--/⨄⨃		--⊠/∞⧆		--/‟‛	--/◌⧇		--–/∓±		--
 	--   ⊤⊥/≠⟂/ꙩ/ꚑ ∫∮/∭∥/ꙫ/ꙭ ⊲⊳/⊣⊢/ꙮ □◇/△▽/ꚉ •⋈/⨯⋆/ꙛ ∨∧		∪∩//ꙅ		≐×/≃/ԑ/--꙳	--∈//ꙉ	∅∋//ꙃ/ꙁ		--//ҹ		--//ӌ
 ***	`~/ˋ˜	1!/¬¡	2@/ºª	3#/·№	4$/¢£	5%/€¥	6^/ˇˆ		7&/√§		8*/„‚		9(/“‘	0)/”’		-_/¯—/--―	=+/≈±
-	ю//ѫ/ѭ	1!/-- ҄	2@/ ҆ ҇	3ё	4Ё	5ъ/--€	6Ъ/-- ҃//-- ҄	7&/// ꙽ꙿ	8*//-- ҅	9(///ҁ	0)/// ꙼꙾	-_//ҽ/ҿ		ч//ҷ/ӵ
+	ю//ѫ/ѭ	--/-- ҄	--/ ҆ ҇	--ё	--Ё	--ъ/--€	--Ъ/-- ҃//-- ҄	--/// ꙽ꙿ	--//-- ҅	--///ҁ	--/// ꙼꙾	--//ҽ/ҿ		ч//ҷ/ӵ
 ‭???	--/ ֙ ֘	--/ ִ ֮	--/ ֵ ְ	--/ ֶ–	--/ ָ	--/ ֱ€	--/ ֳ‌		--/ ׇ‍		--/ ַ ͏		--/ ֻ‎	--/ ֲ‏		--/־—		--/ ְ﬩ ‬
 #
 	--//θ	--//ω	--//ε	--//ρ		--//τ	--//ψ	--//υ	--//ι	--//ο	--//π		--	--	--/◊⧫
@@ -63,23 +62,23 @@ prefix_repeat=3
 	--//α	--//σ	--//δ	--//φ	--//γ	--//η	--//ϊ	--//κ	--//λ	--		∂∇/′″
 	--//ԙ	--//ꚃ	--//ӡ	--	--//ӿ	--//ҩ	--///ꙇ	--//ӄ	--//ԉ	--//ԟ/ҝ		--//ꚓ/ꚕ
 ***	a/æ	s/ßẞ	d/ð	f/è	g/ý	h/ú	j/í	k/ó	l/ö	;:/¨÷		'"/´˵/′″
-	а/ә/ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	;://ӹ/ӳ		'"/ ́´/ ̀ ̀/ ́ ́
+	а/ә/ꙗ/ӓ	с/ѕ/ҫ/ԍ	д/ђ/ӟ/ԁ	ф/ѳ/ғ/ӻ	г/ґ/ӷ/ҕ	х/һ/ҳ/ӽ	й/ї/ҋ/ӑ	к/қ/ҡ/ҟ	л/љ/ӆ/ԓ	--//ӹ/ӳ		--/ ́´/ ̀ ̀/ ́ ́
 ‭???	א ָ/ ַ ֲ סשׂ/ ׂ ֒ ד ֶ/ ְ ֧ פף/פּףּ	ג״/׳ ֞ הח/ ֢ ֜ ח ֻ/ ﬞ ֝ כך/ ֦ ֫ ל ֹ/ ׇ ֳ --/ ֛ ֔	--/׳״ ‬
 #"
 	--//ζ	--//χ	--//ξ	--//ϋ	--//β	--//ν	--//μ	‼2009—2009/--‼200a—200a ·/--‼1d121.1d121	⁄/⋰//1d11e
 	--	--	--//ꙡ	--//ԃ	--	--//ӈ	--//ꙧ	≲//ԇ/ԅ			≳//ꙝ/ꙙ		…≟//ꙓ/ҍ
 ***	z/à	x/é	c/ç	v/ì	b/ù	n/ñ	m/ò	,</¸≤			.>/°≥/…		/?/0338¿/÷�
-	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ꙋ/ѹ	н/њ/ң/ҥ	м/ӎ/ꙟ/ԣ	,</«/⁘⁙/ԋ		.>/»/·։/჻⁖	/?/ј/ԛ/ꙏ
+	з/є/ҙ/ѯ	ь/ъ/ӛ/ӕ	ц/џ/ҵ/ќ	ж/ӂ/җ/ӝ	б/ѓ/ꙋ/ѹ	н/њ/ң/ҥ	м/ӎ/ꙟ/ԣ	--/«/⁘⁙/ԋ		--/»/·։/჻⁖	--/ј/ԛ/ꙏ
 ‭???	ז ַ/ ֮ ֕ כך/כּךּ	צץ/ ֯ ׄ ו ְ/ ֺװ ב₪/בּ ֪	נן/׆ ֦	מם/ ֽ ֣	--/ ֑ ֤			--/׃ ֚		--/ ֥ ׅ ‬
 	--		--
 	--		--
 ***	\|/¶❧		./,
-	ъЪ/ӏӀ		./,
+	ъЪ/ӏӀ		--
 ‭???	ֿ ׇ		-- ‬
 #
 # Earlier versions had:	б/ѹ (now г overflows down as ...);	7&/ ҅ ҆	/?/§”	2@/²³
 # ԥԤ  ԧԦ must be specified both lc/uc since perl 5.10 does not upcases them automatically (v6.0)
-# On II-maps: forms with ¨, iotified, latinized forms, forms with more developped appendages, or appendages
+# On Cyrillic-II-maps: forms with ¨, iotified, latinized forms, forms with more developped appendages, or appendages
 # more to the right, or higher, are on AltGr prefix.  (Same for almost-unrelated letters placed
 # opportunistically.  (Many are inverted w.r.t. Unicode versions!  Later reason in the list wins.)
 #
@@ -139,37 +138,44 @@ Greek_w_Symbols_on_Digit_Row=	Id(Greek) Mutate[<subst-extra_greek>](Face(Latin))
 CyrillicRipe=		NotSameKey(Face(Latin)		Face(CyrillicPhonetic)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))
 CyrillicRipeMax=	ByPairs[˵〃](Face(Latin))	Face(CyrillicRipe)	Face(CyrillicPhonetic)
 #
+GCyrillicRipe=		NotSameKey(FullFace(GreekPoly)	Face(CyrillicPhonetic)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr)	Layers(Green+Green-AltGr))
+GCyrillicRipeMax=	ByPairs[˵〃](Face(Latin))	Face(GCyrillicRipe)	Face(CyrillicPhonetic)
+#
 Hebrew=		Layers(Hebrew-Base+Hebrew-AltGr)
-+MathBlue=	Mutate[\ℯℹℎ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin)) 
-+MathBlue=		Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301] 
++MathBlue=	Mutate[\ℯℹℎ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin))
++MathBlue=		Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301]
 +MathBlue=		Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty)) ByPairs[<⟨ >⟩ ≤≪ ≥≫ =≃]
 #
 +LGreekGreen=	NotSameKey(Face(Latin)	Face(Greek__Letters)	Layers(Green+Green-AltGr))	
 +LGreekGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
 LGreekGreenMax=	Face(LGreekGreen)	Face(Greek__Letters)
 #
-+CGreekGreen=	NotSameKey(Face(CyrillicPhonetic)	Face(Greek__Letters)	Layers(Green+Green-AltGr))	
++CGreekGreen=	NotSameKey(Face(CyrillicPhonetic)	Face(Greek__Letters)	Layers(Green+Green-AltGr))
 +CGreekGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
 CGreekGreenMax=	Face(CGreekGreen)	Face(Greek__Letters)
 #
-+CGreekRipe=	NotSameKey(Face(CyrillicPhonetic)	Face(Greek__Letters)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))	
-+CGreekRipe=		MutateDupsOK[<sub>](SelectRX[[0-9]])	
++CGreekRipe=	NotSameKey(FullFace(CyrillicPhonetic)	Face(Greek__Letters)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr)	Layers(Green+Green-AltGr))
++CGreekRipe=		MutateDupsOK[<sub>](SelectRX[[0-9]])
 CGreekRipeMax=	Face(CGreekRipe)	Face(Greek__Letters)
 #
-+HGreekRipe=	NotSameKey(Face(Hebrew)	Face(Greek__Letters)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))	
++HGreekRipe=	NotSameKey(Face(Hebrew)	Face(Greek__Letters)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr)	Layers(Green+Green-AltGr))
 +HGreekRipe=		MutateDupsOK[<sub>](SelectRX[[0-9]])	
 HGreekRipeMax=	Face(HGreekRipe)	Face(Greek__Letters)
 #
-+CLatinGreen=	NotSameKey(Face(CyrillicPhonetic)	Face(Latin)	Layers(Green+Green-AltGr))	
++CLatinGreen=	NotSameKey(FullFace(CyrillicPhonetic)	Face(Latin)	Layers(Green+Green-AltGr))	
 +CLatinGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
 CLatinGreenMax=	Face(CLatinGreen)	Face(Latin)
 #
 LatinRipe=	NotSameKey(Face(CyrillicPhonetic)	Face(Latin)	Layers(Subs_Dashes_0+More_Dashes_1) Layers(Ripe+Ripe-AltGr))
 LatinRipeMax=	Face(LatinRipe)	Face(Latin)
 #
-+LatinGreen=	NotSameKey(Face(GreekPoly)		Face(Latin)	Layers(Green+Green-AltGr))	
-+LatinGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
-LatinGreenMax=	Face(LatinGreen)	Face(Latin)
++HLatinGreen=	NotSameKey(Face(Hebrew)		Face(Latin)	Layers(Green+Green-AltGr))	
++HLatinGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
+HLatinGreenMax=	Face(HLatinGreen)	Face(Latin)
+#
++GLatinGreen=	NotSameKey(FullFace(GreekPoly)		Face(Latin)	Layers(Green+Green-AltGr))	
++GLatinGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
+GLatinGreenMax=	Face(GLatinGreen)	Face(Latin)
 #
 Greek_Vowels=	Layers(Greek_vowels+Greek_vowels_AltGr)
 # PERISPOMENI=0342=circumflex=(visually)tilde	[SpaceOK not needed, since it checks the BASE character of a key] [varia does not decompose into SPACE+combining, but into `]
@@ -340,7 +346,7 @@ DeadChar_32bitTranslation=		♫
 #					# Had 03a6 on the "ripe key"; then 0138, now 0192
 @SPACE=,0020,0138@,0192@,00a0@
 # Temporary: when ¦ is Compose, change to this...
-@ABNT_C2=,06f0@,00a0@,00a3@,0301
+@ABNT_C1=,06f0@,00a0@,00a3@,0301
 #@TAB=,0009,0009,0483@,0484@
 #
 # Dotted circle, black circle, white circle
@@ -564,19 +570,19 @@ ExportDeadKeys=	́	҃
 +PrefixChains=0192,0192,012e,0301,0338,¨,⍽
 +PrefixChains=0138,0138,019c,£,03e2,␣
 #
-###+DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), “Ripe Keys”, Subscript digits/symbols, dashes]
-###+DeadKey_Map0192=	Face(CGreekRipeMax)	Face(Add_Ripe1)
++DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), “Ripe Keys”, Subscript digits/symbols, dashes]
++DeadKey_Map0192=	Face(CGreekRipeMax)	Face(Add_Ripe1)
 #
 #				ĸ: ↹⇤ 0009⇥
-###+DeadKey_Map0138=	PrefixDocs[Latin, Superscript digits/symbols, “Green Keys”]
-###+DeadKey_Map0138=	Face(CLatinGreenMax)	Face(Add_Green1)
++DeadKey_Map0138=	PrefixDocs[Latin, Superscript digits/symbols, “Green Keys”]
++DeadKey_Map0138=	Face(CLatinGreenMax)	Face(Add_Green1)
 #
-+DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), Superscript digits/symbols, “Green Keys”]
-+DeadKey_Map0192=	Face(CGreekGreenMax)	Face(Add_Ripe1)
+###+DeadKey_Map0192=	PrefixDocs[Greek (AltGr=tonos/final/symbol etc), Superscript digits/symbols, “Green Keys”]
+###+DeadKey_Map0192=	Face(CGreekGreenMax)	Face(Add_Ripe1)
 #
 #				ĸ: ↹⇤ 0009⇥
-+DeadKey_Map0138=	PrefixDocs[Latin, “Ripe Keys”, Subscript digits/symbols, dashes]
-+DeadKey_Map0138=	InheritPrefixKeys[Face(Latin)](Face(LatinRipeMax))	Face(Add_Green1)
+###+DeadKey_Map0138=	PrefixDocs[Latin, “Ripe Keys”, Subscript digits/symbols, dashes]
+###+DeadKey_Map0138=	InheritPrefixKeys[Face(Latin)](Face(LatinRipeMax))	Face(Add_Green1)
 #
 #DeadKey_InvMap0192=	ByPairs[0020.00a0 0192.2007]
 #
@@ -629,10 +635,10 @@ ExportDeadKeys=	0342 0314 0313 03e2
 @extra_report_DeadChar=	012e
 #				ĸ: ↹⇤ 0009⇥
 +DeadKey_Map0138=	PrefixDocs[Latin, Superscript digits/symbols, “Green Keys”]
-+DeadKey_Map0138=	Face(LatinGreenMax)	Face(Add_Green1)
++DeadKey_Map0138=	Face(GLatinGreenMax)	Face(Add_Green1)
 #
 +DeadKey_Map0192=	PrefixDocs[Cyrillic, “Ripe Keys”, Subscript digits/symbols, dashes]
-+DeadKey_Map0192=	InheritPrefixKeys[Face(CyrillicPhonetic)](Face(CyrillicRipeMax))	Face(Add_Ripe1)
++DeadKey_Map0192=	InheritPrefixKeys[Face(CyrillicPhonetic)](Face(GCyrillicRipeMax))	Face(Add_Ripe1)
 +DeadKey_Map0192=	HTML_classes[C=cyr,may-guess,всыхѣєә,C0,need-learn,ючяшщэьжёъЁЪ]
 #
 [faces/Hebrew]
@@ -662,7 +668,7 @@ MetaData_Index=3
 @extra_report_DeadChar=	012e
 #				ĸ: ↹⇤ 0009⇥
 +DeadKey_Map0138=	PrefixDocs[Latin, Superscript digits/symbols, “Green Keys”]
-+DeadKey_Map0138=	Face(LatinGreenMax)	Face(Add_Green1)
++DeadKey_Map0138=	Face(HLatinGreenMax)	Face(Add_Green1)
 #
 +DeadKey_Map012e=	PrefixDocs[Cyrillic, “Ripe Keys”, Subscript digits/symbols, dashes]
 +DeadKey_Map012e=	InheritPrefixKeys[Face(CyrillicPhonetic)](Face(CyrillicRipeMax))	Face(SpecialKey_Images)
