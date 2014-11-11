@@ -13,7 +13,7 @@ UI::KeyboardLayout::izKeys - example keyboard layout generated with L<UI::Keyboa
   UI::KeyboardLayout::->set_NamesList("$ENV{HOME}/Downloads/NamesList.txt", 
   				      "$ENV{HOME}/Downloads/DerivedAge.txt"); 
   my $l = UI::KeyboardLayout::->new_from_configfile('examples/izKey.kbdd');
-  for my $F (qw(US CyrillicPhonetic)) {		
+  for my $F (qw(US CyrillicPhonetic Greek Hebrew)) {		
   	# Open file, select() 
     print $l->fill_win_template(1,[qw(faces US)]);
     $l->print_coverage(q(US));
@@ -59,7 +59,7 @@ Have whole coverage of certain ranges of Unicode.
 
 =back
 
-Currently achieved (ranges as of Unicode v6.1):
+B<[What follows describes a pretty old version of layouts; see L<the current one|http://k.ilyaz.org/windows/izKeys-visual-maps.html#goals-progress>]>  Currently achieved (ranges as of Unicode v6.1):
 
 =over 4
 
@@ -207,11 +207,11 @@ What about other scripts with "small repertoir" of characters (such as arabic wi
 
 =head2 General architecture
 
-Currently, there are two personalities: one for continuous typing in Latin scripts, 
-and one for Cyrillic scripts.  Both access practically the same character repertoirs,
+Currently, there are four personalities: one for continuous typing in Latin scripts, 
+and one for Cyrillic scripts.  All access practically the same character repertoirs,
 but to access an individual "out-of-personality" letter one must use a prefix key
 C<Shift-SPACE>.  To type several such keys in a row, it is more convenient to switch
-to the other personality (such switch is performed using OS/Windowing-system specific 
+to the other personality — such switch is performed using OS/Windowing-system specific 
 ways (via hotkeys, or via mouse clicks on the "Language bars").
 
 Currently, the result of a key press is governed by two modifiers: C<Shift> and C<AltGr>; 

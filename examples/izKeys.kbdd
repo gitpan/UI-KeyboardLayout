@@ -12,7 +12,7 @@ COPYR_YEARS=2011-2014
 SORT_ORDER_ID_=0000
 @LANGUAGE_NAME=English (United States),Russian (Russia),Greek (Greece),Hebrew (Israel)
 #
-VERSION=0.67
+VERSION=0.68
 #
 [Substitutions]
 # Will be used when putting a second diacritic: (as <subst-Vietnamese>)
@@ -96,7 +96,7 @@ prefix_repeat=3
 #
 # 0301 over Greek letters=tonos;   0308=dialytika	'
 Greek_and_More_0=	Id(Greek)	ByPairs[?; ;·](US-Base)
-+Greek_and_More_1=	MutateDupsOK[0301|<any-calculated-symbol>|<any-calculated-final>|<any-lunate-symbol>|<any-latinize>|
++Greek_and_More_1=	MutateDupsOK[\\ꭓ,0301|<any-calculated-symbol>|<any-calculated-final>|<any-lunate-symbol>|<any-latinize>|
 +Greek_and_More_1=			<any-quasisynon>,<any-amplify>](Greek)
 +Greek_and_More_1=		ByPairs[YϜ yϝ TϚ tϛ Kϗ XϠ xϡ CϘ cϙ ZϞ zϟ ;· R∐ l∧ L⋀ n∨ N⋁ F∅ ?Ɂ /ɂ](US-Base)
 #
@@ -142,9 +142,10 @@ GCyrillicRipe=		NotSameKey(FullFace(GreekPoly)	Face(CyrillicPhonetic)	Layers(Sub
 GCyrillicRipeMax=	ByPairs[˵〃](Face(Latin))	Face(GCyrillicRipe)	Face(CyrillicPhonetic)
 #
 Hebrew=		Layers(Hebrew-Base+Hebrew-AltGr)
-+MathBlue=	Mutate[\ℯℹℎ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin))
-+MathBlue=		Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301]
-+MathBlue=		Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty)) ByPairs[<⟨ >⟩ ≤≪ ≥≫ =≃]
++MathBlue=	Mutate[\ℯℹℎ,\\Ɡ,<reveal-substkey>|<font=double-struck>+uc|<font=double-struck>|<subst-Cardinal>|<pseudo-stroke>+<any-font>,<any-font>|<any-script>|<any-calculated-operator>|\\ªº,<super>+dectrl](Face(Latin))
++MathBlue=	  ByPairs[<⟨ >⟩ =≃](Face(Latin))
++MathBlue=	  Mutate[\\ªº,<super>+dectrl|<any-phonetize>|<any-phonetize2>,<any-phonetize3>--0301|<any-whiten>|<any-amplify>](FullFace(Latin))
++MathBlue=	  Mutate[<font=double-struck>|<font=double-struck>+<any-amplify>](Layers(Greek+Empty)) ByPairs[ýℊ ÝꞬ](Face(Latin))
 #
 +LGreekGreen=	NotSameKey(Face(Latin)	Face(Greek__Letters)	Layers(Green+Green-AltGr))	
 +LGreekGreen=		MutateDupsOK[<super>,<super>+<pseudo-calculated-sign>](SelectRX[[-0-9()+=]|-])
@@ -252,7 +253,7 @@ LeftHooks=	Mutate[<any-left-hook>|<pseudo-hook>|<any-palatal-hook>](Face(Latin))
 +DeadKey_Map012e=		Face(Hebrew)	Face(SpecialKey_Images)	ByPairs[0020.2009 0138.200a]	Face(Add_2Ripe)
 #								Having AÅ KK contradicts Unicode recommendations	
 +DeadKey_Map019c=	PrefixDocs[MathBlue (“Blue keys” and common math flavors of letter)]
-+DeadKey_Map019c=	  ByPairs[0020␠ 0192␢ '⎖ "〃 :⫶ \∖ -− _―]	HTML_classes[C,special,∼∗⧵⋅−⫶⟨⟩≪≫≃,C,very-special,∖﬩ℏ―⎖〃,C,need-learn,ℎ]
++DeadKey_Map019c=	  ByPairs[0020␠ 0192␢ '⸣ `⸢ ´⸥ ˋ⸤ "〃 02f5⎖ :⫶ \∖ -− _―]	HTML_classes[C,special,∼∗⧵⋅−⫶⟨⟩≪≫≃,C,very-special,∖﬩ℏ―⎖〃,C,need-learn,ℎ]
 +DeadKey_Map019c=	  ByPairs[0020␢ \⧵ pℎ c℃ f℉](FlipLayers(Latin))	ByPairs[0020␠](Face(Latin))	Face(MathBlue)
 # '
 # It is a terrible hack to make them into deadkeys; all we want is to have them in output_layers
@@ -527,7 +528,7 @@ DeadKey_Map=		Mutate	Mutate2Self
 #	(For the purpose of double accents, grave 0300 is considered equivalent to horn 031b or hat 02c6, ring 00b0 to breve 02d8/0306, with-stroke to horn)
 +DeadKey_Map02dc=	PrefixDocs[Tilde [+ subst-Vietnamese] — overflows to/from the column on left]
 +DeadKey_Map02dc=	Mutate[\\∼∽,\\≋[`],02dc|02dc+<subst-Vietnamese>,<any-tilde>,<any-equivalent>,<any-addtilde>|||
-+DeadKey_Map02dc=		\\∿∽[`],<NAMED-hat>]
++DeadKey_Map02dc=		\\∿∽⍭[`],<NAMED-hat>]
 +DeadKey_Map02dc=	Mutate2Self
 # adding <any-turnaround> breaks more than it adds.   \\∽[˜] does not work, since [**] acts BEFORE propagation to AltGr... ⍩ hurts ⩾
 #
@@ -718,13 +719,15 @@ DEADKEY	00A4
 006b	20ad	// k -> ₭
 004c	00a3	// L -> £
 006c	20ba	// l -> ₺	TURKISH LIRA SIGN [6.2]
-004d	2133	// M -> ℳ
+// 004d	2133	// M -> ℳ
+004d	20BC	// M -> ₼	MANAT SIGN
 006d	20a5	// m -> ₥
 004e	20a6	// N -> ₦
 006e	a838	// n -> ꠸	NORTH INDIC RUPEE MARK [5.2]
 0050	20b1	// P -> ₱
 0070	2117	// p -> ℗
-0052	20b9	// R -> ₹
+// 0052	20b9	// R -> ₹
+0052	20BD	// R -> ₼	RUBLE SIGN
 0072	00ae	// r -> ®
 0053	20aa	// S -> ₪
 0073	2120	// s -> ℠
@@ -760,9 +763,10 @@ DEADKEY	00A3
 006e	a837	// n -> ꠷ (AltGr-inv) NORTH INDIC PLACEHOLDER MARK	ñ
 0050	20a7	// P -> ₧ (AltGr-inv)	[obsolete Spanish]	œ
 0070	20b0	// p -> ₰
-0072	20a8	// r -> ₨
 // 0052	20a2	// R -> ₢ (AltGr-inv)				ý
-0052	211b	// R -> ℛ (AltGr-inv)	SCRIPT CAPITAL R	Ý
+// 0052	211b	// R -> ℛ (AltGr-inv)	SCRIPT CAPITAL R	Ý
+0072	20b9	// r -> ₹ (AltGr-inv) new indian RUPEE sign
+0052	20a8	// R -> ₨ (AltGr-inv) RUPEE sign
 // 0053	0024	// S -> $ (AltGr-inv)				§
 0053	0024	// S -> $ (AltGr-inv)				ß
 0073	20b7	// s -> ₷	SPESMILO SIGN [5.2]

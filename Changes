@@ -1354,3 +1354,20 @@ got <0x30 00 0x65 00 0x31 00 0x32 00 0x33 00 0x34 0x20 0x20 0x20 0x20 0x20 0x20 
 	examples/nano-en.kbdd:	New file.
 				(compile of .klc not tested yet; misses 0331)
 	examples/logo-base.html:	New file.
+
+0.68	Add ℊ Ɡ to the list of case pairs. (does not help, since instructions are in different Mutate() rules)
+
+	izKeys.kbdd:	Temporary (?) suppress auto and add ℊꞬ to manual list for Blue (to fix the previous one).
+		Suppress ꭓ on Greek (can get through cedilla).
+		Now we benefit from Unicode 7.0.
+		Use FullFace() in the MathBlue recipe (does not actually change anything???).
+		Add whiten,amplify to MathBlue rules (except for explicit <⟨ >⟩ =≃).
+		Update currencies to 7.0 (Ruble and Manat replace ℛ and ℳ, which may be entered via Script [and Blue]; 
+					  new/old Rupees are now on AltGr).
+		Add bracket corners on Blue `' (+AltGr for bottom); move decimal separator to AltGr-".
+		In 0.66, because of APL, ⍭ would obscure ◌̃ on AltGr-~ AltGr-~.
+	
+	nano-en.kbdd:	
+		Update currencies to 7.0 (Ruble and Manat replace ℛ and ℳ, which may be entered via Script [and Blue]; 
+		                          new/old Rupees are now on AltGr).
+		Fix description + cosmetic changes.

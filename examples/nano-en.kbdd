@@ -1,6 +1,6 @@
 []
 COMPANYNAME=Ilya Zakharevich
-LAYOUTNAME=US atto-test: AltGr, Diacritics, Compose
+LAYOUTNAME=US nano-test: AltGr, Diacritics, Compose
 COPYR_YEARS=2014
 LOCALE_NAME=
 LOCALE_ID=0409
@@ -8,7 +8,7 @@ DLLNAME=atto-en
 SORT_ORDER_ID_=0000
 LANGUAGE_NAME=English (United States)
 #
-VERSION=0.67
+VERSION=0.68
 #
 [visual -> KBD/ok]
 #
@@ -23,7 +23,6 @@ prefix_repeat=3
 #					20: access KP_Decimal and KP_Extra_Slash_on_Left on offsets 20,21
 @keyline_offsets=0,1,1,1,20
 #
-# Perl 5.8.8 does not recognize  ҇ as a combining character...
 ***	`~/ˋ˜	1!/¬¡	2@/ºª	3#/·№	4$/¢£	5%/€¥	6^/ˇˆ	7&/√§	8*/„‚	9(/“‘	0)/”’	-_/¯—	=+/≈±
 ***	q/ä	w/á	e/ê	r/å	t/þ	y/ÿ	u/ü	i/ĳ	o/œ	p/ø	[{/«‹	]}/»›	\|/¦†
 ***	a/æ	s/ßẞ	d/ð	f/è	g/ý	h/ú	j/í	k/ó	l/ö	;:/¨÷	'"/´˵
@@ -98,13 +97,15 @@ DEADKEY	00A4
 006b	20ad	// k -> ₭
 004c	00a3	// L -> £
 006c	20ba	// l -> ₺	TURKISH LIRA SIGN [6.2]
-004d	2133	// M -> ℳ
+// 004d	2133	// M -> ℳ
+004d	20BC	// M -> ₼	MANAT SIGN
 006d	20a5	// m -> ₥
 004e	20a6	// N -> ₦
 006e	a838	// n -> ꠸	NORTH INDIC RUPEE MARK [5.2]
 0050	20b1	// P -> ₱
 0070	2117	// p -> ℗
-0052	20b9	// R -> ₹
+// 0052	20b9	// R -> ₹
+0052	20BD	// R -> ₼	RUBLE SIGN
 0072	00ae	// r -> ®
 0053	20aa	// S -> ₪
 0073	2120	// s -> ℠
@@ -140,9 +141,10 @@ DEADKEY	00A3
 006e	a837	// n -> ꠷ (AltGr-inv) NORTH INDIC PLACEHOLDER MARK	ñ
 0050	20a7	// P -> ₧ (AltGr-inv)	[obsolete Spanish]	œ
 0070	20b0	// p -> ₰
-0072	20a8	// r -> ₨
 // 0052	20a2	// R -> ₢ (AltGr-inv)				ý
-0052	211b	// R -> ℛ (AltGr-inv)	SCRIPT CAPITAL R	Ý
+// 0052	211b	// R -> ℛ (AltGr-inv)	SCRIPT CAPITAL R	Ý
+0072	20b9	// r -> ₹ (AltGr-inv) new indian RUPEE sign
+0052	20a8	// R -> ₨ (AltGr-inv) RUPEE sign
 // 0053	0024	// S -> $ (AltGr-inv)				§
 0053	0024	// S -> $ (AltGr-inv)				ß
 0073	20b7	// s -> ₷	SPESMILO SIGN [5.2]

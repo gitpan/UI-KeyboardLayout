@@ -1,6 +1,6 @@
 package UI::KeyboardLayout;
 
-$VERSION = $VERSION = "0.67";
+$VERSION = $VERSION = "0.68";
 
 binmode $DB::OUT, ':utf8' if $DB::OUT;		# (older) Perls had "Wide char in Print" in debugger otherwise
 binmode $DB::LINEINFO, ':utf8' if $DB::LINEINFO;		# (older) Perls had "Wide char in Print" in debugger otherwise
@@ -51,7 +51,7 @@ use subs qw(chr lc uc ucfirst);
 #}
 ### Remove ß ẞ :
 ## my %fix = qw( ԥ Ԥ ԧ Ԧ ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ꞩ Ꞩ  ȿ Ȿ  ꞓ Ꞓ  ꞥ Ꞥ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
-my %fix = qw( ԥ Ԥ ԧ Ԧ ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ß ẞ  ꞩ Ꞩ  ȿ Ȿ  ꞓ Ꞓ  ꞥ Ꞥ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
+my %fix = qw( ԥ Ԥ ԧ Ԧ ӏ Ӏ ɀ Ɀ ꙡ Ꙡ ꞑ Ꞑ  ꞧ Ꞧ  ɋ Ɋ  ß ẞ  ꞩ Ꞩ  ȿ Ȿ  ꞓ Ꞓ  ꞥ Ꞥ  ℊ Ɡ );		# Perl 5.8.8 uc is wrong with palochka, 5.10 with z with swash tail
 my %unfix = reverse %fix;
 
 sub chr($)  { local $^W = 0; toU CORE::chr shift }	# Avoid illegal character 0xfffe etc warnings...
@@ -3404,7 +3404,7 @@ case) they can show additionally characters, but only those considered by the
 system as "important enough" (coming from a few of default fonts?).
 
 There is a workaround for this major problem in FireFox (present at least
-up to C<v20>).  It is caused
+up to C<v20>).  The problem is caused
 by L<this “improvement”|https://bugzilla.mozilla.org/show_bug.cgi?id=705594>
 which blatantly saves a few seconds of load time for a tiny minority of
 users, the price being an unability to show Unicode I<for everybody>
@@ -9487,11 +9487,17 @@ Duplicate: A789 <== [ 003A <pseudo-fake-super> ] ==> <1 02F8> (prefered)
 Duplicate: 02EF <== [ 0020 <pseudo-manual-subize> 0306 ] ==> <1 02EC> (prefered)
         <˯>     02EF    MODIFIER LETTER LOW DOWN ARROWHEAD
         <ˬ>     02EC    MODIFIER LETTER VOICING at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 8634, <$f> line 39278.
+Duplicate: 2B95 <== [ 2192 <pseudo-fake-black> ] ==> <1 27A1> (prefered)
+        <⮕>     2B95    RIGHTWARDS BLACK ARROW
+        <➡>     27A1    BLACK RIGHTWARDS ARROW at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 9828, <$f> line 43944.
+Duplicate: 1F7C6 <== [ 2727 <pseudo-fake-black> ] ==> <1 2726> (prefered)
+        <🟆>    1F7C6   FOUR POINTED BLACK STAR
+        <✦>     2726    BLACK FOUR POINTED STAR at UI-KeyboardLayout/lib/UI/KeyboardLayout.pm line 9828, <$f> line 43944.
 EOR
 
 my (%known_dups) = map +($_,1), qw(0296 0384 1D43 1D52 1D9F 1E7A 1E7B 1FBF 2007
   202F 2113 24B8 24C7 2E1E 33B9 FC03 FC68 FD55 FD56 FD57 FD5D FD87 FD8C
-  FD92 FDB5 FE34
+  FD92 FDB5 FE34	2B95 1F7C6
   0273 1DAF 2040 207F 224B 2256 2257 225E 2263 2277 2279 2982 2993 2994 2995 2996 29BC
   2A17 2A34 2A35 2A36 2A50 2ACF 2AFB 2AFD 2AFF 3018 3019 A760 A761 1D4C1 1F12B 1F12C 1F14B A789 02EF);	# As of Unicode 6.2 (questionable: 2982 2ACF)
 
